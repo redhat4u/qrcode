@@ -4,7 +4,7 @@ QR 코드 생성 웹앱 - Streamlit 버전
 
 실행 방법:
 1. pip install streamlit qrcode[pil]
-2. streamlit run qr_webapp.py
+2. streamlit run qrcode_web.py
 
 또는 온라인에서 실행:
 - Streamlit Cloud, Heroku, Replit 등에 배포 가능
@@ -118,7 +118,7 @@ with col1:
                 min_value=1,
                 max_value=100,
                 value=20,
-                help="QR 코드의 각 사각형 크기를 설정합니다"
+                help="QR 코드의 각 사각형(Cell) 크기를 설정합니다"
             )
             
             # 테두리
@@ -182,7 +182,7 @@ with col2:
         if not qr_text.strip():
             st.error("생성할 QR 코드 내용을 입력해주세요.")
         elif pattern_color == background_color:
-            st.error("패턴과 배경색이 같습니다. 다른 색상을 선택해주세요.")
+            st.error("패턴색과 배경색이 같습니다. 다른 색상을 선택해주세요.")
         else:
             try:
                 # QR 코드 데이터 처리
@@ -287,26 +287,27 @@ with st.sidebar:
     4. **다운로드**: 만족스러우면 다운로드 버튼을 클릭하세요
     """)
     
-    st.markdown("### 💡 팁")
+    st.markdown("### 💡 용도별 QR 코드 생성 팁")
     st.markdown("""
     - **웹사이트**: `https://www.example.com`
     - **이메일**: `mailto:user@example.com`  
     - **전화번호**: `tel:010-1234-5678`
     - **SMS**: `sms:010-1234-5678`
     - **WiFi**: `WIFI:T:WPA;S:네트워크명;P:비밀번호;;`
-    - **텍스트**: 일반 텍스트도 가능합니다
+    - **텍스트**: `일반적인 텍스트를 입력합니다`
     """)
     
     st.markdown("### ⚠️ 주의사항")
     st.markdown("""
-    - 너무 많은 내용을 넣으면 QR 코드가 복잡해집니다
-    - 패턴과 배경색이 같으면 읽을 수 없습니다
-    - 휴대폰에서도 정상 작동합니다
+    - 너무 많은 내용을 넣으면 QR 코드 크기가 거대해집니다.
+    - 패턴색과 배경색이 같으면 읽을 수 없습니다.
+    - 휴대폰에서도 문제없이 잘 작동합니다.
     """)
 
 # 하단 정보
 st.markdown("---")
 st.markdown(
-    '<p style="text-align: center; color: #7f8c8d;">© 2024 QR 코드 생성기 | Streamlit으로 제작</p>',
+    '<p style="text-align: center; color: #7f8c8d;">© 2025 QR 코드 생성기 | Streamlit으로 제작 | 제작: 류종훈(redhat4u@gmail.com)</p>',
     unsafe_allow_html=True
 )
+
