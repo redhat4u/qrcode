@@ -292,7 +292,7 @@ with st.sidebar:
     3. **미리보기**: 미리보기 버튼을 클릭하여 결과를 확인하세요
     4. **다운로드**: 만족스러우면 다운로드 버튼을 클릭하세요
     </div>
-    """)
+    """, unsafe_allow_html=True)
     
     st.markdown("### 💡 용도별 QR 코드 생성 팁")
     st.markdown("""
@@ -304,7 +304,7 @@ with st.sidebar:
     - **WiFi**: `WIFI:T:WPA;S:네트워크명;P:비밀번호;;`
     - **텍스트**: `일반적인 텍스트를 입력합니다`
     </div>
-    """)
+    """, unsafe_allow_html=True)
     
     st.markdown("### ⚠️ 주의사항")
     st.markdown("""
@@ -313,7 +313,7 @@ with st.sidebar:
     - 패턴색과 배경색이 같으면 읽을 수 없습니다.
     - 휴대폰에서도 문제없이 잘 작동합니다.
     </div>
-    """)
+    """, unsafe_allow_html=True)
 
 # 하단 정보
 st.markdown("---")
@@ -321,5 +321,6 @@ st.markdown(
     '<p style="text-align: center; color: #00ff00;">© 2025 QR 코드 생성기 | Streamlit으로 제작 | 제작: 류종훈(redhat4u@gmail.com)</p>',
     unsafe_allow_html=True
 )
+
 
 
