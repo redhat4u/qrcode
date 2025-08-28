@@ -249,7 +249,7 @@ with col2:
         
         # 파일명 입력
         filename = st.text_input(
-            "파일명 (확장자 제외)",
+            "확장자를 제외한 파일명만 표시함",
             value=datetime.now().strftime("QR_%Y-%m-%d_%H-%M-%S"),
             help="특수문자는 자동으로 '_'로 변환됩니다"
         )
@@ -310,6 +310,7 @@ st.markdown(
     '<p style="text-align: center; color: #228b22;">© 2025 QR 코드 생성기  |  Streamlit으로 제작  |  제작: 류종훈(redhat4u@gmail.com)</p>',
     unsafe_allow_html=True
 )
+
 
 
 
