@@ -307,9 +307,10 @@ with st.sidebar:
 # 하단 정보
 st.markdown("---")
 st.markdown(
-    '<p style="text-align: center; color: #32cd32;">© 2025 QR 코드 생성기  |  Streamlit으로 제작  |  제작: 류종훈(redhat4u@gmail.com)</p>',
+    '<p style="text-align: center; color: #228b22;">© 2025 QR 코드 생성기  |  Streamlit으로 제작  |  제작: 류종훈(redhat4u@gmail.com)</p>',
     unsafe_allow_html=True
 )
+
 
 
 
