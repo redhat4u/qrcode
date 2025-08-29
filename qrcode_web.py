@@ -45,7 +45,13 @@ def generate_qr_code(data, box_size, border, error_correction, mask_pattern, fil
         qr.add_data(data, optimize=0)
         qr.make(fit=True)
         
+        # PIL Image로 변환하여 Streamlit 호환성 확보
         img = qr.make_image(fill_color=fill_color, back_color=back_color)
+        
+        # PIL Image가 아닌 경우 변환
+        if not isinstance(img, Image.Image):
+            img = img.convert('RGB')
+        
         return img, qr
     except Exception as e:
         st.error(f"QR 코드 생성 오류: {str(e)}")
@@ -273,6 +279,3 @@ st.markdown(
     '<p style="text-align: center; color: #228b22;">© 2025 QR 코드 생성기  |  Streamlit으로 제작  |  제작: 류종훈(redhat4u@gmail.com)</p>',
     unsafe_allow_html=True
 )
-
-
-
