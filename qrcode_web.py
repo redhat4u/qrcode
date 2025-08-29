@@ -14,6 +14,7 @@ import streamlit as st
 import qrcode
 import io
 from datetime import datetime
+from zoneinfo import ZoneInfo
 from PIL import Image
 
 # 페이지 설정
@@ -218,11 +219,13 @@ with col2:
                 - 이미지 크기 = (각 cell 개수 + 좌/우 여백 총 개수) × 1개의 사각 cell 크기
                 """)
                 
+                now = datetime.now(ZoneInfo("Asia/Seoul"))
+
                 # 파일 다운로드
                 if generate_btn:
                     # 파일명 처리
                     if not filename:
-                        filename = datetime.now().strftime("QR_%Y-%m-%d_%H-%M-%S")
+                        filename = now.strftime("QR_%Y-%m-%d_%H-%M-%S")
                     
                     filename = sanitize_filename(filename)
                     download_filename = f"{filename}.png"
@@ -283,6 +286,7 @@ st.markdown(
     '<p style="text-align: center; color: #228b22;">© 2025 QR 코드 생성기  |  Streamlit으로 제작  |  제작: 류종훈(redhat4u@gmail.com)</p>',
     unsafe_allow_html=True
 )
+
 
 
 
