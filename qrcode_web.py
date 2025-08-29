@@ -72,7 +72,7 @@ st.markdown("---")
 col1, col2 = st.columns([1.2, 1])
 
 with col1:
-    st.header("⚙️ 설정")
+    st.header("⚙️ 입력 및 설정")
     
     # QR 코드 입력창
     st.subheader("📝 QR 코드 내용")
@@ -286,6 +286,7 @@ st.markdown(
     '<p style="text-align: center; color: #228b22;">© 2025 QR 코드 생성기  |  Streamlit으로 제작  |  제작: 류종훈(redhat4u@gmail.com)</p>',
     unsafe_allow_html=True
 )
+
 
 
 
