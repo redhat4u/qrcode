@@ -233,7 +233,6 @@ with col2:
                     download_link = get_image_download_link(img, download_filename)
                     st.markdown(download_link, unsafe_allow_html=True)
                     st.success(f"QR 코드가 생성되었습니다! 위의 링크를 클릭하여 다운로드하세요.")
-            
             except Exception as e:
                 st.error(f"QR 코드 생성 중 오류가 발생했습니다: {str(e)}")
 
