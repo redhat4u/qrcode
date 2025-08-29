@@ -64,7 +64,7 @@ def generate_qr_code(data, box_size, border, error_correction, mask_pattern, fil
 
 
 # 메인 앱 ============================================================================================
-st.title("🔲 QR 코드 생성 프로그램")
+st.title("🔲 QR 코드 생성기")
 st.markdown("---")
 
 # 레이아웃 설정 (2개 컬럼)
@@ -282,6 +282,7 @@ st.markdown(
     '<p style="text-align: center; color: #228b22;">© 2025 QR 코드 생성기  |  Streamlit으로 제작  |  제작: 류종훈(redhat4u@gmail.com)</p>',
     unsafe_allow_html=True
 )
+
 
 
 
