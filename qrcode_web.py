@@ -18,7 +18,7 @@ from PIL import Image
 
 # 페이지 설정
 st.set_page_config(
-    page_title="QR 코드 생성 프로그램",
+    page_title="QR 코드 생성기",
     page_icon="🔲",
     layout="wide"
 )
@@ -282,6 +282,7 @@ st.markdown(
     '<p style="text-align: center; color: #228b22;">© 2025 QR 코드 생성기  |  Streamlit으로 제작  |  제작: 류종훈(redhat4u@gmail.com)</p>',
     unsafe_allow_html=True
 )
+
 
 
 
