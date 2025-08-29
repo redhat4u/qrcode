@@ -1,3 +1,15 @@
+"""
+QR 코드 생성 웹앱 - Streamlit 버전
+휴대폰에서도 사용 가능
+
+실행 방법:
+1. pip install streamlit qrcode[pil]
+2. streamlit run qrcode_web.py
+
+또는 온라인에서 실행:
+- Streamlit Cloud, Heroku, Replit 등에 배포 가능
+"""
+
 import streamlit as st
 import qrcode
 import io
@@ -35,6 +47,7 @@ def generate_qr_code(data, box_size, border, error_correction, mask_pattern, fil
         
         img = qr.make_image(fill_color=fill_color, back_color=back_color)
         return img, qr
+        
     except Exception as e:
         st.error(f"QR 코드 생성 오류: {str(e)}")
         return None, None
@@ -51,7 +64,8 @@ def get_image_download_link(img, filename):
         st.error(f"다운로드 링크 생성 오류: {str(e)}")
         return None
 
-# 메인 앱
+
+# 메인 앱 ============================================================================================
 st.title("🔲 QR 코드 생성 프로그램")
 st.markdown("---")
 
@@ -62,7 +76,7 @@ with col1:
     st.header("설정")
     
     # QR 코드 입력창
-    st.subheader("QR 코드 내용")
+    st.subheader("📝 QR 코드 내용")
     st.info("최대 입력 가능한 문자는 종류에 따라 약 2,400~2,900자 정도입니다.")
     
     qr_data = st.text_area(
@@ -81,13 +95,13 @@ with col1:
     strip_option = st.checkbox(
         "마지막 입력문자 이후 모든 공백/줄바꿈 제거",
         value=True,
-        help="입력된 내용 맨끝에 공백/줄바꿈 문자가 한개라도 포함되면 완전히 다른 QR코드가 생성됩니다."
+        help="입력된 내용 맨끝에 공백/줄바꿈 문자가 한개라도 포함되면 완전히 다른 QR코드가 생성됩니다. 입력된 마지막 문자 뒤에 공백/줄바꿈이 추가되어도 QR코드에 반영되지 않도록 하고 싶다면, 이 옵션을 켜 두세요."
     )
     
     st.markdown("---")
     
     # QR 코드 설정
-    st.subheader("QR 코드 설정")
+    st.subheader("🔧 QR 코드 설정")
     
     col1_1, col1_2 = st.columns(2)
     
@@ -158,7 +172,7 @@ with col1:
     st.caption("파일명이 입력되지 않을 경우 자동으로 파일이 생성되며, 특수문자가 입력될 경우에는 '_' 문자로 자동치환 됩니다.")
 
 with col2:
-    st.header("미리보기 및 생성")
+    st.header("👀 미리보기 및 생성")
     
     # 미리보기/생성 버튼
     col2_1, col2_2 = st.columns(2)
@@ -183,15 +197,17 @@ with col2:
         elif pattern_color == bg_color:
             st.error("패턴과 배경은 같은 색을 사용할 수 없습니다.")
         else:
-            # QR 코드 생성
-            img, qr = generate_qr_code(
-                processed_data, int(box_size), int(border), error_correction,
-                int(mask_pattern), pattern_color, bg_color
-            )
-            
-            if img is not None and qr is not None:
+            try:
+                # QR 코드 생성
+                img, qr = generate_qr_code(
+                    processed_data, int(box_size), int(border), error_correction,  # 타입 변환 명시
+                    int(mask_pattern), pattern_color, bg_color
+                )
+
+                if img is not None and qr is not None:  # None 체크 추가
+                
                 # 미리보기 표시
-                st.subheader("QR 코드 미리보기")
+                st.subheader("📱 QR 코드 미리보기")
                 st.image(img, caption="생성된 QR 코드")
                 
                 # QR 코드 정보 표시
@@ -215,9 +231,11 @@ with col2:
                     
                     # 다운로드 링크 생성
                     download_link = get_image_download_link(img, download_filename)
-                    if download_link:
-                        st.markdown(download_link, unsafe_allow_html=True)
-                        st.success(f"QR 코드가 생성되었습니다! 위의 링크를 클릭하여 다운로드하세요.")
+                    st.markdown(download_link, unsafe_allow_html=True)
+                    st.success(f"QR 코드가 생성되었습니다! 위의 링크를 클릭하여 다운로드하세요.")
+            
+            except Exception as e:
+                st.error(f"QR 코드 생성 중 오류가 발생했습니다: {str(e)}")
 
 # 사이드바에 추가 정보
 with st.sidebar:
@@ -229,7 +247,17 @@ with st.sidebar:
     4. **미리 보기** 버튼으로 결과를 확인하세요
     5. **QR 코드 생성** 버튼으로 최종 파일을 다운로드하세요
     """)
-    
+
+    st.markdown("💡 용도별 QR 코드 생성 팁")
+    st.markdown("""
+    - **텍스트**: `가장 보편적인 방식으로 텍스트를 입력합니다`
+    - **웹사이트**: `https://www.example.com`
+    - **이메일**: `mailto:user@example.com`  
+    - **전화번호**: `tel:010-1234-5678`
+    - **SMS**: `sms:010-1234-5678`
+    - **WiFi**: `WIFI:T:WPA;S:네트워크명;P:비밀번호;;`
+    """)
+
     st.header("⚙️ 설정 가이드")
     st.markdown("""
     **오류 보정 레벨:**
@@ -241,4 +269,10 @@ with st.sidebar:
     **마스크 패턴:**
     - 0~7 중 선택 (같은 내용도 패턴별로 다른 모양)
     """)
-    
+
+# 하단 정보
+st.markdown("---")
+st.markdown(
+    '<p style="text-align: center; color: #228b22;">© 2025 QR 코드 생성기  |  Streamlit으로 제작  |  제작: 류종훈(redhat4u@gmail.com)</p>',
+    unsafe_allow_html=True
+)
