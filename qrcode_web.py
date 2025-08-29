@@ -172,7 +172,7 @@ with col1:
 
 with col2:
     st.header("👀 미리보기 및 생성")
-    st.caption("[QR 코드 생성 버튼]을 클릭하면, 화면 맨 아래에 [QR 코드 다운로드] 버튼이 활성화 됩니다.\n휴대폰에서는 'Download' 폴더에 저장됩니다.")
+    st.caption("[QR 코드 생성 버튼]을 클릭하면, 화면 맨 아래에 [QR 코드 다운로드] 버튼이 활성화 되며, 휴대폰에서는 'Download' 폴더로 저장됩니다.")
 
     # 미리보기/생성 버튼
     col2_1, col2_2 = st.columns(2)
@@ -286,6 +286,7 @@ st.markdown(
     '<p style="text-align: center; color: #228b22;">© 2025 QR 코드 생성기  |  Streamlit으로 제작  |  제작: 류종훈(redhat4u@gmail.com)</p>',
     unsafe_allow_html=True
 )
+
 
 
 
