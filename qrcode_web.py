@@ -245,7 +245,7 @@ with st.sidebar:
     5. **QR 코드 생성** 버튼으로 최종 파일을 다운로드하세요
     """)
 
-    st.markdown("💡 용도별 QR 코드 생성 팁")
+    st.header("💡 용도별 QR 코드 생성 팁")
     st.markdown("""
     - **텍스트**: `가장 보편적인 방식으로 텍스트를 입력합니다`
     - **웹사이트**: `https://www.example.com`
@@ -273,3 +273,4 @@ st.markdown(
     '<p style="text-align: center; color: #228b22;">© 2025 QR 코드 생성기  |  Streamlit으로 제작  |  제작: 류종훈(redhat4u@gmail.com)</p>',
     unsafe_allow_html=True
 )
+
