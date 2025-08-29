@@ -261,7 +261,7 @@ with st.sidebar:
     - **Low (7%)**: 손상되지 않는 환경
     - **Medium (15%)**: 일반적인 사용
     - **Quartile (25%)**: 약간의 손상 가능
-    - **High (30%)**: 로고 삽입, 손상 환경
+    - **High (30%)**: 로고 삽입, 손상이 잦은 환경
     
     **마스크 패턴:**
     - 0~7 중 선택 (같은 내용이라도 번호에 따라 패턴이 달라짐)
@@ -273,5 +273,6 @@ st.markdown(
     '<p style="text-align: center; color: #228b22;">© 2025 QR 코드 생성기  |  Streamlit으로 제작  |  제작: 류종훈(redhat4u@gmail.com)</p>',
     unsafe_allow_html=True
 )
+
 
 
