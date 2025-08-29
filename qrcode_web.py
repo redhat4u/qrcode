@@ -47,7 +47,6 @@ def generate_qr_code(data, box_size, border, error_correction, mask_pattern, fil
         
         img = qr.make_image(fill_color=fill_color, back_color=back_color)
         return img, qr
-        
     except Exception as e:
         st.error(f"QR 코드 생성 오류: {str(e)}")
         return None, None
@@ -197,44 +196,43 @@ with col2:
         elif pattern_color == bg_color:
             st.error("패턴과 배경은 같은 색을 사용할 수 없습니다.")
         else:
-            try:
-                # QR 코드 생성
-                img, qr = generate_qr_code(
-                    processed_data, int(box_size), int(border), error_correction,  # 타입 변환 명시
-                    int(mask_pattern), pattern_color, bg_color
-                )
+            # QR 코드 생성
+            img, qr = generate_qr_code(
+                processed_data, int(box_size), int(border), error_correction,
+                int(mask_pattern), pattern_color, bg_color
+            )
 
-                if img is not None and qr is not None:  # None 체크 추가
+            if img is not None and qr is not None:
+            
+            # 미리보기 표시
+            st.subheader("📱 QR 코드 미리보기")
+            st.image(img, caption="생성된 QR 코드")
+            
+            # QR 코드 정보 표시
+            st.info(f"""
+            **QR 코드 정보**
+            - QR 버전: {qr.version}
+            - 가로/세로 각 cell 개수: {qr.modules_count}개
+            - 이미지 크기: {img.size[0]} x {img.size[1]} px
+            
+            - 이미지 크기 = (각 cell 개수 + 좌/우 여백 총 개수) × 1개의 사각 cell 크기
+            """)
+            
+            # 파일 다운로드
+            if generate_btn:
+                # 파일명 처리
+                if not filename:
+                    filename = datetime.now().strftime("QR_%Y-%m-%d_%H-%M-%S")
                 
-                # 미리보기 표시
-                st.subheader("📱 QR 코드 미리보기")
-                st.image(img, caption="생성된 QR 코드")
+                filename = sanitize_filename(filename)
+                download_filename = f"{filename}.png"
                 
-                # QR 코드 정보 표시
-                st.info(f"""
-                **QR 코드 정보**
-                - QR 버전: {qr.version}
-                - 가로/세로 각 cell 개수: {qr.modules_count}개
-                - 이미지 크기: {img.size[0]} x {img.size[1]} px
-                
-                이미지 크기 = (각 cell 개수 + 좌/우 여백 총 개수) × 1개의 사각 cell 크기
-                """)
-                
-                # 파일 다운로드
-                if generate_btn:
-                    # 파일명 처리
-                    if not filename:
-                        filename = datetime.now().strftime("QR_%Y-%m-%d_%H-%M-%S")
-                    
-                    filename = sanitize_filename(filename)
-                    download_filename = f"{filename}.png"
-                    
-                    # 다운로드 링크 생성
-                    download_link = get_image_download_link(img, download_filename)
+                # 다운로드 링크 생성
+                download_link = get_image_download_link(img, download_filename)
+                if download_link:
                     st.markdown(download_link, unsafe_allow_html=True)
                     st.success(f"QR 코드가 생성되었습니다! 위의 링크를 클릭하여 다운로드하세요.")
-            except Exception as e:
-                st.error(f"QR 코드 생성 중 오류가 발생했습니다: {str(e)}")
+
 
 # 사이드바에 추가 정보
 with st.sidebar:
