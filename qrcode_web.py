@@ -265,7 +265,7 @@ with st.sidebar:
     - **이메일**: `mailto:user@example.com`  
     - **전화번호**: `tel:010-1234-5678`
     - **SMS**: `sms:010-1234-5678`
-    - **WiFi**: `WIFI:T:WPA;S:네트워크명;P:비밀번호;;`
+    - **WiFi**: `WIFI:T:WPA;S:네트워크명(SSID);P:비밀번호;H:false;;`
     """)
 
     st.header("⚙️ 설정 가이드")
@@ -286,6 +286,7 @@ st.markdown(
     '<p style="text-align: center; color: #228b22;">© 2025 QR 코드 생성기  |  Streamlit으로 제작  |  제작: 류종훈(redhat4u@gmail.com)</p>',
     unsafe_allow_html=True
 )
+
 
 
 
