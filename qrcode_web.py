@@ -60,7 +60,7 @@ def generate_qr_code(data, box_size, border, error_correction, mask_pattern, fil
         return img, qr
     except Exception as e:
         st.error(f"QR 코드 생성 오류: {str(e)}")
-        return None, Noneimport streamlit as st
+        return None, None
 
 
 # 메인 앱 ============================================================================================
