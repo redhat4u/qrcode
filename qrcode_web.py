@@ -15,7 +15,6 @@ import qrcode
 import io
 from datetime import datetime
 from PIL import Image
-import base64
 
 # 페이지 설정
 st.set_page_config(
@@ -45,29 +44,23 @@ def generate_qr_code(data, box_size, border, error_correction, mask_pattern, fil
         qr.add_data(data, optimize=0)
         qr.make(fit=True)
         
-        # PIL Image로 변환하여 Streamlit 호환성 확보
+        # QR 코드 이미지 생성
         img = qr.make_image(fill_color=fill_color, back_color=back_color)
         
-        # PIL Image가 아닌 경우 변환
-        if not isinstance(img, Image.Image):
+        # Streamlit과 호환되도록 PIL Image로 확실히 변환
+        if hasattr(img, 'convert'):
             img = img.convert('RGB')
+        else:
+            # PIL Image가 아닌 경우 BytesIO를 통해 변환
+            img_buffer = io.BytesIO()
+            img.save(img_buffer, format='PNG')
+            img_buffer.seek(0)
+            img = Image.open(img_buffer)
         
         return img, qr
     except Exception as e:
         st.error(f"QR 코드 생성 오류: {str(e)}")
-        return None, None
-
-# 이미지를 base64로 변환하여 다운로드 링크 생성
-def get_image_download_link(img, filename):
-    try:
-        buffered = io.BytesIO()
-        img.save(buffered, format="PNG")
-        img_str = base64.b64encode(buffered.getvalue()).decode()
-        href = f'<a href="data:image/png;base64,{img_str}" download="{filename}">📥 QR 코드 다운로드</a>'
-        return href
-    except Exception as e:
-        st.error(f"다운로드 링크 생성 오류: {str(e)}")
-        return None
+        return None, Noneimport streamlit as st
 
 
 # 메인 앱 ============================================================================================
@@ -233,11 +226,20 @@ with col2:
                     filename = sanitize_filename(filename)
                     download_filename = f"{filename}.png"
                     
-                    # 다운로드 링크 생성
-                    download_link = get_image_download_link(img, download_filename)
-                    if download_link:
-                        st.markdown(download_link, unsafe_allow_html=True)
-                        st.success(f"QR 코드가 생성되었습니다! 위의 링크를 클릭하여 다운로드하세요.")
+                    # 이미지를 바이트로 변환
+                    img_buffer = io.BytesIO()
+                    img.save(img_buffer, format='PNG')
+                    img_bytes = img_buffer.getvalue()
+                    
+                    # Streamlit 다운로드 버튼 사용
+                    st.download_button(
+                        label="📥 QR 코드 다운로드",
+                        data=img_bytes,
+                        file_name=download_filename,
+                        mime="image/png",
+                        use_container_width=True
+                    )
+                    st.success(f"QR 코드가 생성되었습니다!")
 
 
 # 사이드바에 추가 정보
