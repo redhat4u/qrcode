@@ -79,7 +79,7 @@ with col1:
     
     qr_data = st.text_area(
         "QR 코드로 생성할 내용을 입력해 주세요",
-        height=120,
+        height=200,
         placeholder="이 곳에 QR 코드를 생성할 내용을 입력해 주세요.\n복사/붙여넣기를 사용할 수 있습니다."
     )
     
@@ -282,4 +282,5 @@ st.markdown(
     '<p style="text-align: center; color: #228b22;">© 2025 QR 코드 생성기  |  Streamlit으로 제작  |  제작: 류종훈(redhat4u@gmail.com)</p>',
     unsafe_allow_html=True
 )
+
 
