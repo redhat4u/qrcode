@@ -121,16 +121,16 @@ with col1:
     char_count = len(qr_data) if qr_data else 0
     
     # 문자 수에 따른 상태 메시지 표시
-        if char_count > 0:
-            if char_count > 2900:
-                st.error(f"⚠️ 현재 입력된 총 문자 수: **{char_count}** (권장 최대 문자 수 초과)")
-            elif char_count > 2400:
-                st.warning(f"⚠️ 현재 입력된 총 문자 수: **{char_count}** (권장 문자 수에 근접)")
-            else:
-                st.success(f"✅ 현재 입력된 총 문자 수: **{char_count}**")
+    if char_count > 0:
+        if char_count > 2900:
+            st.error(f"⚠️ 현재 입력된 총 문자 수: **{char_count}** (권장 최대 문자 수 초과)")
+        elif char_count > 2400:
+            st.warning(f"⚠️ 현재 입력된 총 문자 수: **{char_count}** (권장 문자 수에 근접)")
         else:
-            st.caption("현재 입력된 총 문자 수: 0")
-    
+            st.success(f"✅ 현재 입력된 총 문자 수: **{char_count}**")
+    else:
+        st.caption("현재 입력된 총 문자 수: 0")
+        
     # 입력 내용 삭제 버튼
     col_clear1, col_clear2, col_clear3 = st.columns([1, 1, 2])
     with col_clear2:
@@ -425,3 +425,4 @@ st.markdown(
     '<p style="text-align: center; color: darkorange; font-size: 16px;">© 2025 QR 코드 생성기  |  Streamlit으로 제작  |  제작: 류종훈(redhat4u@gmail.com)</p>',
     unsafe_allow_html=True
 )
+
