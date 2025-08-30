@@ -132,7 +132,7 @@ with col1:
         st.caption("현재 입력된 총 문자 수: 0")
         
     # 입력 내용 삭제 버튼
-    col_clear1, col_clear2, col_clear3 = st.columns([1, 1, 2])
+    col_clear1, col_clear2, col_clear3 = st.columns([1, 1, 1])
     with col_clear2:
         if st.button("🗑️ 입력 내용 삭제", use_container_width=True, type="secondary"):
             clear_text_input()
@@ -427,5 +427,6 @@ st.markdown(
     '<p style="text-align: center; color: darkorange; font-size: 16px;">© 2025 QR 코드 생성기  |  Streamlit으로 제작  |  제작: 류종훈(redhat4u@gmail.com)</p>',
     unsafe_allow_html=True
 )
+
 
 
