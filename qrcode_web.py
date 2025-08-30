@@ -97,6 +97,9 @@ with col1:
     st.subheader("📝 QR 코드 내용")
     st.info("최대 입력 가능한 문자는 종류에 따라 약 2,400~2,900자 정도입니다.")
     
+    # 문자 수 카운터를 위한 placeholder 생성
+    char_counter_placeholder = st.empty()
+    
     qr_data = st.text_area(
         "QR 코드로 생성할 내용을 입력해 주세요",
         height=200,
@@ -104,17 +107,20 @@ with col1:
         key="qr_input_area"
     )
     
-    # 실시간 문자 수 표시
-    char_count = len(qr_data)
-    if char_count > 0:
-        if char_count > 2900:
-            st.error(f"⚠️ 현재 입력된 총 문자 수: **{char_count}** (권장 최대 문자 수 초과)")
-        elif char_count > 2400:
-            st.warning(f"⚠️ 현재 입력된 총 문자 수: **{char_count}** (권장 문자 수에 근접)")
+    # 문자 수 표시 (더 반응적으로)
+    char_count = len(qr_data) if qr_data else 0
+    
+    # 문자 수에 따른 상태 메시지 표시
+    with char_counter_placeholder.container():
+        if char_count > 0:
+            if char_count > 2900:
+                st.error(f"⚠️ 현재 입력된 총 문자 수: **{char_count}** (권장 최대 문자 수 초과)")
+            elif char_count > 2400:
+                st.warning(f"⚠️ 현재 입력된 총 문자 수: **{char_count}** (권장 문자 수에 근접)")
+            else:
+                st.success(f"✅ 현재 입력된 총 문자 수: **{char_count}**")
         else:
-            st.success(f"✅ 현재 입력된 총 문자 수: **{char_count}**")
-    else:
-        st.caption("현재 입력된 총 문자 수: 0")
+            st.caption("현재 입력된 총 문자 수: 0")
     
     # 입력 내용 삭제 버튼
     col_clear1, col_clear2, col_clear3 = st.columns([1, 1, 2])
@@ -310,6 +316,7 @@ with col2:
                 - 이미지 크기 = (각 cell 개수 + 좌/우 여백 개수) × 1개의 사각 cell 크기
                 """)
                 
+                # QR 코드 정보 표시
                 st.info(qr_info_text)
                 
                 # 생성 버튼을 눌렀을 때 세션 상태에 저장
