@@ -158,10 +158,10 @@ with col1:
     col1_3, col1_4 = st.columns(2)
     
     with col1_3:
-        pattern_color_choice = st.selectbox("패턴 색상", colors, index=1)  # 기본값: black
+        pattern_color_choice = st.selectbox("패턴 색상", colors, index=2)  # 기본값: black
     
     with col1_4:
-        bg_color_choice = st.selectbox("배경 색상", colors, index=0)  # 기본값: white
+        bg_color_choice = st.selectbox("배경 색상", colors, index=1)  # 기본값: white
     
     # 직접 색상 입력 옵션
     st.markdown("원하는 색상이 리스트에 없다면, 아래에 직접 색상을 입력하세요.")
@@ -337,4 +337,5 @@ st.markdown(
     '<p style="text-align: center; color: darkorange; font-size: 16px;">© 2025 QR 코드 생성기  |  Streamlit으로 제작  |  제작: 류종훈(redhat4u@gmail.com)</p>',
     unsafe_allow_html=True
 )
+
 
