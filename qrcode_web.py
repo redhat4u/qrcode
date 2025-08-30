@@ -145,6 +145,8 @@ with col1:
             index=2
         )
     
+    st.markdown("---")
+
     # 색상 설정
     st.subheader("🔧 색상 설정")
     
@@ -196,6 +198,8 @@ with col1:
     else:
         bg_color = bg_color_choice
     
+    st.markdown("---")
+
     # 파일명 설정
     st.subheader("🔧 파일 설정")
     filename = st.text_input(
@@ -337,6 +341,7 @@ st.markdown(
     '<p style="text-align: center; color: darkorange; font-size: 16px;">© 2025 QR 코드 생성기  |  Streamlit으로 제작  |  제작: 류종훈(redhat4u@gmail.com)</p>',
     unsafe_allow_html=True
 )
+
 
 
 
