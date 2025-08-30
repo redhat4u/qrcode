@@ -73,6 +73,10 @@ if 'qr_image' not in st.session_state:
     st.session_state.qr_image = None
 if 'qr_info' not in st.session_state:
     st.session_state.qr_info = None
+if 'qr_data_input' not in st.session_state:
+    st.session_state.qr_data_input = ""
+if 'clear_input' not in st.session_state:
+    st.session_state.clear_input = False
 
 
 # 메인 앱 ============================================================================================
@@ -89,17 +93,45 @@ with col1:
     st.subheader("📝 QR 코드 내용")
     st.info("최대 입력 가능한 문자는 종류에 따라 약 2,400~2,900자 정도입니다.")
     
+    # 입력 내용 초기화가 요청되었을 때
+    if st.session_state.clear_input:
+        st.session_state.qr_data_input = ""
+        st.session_state.clear_input = False
+    
     qr_data = st.text_area(
         "QR 코드로 생성할 내용을 입력해 주세요",
         height=200,
-        placeholder="이 곳에 QR 코드를 생성할 내용을 입력해 주세요.\n복사/붙여넣기를 사용할 수 있습니다."
+        placeholder="이 곳에 QR 코드를 생성할 내용을 입력해 주세요.\n복사/붙여넣기를 사용할 수 있습니다.",
+        value=st.session_state.qr_data_input,
+        key="qr_input_area"
     )
     
-    # 문자 수 표시
-    if qr_data:
-        st.caption(f"현재 입력된 총 문자 수: {len(qr_data)}")
+    # 입력값이 변경되면 세션 상태 업데이트
+    if qr_data != st.session_state.qr_data_input:
+        st.session_state.qr_data_input = qr_data
+    
+    # 실시간 문자 수 표시
+    char_count = len(qr_data)
+    if char_count > 0:
+        if char_count > 2900:
+            st.error(f"⚠️ 현재 입력된 총 문자 수: **{char_count}** (권장 최대 문자 수 초과)")
+        elif char_count > 2400:
+            st.warning(f"⚠️ 현재 입력된 총 문자 수: **{char_count}** (권장 문자 수에 근접)")
+        else:
+            st.success(f"✅ 현재 입력된 총 문자 수: **{char_count}**")
     else:
         st.caption("현재 입력된 총 문자 수: 0")
+    
+    # 입력 내용 삭제 버튼
+    col_clear1, col_clear2, col_clear3 = st.columns([1, 1, 2])
+    with col_clear2:
+        if st.button("🗑️ 입력 내용 삭제", use_container_width=True, type="secondary"):
+            st.session_state.clear_input = True
+            st.session_state.qr_generated = False  # QR 코드도 초기화
+            st.session_state.qr_image_bytes = None
+            st.session_state.qr_image = None  
+            st.session_state.qr_info = None
+            st.rerun()
     
     # 공백/줄바꿈 제거 옵션
     strip_option = st.checkbox(
@@ -325,7 +357,7 @@ with col2:
             file_name=download_filename,
             mime="image/png",
             use_container_width=True,
-            help="PC에서는 Downloads 폴더에, 휴대폰에서는 다운로드 폴더에 저장됩니다."
+            help="휴대폰에서는 Download 폴더에 저장됩니다."
         )
         
         # 현재 다운로드될 파일명 표시
