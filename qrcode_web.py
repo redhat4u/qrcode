@@ -73,10 +73,14 @@ if 'qr_image' not in st.session_state:
     st.session_state.qr_image = None
 if 'qr_info' not in st.session_state:
     st.session_state.qr_info = None
-if 'qr_data_input' not in st.session_state:
-    st.session_state.qr_data_input = ""
-if 'clear_input' not in st.session_state:
-    st.session_state.clear_input = False
+
+# 텍스트 영역 초기화를 위한 함수
+def clear_text_input():
+    st.session_state.qr_input_area = ""
+    st.session_state.qr_generated = False
+    st.session_state.qr_image_bytes = None
+    st.session_state.qr_image = None  
+    st.session_state.qr_info = None
 
 
 # 메인 앱 ============================================================================================
@@ -93,22 +97,12 @@ with col1:
     st.subheader("📝 QR 코드 내용")
     st.info("최대 입력 가능한 문자는 종류에 따라 약 2,400~2,900자 정도입니다.")
     
-    # 입력 내용 초기화가 요청되었을 때
-    if st.session_state.clear_input:
-        st.session_state.qr_data_input = ""
-        st.session_state.clear_input = False
-    
     qr_data = st.text_area(
         "QR 코드로 생성할 내용을 입력해 주세요",
         height=200,
         placeholder="이 곳에 QR 코드를 생성할 내용을 입력해 주세요.\n복사/붙여넣기를 사용할 수 있습니다.",
-        value=st.session_state.qr_data_input,
         key="qr_input_area"
     )
-    
-    # 입력값이 변경되면 세션 상태 업데이트
-    if qr_data != st.session_state.qr_data_input:
-        st.session_state.qr_data_input = qr_data
     
     # 실시간 문자 수 표시
     char_count = len(qr_data)
@@ -126,11 +120,7 @@ with col1:
     col_clear1, col_clear2, col_clear3 = st.columns([1, 1, 2])
     with col_clear2:
         if st.button("🗑️ 입력 내용 삭제", use_container_width=True, type="secondary"):
-            st.session_state.clear_input = True
-            st.session_state.qr_generated = False  # QR 코드도 초기화
-            st.session_state.qr_image_bytes = None
-            st.session_state.qr_image = None  
-            st.session_state.qr_info = None
+            clear_text_input()
             st.rerun()
     
     # 공백/줄바꿈 제거 옵션
