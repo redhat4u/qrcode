@@ -151,7 +151,7 @@ with col1:
     st.subheader("🔧 색상 설정")
     
     colors = [
-        "<직접 선택>", "white", "black", "gray", "lightgray", 
+        "<직접 선택>", "black", "white", "gray", "lightgray", 
         "lightyellow", "lightgreen", "lightcoral", "lightblue",
         "red", "green", "blue", "purple", "orange", "orangered",
         "darkorange", "maroon", "yellow", "brown", "navy", "mediumblue",
@@ -160,10 +160,10 @@ with col1:
     col1_3, col1_4 = st.columns(2)
     
     with col1_3:
-        pattern_color_choice = st.selectbox("패턴 색상", colors, index=2)  # 기본값: black
+        pattern_color_choice = st.selectbox("패턴 색상", colors, index=1)  # 기본값: black
     
     with col1_4:
-        bg_color_choice = st.selectbox("배경 색상", colors, index=1)  # 기본값: white
+        bg_color_choice = st.selectbox("배경 색상", colors, index=2)  # 기본값: white
     
     # 직접 색상 입력 옵션
     st.markdown("원하는 색상이 리스트에 없다면, 아래에 직접 색상을 입력하세요.")
@@ -305,7 +305,7 @@ with st.sidebar:
     5. **QR 코드 생성** 버튼으로 최종 파일을 다운로드하세요
     """)
 
-    st.markdown("""---------------------------------------------------------""")
+    st.markdown("""---------------------------------------------------""")
 
     st.header("💡 용도별 QR 코드 생성 팁")
     st.markdown("""
@@ -317,7 +317,7 @@ with st.sidebar:
     - **WiFi**: `WIFI:T:WPA;S:네트워크명(SSID);P:비밀번호;H:false;;`
     """)
 
-    st.markdown("""---------------------------------------------------------""")
+    st.markdown("""---------------------------------------------------""")
 
     st.header("⚙️ 설정 가이드")
     st.markdown("""
@@ -341,6 +341,7 @@ st.markdown(
     '<p style="text-align: center; color: darkorange; font-size: 16px;">© 2025 QR 코드 생성기  |  Streamlit으로 제작  |  제작: 류종훈(redhat4u@gmail.com)</p>',
     unsafe_allow_html=True
 )
+
 
 
 
