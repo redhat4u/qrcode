@@ -360,7 +360,7 @@ with col2:
         # 입력 내용이 변경되지 않았다면 미리보기 유지
         if current_data == st.session_state.last_preview_data:
             st.subheader("📱 QR 코드 미리보기")
-            st.image(st.session_state.preview_image, caption="생성된 QR 코드", width=500)
+            st.image(st.session_state.preview_image, caption="생성된 QR 코드", width=600)
             st.info(st.session_state.preview_info)
         else:
             # 입력 내용이 변경되었으면 미리보기 초기화
@@ -452,3 +452,4 @@ st.markdown(
     '<p style="text-align: center; color: darkorange; font-size: 16px;">© 2025 QR 코드 생성기  |  Streamlit으로 제작  |  제작: 류종훈(redhat4u@gmail.com)</p>',
     unsafe_allow_html=True
 )
+
