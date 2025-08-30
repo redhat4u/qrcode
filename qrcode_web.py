@@ -348,7 +348,7 @@ with col2:
                     st.session_state.qr_image = img
                     st.session_state.qr_info = qr_info_text
                     
-                    st.success("🎉 QR 코드 생성 완료! 좌측 파일명을 변경하고 아래 다운로드 버튼을 클릭하세요.")
+                    st.success("🎉 QR 코드 생성 완료! 원하는 파일명으로 변경하고, 아래 다운로드 버튼을 클릭하세요.")
 
     # 저장된 미리보기가 있고 입력 내용이 변경되지 않았다면 미리보기 표시
     if st.session_state.preview_image is not None:
@@ -390,7 +390,7 @@ with col2:
             file_name=download_filename,
             mime="image/png",
             use_container_width=True,
-            help="PC에서는 Downloads 폴더에, 휴대폰에서는 다운로드 폴더에 저장됩니다."
+            help="휴대폰에서는 Download 폴더에 저장됩니다."
         )
         
         # 현재 다운로드될 파일명 표시
@@ -452,4 +452,5 @@ st.markdown(
     '<p style="text-align: center; color: darkorange; font-size: 16px;">© 2025 QR 코드 생성기  |  Streamlit으로 제작  |  제작: 류종훈(redhat4u@gmail.com)</p>',
     unsafe_allow_html=True
 )
+
 
