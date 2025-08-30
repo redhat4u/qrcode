@@ -76,11 +76,16 @@ if 'qr_info' not in st.session_state:
 
 # 텍스트 영역 초기화를 위한 함수
 def clear_text_input():
-    st.session_state.qr_input_area = ""
+    # 위젯의 키를 직접 조작하는 대신 초기화 플래그 사용
+    st.session_state.clear_requested = True
     st.session_state.qr_generated = False
     st.session_state.qr_image_bytes = None
     st.session_state.qr_image = None  
     st.session_state.qr_info = None
+
+# 초기화 플래그 추가
+if 'clear_requested' not in st.session_state:
+    st.session_state.clear_requested = False
 
 
 # 메인 앱 ============================================================================================
@@ -97,21 +102,25 @@ with col1:
     st.subheader("📝 QR 코드 내용")
     st.info("최대 입력 가능한 문자는 종류에 따라 약 2,400~2,900자 정도입니다.")
     
-    # 문자 수 카운터를 위한 placeholder 생성
-    char_counter_placeholder = st.empty()
+    # 초기화 요청이 있으면 빈 값으로 시작
+    default_value = "" if st.session_state.clear_requested else st.session_state.get("qr_input_area", "")
     
     qr_data = st.text_area(
         "QR 코드로 생성할 내용을 입력해 주세요",
         height=200,
         placeholder="이 곳에 QR 코드를 생성할 내용을 입력해 주세요.\n복사/붙여넣기를 사용할 수 있습니다.",
+        value=default_value,
         key="qr_input_area"
     )
+    
+    # 초기화 플래그 리셋
+    if st.session_state.clear_requested:
+        st.session_state.clear_requested = False
     
     # 문자 수 표시 (더 반응적으로)
     char_count = len(qr_data) if qr_data else 0
     
     # 문자 수에 따른 상태 메시지 표시
-    with char_counter_placeholder.container():
         if char_count > 0:
             if char_count > 2900:
                 st.error(f"⚠️ 현재 입력된 총 문자 수: **{char_count}** (권장 최대 문자 수 초과)")
@@ -300,12 +309,8 @@ with col2:
 
             if img is not None and qr is not None:
             
-                # 미리보기 표시
-                st.subheader("📱 QR 코드 미리보기")
-                st.image(img, caption="생성된 QR 코드", width=600)
-                
-                # QR 코드 정보 표시
-                st.info(f"""
+                # QR 코드 정보 텍스트 미리 생성
+                qr_info_text = f"""
                 **QR 코드 정보**
                 - QR 버전: {qr.version}
                 - 가로/세로 각 cell 개수: {qr.modules_count}개
@@ -313,8 +318,12 @@ with col2:
                 - 패턴 색상: {pattern_color}
                 - 배경 색상: {bg_color}
                 
-                - 이미지 크기 = (각 cell 개수 + 좌/우 여백 개수) × 1개의 사각 cell 크기
-                """)
+                - 이미지 크기 = (각 cell 개수 + 좌/우 여백 총 개수) × 1개의 사각 cell 크기
+                """
+
+                # 미리보기 표시
+                st.subheader("📱 QR 코드 미리보기")
+                st.image(img, caption="생성된 QR 코드", width=600)
                 
                 # QR 코드 정보 표시
                 st.info(qr_info_text)
