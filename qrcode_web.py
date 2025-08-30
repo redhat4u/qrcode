@@ -149,12 +149,12 @@ with col1:
     st.subheader("🔧 색상 설정")
     
     colors = [
-        "white", "black", "gray", "lightgray", "lightyellow",
-        "lightgreen", "lightcoral", "lightblue", "darkorange",
+        "<직접 선택>", "white", "black", "gray", "lightgray", 
+        "lightyellow", "lightgreen", "lightcoral", "lightblue",
         "red", "green", "blue", "purple", "orange", "orangered",
-        "maroon", "yellow", "brown", "navy", "mediumblue", "<직접 선택>"
+        "darkorange", "maroon", "yellow", "brown", "navy", "mediumblue",
     ]
-    
+
     col1_3, col1_4 = st.columns(2)
     
     with col1_3:
@@ -337,3 +337,4 @@ st.markdown(
     '<p style="text-align: center; color: darkorange; font-size: 16px;">© 2025 QR 코드 생성기  |  Streamlit으로 제작  |  제작: 류종훈(redhat4u@gmail.com)</p>',
     unsafe_allow_html=True
 )
+
