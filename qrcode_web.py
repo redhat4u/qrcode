@@ -166,7 +166,7 @@ with col1:
     st.subheader("🔧 파일 설정")
     filename = st.text_input(
         "다운로드 파일명 입력 (확장자는 제외, 파일명만 입력)",
-        placeholder="이 곳에 파일명을 입력해 주세요 (비어있으면 자동 생성)"
+        placeholder="이 곳에 파일명을 입력해 주세요 (비어있으면 자동 생성됨)"
     )
     st.caption("파일명이 입력되지 않을 경우 자동으로 파일이 생성되며, 특수문자가 입력될 경우에는 '_' 문자로 자동치환 됩니다.")
 
@@ -286,6 +286,7 @@ st.markdown(
     '<p style="text-align: center; color: darkorange; font-size: 16px;">© 2025 QR 코드 생성기  |  Streamlit으로 제작  |  제작: 류종훈(redhat4u@gmail.com)</p>',
     unsafe_allow_html=True
 )
+
 
 
 
