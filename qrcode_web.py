@@ -1,4 +1,4 @@
-"""
+'''
 QR 코드 생성 웹앱 - Streamlit 버전
 휴대폰에서도 사용 가능
 
@@ -8,7 +8,7 @@ QR 코드 생성 웹앱 - Streamlit 버전
 
 또는 온라인에서 실행:
 - Streamlit Cloud, Heroku, Replit 등에 배포 가능
-"""
+'''
 
 import streamlit as st
 import qrcode
@@ -152,16 +152,49 @@ with col1:
         "white", "black", "gray", "lightgray", "lightyellow",
         "lightgreen", "lightcoral", "lightblue", "darkorange",
         "red", "green", "blue", "purple", "orange", "orangered",
-        "maroon", "yellow", "brown", "navy", "mediumblue"
+        "maroon", "yellow", "brown", "navy", "mediumblue", "<직접 선택>"
     ]
     
     col1_3, col1_4 = st.columns(2)
     
     with col1_3:
-        pattern_color = st.selectbox("패턴 색상", colors, index=1)  # 기본값: black
+        pattern_color_choice = st.selectbox("패턴 색상", colors, index=1)  # 기본값: black
     
     with col1_4:
-        bg_color = st.selectbox("배경 색상", colors, index=0)  # 기본값: white
+        bg_color_choice = st.selectbox("배경 색상", colors, index=0)  # 기본값: white
+    
+    # 직접 색상 입력 옵션
+    st.markdown("원하는 색상이 리스트에 없다면, 아래에 직접 색상을 입력하세요.")
+    st.caption("색상명 (예: crimson, gold) 또는 HEX 코드 (예: #FF5733, #00FF00)를 입력할 수 있습니다.")
+    
+    col1_5, col1_6 = st.columns(2)
+    
+    with col1_5:
+        custom_pattern_color = st.text_input(
+            "패턴 색상 직접 입력",
+            placeholder="예: crimson 또는 #FF0000",
+            disabled=(pattern_color_choice != "<직접 선택>"),
+            help="패턴 색상에서 '<직접 선택>'을 선택하면 활성화됩니다."
+        )
+    
+    with col1_6:
+        custom_bg_color = st.text_input(
+            "배경 색상 직접 입력",
+            placeholder="예: lightcyan 또는 #E0FFFF",
+            disabled=(bg_color_choice != "<직접 선택>"),
+            help="배경 색상에서 '<직접 선택>'을 선택하면 활성화됩니다."
+        )
+    
+    # 최종 색상 결정
+    if pattern_color_choice == "<직접 선택>":
+        pattern_color = custom_pattern_color if custom_pattern_color else "black"
+    else:
+        pattern_color = pattern_color_choice
+    
+    if bg_color_choice == "<직접 선택>":
+        bg_color = custom_bg_color if custom_bg_color else "white"
+    else:
+        bg_color = bg_color_choice
     
     # 파일명 설정
     st.subheader("🔧 파일 설정")
@@ -200,6 +233,10 @@ with col2:
             st.error("생성할 QR 코드 내용을 입력해 주세요.")
         elif pattern_color == bg_color:
             st.error("패턴과 배경은 같은 색을 사용할 수 없습니다.")
+        elif pattern_color_choice == "<직접 선택>" and not custom_pattern_color.strip():
+            st.error("패턴 색상을 직접 입력해 주세요.")
+        elif bg_color_choice == "<직접 선택>" and not custom_bg_color.strip():
+            st.error("배경 색상을 직접 입력해 주세요.")
         else:
             # QR 코드 생성
             img, qr = generate_qr_code(
@@ -219,6 +256,8 @@ with col2:
                 - QR 버전: {qr.version}
                 - 가로/세로 각 cell 개수: {qr.modules_count}개
                 - 이미지 크기: {img.size[0]} x {img.size[1]} px
+                - 패턴 색상: {pattern_color}
+                - 배경 색상: {bg_color}
                 
                 - 이미지 크기 = (각 cell 개수 + 좌/우 여백 총 개수) × 1개의 사각 cell 크기
                 """)
@@ -286,6 +325,10 @@ with st.sidebar:
     
     **마스크 패턴:**
     - 0~7 중 선택 (같은 내용이라도 번호에 따라 패턴이 달라짐)
+    
+    **색상 입력:**
+    - **색상명**: red, blue, green, crimson, gold 등
+    - **HEX 코드**: #FF0000, #0000FF, #00FF00 등
     """)
 
 # 하단 정보
@@ -294,32 +337,3 @@ st.markdown(
     '<p style="text-align: center; color: darkorange; font-size: 16px;">© 2025 QR 코드 생성기  |  Streamlit으로 제작  |  제작: 류종훈(redhat4u@gmail.com)</p>',
     unsafe_allow_html=True
 )
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
