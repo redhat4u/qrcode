@@ -235,7 +235,7 @@ with col2:
                     img.save(img_buffer, format='PNG')
                     img_bytes = img_buffer.getvalue()
                     
-                    st.success(f"QR 코드가 생성되었습니다!")
+                    st.success(f"QR 코드가 생성되었습니다!\n아래 다운로드 버튼으로 PC/휴대폰에 다운로드할 수 있습니다.")
 
                     # Streamlit 다운로드 버튼 사용
                     st.download_button(
@@ -286,6 +286,7 @@ st.markdown(
     '<p style="text-align: center; color: darkorange; font-size: 16px;">© 2025 QR 코드 생성기  |  Streamlit으로 제작  |  제작: 류종훈(redhat4u@gmail.com)</p>',
     unsafe_allow_html=True
 )
+
 
 
 
