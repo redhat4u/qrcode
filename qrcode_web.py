@@ -263,7 +263,7 @@ with col2:
                 - 패턴 색상: {pattern_color}
                 - 배경 색상: {bg_color}
                 
-                - 이미지 크기 = (각 cell 개수 + 좌/우 여백 총 개수) × 1개의 사각 cell 크기
+                - 이미지 크기 = (각 cell 개수 + 좌/우 여백 개수) × 1개의 사각 cell 크기
                 """)
                 
                 now = datetime.now(ZoneInfo("Asia/Seoul"))
@@ -341,6 +341,7 @@ st.markdown(
     '<p style="text-align: center; color: darkorange; font-size: 16px;">© 2025 QR 코드 생성기  |  Streamlit으로 제작  |  제작: 류종훈(redhat4u@gmail.com)</p>',
     unsafe_allow_html=True
 )
+
 
 
 
