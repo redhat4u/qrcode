@@ -248,7 +248,7 @@ with col2:
             
                 # 미리보기 표시
                 st.subheader("📱 QR 코드 미리보기")
-                st.image(img, caption="생성된 QR 코드", width=500)
+                st.image(img, caption="생성된 QR 코드", width=600)
                 
                 # QR 코드 정보 표시
                 st.info(f"""
@@ -337,6 +337,7 @@ st.markdown(
     '<p style="text-align: center; color: darkorange; font-size: 16px;">© 2025 QR 코드 생성기  |  Streamlit으로 제작  |  제작: 류종훈(redhat4u@gmail.com)</p>',
     unsafe_allow_html=True
 )
+
 
 
 
