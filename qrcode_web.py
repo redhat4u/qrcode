@@ -262,7 +262,7 @@ with col1:
     
     # QR 코드가 생성된 후에도 파일명을 변경할 수 있도록 함
     if st.session_state.qr_generated:
-        st.success("✅ QR 코드가 생성되었습니다! 아래에서 파일명을 변경하고 다운로드하세요.")
+        st.success("✅ 파일명이 변경되었습니다. 화면 아래의 [QR 코드 다운로드] 버튼을 클릭하세요.")
     
     filename = st.text_input(
         "다운로드 파일명 입력 (확장자는 제외, 파일명만 입력)",
@@ -452,5 +452,6 @@ st.markdown(
     '<p style="text-align: center; color: darkorange; font-size: 16px;">© 2025 QR 코드 생성기  |  Streamlit으로 제작  |  제작: 류종훈(redhat4u@gmail.com)</p>',
     unsafe_allow_html=True
 )
+
 
 
