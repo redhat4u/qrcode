@@ -352,7 +352,9 @@ with col2:
         now = datetime.now(ZoneInfo("Asia/Seoul"))
         
         # 파일명 처리 (현재 입력된 값 사용)
-        current_filename = filename if filename else now.strftime("QR_%Y-%m-%d_%H-%M-%S")
+        current_filename = st.session_state.get("filename_input", "")
+        if not current_filename.strip():
+            current_filename = now.strftime("QR_%Y-%m-%d_%H-%M-%S")
         current_filename = sanitize_filename(current_filename)
         download_filename = f"{current_filename}.png"
         
@@ -425,4 +427,5 @@ st.markdown(
     '<p style="text-align: center; color: darkorange; font-size: 16px;">© 2025 QR 코드 생성기  |  Streamlit으로 제작  |  제작: 류종훈(redhat4u@gmail.com)</p>',
     unsafe_allow_html=True
 )
+
 
