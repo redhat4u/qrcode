@@ -1,3 +1,12 @@
+"""
+다운로드 파일명 텍스트 크기가 너무 작음.. 조금 크게 조절..
+
+새 qr코드 생성 버튼을 누르면 파일명 입력창의 내용이 그대로 있음..
+버튼 클릭시 파일명 입력창도 빈칸으로 초기화 되도록..
+
+파일명 입력칸 삭제 버튼 추가..
+"""
+
 '''
 QR 코드 생성 웹앱 - Streamlit 버전
 휴대폰에서도 사용 가능
@@ -295,7 +304,7 @@ with col2:
         current_data == st.session_state.last_preview_data and
         current_data != "" and
         not generate_btn):  # 생성 버튼을 클릭한 직후가 아닐 때만
-        st.success("✅ 다운로드 준비 완료! 파일명을 다시 확인해주세요.")
+        st.success("✅ 파일을 다운로드 합니다! 파일이 저장되는 경로를 확인하세요.")
 #    elif not st.session_state.qr_generated:
 #        st.caption("[⚡ QR 코드 생성] 버튼을 클릭하면 QR 코드가 생성되고, [📥 QR 코드 다운로드] 버튼이 활성화됩니다.")
 
