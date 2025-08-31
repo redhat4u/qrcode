@@ -87,10 +87,7 @@ def clear_text_input():
     st.session_state.preview_info = None
     st.session_state.last_preview_data = ""
 
-# 파일명만 초기화하는 함수
-def clear_filename():
-    st.session_state.filename_input = ""  # 직접 값을 빈 문자열로 설정
-    st.rerun()  # 즉시 화면 새로고침
+# 파일명만 초기화하는 함수 (삭제됨)
 
 # 모든 입력창 초기화하는 함수
 def clear_all_inputs():
@@ -224,32 +221,20 @@ with col1:
 
     st.subheader("🔧 파일 설정")
     
-    # 파일명 입력창과 삭제 버튼을 함께 배치
-    col_filename, col_filename_clear = st.columns([3, 1])
+    # 파일명 입력창 - QR 내용 삭제와는 무관하게 파일명 유지
+    filename_default_value = st.session_state.get("filename_input", "")
     
-    with col_filename:
-        # 파일명 입력창 - QR 내용 삭제와는 무관하게 파일명 유지
-        filename_default_value = st.session_state.get("filename_input", "")
-        
-        # 오직 전체 초기화 요청시에만 파일명도 초기화
-        if st.session_state.clear_all_requested:
-            filename_default_value = ""
-            st.session_state.clear_all_requested = False  # 플래그 해제
+    # 오직 전체 초기화 요청시에만 파일명도 초기화
+    if st.session_state.clear_all_requested:
+        filename_default_value = ""
+        st.session_state.clear_all_requested = False  # 플래그 해제
 
-        filename = st.text_input(
-            "다운로드 파일명 입력 (확장자는 제외, 파일명만 입력)",
-            placeholder="이 곳에 파일명을 입력해 주세요 (비어있으면 자동 생성됨)",
-            value=filename_default_value,
-            key="filename_input"
-        )
-            
-    with col_filename_clear:
-        st.markdown("<br>", unsafe_allow_html=True)  # 입력창과 높이 맞추기
-        # 현재 세션 상태의 filename_input 값으로 버튼 상태 결정
-        current_filename_in_session = st.session_state.get('filename_input', '')
-        filename_delete_disabled = not current_filename_in_session.strip()
-        if st.button("🗑️ 파일명 삭제", help="입력한 파일명을 삭제합니다", use_container_width=True, disabled=filename_delete_disabled):
-            clear_filename()
+    filename = st.text_input(
+        "다운로드 파일명 입력 (확장자는 제외, 파일명만 입력)",
+        placeholder="이 곳에 파일명을 입력해 주세요 (비어있으면 자동 생성됨)",
+        value=filename_default_value,
+        key="filename_input"
+    )
 
     # 파일명 상태 메시지
     current_filename = filename.strip()
