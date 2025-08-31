@@ -281,6 +281,7 @@ with col2:
 
     if st.session_state.preview_image:
         current_data = qr_data.strip() if strip_option else qr_data
+
         if current_data == st.session_state.last_preview_data:
             st.subheader("📱 QR 코드 미리보기")
             st.image(st.session_state.preview_image, caption="생성된 QR 코드", width=600)
@@ -300,8 +301,10 @@ with col2:
 
         st.session_state.last_preview_data = current_data
 
-    if st.session_state.qr_generated and st.session_state.qr_image_bytes:
+    # ✅ QR 생성 완료 메시지 출력 조건 수정
+    if st.session_state.qr_generated and current_data == st.session_state.last_preview_data:
         st.success("✅ QR 코드 생성 완료! 필요시 파일명을 변경하고 다운로드하세요.")
+
         st.markdown("---")
         st.subheader("📥 다운로드")
         
