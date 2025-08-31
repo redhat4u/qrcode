@@ -202,23 +202,25 @@ with col1:
     # 파일명 초기화 플래그
     if "reset_filename" not in st.session_state:
         st.session_state.reset_filename = False
+    if "filename_counter" not in st.session_state:
+        st.session_state.filename_counter = 0
+
+    # 파일명 초기화가 필요한 경우 key를 변경해서 위젯을 새로 생성
+    if st.session_state.reset_filename:
+        st.session_state.filename_counter += 1
+        st.session_state.reset_filename = False
 
     filename = st.text_input(
         "다운로드 파일명 입력 (확장자는 제외, 파일명만 입력)",
         placeholder="이 곳에 파일명을 입력해 주세요 (비어있으면 자동 생성됨)",
-        key="filename_input"
+        key=f"filename_input_{st.session_state.filename_counter}"
     )
-
-    # 파일명 초기화는 입력 내용 변경 시에만 (별도 처리)
-    if st.session_state.reset_filename:
-        st.session_state.filename_input = ""
-        st.session_state.reset_filename = False
 
     if "last_filename" not in st.session_state:
         st.session_state.last_filename = ""  # 처음엔 빈 문자열로 시작
 
     if st.session_state.qr_generated:
-        current_filename = st.session_state.get("filename_input", "").strip()
+        current_filename = filename.strip()
         if current_filename and current_filename != st.session_state.last_filename:
             st.success("✅ 파일명이 변경되었습니다. 화면 아래의 [QR 코드 다운로드] 버튼을 클릭하세요.")
             st.session_state.last_filename = current_filename
@@ -310,7 +312,7 @@ with col2:
         st.subheader("📥 다운로드")
         
         now = datetime.now(ZoneInfo("Asia/Seoul"))
-        current_filename = st.session_state.get("filename_input", "").strip()
+        current_filename = filename.strip()
         
         # 파일명이 비어있으면 자동 생성
         if not current_filename:
