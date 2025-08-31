@@ -265,7 +265,7 @@ with col2:
     # 미리보기용 유효성 검사 변수
     is_pattern_color_valid_preview = (pattern_color_choice != "<직접 선택>" and is_valid_color(pattern_color_choice)) or (pattern_color_choice == "<직접 선택>" and custom_pattern_color.strip() and is_valid_color(custom_pattern_color))
     is_bg_color_valid_preview = (bg_color_choice != "<직접 선택>" and is_valid_color(bg_color_choice)) or (bg_color_choice == "<직접 선택>" and custom_bg_color.strip() and is_valid_color(custom_bg_color))
-    is_colors_same_preview = (pattern_color and bg_color and pattern_color == bg_color)
+    is_colors_same_preview = (is_pattern_color_valid_preview and is_bg_color_valid_preview and pattern_color and bg_color and pattern_color == bg_color)
 
     # QR 코드 파라미터 해시 생성
     qr_params = (
@@ -332,34 +332,25 @@ with col2:
         if not current_data:
             errors.append("생성할 QR 코드 내용을 입력해 주세요.")
         
-        # 패턴 및 배경 색상 유효성 검사
-        is_pattern_valid = True
-        is_bg_valid = True
-
+        is_pattern_ok = True
         if pattern_color_choice == "<직접 선택>":
             if not custom_pattern_color.strip():
                 errors.append("QR 코드 **패턴 색상**을 직접 입력해 주세요.")
-                is_pattern_valid = False
+                is_pattern_ok = False
             elif not is_valid_color(custom_pattern_color):
                 errors.append("패턴 색상으로 입력한 색상은 올바른 값이 아닙니다. 다시 확인해주세요.")
-                is_pattern_valid = False
-        elif not is_valid_color(pattern_color_choice):
-            errors.append("패턴 색상으로 입력한 색상은 올바른 값이 아닙니다. 다시 확인해주세요.")
-            is_pattern_valid = False
-
+                is_pattern_ok = False
+        
+        is_bg_ok = True
         if bg_color_choice == "<직접 선택>":
             if not custom_bg_color.strip():
                 errors.append("QR 코드 **배경 색상**을 직접 입력해 주세요.")
-                is_bg_valid = False
+                is_bg_ok = False
             elif not is_valid_color(custom_bg_color):
                 errors.append("배경 색상으로 입력한 색상은 올바른 값이 아닙니다. 다시 확인해주세요.")
-                is_bg_valid = False
-        elif not is_valid_color(bg_color_choice):
-            errors.append("배경 색상으로 입력한 색상은 올바른 값이 아닙니다. 다시 확인해주세요.")
-            is_bg_valid = False
+                is_bg_ok = False
             
-        # 두 색상이 같은지 최종 검사
-        if is_pattern_valid and is_bg_valid and pattern_color and bg_color and pattern_color == bg_color:
+        if is_pattern_ok and is_bg_ok and pattern_color and bg_color and pattern_color == bg_color:
             errors.append("패턴과 배경은 같은 색을 사용할 수 없습니다.")
 
         if errors:
@@ -400,23 +391,20 @@ with col2:
         st.image(st.session_state.preview_image, caption="생성된 QR 코드", width=380)
         st.info(st.session_state.preview_info)
     else:
-        st.info("QR 코드 내용을 입력하시면 미리보기가 자동으로 나타납니다.")
-        
-        # 미리보기 관련 오류 메시지
-        if (pattern_color_choice == "<직접 선택>" and not custom_pattern_color.strip()) and (bg_color_choice == "<직접 선택>" and not custom_bg_color.strip()):
-            st.warning("⚠️ 패턴 및 배경 색상을 직접 입력해 주세요. 미리보기를 위해 유효한 색상 값이 필요합니다.")
-        elif (pattern_color_choice == "<직접 선택>" and not custom_pattern_color.strip()):
-            st.warning("⚠️ 패턴 색상을 직접 입력해 주세요. 미리보기를 위해 유효한 색상 값이 필요합니다.")
-        elif (bg_color_choice == "<직접 선택>" and not custom_bg_color.strip()):
-            st.warning("⚠️ 배경 색상을 직접 입력해 주세요. 미리보기를 위해 유효한 색상 값이 필요합니다.")
-        
-        if not is_valid_color(pattern_color):
-            st.warning("⚠️ 패턴 색상으로 입력한 값은 올바른 색상이 아닙니다. 다시 확인해주세요.")
-        if not is_valid_color(bg_color):
-            st.warning("⚠️ 배경 색상으로 입력한 값은 올바른 색상이 아닙니다. 다시 확인해주세요.")
-        
-        if is_colors_same_preview:
-            st.warning("⚠️ 패턴과 배경은 같은 색을 사용할 수 없습니다.")
+        # 오류 메시지 표시 로직
+        if not current_data:
+            st.info("QR 코드 내용을 입력하시면 미리보기가 자동으로 나타납니다.")
+        else:
+            if pattern_color_choice == "<직접 선택>" and not custom_pattern_color.strip():
+                st.warning("⚠️ 패턴 색상을 직접 입력해 주세요. 미리보기를 위해 유효한 색상 값이 필요합니다.")
+            if bg_color_choice == "<직접 선택>" and not custom_bg_color.strip():
+                st.warning("⚠️ 배경 색상을 직접 입력해 주세요. 미리보기를 위해 유효한 색상 값이 필요합니다.")
+            if pattern_color_choice == "<직접 선택>" and custom_pattern_color.strip() and not is_valid_color(custom_pattern_color):
+                st.warning("⚠️ 패턴 색상으로 입력한 값은 올바른 색상이 아닙니다. 다시 확인해주세요.")
+            if bg_color_choice == "<직접 선택>" and custom_bg_color.strip() and not is_valid_color(custom_bg_color):
+                st.warning("⚠️ 배경 색상으로 입력한 값은 올바른 색상이 아닙니다. 다시 확인해주세요.")
+            if is_colors_same_preview:
+                st.warning("⚠️ 패턴과 배경은 같은 색을 사용할 수 없습니다.")
 
     # 생성 성공 메시지 (고정)
     if st.session_state.show_generate_success:
@@ -461,7 +449,6 @@ with col2:
         if st.session_state.download_initiated:
             st.success("✅ 파일을 다운로드 합니다! 파일이 저장되는 경로를 확인하세요.")
             st.session_state.download_initiated = False
-
 
 # 사이드바
 with st.sidebar:
