@@ -334,7 +334,7 @@ with col2:
         st.markdown(
             f'<p style="font-size:18px;">'
             f'<span style="color:darkorange; font-weight:bold;">📄 다운로드 파일명: </span> '
-            f'<span style="color:mediumblue;"> {download_filename}</span>'
+            f'<span style="color:dodgerblue;"> {download_filename}</span>'
             f'</p>',
             unsafe_allow_html=True
         )
