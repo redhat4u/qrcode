@@ -91,6 +91,7 @@ def clear_text_input():
     st.session_state.preview_image = None
     st.session_state.preview_info = None
     st.session_state.last_preview_data = ""
+    st.session_state.filename_input = ""  # ⭐ 파일명 입력창도 초기화되도록 추가
 
 # 초기화 플래그 추가
 if 'clear_requested' not in st.session_state:
@@ -352,38 +353,34 @@ with col2:
 
     # 저장된 미리보기가 있고 입력 내용이 변경되지 않았다면 미리보기 표시
     if st.session_state.preview_image is not None:
-        # 현재 입력 데이터 확인
-        current_data = qr_data
-        if strip_option:
-            current_data = current_data.strip()
-            
-        # 입력 내용이 변경되지 않았다면 미리보기 유지
+        current_data = qr_data.strip() if strip_option else qr_data
+        
         if current_data == st.session_state.last_preview_data:
             st.subheader("📱 QR 코드 미리보기")
             st.image(st.session_state.preview_image, caption="생성된 QR 코드", width=600)
             st.info(st.session_state.preview_info)
         else:
-            # 입력 내용이 변경되었으면 미리보기 초기화
+            # ⭐ 입력 내용이 변경되면 전체 상태 초기화되도록 수정
             st.session_state.preview_image = None
             st.session_state.preview_info = None
             st.session_state.last_preview_data = ""
+            st.session_state.qr_generated = False
+            st.session_state.qr_image_bytes = None
+            st.session_state.qr_image = None
+            st.session_state.qr_info = None
 
     # 생성된 QR 코드가 있다면 다운로드 버튼 표시
     if st.session_state.qr_generated and st.session_state.qr_image_bytes is not None:
         st.markdown("---")
         st.subheader("📥 다운로드")
         
-        # 현재 시각 가져오기
         now = datetime.now(ZoneInfo("Asia/Seoul"))
-        
-        # 파일명 처리 (현재 입력된 값 사용)
         current_filename = st.session_state.get("filename_input", "")
         if not current_filename.strip():
             current_filename = now.strftime("QR_%Y-%m-%d_%H-%M-%S")
         current_filename = sanitize_filename(current_filename)
         download_filename = f"{current_filename}.png"
         
-        # 다운로드 버튼
         st.download_button(
             label="📥 QR 코드 다운로드 (PNG)",
             data=st.session_state.qr_image_bytes,
@@ -393,7 +390,6 @@ with col2:
             help="휴대폰에서는 Download 폴더에 저장됩니다."
         )
         
-        # 현재 다운로드될 파일명 표시
         st.caption(f"📄 다운로드 파일명: `{download_filename}`")
         
         # 새 QR 코드 생성 버튼
@@ -402,6 +398,7 @@ with col2:
             st.session_state.qr_image_bytes = None
             st.session_state.qr_image = None
             st.session_state.qr_info = None
+            st.session_state.filename_input = ""  # ⭐ 새 QR 코드 생성 시 파일명도 초기화되도록 추가
             st.rerun()
 
 
@@ -452,7 +449,4 @@ st.markdown(
     '<p style="text-align: center; color: darkorange; font-size: 16px;">© 2025 QR 코드 생성기  |  Streamlit으로 제작  |  제작: 류종훈(redhat4u@gmail.com)</p>',
     unsafe_allow_html=True
 )
-
-
-
 
