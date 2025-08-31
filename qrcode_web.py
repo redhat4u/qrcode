@@ -289,13 +289,13 @@ with col2:
         st.image(st.session_state.preview_image, caption="생성된 QR 코드", width=600)
         st.info(st.session_state.preview_info)
 
-    # 생성 완료 메시지 표시 (생성 버튼 클릭 직후가 아닐 때)
+    # 생성 완료 메시지 표시 (다운로드 버튼 클릭시)
     if (st.session_state.qr_generated and
         st.session_state.qr_image is not None and
         current_data == st.session_state.last_preview_data and
         current_data != "" and
         not generate_btn):  # 생성 버튼을 클릭한 직후가 아닐 때만
-        st.success("✅ 다운로드 준비 완료! 파일명 다시 확인하고 다운로드하세요.")
+        st.success("✅ 다운로드 준비 완료! 파일명을 다시 확인해주세요.")
 #    elif not st.session_state.qr_generated:
 #        st.caption("[⚡ QR 코드 생성] 버튼을 클릭하면 QR 코드가 생성되고, [📥 QR 코드 다운로드] 버튼이 활성화됩니다.")
 
@@ -306,6 +306,7 @@ with col2:
         current_data != ""):
         
         st.markdown("---")
+ 
         st.subheader("📥 다운로드")
         
         now = datetime.now(ZoneInfo("Asia/Seoul"))
@@ -327,6 +328,7 @@ with col2:
             use_container_width=True,
             help="휴대폰에서는 Download 폴더에 저장됩니다.",
         )
+
         st.caption(f"📄 다운로드 파일명: `{download_filename}`")
 
         if st.button("🔄 새 QR 코드 생성", use_container_width=True):
