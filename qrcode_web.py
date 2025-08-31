@@ -214,7 +214,7 @@ with col1:
         st.session_state.last_filename = current_filename
     elif not current_filename and st.session_state.last_filename:
         # 파일명을 지웠을 때
-        st.info("📝 파일명이 비어있습니다. 다운로드 시 자동으로 생성됩니다.")
+        st.info("📝 파일명을 입력하지 않았습니다. 기본 설정 값으로 자동 생성됩니다.")
         st.session_state.last_filename = ""
 
 with col2:
