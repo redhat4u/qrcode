@@ -65,10 +65,13 @@ if 'last_filename_state' not in st.session_state:
     st.session_state.last_filename_state = ""
 if 'filename_message' not in st.session_state:
     st.session_state.filename_message = ""
+if 'download_initiated' not in st.session_state:
+    st.session_state.download_initiated = False
+
 
 # QR 내용만 초기화하는 콜백 함수 (파일명은 유지)
 def clear_text_input():
-    st.session_state.qr_input_area = "" # 직접 입력창의 상태를 변경
+    st.session_state.qr_input_area = ""
     st.session_state.qr_generated = False
     st.session_state.qr_image_bytes = None
     st.session_state.qr_image = None
@@ -76,13 +79,18 @@ def clear_text_input():
     st.session_state.preview_image = None
     st.session_state.preview_info = None
     st.session_state.last_preview_data = ""
+    st.session_state.download_initiated = False
 
 # 파일명 초기화 콜백 함수
 def clear_filename_callback():
     st.session_state.filename_input = ""
     st.session_state.filename_message = "deleted"
     st.session_state.last_filename_state = ""
+    st.session_state.download_initiated = False
 
+# 다운로드 버튼 클릭 시 호출되는 콜백 함수
+def set_download_initiated():
+    st.session_state.download_initiated = True
 
 # 메인 앱 ============================================================================================
 
@@ -128,7 +136,7 @@ with col1:
             use_container_width=True,
             type="secondary",
             disabled=delete_btn_disabled,
-            on_click=clear_text_input  # on_click 콜백으로 함수 직접 연결
+            on_click=clear_text_input
         )
 
     # 공백/줄바꿈 제거 옵션
@@ -211,7 +219,7 @@ with col1:
             use_container_width=True,
             type="secondary",
             disabled=filename_delete_disabled,
-            on_click=clear_filename_callback  # on_click 콜백 사용
+            on_click=clear_filename_callback
         )
 
     # 파일명 상태 메시지 - 실제 변경사항만 반영
@@ -243,6 +251,7 @@ with col2:
         st.session_state.qr_info = None
         st.session_state.preview_image = None
         st.session_state.preview_info = None
+        st.session_state.download_initiated = False
 
     col2_1, col2_2 = st.columns(2)
     with col2_1:
@@ -282,9 +291,9 @@ with col2:
                 st.session_state.preview_image = img
                 st.session_state.preview_info = qr_info_text
                 st.session_state.last_preview_data = current_data
+                st.session_state.download_initiated = False # 새로운 QR 생성 시 다운로드 상태 초기화
 
                 if preview_btn:
-                    # 미리보기 버튼 클릭시 생성 관련 상태 초기화
                     st.session_state.qr_generated = False
                     st.session_state.qr_image_bytes = None
                     st.session_state.qr_image = None
@@ -297,8 +306,8 @@ with col2:
                     st.session_state.qr_image = img
                     st.session_state.qr_info = qr_info_text
                     st.session_state.qr_generated = True
-                    # 생성 직후 즉시 성공 메시지 표시
                     st.success("✅ QR 코드 생성 완료! 필요시 파일명을 변경하고 다운로드하세요.")
+
 
     # 저장된 미리보기가 있고 입력 내용이 같을 때만 표시
     if st.session_state.preview_image and current_data == st.session_state.last_preview_data:
@@ -313,13 +322,10 @@ with col2:
         current_data != ""):
 
         st.markdown("---")
-
         st.subheader("📥 다운로드")
-
         now = datetime.now(ZoneInfo("Asia/Seoul"))
         current_filename = filename.strip()
 
-        # 파일명이 비어있으면 자동 생성
         if not current_filename:
             final_filename = now.strftime("QR_%Y-%m-%d_%H-%M-%S")
         else:
@@ -327,6 +333,7 @@ with col2:
 
         download_filename = f"{sanitize_filename(final_filename)}.png"
 
+        # 다운로드 버튼에 on_click 콜백 추가
         st.download_button(
             label="💾 QR 코드 다운로드",
             data=st.session_state.qr_image_bytes,
@@ -334,6 +341,7 @@ with col2:
             mime="image/png",
             use_container_width=True,
             help="PC는 'Download' 폴더, 휴대폰은 'Download' 폴더에 저장됩니다.",
+            on_click=set_download_initiated
         )
 
         st.markdown(
@@ -344,13 +352,10 @@ with col2:
             unsafe_allow_html=True
         )
 
-        # 생성 완료 메시지 표시 (다운로드 버튼 클릭시)
-        if (st.session_state.qr_generated and
-            st.session_state.qr_image is not None and
-            current_data == st.session_state.last_preview_data and
-            current_data != "" and
-            not generate_btn):  # 생성 버튼을 클릭한 직후가 아닐 때만
+        # 다운로드 성공 메시지 - 다운로드 버튼 클릭시에만 표시
+        if st.session_state.download_initiated:
             st.success("✅ 파일을 다운로드 합니다! 파일이 저장되는 경로를 확인하세요.")
+            st.session_state.download_initiated = False # 메시지를 한 번만 표시하고 초기화
 
 
 # 사이드바
@@ -363,7 +368,7 @@ with st.sidebar:
     4. **미리 보기** 버튼으로 결과를 확인하세요
     5. **QR 코드 생성** 버튼으로 최종 파일을 다운로드하세요
     """)
-    st.markdown("""---------------------------------------------------""")
+    st.markdown("""---""")
     st.header("💡 용도별 QR 코드 생성 팁")
     st.markdown("""
     - **텍스트**: `QR 코드로 생성할 텍스트를 입력합니다`
@@ -373,7 +378,7 @@ with st.sidebar:
     - **SMS**: `sms:010-1234-5678`
     - **WiFi**: `WIFI:T:WPA;S:네트워크명(SSID);P:비밀번호;H:false;;`
     """)
-    st.markdown("""---------------------------------------------------""")
+    st.markdown("""---""")
     st.header("⚙️ 설정 가이드")
     st.markdown("""
     **오류 보정 레벨:**
