@@ -333,8 +333,8 @@ with col2:
 #        st.caption(f"📄 다운로드 파일명: `{download_filename}`")
         st.markdown(
             f'<p style="font-size:18px;">'
-            f'<span style="color:darkorange;">📄 다운로드 파일명:</span> '
-            f'<span style="color:blue; font-weight:bold;">{download_filename}</span>'
+            f'<span style="color:darkorange; font-weight:bold;">📄 다운로드 파일명: </span> '
+            f'<span style="color:mediumblue;"> {download_filename}</span>'
             f'</p>',
             unsafe_allow_html=True
         )
