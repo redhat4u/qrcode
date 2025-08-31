@@ -281,6 +281,7 @@ with col2:
 
     # 저장된 미리보기가 있는 경우
     if st.session_state.preview_image:
+        # current_data 정의 (미리보기 영역 밖에서도 사용할 수 있도록)
         current_data = qr_data.strip() if strip_option else qr_data
 
         # 입력 내용이 바뀌었으면 생성 상태 초기화
