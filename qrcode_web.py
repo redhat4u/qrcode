@@ -285,6 +285,7 @@ with col2:
         elif bg_color_choice == "<직접 선택>" and not custom_bg_color.strip():
             st.error("배경 색상을 직접 입력해 주세요.")
         else:
+            # QR 코드 생성 로직 (NameError 방지를 위해 수정)
             img, qr = generate_qr_code(
                 current_data, int(box_size), int(border), error_correction,
                 int(mask_pattern), pattern_color, bg_color
@@ -295,10 +296,21 @@ with col2:
                 img.save(img_buffer, format='PNG')
                 st.session_state.qr_image_bytes = img_buffer.getvalue()
                 st.session_state.qr_image = img
-                st.session_state.qr_info = qr_info_text
                 st.session_state.qr_generated = True
                 st.session_state.show_generate_success = True
-
+            
+                # ❗ NameError 방지를 위해 qr_info_text 할당 로직을 if 블록 안으로 이동
+                qr_info_text = f"""
+                **QR 코드 정보**
+                - QR 버전: {qr.version}
+                - 가로/세로 각 cell 개수: {qr.modules_count}개
+                - 이미지 크기: {img.size[0]} x {img.size[1]} px
+                - 패턴 색상: {pattern_color}
+                - 배경 색상: {bg_color}
+                - 이미지 크기 = (각 cell 개수 + 좌/우 여백 총 개수) × 1개의 사각 cell 크기
+                """
+                st.session_state.qr_info = qr_info_text
+    
     st.markdown("---")
 
     # 미리보기 이미지 및 정보 표시
@@ -307,7 +319,7 @@ with col2:
         st.image(st.session_state.preview_image, caption="생성된 QR 코드", width=380)
         st.info(st.session_state.preview_info)
     elif not current_data:
-        st.info("QR 코드 내용을 입력하시면 QR 코드를 미리 볼 수 있습니다.")
+        st.info("QR 코드 내용을 입력하시면 미리보기가 자동으로 나타납니다.")
 
     # 생성 성공 메시지 (고정)
     if st.session_state.show_generate_success:
@@ -363,7 +375,7 @@ with st.sidebar:
     3. **색상 설정**에서 패턴과 배경 색상을 선택하세요
     4. **QR 코드 생성** 버튼으로 최종 파일을 다운로드하세요
     """)
-    st.markdown("""---""")
+    st.markdown("---")
     st.header("💡 용도별 QR 코드 생성 팁")
     st.markdown("""
     - **텍스트**: `QR 코드로 생성할 텍스트를 입력합니다`
@@ -373,7 +385,7 @@ with st.sidebar:
     - **SMS**: `sms:010-1234-5678`
     - **WiFi**: `WIFI:T:WPA;S:네트워크명(SSID);P:비밀번호;H:false;;`
     """)
-    st.markdown("""---""")
+    st.markdown("---")
     st.header("⚙️ 설정 가이드")
     st.markdown("""
     **오류 보정 레벨:**
@@ -396,4 +408,3 @@ st.markdown(
     '<p style="text-align: center; color: darkorange; font-weight:bold; font-size: 18px;">© 2025 QR 코드 생성기  |  Streamlit으로 제작  |  제작: 류종훈(redhat4u@gmail.com)</p>',
     unsafe_allow_html=True
 )
-
