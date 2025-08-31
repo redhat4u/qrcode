@@ -223,9 +223,12 @@ with col1:
             unsafe_allow_html=True
         )
 
-    if st.button("❌ 삭제", use_container_width=True):
-        st.session_state["filename_input"] = ""   # ✅ 이렇게 수정
-        st.success("파일명이 삭제되었습니다.")
+        if st.button("❌ 삭제", use_container_width=True):
+            # key 자체를 삭제 → Streamlit이 다음 rerun에서 초기화된 값으로 만듦
+            if "filename_input" in st.session_state:
+                del st.session_state["filename_input"]
+            st.success("파일명이 삭제되었습니다.")
+            st.rerun()   # 즉시 rerun해서 입력창을 빈 값으로 갱신
 
     if "last_filename" not in st.session_state:
         st.session_state.last_filename = ""  # 처음엔 빈 문자열로 시작
