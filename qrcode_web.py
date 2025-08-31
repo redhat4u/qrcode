@@ -322,6 +322,7 @@ with col2:
             file_name=download_filename,
             mime="image/png",
             use_container_width=True
+            help="휴대폰에서는 Download 폴더에 저장됩니다."
         )
         st.caption(f"📄 다운로드 파일명: `{download_filename}`")
 
@@ -384,5 +385,3 @@ st.markdown(
     '<p style="text-align: center; color: darkorange; font-size: 16px;">© 2025 QR 코드 생성기  |  Streamlit으로 제작  |  제작: 류종훈(redhat4u@gmail.com)</p>',
     unsafe_allow_html=True
 )
-
-
