@@ -307,7 +307,7 @@ with col2:
         st.image(st.session_state.preview_image, caption="생성된 QR 코드", width=380)
         st.info(st.session_state.preview_info)
     elif not current_data:
-        st.info("QR 코드 내용을 입력하시면 미리보기가 자동으로 나타납니다.")
+        st.info("QR 코드 내용을 입력하시면 QR 코드를 미리 볼 수 있습니다.")
 
     # 생성 성공 메시지 (고정)
     if st.session_state.show_generate_success:
@@ -396,3 +396,4 @@ st.markdown(
     '<p style="text-align: center; color: darkorange; font-weight:bold; font-size: 18px;">© 2025 QR 코드 생성기  |  Streamlit으로 제작  |  제작: 류종훈(redhat4u@gmail.com)</p>',
     unsafe_allow_html=True
 )
+
