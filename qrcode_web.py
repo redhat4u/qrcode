@@ -265,15 +265,15 @@ with col1:
         "다운로드 파일명 입력 (확장자는 제외, 파일명만 입력)",
         placeholder="이 곳에 파일명을 입력해 주세요 (비어있으면 자동 생성됨)",
         key="filename_input",
-        value=st.session_state.get("filename_input", "")  # ⭐ 존재하지 않으면 ""로 초기화
+        value=st.session_state.get("filename_input", "")  # 존재하지 않으면 ""로 초기화
     )
     st.caption("파일명이 입력되지 않을 경우 자동으로 파일이 생성되며, 특수문자가 입력될 경우에는 '_' 문자로 자동치환 됩니다.")
 
-    # ⭐ 파일명 변경 감지용 상태 변수 초기화
+    # 파일명 변경 감지용 상태 변수 초기화
     if "last_filename" not in st.session_state:
         st.session_state.last_filename = ""  # 처음엔 빈 문자열로 시작
 
-    # ⭐ 파일명이 입력되거나 변경되었을 때만 메시지 표시
+    # QR 코드 생성 후, 파일명이 입력되거나 변경되었을 때만 메시지 표시
     if st.session_state.qr_generated:
         current_filename = st.session_state.get("filename_input", "").strip()
     
@@ -378,8 +378,11 @@ with col2:
             st.session_state.qr_image_bytes = None
             st.session_state.qr_image = None
             st.session_state.qr_info = None
-            st.session_state.filename_input = ""    # 파일명도 초기화
-            st.session_state.last_filename = ""     # 파일명 변경 메시지도 초기화
+
+            # ⭐ 파일명 초기화 시 키 존재 여부 확인 후 안전 처리
+            if "filename_input" in st.session_state:
+                st.session_state["filename_input"] = ""
+            st.session_state.last_filename = ""  # 파일명 변경 메시지도 초기화
 
         # 마지막 입력값을 갱신
         st.session_state.last_preview_data = current_data
