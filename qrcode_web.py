@@ -1,3 +1,15 @@
+"""
+QR 코드 생성 웹앱 - Streamlit 버전
+휴대폰에서도 사용 가능
+
+실행 방법:
+1. pip install streamlit qrcode[pil]
+2. streamlit run qrcode_web.py
+
+또는 온라인에서 실행:
+- Streamlit Cloud, Heroku, Replit 등에 배포 가능
+"""
+
 import streamlit as st
 import qrcode
 import io
@@ -366,11 +378,11 @@ with col2:
     elif not current_data:
         st.info("QR 코드 내용을 입력하시면 미리보기가 자동으로 나타납니다.")
     elif is_pattern_color_invalid_preview and is_bg_color_invalid_preview:
-        st.warning("⚠️ 패턴 색상 및 배경 색상을 직접 입력해 주세요. 미리보기를 위해 유효한 색상 값이 필요합니다.")
+        st.warning("⚠️ 패턴 및 배경 색상을 입력해 주세요. 미리보기를 위한 색상 값이 필요합니다.")
     elif is_pattern_color_invalid_preview:
-        st.warning("⚠️ 패턴 색상을 직접 입력해 주세요. 미리보기를 위해 유효한 색상 값이 필요합니다.")
+        st.warning("⚠️ 패턴 색상을 입력해 주세요. 미리보기를 위한 색상 값이 필요합니다.")
     elif is_bg_color_invalid_preview:
-        st.warning("⚠️ 배경 색상을 직접 입력해 주세요. 미리보기를 위해 유효한 색상 값이 필요합니다.")
+        st.warning("⚠️ 배경 색상을 입력해 주세요. 미리보기를 위한 색상 값이 필요합니다.")
     elif is_colors_same_preview:
         st.warning("⚠️ 패턴과 배경은 같은 색을 사용할 수 없습니다.")
 
@@ -451,7 +463,7 @@ with st.sidebar:
     - 0~7 중 선택 (같은 내용이라도 번호에 따라 패턴이 달라짐)
 
     **색상 입력:**
-    - **색상명**: red, blue, green, crimson, gold 등
+    - **색상명**: red, blue, green, purple 등
     - **HEX 코드**: #FF0000, #0000FF, #00FF00 등
     """)
 
@@ -461,3 +473,4 @@ st.markdown(
     '<p style="text-align: center; color: darkorange; font-weight:bold; font-size: 18px;">© 2025 QR 코드 생성기  |  Streamlit으로 제작  |  제작: 류종훈(redhat4u@gmail.com)</p>',
     unsafe_allow_html=True
 )
+# final 버전 - 모두 정상적으로 잘 동작함..
