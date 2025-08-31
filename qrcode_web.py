@@ -211,9 +211,8 @@ with col1:
     col_filename, col_filename_clear = st.columns([3, 1])
     
     with col_filename:
-        # 파일명 입력창 - key만 사용하고 value는 설정하지 않음
+        # 파일명 삭제 요청시 세션 상태에서 직접 삭제
         if st.session_state.clear_filename_requested:
-            # 파일명 삭제 요청시에만 세션 상태에서 직접 삭제
             if 'filename_input' in st.session_state:
                 del st.session_state.filename_input
             st.session_state.clear_filename_requested = False
@@ -226,9 +225,8 @@ with col1:
     
     with col_filename_clear:
         st.markdown("<br>", unsafe_allow_html=True)  # 입력창과 높이 맞추기
-        # 실제 입력창에 파일명이 있을 때만 삭제 버튼 활성화
-        current_filename_input = st.session_state.get("filename_input", "")
-        filename_delete_disabled = not current_filename_input.strip()
+        # filename 변수 (text_input의 현재 반환값)로 버튼 상태 결정
+        filename_delete_disabled = not filename.strip()
         if st.button("🗑️ 파일명 삭제", help="입력한 파일명을 삭제합니다", use_container_width=True, disabled=filename_delete_disabled):
             clear_filename()
             st.rerun()
