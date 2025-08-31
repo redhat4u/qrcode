@@ -88,15 +88,14 @@ def clear_text_input():
 
 # 파일명만 초기화하는 함수
 def clear_filename():
-    st.session_state.clear_filename_requested = True
+    st.session_state.filename_input = ""  # 직접 값을 빈 문자열로 설정
+    st.rerun()  # 즉시 화면 새로고침
 
 # 초기화 플래그 추가
 if 'clear_requested' not in st.session_state:
     st.session_state.clear_requested = False
-if 'clear_filename_requested' not in st.session_state:
-    st.session_state.clear_filename_requested = False
-if 'reset_filename' not in st.session_state:
-    st.session_state.reset_filename = False
+if 'last_filename' not in st.session_state:
+    st.session_state.last_filename = ""
 
 # 메인 앱 ============================================================================================
 
@@ -211,11 +210,9 @@ with col1:
     col_filename, col_filename_clear = st.columns([3, 1])
     
     with col_filename:
-        # 파일명 삭제 요청시 세션 상태에서 직접 삭제
-        if st.session_state.clear_filename_requested: 
-            if 'filename_input' in st.session_state:
-                del st.session_state.filename_input
-            st.session_state.clear_filename_requested = False
+        # filename_input 키가 없으면 빈 문자열로 초기화
+        if 'filename_input' not in st.session_state:
+            st.session_state.filename_input = ""
 
         filename = st.text_input(
             "다운로드 파일명 입력 (확장자는 제외, 파일명만 입력)",
@@ -225,24 +222,20 @@ with col1:
             
     with col_filename_clear:
         st.markdown("<br>", unsafe_allow_html=True)  # 입력창과 높이 맞추기
-        # filename 변수 (text_input의 현재 반환값)로 버튼 상태 결정
-        filename_delete_disabled = not filename.strip()
+        # 현재 세션 상태의 filename_input 값으로 버튼 상태 결정
+        current_filename_in_session = st.session_state.get('filename_input', '')
+        filename_delete_disabled = not current_filename_in_session.strip()
         if st.button("🗑️ 파일명 삭제", help="입력한 파일명을 삭제합니다", use_container_width=True, disabled=filename_delete_disabled):
             clear_filename()
-            st.rerun()
-    
-    # 파일명 변경 감지를 위한 별도 상태 관리
-    if "last_filename" not in st.session_state:
-        st.session_state.last_filename = ""
 
+    # 파일명 상태 메시지
     current_filename = filename.strip()
-
-    # 파일명 상태 메시지 (실제 파일명 변화만 감지)
+    
+    # 파일명 변경 감지 및 메시지 표시
     if current_filename and current_filename != st.session_state.last_filename:
         st.success("✅ 파일명이 입력되었습니다.")
         st.session_state.last_filename = current_filename
-    elif not current_filename and st.session_state.last_filename and st.session_state.clear_filename_requested:
-        # 파일명 삭제 버튼을 통해 실제로 삭제된 경우에만 메시지 표시
+    elif not current_filename and st.session_state.last_filename:
         st.info("✅ 파일명이 삭제되었습니다. 빈칸일 경우 자동 생성됩니다.")
         st.session_state.last_filename = ""
 
@@ -385,9 +378,7 @@ with col2:
             st.session_state.last_filename = ""
             # 입력창과 파일명 입력창 초기화
             st.session_state.clear_requested = True
-            st.session_state.clear_filename_requested = True
-            if 'filename_input' in st.session_state:
-                del st.session_state.filename_input
+            st.session_state.filename_input = ""  # 파일명도 직접 초기화
             st.rerun()
 
 # 사이드바
