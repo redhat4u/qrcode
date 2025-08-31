@@ -198,13 +198,20 @@ with col1:
     bg_color = custom_bg_color if bg_color_choice == "<직접 선택>" and custom_bg_color else bg_color_choice
     
     st.markdown("---")
+
     st.subheader("🔧 파일 설정")
     
-    filename = st.text_input(
-        "다운로드 파일명 입력 (확장자는 제외, 파일명만 입력)",
-        placeholder="이 곳에 파일명을 입력해 주세요 (비어있으면 자동 생성됨)",
-        key="filename_input"
-    )
+    col_filename1, col_filename2 = st.columns([3,1])
+    with col_filename1:
+        filename = st.text_input(
+            "다운로드 파일명 입력 (확장자는 제외, 파일명만 입력)",
+            placeholder="이 곳에 파일명을 입력해 주세요 (비어있으면 자동 생성됨)",
+            key="filename_input"
+        )
+    with col_filename2:
+        if st.button("❌ 삭제", use_container_width=True):
+            st.session_state.filename_input = ""
+            st.success("✅ 파일명이 삭제되었습니다.")
 
     if "last_filename" not in st.session_state:
         st.session_state.last_filename = ""  # 처음엔 빈 문자열로 시작
@@ -216,7 +223,7 @@ with col1:
         st.session_state.last_filename = current_filename
     elif not current_filename and st.session_state.last_filename:
         # 파일명을 지웠을 때
-        st.info("📝 파일명을 입력하지 않았습니다. 기본 설정 값으로 자동 생성됩니다.")
+        st.info("✅ 파일명이 입력되지 않았습니다. 설정된 값으로 자동 생성됩니다.")
         st.session_state.last_filename = ""
 
 with col2:
