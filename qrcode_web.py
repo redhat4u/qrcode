@@ -319,11 +319,19 @@ with col2:
         st.caption(f"📄 다운로드 파일명: `{download_filename}`")
 
         if st.button("🔄 새 QR 코드 생성", use_container_width=True):
+            # 모든 상태와 입력창 초기화
             st.session_state.qr_generated = False
             st.session_state.qr_image_bytes = None
             st.session_state.qr_image = None
             st.session_state.qr_info = None
-            # 새 QR 코드 생성 시에는 파일명 유지
+            st.session_state.preview_image = None
+            st.session_state.preview_info = None
+            st.session_state.last_preview_data = ""
+            st.session_state.last_filename = ""
+            # 입력창과 파일명 입력창 초기화
+            st.session_state.clear_requested = True
+            if 'filename_input' in st.session_state:
+                del st.session_state.filename_input
             st.rerun()
 
 # 사이드바
