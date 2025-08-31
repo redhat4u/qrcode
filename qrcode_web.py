@@ -362,7 +362,7 @@ with col2:
         )
 
         if st.session_state.download_initiated:
-            st.success("✅ 파일을 다운로드 합니다! 파일이 저장되는 경로를 확인하세요.")
+            st.success("✅ 파일을 다운로드 합니다! 휴대폰은 'Download' 폴더에 저장됩니다.")
             st.session_state.download_initiated = False
 
 
@@ -409,6 +409,7 @@ st.markdown(
     unsafe_allow_html=True
 )
 # 최종버전
+
 
 
 
