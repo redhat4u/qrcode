@@ -201,20 +201,24 @@ with col1:
 
     st.subheader("🔧 파일 설정")
     
-    col_filename1, col_filename2 = st.columns([4,1])
+    col_label1, col_label2 = st.columns([3,1])
 
-    with col_filename1:
-        filename = st.text_input(
-            "다운로드 파일명 입력 (확장자는 제외)",   # 라벨을 입력칸에 직접 넣기
-            placeholder="이 곳에 파일명을 입력해 주세요 (비어있으면 자동 생성됨)",
-            key="filename_input"
-        )
+    with col_label1:
+        st.write("다운로드 파일명 입력 (확장자는 제외)")
+    with col_label2:
+        # ↓ spacer: 아래 숫자(px)를 조절해서 입력창과 정확히 맞춰주세요.
+        st.markdown("<div style='height:38px;'></div>", unsafe_allow_html=True)
 
-    with col_filename2:
-        st.markdown("<div style='margin-top: 1.9rem;'></div>", unsafe_allow_html=True)  # 입력창과 높이 맞춤
-        if st.button("❌ 삭제", use_container_width=True):
+        # 키를 지정하면 Streamlit에서 중복 이벤트를 피할 수 있습니다.
+        if st.button("❌ 삭제", use_container_width=True, key="del_filename"):
             st.session_state.filename_input = ""
             st.success("파일명이 삭제되었습니다.")
+
+    filename = st.text_input(
+        "",
+        placeholder="이 곳에 파일명을 입력해 주세요 (비어있으면 자동 생성됨)",
+        key="filename_input"
+    )
 
     if "last_filename" not in st.session_state:
         st.session_state.last_filename = ""  # 처음엔 빈 문자열로 시작
