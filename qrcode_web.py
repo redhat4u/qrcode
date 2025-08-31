@@ -225,7 +225,7 @@ with col1:
     
     with col_filename_clear:
         st.markdown("<br>", unsafe_allow_html=True)  # 입력창과 높이 맞추기
-        if st.button("🗑️", help="파일명 삭제", use_container_width=True):
+        if st.button("🗑️ 파일명 삭제", help="파일명 삭제", use_container_width=True):
             clear_filename()
             st.rerun()
     
