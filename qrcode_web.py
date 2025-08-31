@@ -75,9 +75,8 @@ if 'preview_info' not in st.session_state:
 if 'last_preview_data' not in st.session_state:
     st.session_state.last_preview_data = ""
 
-# 텍스트 영역 초기화를 위한 함수
+# 텍스트 영역 초기화를 위한 함수 (파일명은 건드리지 않음)
 def clear_text_input():
-    # 위젯의 키를 직접 조작하는 대신 초기화 플래그 사용
     st.session_state.clear_requested = True
     st.session_state.qr_generated = False
     st.session_state.qr_image_bytes = None
@@ -86,9 +85,8 @@ def clear_text_input():
     st.session_state.preview_image = None
     st.session_state.preview_info = None
     st.session_state.last_preview_data = ""
-    # 파일명은 유지 - last_filename 초기화 제거
 
-# 파일명 초기화 함수 추가
+# 파일명만 초기화하는 함수
 def clear_filename():
     st.session_state.clear_filename_requested = True
     if 'filename_input' in st.session_state:
@@ -237,18 +235,18 @@ with col1:
     if st.session_state.clear_filename_requested:
         st.session_state.clear_filename_requested = False
 
+    # 파일명 변경 감지를 위한 별도 상태 관리
     if "last_filename" not in st.session_state:
-        st.session_state.last_filename = ""  # 처음엔 빈 문자열로 시작
+        st.session_state.last_filename = ""
 
-    # 파일명 변경 메시지 - QR 생성 여부와 상관없이 표시
     current_filename = filename.strip()
 
-    # 파일명 상태 관리 - QR 내용 삭제와 독립적으로 동작
+    # 파일명 상태 메시지 (QR 내용 삭제와 완전히 독립적)
     if current_filename and current_filename != st.session_state.last_filename:
         st.success("✅ 파일명이 입력되었습니다.")
         st.session_state.last_filename = current_filename
-    elif not current_filename and st.session_state.last_filename and not st.session_state.clear_requested:
-        # QR 내용 삭제가 아닌 경우에만 파일명 삭제 메시지 표시
+    elif not current_filename and st.session_state.last_filename:
+        # 파일명이 실제로 삭제된 경우에만 메시지 표시
         st.info("✅ 파일명이 삭제되었습니다. 빈칸일 경우 자동 생성됩니다.")
         st.session_state.last_filename = ""
 
