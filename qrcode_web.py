@@ -85,8 +85,6 @@ def clear_text_input():
     st.session_state.preview_image = None
     st.session_state.preview_info = None
     st.session_state.last_preview_data = ""
-    # 입력 내용 삭제 버튼을 눌렀을 때만 파일명도 초기화
-    st.session_state.reset_filename = True
 
 # 초기화 플래그 추가
 if 'clear_requested' not in st.session_state:
@@ -200,21 +198,10 @@ with col1:
     st.markdown("---")
     st.subheader("🔧 파일 설정")
     
-    # 파일명 초기화 플래그
-    if "reset_filename" not in st.session_state:
-        st.session_state.reset_filename = False
-    if "filename_counter" not in st.session_state:
-        st.session_state.filename_counter = 0
-
-    # 파일명 초기화가 필요한 경우 key를 변경해서 위젯을 새로 생성
-    if st.session_state.reset_filename:
-        st.session_state.filename_counter += 1
-        st.session_state.reset_filename = False
-
     filename = st.text_input(
         "다운로드 파일명 입력 (확장자는 제외, 파일명만 입력)",
         placeholder="이 곳에 파일명을 입력해 주세요 (비어있으면 자동 생성됨)",
-        key=f"filename_input_{st.session_state.filename_counter}"
+        key="filename_input"
     )
 
     if "last_filename" not in st.session_state:
@@ -232,7 +219,7 @@ with col2:
     # 현재 입력된 데이터 처리
     current_data = qr_data.strip() if strip_option else qr_data
     
-    # 입력 내용이 변경되었을 때 상태 초기화
+    # 입력 내용이 변경되었을 때 상태 초기화 (파일명은 유지)
     if 'last_preview_data' in st.session_state and current_data != st.session_state.last_preview_data:
         st.session_state.qr_generated = False
         st.session_state.qr_image_bytes = None
@@ -240,8 +227,6 @@ with col2:
         st.session_state.qr_info = None
         st.session_state.preview_image = None
         st.session_state.preview_info = None
-        # 입력 내용이 변경될 때만 파일명 초기화
-        st.session_state.reset_filename = True
         st.session_state.last_filename = ""
     
     # 생성 완료 메시지 표시
