@@ -321,8 +321,8 @@ with col2:
             data=st.session_state.qr_image_bytes,
             file_name=download_filename,
             mime="image/png",
-            use_container_width=True
-            help="휴대폰에서는 Download 폴더에 저장됩니다."
+            use_container_width=True,
+            help="휴대폰에서는 Download 폴더에 저장됩니다.",
         )
         st.caption(f"📄 다운로드 파일명: `{download_filename}`")
 
