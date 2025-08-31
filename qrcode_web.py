@@ -75,9 +75,11 @@ if 'preview_info' not in st.session_state:
 if 'last_preview_data' not in st.session_state:
     st.session_state.last_preview_data = ""
 
-# QR 내용만 초기화하는 함수
+# QR 내용만 초기화하는 함수 (파일명은 유지)
 def clear_text_input():
-    # 파일명과 관련된 어떤 상태도 건드리지 않음
+    # 파일명 백업
+    current_filename = st.session_state.get("filename_input", "")
+    
     st.session_state.clear_requested = True
     st.session_state.qr_generated = False
     st.session_state.qr_image_bytes = None
@@ -86,6 +88,10 @@ def clear_text_input():
     st.session_state.preview_image = None
     st.session_state.preview_info = None
     st.session_state.last_preview_data = ""
+    
+    # 파일명 복원
+    if current_filename:
+        st.session_state.filename_input = current_filename
 
 # 파일명만 초기화하는 함수
 def clear_filename():
@@ -145,11 +151,8 @@ with col1:
     col_clear1, col_clear2, col_clear3 = st.columns([1, 1, 1])
     with col_clear2:
         delete_btn_disabled = (char_count == 0)
-        if st.button("🗑️ 입력 내용 삭제", help="입력한 내용을 전부 삭제합니다", use_container_width=True, type="secondary", disabled=delete_btn_disabled):
-            # 현재 파일명을 백업
-            if 'filename_input' in st.session_state:
-                st.session_state.filename_backup = st.session_state.filename_input
-            clear_text_input()
+        if st.button("🗑️ 입력 내용 삭제", help="입력한 내용을 전부 삭제합니다 (파일명은 유지)", use_container_width=True, type="secondary", disabled=delete_btn_disabled):
+            clear_text_input()  # 파일명은 유지하고 QR 내용만 삭제
             st.rerun()
     
     # 공백/줄바꿈 제거 옵션
@@ -235,13 +238,8 @@ with col1:
         filename_delete_disabled = not filename.strip()
         if st.button("🗑️ 파일명 삭제", help="입력한 파일명을 삭제합니다", use_container_width=True, disabled=filename_delete_disabled):
             clear_filename()
-            # 파일명 백업도 삭제
-            if 'filename_backup' in st.session_state:
-                del st.session_state.filename_backup
             st.rerun()
     
-    # 파일명 초기화 플래그 리셋은 위에서 처리됨
-
     # 파일명 변경 감지를 위한 별도 상태 관리
     if "last_filename" not in st.session_state:
         st.session_state.last_filename = ""
@@ -341,8 +339,6 @@ with col2:
         current_data != "" and
         not generate_btn):  # 생성 버튼을 클릭한 직후가 아닐 때만
         st.success("✅ 파일을 다운로드 합니다! 파일이 저장되는 경로를 확인하세요.")
-#    elif not st.session_state.qr_generated:
-#        st.caption("[⚡ QR 코드 생성] 버튼을 클릭하면 QR 코드가 생성되고, [📥 QR 코드 다운로드] 버튼이 활성화됩니다.")
 
     # 다운로드 섹션 - QR 코드가 생성되었을 때만 표시
     if (st.session_state.qr_generated and
@@ -374,7 +370,6 @@ with col2:
             help="PC는 'Download' 폴더, 휴대폰은 'Download' 폴더에 저장됩니다.",
         )
 
-#        st.caption(f"📄 다운로드 파일명: `{download_filename}`")
         st.markdown(
             f'<p style="font-size:18px;">'
             f'<span style="color:darkorange; font-weight:bold;">📄 다운로드 파일명: </span> '
@@ -388,7 +383,7 @@ with col2:
             use_container_width=True,
             help="이 버튼을 누르면 현재 입력된 모든 내용이 초기화 됩니다.",
         ):
-            # 모든 상태와 입력창 초기화
+            # 모든 상태와 입력창 초기화 (파일명 포함)
             st.session_state.qr_generated = False
             st.session_state.qr_image_bytes = None
             st.session_state.qr_image = None
