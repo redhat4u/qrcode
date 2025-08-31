@@ -319,14 +319,6 @@ with col2:
         st.image(st.session_state.preview_image, caption="생성된 QR 코드", width=380)
         st.info(st.session_state.preview_info)
 
-    # 생성 완료 메시지 표시 (다운로드 버튼 클릭시)
-    if (st.session_state.qr_generated and
-        st.session_state.qr_image is not None and
-        current_data == st.session_state.last_preview_data and
-        current_data != "" and
-        not generate_btn):  # 생성 버튼을 클릭한 직후가 아닐 때만
-        st.success("✅ 파일을 다운로드 합니다! 파일이 저장되는 경로를 확인하세요.")
-
     # 다운로드 섹션 - QR 코드가 생성되었을 때만 표시
     if (st.session_state.qr_generated and
         st.session_state.qr_image_bytes is not None and
@@ -364,6 +356,14 @@ with col2:
             f'</p>',
             unsafe_allow_html=True
         )
+
+        # 생성 완료 메시지 표시 (다운로드 버튼 클릭시)
+        if (st.session_state.qr_generated and
+            st.session_state.qr_image is not None and
+            current_data == st.session_state.last_preview_data and
+            current_data != "" and
+            not generate_btn):  # 생성 버튼을 클릭한 직후가 아닐 때만
+            st.success("✅ 파일을 다운로드 합니다! 파일이 저장되는 경로를 확인하세요.")
 
 
 # 파일명 입력창의 clear_all_requested 플래그 처리 (QR 입력창과 분리)
@@ -415,4 +415,3 @@ st.markdown(
     unsafe_allow_html=True
 )
 # 최신버전..
-
