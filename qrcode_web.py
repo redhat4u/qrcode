@@ -210,7 +210,7 @@ with col1:
     st.subheader("🔧 파일 설정")
     
     # 파일명 입력창과 삭제 버튼을 함께 배치
-    col_filename, col_filename_clear = st.columns([4, 1])
+    col_filename, col_filename_clear = st.columns([3, 1])
     
     with col_filename:
         # 파일명 초기화 요청이 있으면 빈 값으로 시작
@@ -427,3 +427,4 @@ st.markdown(
     '<p style="text-align: center; color: darkorange; font-size: 16px;">© 2025 QR 코드 생성기  |  Streamlit으로 제작  |  제작: 류종훈(redhat4u@gmail.com)</p>',
     unsafe_allow_html=True
 )
+
