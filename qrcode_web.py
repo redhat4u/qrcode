@@ -377,7 +377,11 @@ with col2:
             unsafe_allow_html=True
         )
 
-        if st.button("🔄 새 QR 코드 생성", use_container_width=True):
+        if st.button(
+            label="🔄 새 QR 코드 생성",
+            use_container_width=True,
+            help="이 버튼을 누르면 현재 입력된 모든 내용이 초기화 됩니다.",
+        ):
             # 모든 상태와 입력창 초기화
             st.session_state.qr_generated = False
             st.session_state.qr_image_bytes = None
