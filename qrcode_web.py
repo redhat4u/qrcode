@@ -240,11 +240,11 @@ with col1:
     current_filename = filename.strip()
 
     if current_filename and current_filename != st.session_state.last_filename:
-        st.success("✅ 파일명이 변경되었습니다.")
+        st.success("✅ 파일명이 입력되었습니다.")
         st.session_state.last_filename = current_filename
     elif not current_filename and st.session_state.last_filename:
         # 파일명을 지웠을 때
-        st.info("✅ 파일명이 입력되지 않았습니다. 설정된 값으로 자동 생성됩니다.")
+        st.info("✅ 파일명을 삭제하였습니다. 설정된 값으로 자동 생성됩니다.")
         st.session_state.last_filename = ""
 
 with col2:
