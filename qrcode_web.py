@@ -1,16 +1,3 @@
-"""
-QR 코드 생성 웹앱 - Streamlit 버전
-휴대폰에서도 사용 가능
-
-로컬 실행 방법:
-1. pip install streamlit qrcode[pil]
-2. streamlit run qrcode_web.py
-
-또는 온라인에서 실행:
-- Streamlit Cloud, Heroku, Replit 등에 배포 가능
-"""
-
-
 import streamlit as st
 import qrcode
 import io
@@ -74,6 +61,10 @@ if 'preview_info' not in st.session_state:
     st.session_state.preview_info = None
 if 'last_preview_data' not in st.session_state:
     st.session_state.last_preview_data = ""
+if 'last_filename_state' not in st.session_state:
+    st.session_state.last_filename_state = ""
+if 'filename_message' not in st.session_state:
+    st.session_state.filename_message = ""
 
 # QR 내용만 초기화하는 콜백 함수 (파일명은 유지)
 def clear_text_input():
@@ -89,14 +80,9 @@ def clear_text_input():
 # 파일명 초기화 콜백 함수
 def clear_filename_callback():
     st.session_state.filename_input = ""
-    st.session_state.last_filename = ""
+    st.session_state.filename_message = "deleted"
+    st.session_state.last_filename_state = ""
 
-
-# 초기화 플래그 추가
-if 'clear_qr_requested' not in st.session_state:
-    st.session_state.clear_qr_requested = False
-if 'last_filename' not in st.session_state:
-    st.session_state.last_filename = ""
 
 # 메인 앱 ============================================================================================
 
@@ -231,12 +217,17 @@ with col1:
     # 파일명 상태 메시지 - 실제 변경사항만 반영
     current_filename = filename.strip()
 
-    # 파일명 변경 감지 및 메시지 표시
-    if current_filename and current_filename != st.session_state.last_filename:
+    # 파일명 변경 감지 및 메시지 표시 로직 수정
+    if st.session_state.filename_message == "deleted":
+        st.success("✅ 파일명이 삭제되었습니다. 입력되지 않으면 자동으로 생성됩니다.")
+        st.session_state.filename_message = ""
+        st.session_state.last_filename_state = ""
+    elif current_filename and current_filename != st.session_state.last_filename_state:
         st.success("✅ 파일명이 변경되었습니다.")
-        st.session_state.last_filename = current_filename
-    elif not current_filename and st.session_state.last_filename:
-        st.session_state.last_filename = ""
+        st.session_state.last_filename_state = current_filename
+    elif not current_filename and st.session_state.last_filename_state:
+        st.session_state.last_filename_state = ""
+        st.session_state.filename_message = ""
 
 with col2:
     st.header("👀 미리보기 및 생성")
