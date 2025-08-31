@@ -91,6 +91,7 @@ def clear_text_input():
 
 # 모든 입력창 초기화하는 함수
 def clear_all_inputs():
+    # QR 관련 상태만 초기화하고, 파일명은 별도로 처리
     st.session_state.clear_all_requested = True
     st.session_state.clear_qr_requested = False  # QR만 삭제 플래그는 해제
     st.session_state.qr_generated = False
@@ -101,6 +102,8 @@ def clear_all_inputs():
     st.session_state.preview_info = None
     st.session_state.last_preview_data = ""
     st.session_state.last_filename = ""
+    # 파일명도 직접 초기화
+    st.session_state.filename_input = ""
 
 # 초기화 플래그 추가
 if 'clear_qr_requested' not in st.session_state:
@@ -221,30 +224,22 @@ with col1:
 
     st.subheader("🔧 파일 설정")
     
-    # 파일명 입력창 - QR 삭제와 완전히 분리
-    filename_default_value = st.session_state.get("filename_input", "")
-    
-    # 오직 전체 초기화(새 QR 코드 생성)일 때만 파일명 초기화
-    if st.session_state.clear_all_requested:
-        filename_default_value = ""
-
+    # 파일명 입력창 - QR 삭제와 완전히 독립적으로 처리
+    # QR 내용 삭제와는 전혀 무관하게 파일명 유지
     filename = st.text_input(
         "다운로드 파일명 입력 (확장자는 제외, 파일명만 입력)",
         placeholder="이 곳에 파일명을 입력해 주세요 (비어있으면 자동 생성됨)",
-        value=filename_default_value,
         key="filename_input"
     )
 
-    # 파일명 상태 메시지 - QR 내용 삭제와 무관하게 처리
+    # 파일명 상태 메시지 - 실제 변경사항만 반영
     current_filename = filename.strip()
     
     # 파일명 변경 감지 및 메시지 표시
     if current_filename and current_filename != st.session_state.last_filename:
         st.success("✅ 파일명이 입력되었습니다.")
         st.session_state.last_filename = current_filename
-    elif not current_filename and st.session_state.last_filename and st.session_state.clear_all_requested:
-        # 오직 "새 QR 코드 생성" 버튼을 통해서만 파일명 삭제 메시지 표시
-        st.info("✅ 파일명이 삭제되었습니다. 빈칸일 경우 자동 생성됩니다.")
+    elif not current_filename and st.session_state.last_filename:
         st.session_state.last_filename = ""
 
 with col2:
