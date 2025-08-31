@@ -87,29 +87,15 @@ def clear_text_input():
     st.session_state.preview_info = None
     st.session_state.last_preview_data = ""
 
-# 파일명만 초기화하는 함수 (삭제됨)
-
-# 모든 입력창 초기화하는 함수
-def clear_all_inputs():
-    # QR 관련 상태만 초기화하고, 파일명은 별도로 처리
-    st.session_state.clear_all_requested = True
-    st.session_state.clear_qr_requested = False  # QR만 삭제 플래그는 해제
-    st.session_state.qr_generated = False
-    st.session_state.qr_image_bytes = None
-    st.session_state.qr_image = None
-    st.session_state.qr_info = None
-    st.session_state.preview_image = None
-    st.session_state.preview_info = None
-    st.session_state.last_preview_data = ""
-    st.session_state.last_filename = ""
-    # 파일명도 직접 초기화
+# 파일명 초기화 콜백 함수
+def clear_filename_callback():
     st.session_state.filename_input = ""
+    st.session_state.last_filename = ""
+
 
 # 초기화 플래그 추가
 if 'clear_qr_requested' not in st.session_state:
     st.session_state.clear_qr_requested = False
-if 'clear_all_requested' not in st.session_state:
-    st.session_state.clear_all_requested = False
 if 'last_filename' not in st.session_state:
     st.session_state.last_filename = ""
 
@@ -133,9 +119,6 @@ with col1:
     if st.session_state.clear_qr_requested:
         qr_default_value = ""
         st.session_state.clear_qr_requested = False
-    elif st.session_state.clear_all_requested:
-        qr_default_value = ""
-        # clear_all_requested는 파일명 처리 후에 해제됨
     
     qr_data = st.text_area(
         "QR 코드로 생성할 내용을 입력해 주세요",
@@ -239,10 +222,14 @@ with col1:
         st.markdown('<div style="margin-top: 28px;"></div>', unsafe_allow_html=True)
         # 파일명 입력창이 비어있으면 삭제 버튼 비활성화
         filename_delete_disabled = not st.session_state.get("filename_input", "")
-        if st.button("🗑️ 파일명 삭제", help="입력한 파일명을 삭제합니다", use_container_width=True, type="secondary", disabled=filename_delete_disabled):
-            st.session_state.filename_input = ""
-            st.session_state.last_filename = ""
-            st.rerun()
+        st.button(
+            "🗑️ 파일명 삭제",
+            help="입력한 파일명을 삭제합니다",
+            use_container_width=True,
+            type="secondary",
+            disabled=filename_delete_disabled,
+            on_click=clear_filename_callback  # on_click 콜백 사용
+        )
 
     # 파일명 상태 메시지 - 실제 변경사항만 반영
     current_filename = filename.strip()
@@ -376,11 +363,6 @@ with col2:
             current_data != "" and
             not generate_btn):  # 생성 버튼을 클릭한 직후가 아닐 때만
             st.success("✅ 파일을 다운로드 합니다! 파일이 저장되는 경로를 확인하세요.")
-
-
-# 파일명 입력창의 clear_all_requested 플래그 처리 (QR 입력창과 분리)
-if st.session_state.clear_all_requested:
-    st.session_state.clear_all_requested = False  # 플래그 해제
 
 
 # 사이드바
