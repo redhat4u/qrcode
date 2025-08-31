@@ -294,7 +294,7 @@ with col2:
         not generate_btn):  # 생성 버튼을 클릭한 직후가 아닐 때만
         st.success("✅ QR 코드 생성 완료! 필요시 파일명을 변경하고 다운로드하세요.")
     elif not st.session_state.qr_generated:
-        st.caption("[⚡ QR 코드 생성] 버튼을 클릭하면, QR 코드가 생성되고 [📥 QR 코드 다운로드] 버튼이 활성화됩니다.")
+        st.caption("[⚡ QR 코드 생성] 버튼을 클릭하면 QR 코드가 생성되고, [📥 QR 코드 다운로드] 버튼이 활성화됩니다.")
 
     # 다운로드 섹션 - QR 코드가 생성되었을 때만 표시
     if (st.session_state.qr_generated and 
@@ -384,3 +384,4 @@ st.markdown(
     '<p style="text-align: center; color: darkorange; font-size: 16px;">© 2025 QR 코드 생성기  |  Streamlit으로 제작  |  제작: 류종훈(redhat4u@gmail.com)</p>',
     unsafe_allow_html=True
 )
+
