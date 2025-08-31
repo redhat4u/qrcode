@@ -77,9 +77,6 @@ if 'last_preview_data' not in st.session_state:
 
 # QR 내용만 초기화하는 함수 (파일명은 유지)
 def clear_text_input():
-    # 파일명 백업
-    current_filename = st.session_state.get("filename_input", "")
-    
     st.session_state.clear_requested = True
     st.session_state.qr_generated = False
     st.session_state.qr_image_bytes = None
@@ -88,10 +85,6 @@ def clear_text_input():
     st.session_state.preview_image = None
     st.session_state.preview_info = None
     st.session_state.last_preview_data = ""
-    
-    # 파일명 복원
-    if current_filename:
-        st.session_state.filename_input = current_filename
 
 # 파일명만 초기화하는 함수
 def clear_filename():
@@ -218,17 +211,16 @@ with col1:
     col_filename, col_filename_clear = st.columns([3, 1])
     
     with col_filename:
-        # 파일명 입력창 - 삭제 요청 시에만 빈 값으로 초기화
+        # 파일명 입력창 - key만 사용하고 value는 설정하지 않음
         if st.session_state.clear_filename_requested:
-            filename_value = ""
+            # 파일명 삭제 요청시에만 세션 상태에서 직접 삭제
+            if 'filename_input' in st.session_state:
+                del st.session_state.filename_input
             st.session_state.clear_filename_requested = False
-        else:
-            filename_value = st.session_state.get("filename_input", "")
         
         filename = st.text_input(
             "다운로드 파일명 입력 (확장자는 제외, 파일명만 입력)",
             placeholder="이 곳에 파일명을 입력해 주세요 (비어있으면 자동 생성됨)",
-            value=filename_value,
             key="filename_input"
         )
     
