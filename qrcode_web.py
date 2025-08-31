@@ -228,15 +228,6 @@ with col2:
         st.session_state.preview_image = None
         st.session_state.preview_info = None
         st.session_state.last_filename = ""
-    
-    # 생성 완료 메시지 표시
-    if (st.session_state.qr_generated and 
-        st.session_state.qr_image is not None and 
-        current_data == st.session_state.last_preview_data and
-        current_data != ""):
-        st.success("✅ QR 코드 생성 완료! 필요시 파일명을 변경하고 다운로드하세요.")
-    else:
-        st.caption("[QR 코드 생성 버튼]을 클릭하면, QR 코드가 생성되고 다운로드 버튼이 활성화됩니다.")
 
     col2_1, col2_2 = st.columns(2)
     with col2_1:
@@ -282,12 +273,24 @@ with col2:
                     st.session_state.qr_image = img
                     st.session_state.qr_info = qr_info_text
                     st.session_state.qr_generated = True
+                    # 생성 직후 즉시 성공 메시지 표시
+                    st.success("✅ QR 코드 생성 완료! 필요시 파일명을 변경하고 다운로드하세요.")
 
     # 저장된 미리보기가 있고 입력 내용이 같을 때만 표시
     if st.session_state.preview_image and current_data == st.session_state.last_preview_data:
         st.subheader("📱 QR 코드 미리보기")
         st.image(st.session_state.preview_image, caption="생성된 QR 코드", width=600)
         st.info(st.session_state.preview_info)
+
+    # 생성 완료 메시지 표시 (생성 버튼 클릭 직후가 아닐 때)
+    if (st.session_state.qr_generated and 
+        st.session_state.qr_image is not None and 
+        current_data == st.session_state.last_preview_data and
+        current_data != "" and
+        not generate_btn):  # 생성 버튼을 클릭한 직후가 아닐 때만
+        st.success("✅ QR 코드 생성 완료! 필요시 파일명을 변경하고 다운로드하세요.")
+    elif not st.session_state.qr_generated:
+        st.caption("[QR 코드 생성 버튼]을 클릭하면, QR 코드가 생성되고 다운로드 버튼이 활성화됩니다.")
 
     # 다운로드 섹션 - QR 코드가 생성되었을 때만 표시
     if (st.session_state.qr_generated and 
