@@ -212,17 +212,17 @@ with col1:
     col_filename, col_filename_clear = st.columns([3, 1])
     
     with col_filename:
-        # 파일명은 QR 내용 삭제와 완전히 독립적으로 관리
+        # 파일명 입력창 - value 속성으로 상태 유지
         if st.session_state.clear_filename_requested:
-            filename_default = ""
+            filename_value = ""
             st.session_state.clear_filename_requested = False
         else:
-            filename_default = st.session_state.get("filename_input", "")
+            filename_value = st.session_state.get("filename_input", "")
         
         filename = st.text_input(
             "다운로드 파일명 입력 (확장자는 제외, 파일명만 입력)",
             placeholder="이 곳에 파일명을 입력해 주세요 (비어있으면 자동 생성됨)",
-            value=filename_default,
+            value=filename_value,
             key="filename_input"
         )
     
