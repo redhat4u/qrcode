@@ -146,7 +146,7 @@ with col1:
     # 입력 내용 삭제 버튼
     col_clear1, col_clear2, col_clear3 = st.columns([1, 1, 1])
     with col_clear2:
-        if st.button("🗑️ 입력 내용 삭제", use_container_width=True, type="secondary"):
+        if st.button("🗑️ 입력 내용 삭제", help="입력한 내용을 전부 삭제합니다", use_container_width=True, type="secondary"):
             clear_text_input()
             st.rerun()
     
@@ -225,7 +225,7 @@ with col1:
     
     with col_filename_clear:
         st.markdown("<br>", unsafe_allow_html=True)  # 입력창과 높이 맞추기
-        if st.button("🗑️ 파일명 삭제", help="파일명 삭제", use_container_width=True):
+        if st.button("🗑️ 파일명 삭제", help="입력한 파일명을 삭제합니다", use_container_width=True):
             clear_filename()
             st.rerun()
     
@@ -427,4 +427,3 @@ st.markdown(
     '<p style="text-align: center; color: darkorange; font-weight:bold; font-size: 18px;">© 2025 QR 코드 생성기  |  Streamlit으로 제작  |  제작: 류종훈(redhat4u@gmail.com)</p>',
     unsafe_allow_html=True
 )
-
