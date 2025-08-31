@@ -207,11 +207,15 @@ with col1:
     if "last_filename" not in st.session_state:
         st.session_state.last_filename = ""  # 처음엔 빈 문자열로 시작
 
-    if st.session_state.qr_generated:
-        current_filename = filename.strip()
-        if current_filename and current_filename != st.session_state.last_filename:
-            st.success("✅ 파일명이 변경되었습니다. 화면 아래의 [QR 코드 다운로드] 버튼을 클릭하세요.")
-            st.session_state.last_filename = current_filename
+    # 파일명 변경 메시지 - QR 생성 여부와 상관없이 표시
+    current_filename = filename.strip()
+    if current_filename and current_filename != st.session_state.last_filename:
+        st.success("✅ 파일명이 변경되었습니다. QR 코드 생성 후 다운로드 버튼을 클릭하세요.")
+        st.session_state.last_filename = current_filename
+    elif not current_filename and st.session_state.last_filename:
+        # 파일명을 지웠을 때
+        st.info("📝 파일명이 비어있습니다. 다운로드 시 자동으로 생성됩니다.")
+        st.session_state.last_filename = ""
 
 with col2:
     st.header("👀 미리보기 및 생성")
