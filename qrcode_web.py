@@ -146,11 +146,9 @@ with col1:
     with col_clear2:
         delete_btn_disabled = (char_count == 0)
         if st.button("🗑️ 입력 내용 삭제", help="입력한 내용을 전부 삭제합니다", use_container_width=True, type="secondary", disabled=delete_btn_disabled):
-            # 파일명 상태를 미리 백업
-            current_filename_backup = st.session_state.get("filename_input", "")
+            # 즉시 입력창 상태 삭제
+            st.session_state.qr_input_area = ""
             clear_text_input()
-            # 파일명 상태 복원
-            st.session_state.filename_backup = current_filename_backup
             st.rerun()
     
     # 공백/줄바꿈 제거 옵션
@@ -216,11 +214,8 @@ with col1:
     col_filename, col_filename_clear = st.columns([3, 1])
     
     with col_filename:
-        # 파일명 백업에서 복원
-        if 'filename_backup' in st.session_state:
-            filename_value = st.session_state.filename_backup
-            del st.session_state.filename_backup
-        elif st.session_state.clear_filename_requested:
+        # 파일명 입력창 - 삭제 요청 시에만 빈 값으로 초기화
+        if st.session_state.clear_filename_requested:
             filename_value = ""
             st.session_state.clear_filename_requested = False
         else:
@@ -238,8 +233,10 @@ with col1:
         # 파일명이 입력되어 있을 때만 삭제 버튼 활성화
         filename_delete_disabled = not filename.strip()
         if st.button("🗑️ 파일명 삭제", help="입력한 파일명을 삭제합니다", use_container_width=True, disabled=filename_delete_disabled):
+            # 즉시 파일명 입력창 상태 삭제
+            st.session_state.filename_input = ""
             clear_filename()
-            # st.rerun() 제거 - 자연스럽게 다음 렌더링에서 반영됨
+            st.rerun()
     
     # 파일명 초기화 플래그 리셋은 위에서 처리됨
 
