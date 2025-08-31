@@ -145,8 +145,8 @@ with col1:
         key="qr_input_area"
     )
     
-    # 이 부분만 실시간으로 문자 수를 세어 업데이트되도록 수정되었습니다.
-    char_count = len(qr_data)
+    # 문자 수 표시
+    char_count = len(qr_data) if qr_data else 0
     if char_count > 0:
         if char_count > 2900:
             st.error(f"⚠️ 현재 입력된 총 문자 수: **{char_count}** (권장 최대 문자 수 초과)")
@@ -198,7 +198,7 @@ with col1:
     st.subheader("🔧 색상 설정")
     
     colors = [
-        "<직접 선택>", "black", "white", "gray", "lightgray", 
+        "<직접 선택>", "black", "white", "gray", "lightgray",  
         "lightyellow", "lightgreen", "lightcoral", "lightblue",
         "red", "green", "blue", "purple", "orange", "orangered",
         "darkorange", "maroon", "yellow", "brown", "navy", "mediumblue",
@@ -224,13 +224,25 @@ with col1:
 
     st.subheader("🔧 파일 설정")
     
-    # 파일명 입력창 - QR 삭제와 완전히 독립적으로 처리
-    # QR 내용 삭제와는 전혀 무관하게 파일명 유지
-    filename = st.text_input(
-        "다운로드 파일명 입력 (확장자는 제외, 파일명만 입력)",
-        placeholder="이 곳에 파일명을 입력해 주세요 (비어있으면 자동 생성됨)",
-        key="filename_input"
-    )
+    # 파일명 입력창과 삭제 버튼을 위한 컬럼
+    col_filename_input, col_filename_delete = st.columns([3, 1.1])
+
+    with col_filename_input:
+        filename = st.text_input(
+            "다운로드 파일명 입력 (확장자는 제외, 파일명만 입력)",
+            placeholder="이 곳에 파일명을 입력해 주세요 (비어있으면 자동 생성됨)",
+            key="filename_input"
+        )
+
+    with col_filename_delete:
+        # 버튼을 입력창과 수직으로 정렬하기 위해 약간의 공백 추가
+        st.markdown('<div style="margin-top: 28px;"></div>', unsafe_allow_html=True)
+        # 파일명 입력창이 비어있으면 삭제 버튼 비활성화
+        filename_delete_disabled = not st.session_state.get("filename_input", "")
+        if st.button("🗑️ 파일명 삭제", help="입력한 파일명을 삭제합니다", use_container_width=True, type="secondary", disabled=filename_delete_disabled):
+            st.session_state.filename_input = ""
+            st.session_state.last_filename = ""
+            st.rerun()
 
     # 파일명 상태 메시지 - 실제 변경사항만 반영
     current_filename = filename.strip()
@@ -381,7 +393,7 @@ with st.sidebar:
     4. **미리 보기** 버튼으로 결과를 확인하세요
     5. **QR 코드 생성** 버튼으로 최종 파일을 다운로드하세요
     """)
-    st.markdown("""---""")
+    st.markdown("""---------------------------------------------------""")
     st.header("💡 용도별 QR 코드 생성 팁")
     st.markdown("""
     - **텍스트**: `QR 코드로 생성할 텍스트를 입력합니다`
@@ -391,7 +403,7 @@ with st.sidebar:
     - **SMS**: `sms:010-1234-5678`
     - **WiFi**: `WIFI:T:WPA;S:네트워크명(SSID);P:비밀번호;H:false;;`
     """)
-    st.markdown("""---""")
+    st.markdown("""---------------------------------------------------""")
     st.header("⚙️ 설정 가이드")
     st.markdown("""
     **오류 보정 레벨:**
@@ -414,3 +426,4 @@ st.markdown(
     '<p style="text-align: center; color: darkorange; font-weight:bold; font-size: 18px;">© 2025 QR 코드 생성기  |  Streamlit으로 제작  |  제작: 류종훈(redhat4u@gmail.com)</p>',
     unsafe_allow_html=True
 )
+# 최신버전..
