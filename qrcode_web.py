@@ -224,13 +224,7 @@ with col1:
                 placeholder="이 곳에 파일명을 입력해 주세요 (비어있으면 자동 생성됨)",
                 key="filename_input"
             )
-        
-        filename = st.text_input(
-            "다운로드 파일명 입력 (확장자는 제외, 파일명만 입력)",
-            placeholder="이 곳에 파일명을 입력해 주세요 (비어있으면 자동 생성됨)",
-            key="filename_input"
-        )
-    
+            
     with col_filename_clear:
         st.markdown("<br>", unsafe_allow_html=True)  # 입력창과 높이 맞추기
         # filename 변수 (text_input의 현재 반환값)로 버튼 상태 결정
