@@ -226,7 +226,27 @@ with col1:
 with col2:
     st.header("👀 미리보기 및 생성")
     
-    if st.session_state.qr_generated and st.session_state.qr_image is not None:
+    # 현재 입력된 데이터 처리
+    current_data = qr_data.strip() if strip_option else qr_data
+    
+    # 입력 내용이 변경되었을 때 상태 초기화
+    if 'last_preview_data' in st.session_state and current_data != st.session_state.last_preview_data:
+        st.session_state.qr_generated = False
+        st.session_state.qr_image_bytes = None
+        st.session_state.qr_image = None
+        st.session_state.qr_info = None
+        st.session_state.preview_image = None
+        st.session_state.preview_info = None
+        st.session_state.reset_filename = True
+        st.session_state.last_filename = ""
+    
+    # 생성 완료 메시지 표시 조건을 더 엄격하게
+    is_generated = (st.session_state.qr_generated and 
+                   st.session_state.qr_image is not None and 
+                   current_data == st.session_state.last_preview_data and
+                   current_data != "")
+    
+    if is_generated:
         st.success("✅ QR 코드 생성 완료! 필요시 파일명을 변경하고 다운로드하세요.")
     else:
         st.caption("[QR 코드 생성 버튼]을 클릭하면, QR 코드가 생성되고 다운로드 버튼이 활성화됩니다.")
@@ -240,9 +260,7 @@ with col2:
     st.markdown("---")
     
     if preview_btn or generate_btn:
-        processed_data = qr_data.strip() if strip_option else qr_data
-        
-        if not processed_data:
+        if not current_data:
             st.error("생성할 QR 코드 내용을 입력해 주세요.")
         elif pattern_color == bg_color:
             st.error("패턴과 배경은 같은 색을 사용할 수 없습니다.")
@@ -252,7 +270,7 @@ with col2:
             st.error("배경 색상을 직접 입력해 주세요.")
         else:
             img, qr = generate_qr_code(
-                processed_data, int(box_size), int(border), error_correction,
+                current_data, int(box_size), int(border), error_correction,
                 int(mask_pattern), pattern_color, bg_color
             )
 
@@ -268,7 +286,7 @@ with col2:
                 """
                 st.session_state.preview_image = img
                 st.session_state.preview_info = qr_info_text
-                st.session_state.last_preview_data = processed_data
+                st.session_state.last_preview_data = current_data
 
                 if generate_btn:
                     img_buffer = io.BytesIO()
@@ -277,35 +295,12 @@ with col2:
                     st.session_state.qr_image = img
                     st.session_state.qr_info = qr_info_text
                     st.session_state.qr_generated = True
-                    st.success("🎉 QR 코드 생성 완료! 원하는 파일명으로 변경하고, 아래 다운로드 버튼을 클릭하세요.")
 
-    # 저장된 미리보기가 있는 경우
-    if st.session_state.preview_image:
-        # current_data 정의 (미리보기 영역 밖에서도 사용할 수 있도록)
-        current_data = qr_data.strip() if strip_option else qr_data
-
-        # 입력 내용이 바뀌었으면 생성 상태 초기화
-        if current_data == st.session_state.last_preview_data:
-            st.subheader("📱 QR 코드 미리보기")
-            st.image(st.session_state.preview_image, caption="생성된 QR 코드", width=600)
-            st.info(st.session_state.preview_info)
-        else:
-            # 입력 내용이 변경되면 전체 상태 초기화
-            st.session_state.preview_image = None
-            st.session_state.preview_info = None
-            st.session_state.qr_generated = False
-            st.session_state.qr_image_bytes = None
-            st.session_state.qr_image = None
-            st.session_state.qr_info = None
-            st.session_state.reset_filename = True
-            st.session_state.last_filename = ""
-
-        # 마지막 입력값 갱신
-        st.session_state.last_preview_data = current_data
-
-    # ✅ 메시지 출력 조건 수정
-    if st.session_state.qr_generated and current_data == st.session_state.last_preview_data:
-        st.success("✅ QR 코드 생성 완료! 필요시 파일명을 변경하고 다운로드하세요.")
+    # 저장된 미리보기가 있고 입력 내용이 같을 때만 표시
+    if st.session_state.preview_image and current_data == st.session_state.last_preview_data:
+        st.subheader("📱 QR 코드 미리보기")
+        st.image(st.session_state.preview_image, caption="생성된 QR 코드", width=600)
+        st.info(st.session_state.preview_info)
 
         st.markdown("---")
         st.subheader("📥 다운로드")
@@ -316,8 +311,8 @@ with col2:
             current_filename = now.strftime("QR_%Y-%m-%d_%H-%M-%S")
         download_filename = f"{sanitize_filename(current_filename)}.png"
         
-    # 다운로드 버튼 표시 조건도 동일하게
-    if st.session_state.qr_generated and st.session_state.qr_image_bytes is not None and current_data == st.session_state.last_preview_data:
+    # 다운로드 버튼 표시 조건
+    if is_generated and st.session_state.qr_image_bytes is not None:
         st.download_button(
             label="📥 QR 코드 다운로드 (PNG)",
             data=st.session_state.qr_image_bytes,
