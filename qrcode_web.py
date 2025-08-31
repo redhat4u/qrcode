@@ -215,7 +215,15 @@ with col1:
         if st.session_state.clear_filename_requested:
             if 'filename_input' in st.session_state:
                 del st.session_state.filename_input
+            st.session_state.last_filename = ""   # ✅ last_filename도 초기화
+            filename = ""                         # ✅ 현재 filename도 강제로 비움
             st.session_state.clear_filename_requested = False
+        else:
+            filename = st.text_input(
+                "다운로드 파일명 입력 (확장자는 제외, 파일명만 입력)",
+                placeholder="이 곳에 파일명을 입력해 주세요 (비어있으면 자동 생성됨)",
+                key="filename_input"
+            )
         
         filename = st.text_input(
             "다운로드 파일명 입력 (확장자는 제외, 파일명만 입력)",
