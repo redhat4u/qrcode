@@ -240,13 +240,11 @@ with col2:
         st.session_state.reset_filename = True
         st.session_state.last_filename = ""
     
-    # 생성 완료 메시지 표시 조건을 더 엄격하게
-    is_generated = (st.session_state.qr_generated and 
-                   st.session_state.qr_image is not None and 
-                   current_data == st.session_state.last_preview_data and
-                   current_data != "")
-    
-    if is_generated:
+    # 생성 완료 메시지 표시
+    if (st.session_state.qr_generated and 
+        st.session_state.qr_image is not None and 
+        current_data == st.session_state.last_preview_data and
+        current_data != ""):
         st.success("✅ QR 코드 생성 완료! 필요시 파일명을 변경하고 다운로드하세요.")
     else:
         st.caption("[QR 코드 생성 버튼]을 클릭하면, QR 코드가 생성되고 다운로드 버튼이 활성화됩니다.")
@@ -302,21 +300,30 @@ with col2:
         st.image(st.session_state.preview_image, caption="생성된 QR 코드", width=600)
         st.info(st.session_state.preview_info)
 
+    # 다운로드 섹션 - QR 코드가 생성되었을 때만 표시
+    if (st.session_state.qr_generated and 
+        st.session_state.qr_image_bytes is not None and
+        current_data == st.session_state.last_preview_data and
+        current_data != ""):
+        
         st.markdown("---")
         st.subheader("📥 다운로드")
         
         now = datetime.now(ZoneInfo("Asia/Seoul"))
-        current_filename = st.session_state.get("filename_input", "")
-        if not current_filename.strip():
-            current_filename = now.strftime("QR_%Y-%m-%d_%H-%M-%S")
-        download_filename = f"{sanitize_filename(current_filename)}.png"
+        current_filename = st.session_state.get("filename_input", "").strip()
         
-    # 다운로드 버튼 표시 조건
-    if is_generated and st.session_state.qr_image_bytes is not None:
+        # 파일명이 비어있으면 자동 생성
+        if not current_filename:
+            final_filename = now.strftime("QR_%Y-%m-%d_%H-%M-%S")
+        else:
+            final_filename = current_filename
+            
+        download_filename = f"{sanitize_filename(final_filename)}.png"
+        
         st.download_button(
             label="📥 QR 코드 다운로드 (PNG)",
             data=st.session_state.qr_image_bytes,
-            file_name=f"{sanitize_filename(st.session_state.get('filename_input', 'QR'))}.png",
+            file_name=download_filename,
             mime="image/png",
             use_container_width=True
         )
