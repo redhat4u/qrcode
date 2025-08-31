@@ -95,6 +95,7 @@ def clear_filename():
 # 모든 입력창 초기화하는 함수
 def clear_all_inputs():
     st.session_state.clear_all_requested = True
+    st.session_state.clear_qr_requested = False  # QR만 삭제 플래그는 해제
     st.session_state.qr_generated = False
     st.session_state.qr_image_bytes = None
     st.session_state.qr_image = None
@@ -127,16 +128,14 @@ with col1:
     st.subheader("📝 QR 코드 내용")
     st.info("최대 입력 가능한 문자는 종류에 따라 약 2,400~2,900자 정도입니다.")
     
-    # QR 입력창 초기화 처리
-    qr_default_value = ""
+    # QR 입력창만 초기화 (파일명은 건드리지 않음)
+    qr_default_value = st.session_state.get("qr_input_area", "")
     if st.session_state.clear_qr_requested:
         qr_default_value = ""
         st.session_state.clear_qr_requested = False
     elif st.session_state.clear_all_requested:
         qr_default_value = ""
-        st.session_state.clear_all_requested = False
-    else:
-        qr_default_value = st.session_state.get("qr_input_area", "")
+        # clear_all_requested는 파일명 처리 후에 해제됨
     
     qr_data = st.text_area(
         "QR 코드로 생성할 내용을 입력해 주세요",
@@ -229,12 +228,13 @@ with col1:
     col_filename, col_filename_clear = st.columns([3, 1])
     
     with col_filename:
-        # 파일명 입력창 초기화 처리
-        filename_default_value = ""
+        # 파일명 입력창 - QR 내용 삭제와는 무관하게 파일명 유지
+        filename_default_value = st.session_state.get("filename_input", "")
+        
+        # 오직 전체 초기화 요청시에만 파일명도 초기화
         if st.session_state.clear_all_requested:
             filename_default_value = ""
-        else:
-            filename_default_value = st.session_state.get("filename_input", "")
+            st.session_state.clear_all_requested = False  # 플래그 해제
 
         filename = st.text_input(
             "다운로드 파일명 입력 (확장자는 제외, 파일명만 입력)",
