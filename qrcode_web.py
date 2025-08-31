@@ -201,34 +201,6 @@ with col1:
 
     st.subheader("🔧 파일 설정")
     
-    col_filename1, col_filename2 = st.columns([3,1])
-
-    with col_filename1:
-        filename = st.text_input(
-            "다운로드 파일명 입력 (확장자는 제외, 파일명만 입력)",
-            placeholder="이 곳에 파일명을 입력해 주세요 (비어있으면 자동 생성됨)",
-            key="filename_input"
-        )
-
-    with col_filename2:
-        st.markdown(
-            """
-            <style>
-            div[data-testid="stVerticalBlock"] div.stButton button {
-                height: 3rem;
-                margin-top: 0.25rem;
-            }
-            </style>
-            """,
-            unsafe_allow_html=True
-        )
-
-        if st.button("❌ 삭제", use_container_width=True):
-            # key 자체를 삭제 → Streamlit이 다음 rerun에서 초기화된 값으로 만듦
-            if "filename_input" in st.session_state:
-                del st.session_state["filename_input"]
-            st.success("파일명이 삭제되었습니다.")
-            st.rerun()   # 즉시 rerun해서 입력창을 빈 값으로 갱신
 
     if "last_filename" not in st.session_state:
         st.session_state.last_filename = ""  # 처음엔 빈 문자열로 시작
