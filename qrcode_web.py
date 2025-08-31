@@ -384,4 +384,33 @@ with st.sidebar:
     st.markdown("""---""")
     st.header("💡 용도별 QR 코드 생성 팁")
     st.markdown("""
-    - **텍스트**: `QR 코드로
+    - **텍스트**: `QR 코드로 생성할 텍스트를 입력합니다`
+    - **웹사이트**: `https://www.example.com`
+    - **이메일**: `mailto:user@example.com`  
+    - **전화번호**: `tel:010-1234-5678`
+    - **SMS**: `sms:010-1234-5678`
+    - **WiFi**: `WIFI:T:WPA;S:네트워크명(SSID);P:비밀번호;H:false;;`
+    """)
+    st.markdown("""---""")
+    st.header("⚙️ 설정 가이드")
+    st.markdown("""
+    **오류 보정 레벨:**
+    - **Low (7%)**: 손상되지 않는 환경
+    - **Medium (15%)**: 일반적인 사용
+    - **Quartile (25%)**: 약간의 손상 가능
+    - **High (30%)**: 로고 삽입, 손상이 잦은 환경
+    
+    **마스크 패턴:**
+    - 0~7 중 선택 (같은 내용이라도 번호에 따라 패턴이 달라짐)
+    
+    **색상 입력:**
+    - **색상명**: red, blue, green, crimson, gold 등
+    - **HEX 코드**: #FF0000, #0000FF, #00FF00 등
+    """)
+
+# 하단 정보
+st.markdown("---")
+st.markdown(
+    '<p style="text-align: center; color: darkorange; font-weight:bold; font-size: 18px;">© 2025 QR 코드 생성기  |  Streamlit으로 제작  |  제작: 류종훈(redhat4u@gmail.com)</p>',
+    unsafe_allow_html=True
+)
