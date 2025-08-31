@@ -290,12 +290,12 @@ with col2:
         st.info(st.session_state.preview_info)
 
     # 생성 완료 메시지 표시 (생성 버튼 클릭 직후가 아닐 때)
-    if (st.session_state.qr_generated and 
-        st.session_state.qr_image is not None and 
+    if (st.session_state.qr_generated and
+        st.session_state.qr_image is not None and
         current_data == st.session_state.last_preview_data and
         current_data != "" and
         not generate_btn):  # 생성 버튼을 클릭한 직후가 아닐 때만
-#        st.success("✅ QR 코드 생성 완료! 필요시 파일명을 변경하고 다운로드하세요.")
+        st.success("✅ QR 코드 생성 완료! 필요시 파일명을 변경하고 다운로드하세요.")
 #    elif not st.session_state.qr_generated:
 #        st.caption("[⚡ QR 코드 생성] 버튼을 클릭하면 QR 코드가 생성되고, [📥 QR 코드 다운로드] 버튼이 활성화됩니다.")
 
