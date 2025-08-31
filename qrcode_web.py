@@ -288,8 +288,8 @@ with col2:
     st.header("👀 미리보기 및 생성")
     
     # QR 코드가 생성된 상태라면 다운로드 버튼도 표시
-    if st.session_state.qr_generated:
-        st.caption("✅ QR 코드 생성 완료! 필요시 파일명을 변경하고 다운로드하세요.")
+    if st.session_state.qr_generated and st.session_state.qr_image is not None:
+        st.success("✅ QR 코드 생성 완료! 필요시 파일명을 변경하고 다운로드하세요.")
     else:
         st.caption("[QR 코드 생성 버튼]을 클릭하면, QR 코드가 생성되고 다운로드 버튼이 활성화됩니다.")
 
@@ -369,14 +369,16 @@ with col2:
             st.image(st.session_state.preview_image, caption="생성된 QR 코드", width=600)
             st.info(st.session_state.preview_info)
         else:
-            # ⭐ 입력 내용이 변경되면 전체 상태 초기화되도록 수정
+            # 입력 내용이 변경되었으면 전체 상태 초기화
             st.session_state.preview_image = None
             st.session_state.preview_info = None
             st.session_state.last_preview_data = ""
-            st.session_state.qr_generated = False
+            st.session_state.qr_generated = False   # ⭐ 생성 완료 메시지도 초기화
             st.session_state.qr_image_bytes = None
             st.session_state.qr_image = None
             st.session_state.qr_info = None
+            st.session_state.filename_input = ""    # (필요하면 파일명도 초기화)
+            st.session_state.last_filename = ""     # ⭐ 파일명 변경 메시지도 초기화
 
     # 생성된 QR 코드가 있다면 다운로드 버튼 표시
     if st.session_state.qr_generated and st.session_state.qr_image_bytes is not None:
