@@ -87,9 +87,17 @@ def clear_text_input():
     st.session_state.preview_info = None
     st.session_state.last_preview_data = ""
 
+# 파일명 초기화 함수 추가
+def clear_filename():
+    st.session_state.clear_filename_requested = True
+    if 'filename_input' in st.session_state:
+        del st.session_state.filename_input
+
 # 초기화 플래그 추가
 if 'clear_requested' not in st.session_state:
     st.session_state.clear_requested = False
+if 'clear_filename_requested' not in st.session_state:
+    st.session_state.clear_filename_requested = False
 if 'reset_filename' not in st.session_state:
     st.session_state.reset_filename = False
 
@@ -201,11 +209,29 @@ with col1:
 
     st.subheader("🔧 파일 설정")
     
-    filename = st.text_input(
-        "다운로드 파일명 입력 (확장자는 제외, 파일명만 입력)",
-        placeholder="이 곳에 파일명을 입력해 주세요 (비어있으면 자동 생성됨)",
-        key="filename_input"
-    )
+    # 파일명 입력창과 삭제 버튼을 함께 배치
+    col_filename, col_filename_clear = st.columns([4, 1])
+    
+    with col_filename:
+        # 파일명 초기화 요청이 있으면 빈 값으로 시작
+        filename_default = "" if st.session_state.clear_filename_requested else st.session_state.get("filename_input", "")
+        
+        filename = st.text_input(
+            "다운로드 파일명 입력 (확장자는 제외, 파일명만 입력)",
+            placeholder="이 곳에 파일명을 입력해 주세요 (비어있으면 자동 생성됨)",
+            value=filename_default,
+            key="filename_input"
+        )
+    
+    with col_filename_clear:
+        st.markdown("<br>", unsafe_allow_html=True)  # 입력창과 높이 맞추기
+        if st.button("🗑️", help="파일명 삭제", use_container_width=True):
+            clear_filename()
+            st.rerun()
+    
+    # 파일명 초기화 플래그 리셋
+    if st.session_state.clear_filename_requested:
+        st.session_state.clear_filename_requested = False
 
     if "last_filename" not in st.session_state:
         st.session_state.last_filename = ""  # 처음엔 빈 문자열로 시작
@@ -353,6 +379,7 @@ with col2:
             st.session_state.last_filename = ""
             # 입력창과 파일명 입력창 초기화
             st.session_state.clear_requested = True
+            st.session_state.clear_filename_requested = True
             if 'filename_input' in st.session_state:
                 del st.session_state.filename_input
             st.rerun()
