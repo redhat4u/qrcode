@@ -329,7 +329,7 @@ with col2:
             file_name=download_filename,
             mime="image/png",
             use_container_width=True,
-            help="[저장경로]: PC => 'C:\User\<사용자 이름>\Download' 폴더, 휴대폰 => '/Download' 폴더",
+            help="PC는 'Download' 폴더, 휴대폰은 'Download' 폴더에 저장됩니다.",
         )
 
 #        st.caption(f"📄 다운로드 파일명: `{download_filename}`")
