@@ -260,7 +260,6 @@ with col2:
     current_qr_params_hash = hashlib.md5(str(qr_params).encode('utf-8')).hexdigest()
 
     # 미리보기 유효성 검사 및 업데이트 로직
-    # 색상 선택이 <직접 선택>이지만 입력값이 없으면 미리보기 생성하지 않음
     is_pattern_color_invalid = (pattern_color_choice == "<직접 선택>" and not custom_pattern_color.strip())
     is_bg_color_invalid = (bg_color_choice == "<직접 선택>" and not custom_bg_color.strip())
     
@@ -310,6 +309,7 @@ with col2:
     generate_btn = st.button("⚡ QR 코드 생성", use_container_width=True)
     
     if generate_btn:
+        # 유효성 검사 로직 (QR 코드 생성 이전에 실행)
         if not current_data:
             st.error("생성할 QR 코드 내용을 입력해 주세요.")
         elif pattern_color_choice == "<직접 선택>" and not custom_pattern_color.strip():
