@@ -209,8 +209,8 @@ with col1:
             placeholder="이 곳에 파일명을 입력해 주세요 (비어있으면 자동 생성됨)",
             key="filename_input"
         )
+
     with col_filename2:
-        # 버튼 높이 조절
         st.markdown(
             """
             <style>
@@ -222,9 +222,10 @@ with col1:
             """,
             unsafe_allow_html=True
         )
-        if st.button("❌ 삭제", use_container_width=True):
-            st.session_state.filename_input = ""
-            st.success("파일명이 삭제되었습니다.")
+
+    if st.button("❌ 삭제", use_container_width=True):
+        st.session_state["filename_input"] = ""   # ✅ 이렇게 수정
+        st.success("파일명이 삭제되었습니다.")
 
     if "last_filename" not in st.session_state:
         st.session_state.last_filename = ""  # 처음엔 빈 문자열로 시작
