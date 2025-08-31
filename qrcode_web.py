@@ -294,7 +294,7 @@ with col2:
     # 저장된 미리보기가 있고 입력 내용이 같을 때만 표시
     if st.session_state.preview_image and current_data == st.session_state.last_preview_data:
         st.subheader("📱 QR 코드 미리보기")
-        st.image(st.session_state.preview_image, caption="생성된 QR 코드", width=400)
+        st.image(st.session_state.preview_image, caption="생성된 QR 코드", width=380)
         st.info(st.session_state.preview_info)
 
     # 생성 완료 메시지 표시 (다운로드 버튼 클릭시)
