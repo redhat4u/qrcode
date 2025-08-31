@@ -86,6 +86,7 @@ def clear_text_input():
     st.session_state.preview_image = None
     st.session_state.preview_info = None
     st.session_state.last_preview_data = ""
+    # 파일명은 유지 - last_filename 초기화 제거
 
 # 파일명 초기화 함수 추가
 def clear_filename():
@@ -264,7 +265,7 @@ with col2:
         st.session_state.qr_info = None
         st.session_state.preview_image = None
         st.session_state.preview_info = None
-        st.session_state.last_filename = ""
+        # 파일명은 유지 - last_filename 초기화 제거
 
     col2_1, col2_2 = st.columns(2)
     with col2_1:
