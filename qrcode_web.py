@@ -300,7 +300,7 @@ with col2:
 #        st.caption("[⚡ QR 코드 생성] 버튼을 클릭하면 QR 코드가 생성되고, [📥 QR 코드 다운로드] 버튼이 활성화됩니다.")
 
     # 다운로드 섹션 - QR 코드가 생성되었을 때만 표시
-    if (st.session_state.qr_generated and 
+    if (st.session_state.qr_generated and
         st.session_state.qr_image_bytes is not None and
         current_data == st.session_state.last_preview_data and
         current_data != ""):
