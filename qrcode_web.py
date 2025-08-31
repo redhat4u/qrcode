@@ -206,12 +206,12 @@ with col1:
     filename = st.text_input(
         "다운로드 파일명 입력 (확장자는 제외, 파일명만 입력)",
         placeholder="이 곳에 파일명을 입력해 주세요 (비어있으면 자동 생성됨)",
-        key="filename_input",
-        value="" if st.session_state.reset_filename else st.session_state.get("filename_input", "")
+        key="filename_input"
     )
 
-    # 파일명 초기화 후 플래그 해제
+    # 파일명 초기화는 입력 내용 변경 시에만 (별도 처리)
     if st.session_state.reset_filename:
+        st.session_state.filename_input = ""
         st.session_state.reset_filename = False
 
     if "last_filename" not in st.session_state:
