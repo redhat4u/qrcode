@@ -279,6 +279,7 @@ with col2:
                     st.session_state.qr_generated = True
                     st.success("🎉 QR 코드 생성 완료! 원하는 파일명으로 변경하고, 아래 다운로드 버튼을 클릭하세요.")
 
+    # 저장된 미리보기가 있는 경우
     if st.session_state.preview_image:
         current_data = qr_data.strip() if strip_option else qr_data
 
@@ -294,15 +295,14 @@ with col2:
             st.session_state.qr_image_bytes = None
             st.session_state.qr_image = None
             st.session_state.qr_info = None
-
-            # ⭐ 직접 초기화 대신 플래그 사용
             st.session_state.reset_filename = True
             st.session_state.last_filename = ""
 
+        # 마지막 입력값 갱신
         st.session_state.last_preview_data = current_data
 
-    # ✅ QR 생성 완료 메시지 출력 조건 수정
-    if st.session_state.qr_generated and current_data == st.session_state.last_preview_data:
+    # ✅ 메시지를 출력할 때 조건 강화
+    if st.session_state.qr_generated and st.session_state.last_preview_data == (qr_data.strip() if strip_option else qr_data):
         st.success("✅ QR 코드 생성 완료! 필요시 파일명을 변경하고 다운로드하세요.")
 
         st.markdown("---")
