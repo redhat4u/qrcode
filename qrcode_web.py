@@ -238,12 +238,12 @@ with col1:
 
     current_filename = filename.strip()
 
-    # 파일명 상태 메시지 (QR 내용 삭제와 완전히 독립적)
+    # 파일명 상태 메시지 (실제 파일명 변화만 감지)
     if current_filename and current_filename != st.session_state.last_filename:
         st.success("✅ 파일명이 입력되었습니다.")
         st.session_state.last_filename = current_filename
-    elif not current_filename and st.session_state.last_filename:
-        # 파일명이 실제로 삭제된 경우에만 메시지 표시
+    elif not current_filename and st.session_state.last_filename and st.session_state.clear_filename_requested:
+        # 파일명 삭제 버튼을 통해 실제로 삭제된 경우에만 메시지 표시
         st.info("✅ 파일명이 삭제되었습니다. 빈칸일 경우 자동 생성됩니다.")
         st.session_state.last_filename = ""
 
