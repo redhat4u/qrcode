@@ -1,15 +1,3 @@
-"""
-QR 코드 생성 웹앱 - Streamlit 버전
-휴대폰에서도 사용 가능
-
-실행 방법:
-1. pip install streamlit qrcode[pil]
-2. streamlit run qrcode_web.py
-
-또는 온라인에서 실행:
-- Streamlit Cloud, Heroku, Replit 등에 배포 가능
-"""
-
 import streamlit as st
 import qrcode
 import io
@@ -17,6 +5,7 @@ from datetime import datetime
 from zoneinfo import ZoneInfo
 from PIL import Image
 import hashlib
+import re
 
 # 페이지 설정
 st.set_page_config(
@@ -31,6 +20,20 @@ def sanitize_filename(name: str) -> str:
     for ch in invalid_chars:
         name = name.replace(ch, "_")
     return name.strip()
+
+# 유효한 색상인지 확인하는 함수 추가
+def is_valid_color(color_name):
+    # 일반적인 색상 이름 (일부만 검사, 모든 색상 이름을 검사하려면 더 많은 데이터가 필요)
+    standard_colors = [
+        "red", "blue", "green", "black", "white", "gray", "lightgray",
+        "lightyellow", "lightgreen", "lightcoral", "lightblue",
+        "purple", "orange", "orangered", "darkorange", "maroon",
+        "yellow", "brown", "navy", "mediumblue",
+        "crimson", "gold", "lightcyan",
+    ]
+    # 16진수 코드 (# 뒤에 3자리 또는 6자리)
+    hex_pattern = re.compile(r'^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$')
+    return color_name.lower() in standard_colors or hex_pattern.match(color_name)
 
 # QR 코드 생성 함수
 def generate_qr_code(data, box_size, border, error_correction, mask_pattern, fill_color, back_color):
@@ -55,7 +58,11 @@ def generate_qr_code(data, box_size, border, error_correction, mask_pattern, fil
             img = Image.open(img_buffer)
         return img, qr
     except Exception as e:
-        st.error(f"QR 코드 생성 오류: {str(e)}")
+        # qrcode 라이브러리에서 발생하는 오류 메시지를 커스텀 메시지로 대체
+        if "unknown color specifier" in str(e):
+            st.error("QR 코드 생성 오류: 올바른 색상 값을 입력해주세요.")
+        else:
+            st.error(f"QR 코드 생성 오류: {str(e)}")
         return None, None
 
 # 세션 상태 초기화
@@ -258,8 +265,8 @@ with col2:
     current_data = qr_data.strip() if strip_option else qr_data
     
     # 미리보기용 유효성 검사 변수
-    is_pattern_color_invalid_preview = (pattern_color_choice == "<직접 선택>" and not custom_pattern_color.strip())
-    is_bg_color_invalid_preview = (bg_color_choice == "<직접 선택>" and not custom_bg_color.strip())
+    is_pattern_color_invalid_preview = (pattern_color_choice == "<직접 선택>" and not custom_pattern_color.strip()) or (pattern_color_choice != "<직접 선택>" and not is_valid_color(pattern_color_choice))
+    is_bg_color_invalid_preview = (bg_color_choice == "<직접 선택>" and not custom_bg_color.strip()) or (bg_color_choice != "<직접 선택>" and not is_valid_color(bg_color_choice))
     is_colors_same_preview = (pattern_color == bg_color)
     
     # QR 코드 파라미터 해시 생성
@@ -327,15 +334,18 @@ with col2:
         if not current_data:
             errors.append("생성할 QR 코드 내용을 입력해 주세요.")
         
-        # 패턴 및 배경 색상 직접 입력 유효성 검사
         if pattern_color_choice == "<직접 선택>" and not custom_pattern_color.strip():
             errors.append("QR 코드 **패턴 색상**을 직접 입력해 주세요.")
-        
+        elif pattern_color_choice != "<직접 선택>" and not is_valid_color(pattern_color_choice):
+             errors.append("QR 코드 **패턴 색상**이 유효하지 않습니다. 올바른 색상 값을 입력해 주세요.")
+
         if bg_color_choice == "<직접 선택>" and not custom_bg_color.strip():
             errors.append("QR 코드 **배경 색상**을 직접 입력해 주세요.")
+        elif bg_color_choice != "<직접 선택>" and not is_valid_color(bg_color_choice):
+            errors.append("QR 코드 **배경 색상**이 유효하지 않습니다. 올바른 색상 값을 입력해 주세요.")
             
         # 두 색상이 같은지 최종 검사
-        if pattern_color == bg_color:
+        if pattern_color == bg_color and is_valid_color(pattern_color) and is_valid_color(bg_color):
             errors.append("패턴과 배경은 같은 색을 사용할 수 없습니다.")
 
         if errors:
@@ -378,11 +388,11 @@ with col2:
     elif not current_data:
         st.info("QR 코드 내용을 입력하시면 미리보기가 자동으로 나타납니다.")
     elif is_pattern_color_invalid_preview and is_bg_color_invalid_preview:
-        st.warning("⚠️ 패턴 및 배경 색상을 입력해 주세요. 미리보기를 위한 색상 값이 필요합니다.")
+        st.warning("⚠️ 패턴 색상 및 배경 색상을 직접 입력해 주세요. 미리보기를 위해 유효한 색상 값이 필요합니다.")
     elif is_pattern_color_invalid_preview:
-        st.warning("⚠️ 패턴 색상을 입력해 주세요. 미리보기를 위한 색상 값이 필요합니다.")
+        st.warning("⚠️ 패턴 색상을 직접 입력해 주세요. 미리보기를 위해 유효한 색상 값이 필요합니다.")
     elif is_bg_color_invalid_preview:
-        st.warning("⚠️ 배경 색상을 입력해 주세요. 미리보기를 위한 색상 값이 필요합니다.")
+        st.warning("⚠️ 배경 색상을 직접 입력해 주세요. 미리보기를 위해 유효한 색상 값이 필요합니다.")
     elif is_colors_same_preview:
         st.warning("⚠️ 패턴과 배경은 같은 색을 사용할 수 없습니다.")
 
@@ -463,7 +473,7 @@ with st.sidebar:
     - 0~7 중 선택 (같은 내용이라도 번호에 따라 패턴이 달라짐)
 
     **색상 입력:**
-    - **색상명**: red, blue, green, purple 등
+    - **색상명**: red, blue, green, crimson, gold 등
     - **HEX 코드**: #FF0000, #0000FF, #00FF00 등
     """)
 
@@ -473,4 +483,3 @@ st.markdown(
     '<p style="text-align: center; color: darkorange; font-weight:bold; font-size: 18px;">© 2025 QR 코드 생성기  |  Streamlit으로 제작  |  제작: 류종훈(redhat4u@gmail.com)</p>',
     unsafe_allow_html=True
 )
-# final 버전 - 모두 정상적으로 잘 동작함..
