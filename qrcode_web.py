@@ -365,18 +365,11 @@ with col2:
             unsafe_allow_html=True
         )
 
-        if st.button(
-            label="🔄 전체 초기화",
-            use_container_width=True,
-            help="이 버튼을 누르면 현재 입력된 모든 내용이 삭제됩니다.",
-        ):
-            # 모든 입력창 초기화
-            clear_all_inputs()
-            st.rerun()
 
 # 파일명 입력창의 clear_all_requested 플래그 처리 (QR 입력창과 분리)
 if st.session_state.clear_all_requested:
     st.session_state.clear_all_requested = False  # 플래그 해제
+
 
 # 사이드바
 with st.sidebar:
@@ -422,3 +415,4 @@ st.markdown(
     unsafe_allow_html=True
 )
 # 최신버전..
+
