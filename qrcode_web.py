@@ -77,7 +77,8 @@ if 'last_preview_data' not in st.session_state:
 
 # QR 내용만 초기화하는 함수 (파일명은 유지)
 def clear_text_input():
-    st.session_state.clear_requested = True
+    # QR 입력창만 초기화하고 파일명은 유지
+    st.session_state.qr_input_area = ""  # QR 입력창 직접 초기화
     st.session_state.qr_generated = False
     st.session_state.qr_image_bytes = None
     st.session_state.qr_image = None  
