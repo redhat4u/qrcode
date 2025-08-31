@@ -320,7 +320,8 @@ with col2:
             file_name=f"{sanitize_filename(st.session_state.get('filename_input', 'QR'))}.png",
             mime="image/png",
             use_container_width=True
-        )        st.caption(f"📄 다운로드 파일명: `{download_filename}`")
+        )
+        st.caption(f"📄 다운로드 파일명: `{download_filename}`")
 
         if st.button("🔄 새 QR 코드 생성", use_container_width=True):
             st.session_state.qr_generated = False
