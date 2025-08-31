@@ -294,7 +294,7 @@ with col2:
         not generate_btn):  # 생성 버튼을 클릭한 직후가 아닐 때만
         st.success("✅ QR 코드 생성 완료! 필요시 파일명을 변경하고 다운로드하세요.")
     elif not st.session_state.qr_generated:
-        st.caption("[QR 코드 생성 버튼]을 클릭하면, QR 코드가 생성되고 다운로드 버튼이 활성화됩니다.")
+        st.caption("[⚡ QR 코드 생성] 버튼을 클릭하면, QR 코드가 생성되고 [📥 QR 코드 다운로드] 버튼이 활성화됩니다.")
 
     # 다운로드 섹션 - QR 코드가 생성되었을 때만 표시
     if (st.session_state.qr_generated and 
@@ -317,7 +317,7 @@ with col2:
         download_filename = f"{sanitize_filename(final_filename)}.png"
         
         st.download_button(
-            label="📥 QR 코드 다운로드 (PNG)",
+            label="📥 QR 코드 다운로드",
             data=st.session_state.qr_image_bytes,
             file_name=download_filename,
             mime="image/png",
