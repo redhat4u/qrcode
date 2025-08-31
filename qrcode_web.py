@@ -283,11 +283,9 @@ with col2:
     if st.session_state.preview_image:
         current_data = qr_data.strip() if strip_option else qr_data
 
-        if current_data == st.session_state.last_preview_data:
-            st.subheader("📱 QR 코드 미리보기")
-            st.image(st.session_state.preview_image, caption="생성된 QR 코드", width=600)
-            st.info(st.session_state.preview_info)
-        else:
+        # 입력 내용이 바뀌었으면 생성 상태 초기화
+        if current_data != st.session_state.last_preview_data:
+
             # 입력 내용이 변경되면 전체 상태 초기화
             st.session_state.preview_image = None
             st.session_state.preview_info = None
@@ -301,8 +299,8 @@ with col2:
         # 마지막 입력값 갱신
         st.session_state.last_preview_data = current_data
 
-    # ✅ 메시지를 출력할 때 조건 강화
-    if st.session_state.qr_generated and st.session_state.last_preview_data == (qr_data.strip() if strip_option else qr_data):
+    # ✅ 메시지 출력 조건 수정
+    if st.session_state.qr_generated and current_data == st.session_state.last_preview_data:
         st.success("✅ QR 코드 생성 완료! 필요시 파일명을 변경하고 다운로드하세요.")
 
         st.markdown("---")
@@ -314,15 +312,15 @@ with col2:
             current_filename = now.strftime("QR_%Y-%m-%d_%H-%M-%S")
         download_filename = f"{sanitize_filename(current_filename)}.png"
         
+    # 다운로드 버튼 표시 조건도 동일하게
+    if st.session_state.qr_generated and st.session_state.qr_image_bytes is not None and current_data == st.session_state.last_preview_data:
         st.download_button(
             label="📥 QR 코드 다운로드 (PNG)",
             data=st.session_state.qr_image_bytes,
-            file_name=download_filename,
+            file_name=f"{sanitize_filename(st.session_state.get('filename_input', 'QR'))}.png",
             mime="image/png",
-            use_container_width=True,
-            help="휴대폰에서는 Download 폴더에 저장됩니다."
-        )
-        st.caption(f"📄 다운로드 파일명: `{download_filename}`")
+            use_container_width=True
+        )        st.caption(f"📄 다운로드 파일명: `{download_filename}`")
 
         if st.button("🔄 새 QR 코드 생성", use_container_width=True):
             st.session_state.qr_generated = False
