@@ -284,8 +284,11 @@ with col2:
         current_data = qr_data.strip() if strip_option else qr_data
 
         # 입력 내용이 바뀌었으면 생성 상태 초기화
-        if current_data != st.session_state.last_preview_data:
-
+        if current_data == st.session_state.last_preview_data:
+            st.subheader("📱 QR 코드 미리보기")
+            st.image(st.session_state.preview_image, caption="생성된 QR 코드", width=600)
+            st.info(st.session_state.preview_info)
+        else:
             # 입력 내용이 변경되면 전체 상태 초기화
             st.session_state.preview_image = None
             st.session_state.preview_info = None
