@@ -85,7 +85,8 @@ def clear_text_input():
     st.session_state.preview_image = None
     st.session_state.preview_info = None
     st.session_state.last_preview_data = ""
-    st.session_state.reset_filename = True  # 파일명 초기화를 플래그로 처리
+    # 입력 내용 삭제 버튼을 눌렀을 때만 파일명도 초기화
+    st.session_state.reset_filename = True
 
 # 초기화 플래그 추가
 if 'clear_requested' not in st.session_state:
@@ -239,6 +240,7 @@ with col2:
         st.session_state.qr_info = None
         st.session_state.preview_image = None
         st.session_state.preview_info = None
+        # 입력 내용이 변경될 때만 파일명 초기화
         st.session_state.reset_filename = True
         st.session_state.last_filename = ""
     
@@ -336,7 +338,7 @@ with col2:
             st.session_state.qr_image_bytes = None
             st.session_state.qr_image = None
             st.session_state.qr_info = None
-            st.session_state.reset_filename = True
+            # 새 QR 코드 생성 시에는 파일명 유지
             st.rerun()
 
 # 사이드바
