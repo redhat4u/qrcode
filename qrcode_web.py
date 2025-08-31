@@ -201,12 +201,17 @@ with col1:
 
     st.subheader("🔧 파일 설정")
     
+    filename = st.text_input(
+        "다운로드 파일명 입력 (확장자는 제외, 파일명만 입력)",
+        placeholder="이 곳에 파일명을 입력해 주세요 (비어있으면 자동 생성됨)",
+        key="filename_input"
+    )
 
     if "last_filename" not in st.session_state:
         st.session_state.last_filename = ""  # 처음엔 빈 문자열로 시작
 
     # 파일명 변경 메시지 - QR 생성 여부와 상관없이 표시
-    current_filename = last_filename.strip()
+    current_filename = filename.strip()
 
     if current_filename and current_filename != st.session_state.last_filename:
         st.success("✅ 파일명이 변경되었습니다.")
