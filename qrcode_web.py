@@ -237,7 +237,7 @@ with col1:
     
     # 파일명 변경 감지 및 메시지 표시
     if current_filename and current_filename != st.session_state.last_filename:
-        st.success("✅ 파일명이 입력되었습니다.")
+        st.success("✅ 파일명이 변경되었습니다.")
         st.session_state.last_filename = current_filename
     elif not current_filename and st.session_state.last_filename:
         st.session_state.last_filename = ""
@@ -415,3 +415,4 @@ st.markdown(
     unsafe_allow_html=True
 )
 # 최신버전..
+
