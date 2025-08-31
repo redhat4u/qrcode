@@ -306,9 +306,9 @@ with col2:
     generate_btn = st.button("⚡ QR 코드 생성", use_container_width=True)
     
     if generate_btn:
+        # 유효성 검사 로직 (QR 코드 생성 이전에 실행)
         if not current_data:
             st.error("생성할 QR 코드 내용을 입력해 주세요.")
-        # 명확한 오류 메시지를 위한 분리된 유효성 검사
         elif pattern_color_choice == "<직접 선택>" and not custom_pattern_color.strip():
             st.error("⚠️ QR 코드 **패턴 색상**을 직접 입력해 주세요.")
         elif bg_color_choice == "<직접 선택>" and not custom_bg_color.strip():
@@ -316,6 +316,7 @@ with col2:
         elif pattern_color == bg_color:
             st.error("⚠️ 패턴과 배경은 같은 색을 사용할 수 없습니다.")
         else:
+            # 모든 유효성 검사를 통과했을 때만 QR 코드 생성
             img, qr = generate_qr_code(
                 current_data, int(box_size), int(border), error_correction,
                 int(mask_pattern), pattern_color, bg_color
