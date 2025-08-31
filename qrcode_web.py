@@ -226,8 +226,9 @@ with col1:
     
     with col_filename_clear:
         st.markdown("<br>", unsafe_allow_html=True)  # 입력창과 높이 맞추기
-        # 파일명이 입력되어 있을 때만 삭제 버튼 활성화
-        filename_delete_disabled = not filename.strip()
+        # 실제 입력창에 파일명이 있을 때만 삭제 버튼 활성화
+        current_filename_input = st.session_state.get("filename_input", "")
+        filename_delete_disabled = not current_filename_input.strip()
         if st.button("🗑️ 파일명 삭제", help="입력한 파일명을 삭제합니다", use_container_width=True, disabled=filename_delete_disabled):
             clear_filename()
             st.rerun()
