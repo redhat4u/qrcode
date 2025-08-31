@@ -221,13 +221,12 @@ with col1:
 
     st.subheader("🔧 파일 설정")
     
-    # 파일명 입력창 - QR 내용 삭제와는 무관하게 파일명 유지
+    # 파일명 입력창 - QR 삭제와 완전히 분리
     filename_default_value = st.session_state.get("filename_input", "")
     
-    # 오직 전체 초기화 요청시에만 파일명도 초기화
+    # 오직 전체 초기화(새 QR 코드 생성)일 때만 파일명 초기화
     if st.session_state.clear_all_requested:
         filename_default_value = ""
-        st.session_state.clear_all_requested = False  # 플래그 해제
 
     filename = st.text_input(
         "다운로드 파일명 입력 (확장자는 제외, 파일명만 입력)",
@@ -378,6 +377,10 @@ with col2:
             # 모든 입력창 초기화
             clear_all_inputs()
             st.rerun()
+
+# 파일명 입력창의 clear_all_requested 플래그 처리 (QR 입력창과 분리)
+if st.session_state.clear_all_requested:
+    st.session_state.clear_all_requested = False  # 플래그 해제
 
 # 사이드바
 with st.sidebar:
