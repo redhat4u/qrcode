@@ -21,9 +21,9 @@ def sanitize_filename(name: str) -> str:
         name = name.replace(ch, "_")
     return name.strip()
 
-# 유효한 색상인지 확인하는 함수 추가
+# 유효한 색상인지 확인하는 함수
 def is_valid_color(color_name):
-    # 일반적인 색상 이름 (일부만 검사, 모든 색상 이름을 검사하려면 더 많은 데이터가 필요)
+    # 일반적인 색상 이름 (추가: blue, yellow, red, green 등)
     standard_colors = [
         "red", "blue", "green", "black", "white", "gray", "lightgray",
         "lightyellow", "lightgreen", "lightcoral", "lightblue",
@@ -33,6 +33,8 @@ def is_valid_color(color_name):
     ]
     # 16진수 코드 (# 뒤에 3자리 또는 6자리)
     hex_pattern = re.compile(r'^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$')
+    
+    # 먼저 표준 색상 목록에서 찾고, 그 다음 HEX 코드를 검사합니다.
     return color_name.lower() in standard_colors or hex_pattern.match(color_name)
 
 # QR 코드 생성 함수
@@ -58,11 +60,7 @@ def generate_qr_code(data, box_size, border, error_correction, mask_pattern, fil
             img = Image.open(img_buffer)
         return img, qr
     except Exception as e:
-        # qrcode 라이브러리에서 발생하는 오류 메시지를 커스텀 메시지로 대체
-        if "unknown color specifier" in str(e):
-            st.error("QR 코드 생성 오류: 올바른 색상 값을 입력해주세요.")
-        else:
-            st.error(f"QR 코드 생성 오류: {str(e)}")
+        st.error(f"QR 코드 생성 오류: {str(e)}")
         return None, None
 
 # 세션 상태 초기화
@@ -265,10 +263,10 @@ with col2:
     current_data = qr_data.strip() if strip_option else qr_data
     
     # 미리보기용 유효성 검사 변수
-    is_pattern_color_invalid_preview = (pattern_color_choice == "<직접 선택>" and not custom_pattern_color.strip()) or (pattern_color_choice != "<직접 선택>" and not is_valid_color(pattern_color_choice))
-    is_bg_color_invalid_preview = (bg_color_choice == "<직접 선택>" and not custom_bg_color.strip()) or (bg_color_choice != "<직접 선택>" and not is_valid_color(bg_color_choice))
+    is_pattern_color_valid_preview = (pattern_color_choice != "<직접 선택>" and is_valid_color(pattern_color_choice)) or (pattern_color_choice == "<직접 선택>" and custom_pattern_color.strip() and is_valid_color(custom_pattern_color))
+    is_bg_color_valid_preview = (bg_color_choice != "<직접 선택>" and is_valid_color(bg_color_choice)) or (bg_color_choice == "<직접 선택>" and custom_bg_color.strip() and is_valid_color(custom_bg_color))
     is_colors_same_preview = (pattern_color == bg_color)
-    
+
     # QR 코드 파라미터 해시 생성
     qr_params = (
         current_data,
@@ -284,7 +282,7 @@ with col2:
     current_qr_params_hash = hashlib.md5(str(qr_params).encode('utf-8')).hexdigest()
 
     # 미리보기 업데이트 로직
-    if current_data and not is_pattern_color_invalid_preview and not is_bg_color_invalid_preview and not is_colors_same_preview and (current_qr_params_hash != st.session_state.last_qr_params_hash):
+    if current_data and is_pattern_color_valid_preview and is_bg_color_valid_preview and not is_colors_same_preview and (current_qr_params_hash != st.session_state.last_qr_params_hash):
         st.session_state.qr_generated = False
         st.session_state.qr_image_bytes = None
         st.session_state.qr_image = None
@@ -334,18 +332,23 @@ with col2:
         if not current_data:
             errors.append("생성할 QR 코드 내용을 입력해 주세요.")
         
+        # 패턴 및 배경 색상 직접 입력 유효성 검사
         if pattern_color_choice == "<직접 선택>" and not custom_pattern_color.strip():
             errors.append("QR 코드 **패턴 색상**을 직접 입력해 주세요.")
-        elif pattern_color_choice != "<직접 선택>" and not is_valid_color(pattern_color_choice):
-             errors.append("QR 코드 **패턴 색상**이 유효하지 않습니다. 올바른 색상 값을 입력해 주세요.")
-
+        elif (pattern_color_choice == "<직접 선택>" and custom_pattern_color.strip() and not is_valid_color(custom_pattern_color)):
+            errors.append("패턴 색상으로 입력한 색상은 올바른 값이 아닙니다. 다시 확인해주세요.")
+        elif (pattern_color_choice != "<직접 선택>" and not is_valid_color(pattern_color_choice)):
+            errors.append("패턴 색상으로 입력한 색상은 올바른 값이 아닙니다. 다시 확인해주세요.")
+        
         if bg_color_choice == "<직접 선택>" and not custom_bg_color.strip():
             errors.append("QR 코드 **배경 색상**을 직접 입력해 주세요.")
-        elif bg_color_choice != "<직접 선택>" and not is_valid_color(bg_color_choice):
-            errors.append("QR 코드 **배경 색상**이 유효하지 않습니다. 올바른 색상 값을 입력해 주세요.")
+        elif (bg_color_choice == "<직접 선택>" and custom_bg_color.strip() and not is_valid_color(custom_bg_color)):
+            errors.append("배경 색상으로 입력한 색상은 올바른 값이 아닙니다. 다시 확인해주세요.")
+        elif (bg_color_choice != "<직접 선택>" and not is_valid_color(bg_color_choice)):
+            errors.append("배경 색상으로 입력한 색상은 올바른 값이 아닙니다. 다시 확인해주세요.")
             
         # 두 색상이 같은지 최종 검사
-        if pattern_color == bg_color and is_valid_color(pattern_color) and is_valid_color(bg_color):
+        if pattern_color and bg_color and pattern_color == bg_color:
             errors.append("패턴과 배경은 같은 색을 사용할 수 없습니다.")
 
         if errors:
@@ -381,18 +384,22 @@ with col2:
     st.markdown("---")
 
     # 미리보기 이미지 및 정보 표시
-    if st.session_state.preview_image and current_data and not is_pattern_color_invalid_preview and not is_bg_color_invalid_preview and not is_colors_same_preview and (current_qr_params_hash == st.session_state.last_qr_params_hash):
+    if st.session_state.preview_image and current_data and is_pattern_color_valid_preview and is_bg_color_valid_preview and not is_colors_same_preview and (current_qr_params_hash == st.session_state.last_qr_params_hash):
         st.subheader("📱 QR 코드 미리보기")
         st.image(st.session_state.preview_image, caption="생성된 QR 코드", width=380)
         st.info(st.session_state.preview_info)
     elif not current_data:
         st.info("QR 코드 내용을 입력하시면 미리보기가 자동으로 나타납니다.")
-    elif is_pattern_color_invalid_preview and is_bg_color_invalid_preview:
+    elif (pattern_color_choice == "<직접 선택>" and not custom_pattern_color.strip()) and (bg_color_choice == "<직접 선택>" and not custom_bg_color.strip()):
         st.warning("⚠️ 패턴 색상 및 배경 색상을 직접 입력해 주세요. 미리보기를 위해 유효한 색상 값이 필요합니다.")
-    elif is_pattern_color_invalid_preview:
+    elif (pattern_color_choice == "<직접 선택>" and not custom_pattern_color.strip()):
         st.warning("⚠️ 패턴 색상을 직접 입력해 주세요. 미리보기를 위해 유효한 색상 값이 필요합니다.")
-    elif is_bg_color_invalid_preview:
+    elif (bg_color_choice == "<직접 선택>" and not custom_bg_color.strip()):
         st.warning("⚠️ 배경 색상을 직접 입력해 주세요. 미리보기를 위해 유효한 색상 값이 필요합니다.")
+    elif not is_pattern_color_valid_preview:
+        st.warning("⚠️ 패턴 색상으로 입력한 값은 올바른 색상이 아닙니다. 다시 확인해주세요.")
+    elif not is_bg_color_valid_preview:
+        st.warning("⚠️ 배경 색상으로 입력한 값은 올바른 색상이 아닙니다. 다시 확인해주세요.")
     elif is_colors_same_preview:
         st.warning("⚠️ 패턴과 배경은 같은 색을 사용할 수 없습니다.")
 
