@@ -75,9 +75,8 @@ if 'preview_info' not in st.session_state:
 if 'last_preview_data' not in st.session_state:
     st.session_state.last_preview_data = ""
 
-# 텍스트 영역 초기화를 위한 함수
+# QR 내용만 초기화하는 함수 (파일명은 유지)
 def clear_text_input():
-    # 위젯의 키를 직접 조작하는 대신 초기화 플래그 사용
     st.session_state.clear_requested = True
     st.session_state.qr_generated = False
     st.session_state.qr_image_bytes = None
@@ -87,11 +86,9 @@ def clear_text_input():
     st.session_state.preview_info = None
     st.session_state.last_preview_data = ""
 
-# 파일명 초기화 함수 추가
+# 파일명만 초기화하는 함수
 def clear_filename():
     st.session_state.clear_filename_requested = True
-    if 'filename_input' in st.session_state:
-        del st.session_state.filename_input
 
 # 초기화 플래그 추가
 if 'clear_requested' not in st.session_state:
@@ -143,11 +140,12 @@ with col1:
     else:
         st.caption("현재 입력된 총 문자 수: 0")
         
-    # 입력 내용 삭제 버튼
+    # 입력 내용 삭제 버튼 - 입력 내용이 있을 때만 활성화
     col_clear1, col_clear2, col_clear3 = st.columns([1, 1, 1])
     with col_clear2:
-        if st.button("🗑️ 입력 내용 삭제", help="입력한 내용을 전부 삭제합니다", use_container_width=True, type="secondary"):
-            clear_text_input()
+        delete_btn_disabled = (char_count == 0)
+        if st.button("🗑️ 입력 내용 삭제", help="입력한 내용을 전부 삭제합니다 (파일명은 유지)", use_container_width=True, type="secondary", disabled=delete_btn_disabled):
+            clear_text_input()  # 파일명은 유지하고 QR 내용만 삭제
             st.rerun()
     
     # 공백/줄바꿈 제거 옵션
@@ -213,37 +211,38 @@ with col1:
     col_filename, col_filename_clear = st.columns([3, 1])
     
     with col_filename:
-        # 파일명 초기화 요청이 있으면 빈 값으로 시작
-        filename_default = "" if st.session_state.clear_filename_requested else st.session_state.get("filename_input", "")
-        
+        # 파일명 삭제 요청시 세션 상태에서 직접 삭제
+        if st.session_state.clear_filename_requested: 
+            if 'filename_input' in st.session_state:
+                del st.session_state.filename_input
+            st.session_state.clear_filename_requested = False
+
         filename = st.text_input(
             "다운로드 파일명 입력 (확장자는 제외, 파일명만 입력)",
             placeholder="이 곳에 파일명을 입력해 주세요 (비어있으면 자동 생성됨)",
-            value=filename_default,
             key="filename_input"
         )
-    
+            
     with col_filename_clear:
         st.markdown("<br>", unsafe_allow_html=True)  # 입력창과 높이 맞추기
-        if st.button("🗑️ 파일명 삭제", help="입력한 파일명을 삭제합니다", use_container_width=True):
+        # filename 변수 (text_input의 현재 반환값)로 버튼 상태 결정
+        filename_delete_disabled = not filename.strip()
+        if st.button("🗑️ 파일명 삭제", help="입력한 파일명을 삭제합니다", use_container_width=True, disabled=filename_delete_disabled):
             clear_filename()
             st.rerun()
     
-    # 파일명 초기화 플래그 리셋
-    if st.session_state.clear_filename_requested:
-        st.session_state.clear_filename_requested = False
-
+    # 파일명 변경 감지를 위한 별도 상태 관리
     if "last_filename" not in st.session_state:
-        st.session_state.last_filename = ""  # 처음엔 빈 문자열로 시작
+        st.session_state.last_filename = ""
 
-    # 파일명 변경 메시지 - QR 생성 여부와 상관없이 표시
     current_filename = filename.strip()
 
+    # 파일명 상태 메시지 (실제 파일명 변화만 감지)
     if current_filename and current_filename != st.session_state.last_filename:
         st.success("✅ 파일명이 입력되었습니다.")
         st.session_state.last_filename = current_filename
-    elif not current_filename and st.session_state.last_filename:
-        # 파일명을 지웠을 때
+    elif not current_filename and st.session_state.last_filename and st.session_state.clear_filename_requested:
+        # 파일명 삭제 버튼을 통해 실제로 삭제된 경우에만 메시지 표시
         st.info("✅ 파일명이 삭제되었습니다. 빈칸일 경우 자동 생성됩니다.")
         st.session_state.last_filename = ""
 
@@ -261,7 +260,6 @@ with col2:
         st.session_state.qr_info = None
         st.session_state.preview_image = None
         st.session_state.preview_info = None
-        st.session_state.last_filename = ""
 
     col2_1, col2_2 = st.columns(2)
     with col2_1:
@@ -271,53 +269,53 @@ with col2:
     
     st.markdown("---")
     
-    st.caption("[⚡ QR 코드 생성] 버튼을 클릭하면 QR 코드가 생성되고, [📥 QR 코드 다운로드] 버튼이 활성화됩니다.")
+    st.caption("[⚡ QR 코드 생성] 버튼을 클릭하면 QR 코드가 생성되고, [💾 QR 코드 다운로드] 버튼이 활성화됩니다.")
 
     if preview_btn or generate_btn:
-            if not current_data:
-                st.error("생성할 QR 코드 내용을 입력해 주세요.")
-            elif pattern_color == bg_color:
-                st.error("패턴과 배경은 같은 색을 사용할 수 없습니다.")
-            elif pattern_color_choice == "<직접 선택>" and not custom_pattern_color.strip():
-                st.error("패턴 색상을 직접 입력해 주세요.")
-            elif bg_color_choice == "<직접 선택>" and not custom_bg_color.strip():
-                st.error("배경 색상을 직접 입력해 주세요.")
-            else:
-                img, qr = generate_qr_code(
-                    current_data, int(box_size), int(border), error_correction,
-                    int(mask_pattern), pattern_color, bg_color
-                )
-    
-                if img and qr:
-                    qr_info_text = f"""
-                    **QR 코드 정보**
-                    - QR 버전: {qr.version}
-                    - 가로/세로 각 cell 개수: {qr.modules_count}개
-                    - 이미지 크기: {img.size[0]} x {img.size[1]} px
-                    - 패턴 색상: {pattern_color}
-                    - 배경 색상: {bg_color}
-                    - 이미지 크기 = (각 cell 개수 + 좌/우 여백 총 개수) × 1개의 사각 cell 크기
-                    """
-                    st.session_state.preview_image = img
-                    st.session_state.preview_info = qr_info_text
-                    st.session_state.last_preview_data = current_data
-    
-                    if preview_btn:
-                        # 미리보기 버튼 클릭시 생성 관련 상태 초기화
-                        st.session_state.qr_generated = False
-                        st.session_state.qr_image_bytes = None
-                        st.session_state.qr_image = None
-                        st.session_state.qr_info = None
-    
-                    if generate_btn:
-                        img_buffer = io.BytesIO()
-                        img.save(img_buffer, format='PNG')
-                        st.session_state.qr_image_bytes = img_buffer.getvalue()
-                        st.session_state.qr_image = img
-                        st.session_state.qr_info = qr_info_text
-                        st.session_state.qr_generated = True
-                        # 생성 직후 즉시 성공 메시지 표시
-                        st.success("✅ QR 코드 생성 완료! 필요시 파일명을 변경하고 다운로드하세요.")
+        if not current_data:
+            st.error("생성할 QR 코드 내용을 입력해 주세요.")
+        elif pattern_color == bg_color:
+            st.error("패턴과 배경은 같은 색을 사용할 수 없습니다.")
+        elif pattern_color_choice == "<직접 선택>" and not custom_pattern_color.strip():
+            st.error("패턴 색상을 직접 입력해 주세요.")
+        elif bg_color_choice == "<직접 선택>" and not custom_bg_color.strip():
+            st.error("배경 색상을 직접 입력해 주세요.")
+        else:
+            img, qr = generate_qr_code(
+                current_data, int(box_size), int(border), error_correction,
+                int(mask_pattern), pattern_color, bg_color
+            )
+
+            if img and qr:
+                qr_info_text = f"""
+                **QR 코드 정보**
+                - QR 버전: {qr.version}
+                - 가로/세로 각 cell 개수: {qr.modules_count}개
+                - 이미지 크기: {img.size[0]} x {img.size[1]} px
+                - 패턴 색상: {pattern_color}
+                - 배경 색상: {bg_color}
+                - 이미지 크기 = (각 cell 개수 + 좌/우 여백 총 개수) × 1개의 사각 cell 크기
+                """
+                st.session_state.preview_image = img
+                st.session_state.preview_info = qr_info_text
+                st.session_state.last_preview_data = current_data
+
+                if preview_btn:
+                    # 미리보기 버튼 클릭시 생성 관련 상태 초기화
+                    st.session_state.qr_generated = False
+                    st.session_state.qr_image_bytes = None
+                    st.session_state.qr_image = None
+                    st.session_state.qr_info = None
+
+                if generate_btn:
+                    img_buffer = io.BytesIO()
+                    img.save(img_buffer, format='PNG')
+                    st.session_state.qr_image_bytes = img_buffer.getvalue()
+                    st.session_state.qr_image = img
+                    st.session_state.qr_info = qr_info_text
+                    st.session_state.qr_generated = True
+                    # 생성 직후 즉시 성공 메시지 표시
+                    st.success("✅ QR 코드 생성 완료! 필요시 파일명을 변경하고 다운로드하세요.")
 
     # 저장된 미리보기가 있고 입력 내용이 같을 때만 표시
     if st.session_state.preview_image and current_data == st.session_state.last_preview_data:
@@ -332,8 +330,6 @@ with col2:
         current_data != "" and
         not generate_btn):  # 생성 버튼을 클릭한 직후가 아닐 때만
         st.success("✅ 파일을 다운로드 합니다! 파일이 저장되는 경로를 확인하세요.")
-#    elif not st.session_state.qr_generated:
-#        st.caption("[⚡ QR 코드 생성] 버튼을 클릭하면 QR 코드가 생성되고, [📥 QR 코드 다운로드] 버튼이 활성화됩니다.")
 
     # 다운로드 섹션 - QR 코드가 생성되었을 때만 표시
     if (st.session_state.qr_generated and
@@ -357,7 +353,7 @@ with col2:
         download_filename = f"{sanitize_filename(final_filename)}.png"
         
         st.download_button(
-            label="📥 QR 코드 다운로드",
+            label="💾 QR 코드 다운로드",
             data=st.session_state.qr_image_bytes,
             file_name=download_filename,
             mime="image/png",
@@ -365,7 +361,6 @@ with col2:
             help="PC는 'Download' 폴더, 휴대폰은 'Download' 폴더에 저장됩니다.",
         )
 
-#        st.caption(f"📄 다운로드 파일명: `{download_filename}`")
         st.markdown(
             f'<p style="font-size:18px;">'
             f'<span style="color:darkorange; font-weight:bold;">📄 다운로드 파일명: </span> '
@@ -374,8 +369,12 @@ with col2:
             unsafe_allow_html=True
         )
 
-        if st.button("🔄 새 QR 코드 생성", use_container_width=True):
-            # 모든 상태와 입력창 초기화
+        if st.button(
+            label="🔄 새 QR 코드 생성",
+            use_container_width=True,
+            help="이 버튼을 누르면 현재 입력된 모든 내용이 초기화 됩니다.",
+        ):
+            # 모든 상태와 입력창 초기화 (파일명 포함)
             st.session_state.qr_generated = False
             st.session_state.qr_image_bytes = None
             st.session_state.qr_image = None
