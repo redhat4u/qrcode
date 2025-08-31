@@ -205,13 +205,13 @@ with col1:
 
     with col_filename1:
         filename = st.text_input(
-            "다운로드 파일명 입력 (확장자는 제외)",   # 라벨은 여기!
+            "다운로드 파일명 입력 (확장자는 제외)",   # 라벨을 입력칸에 직접 넣기
             placeholder="이 곳에 파일명을 입력해 주세요 (비어있으면 자동 생성됨)",
             key="filename_input"
         )
 
     with col_filename2:
-        st.markdown("<br>", unsafe_allow_html=True)  # 버튼을 입력창 높이 맞추기 위한 공백
+        st.markdown("<div style='margin-top: 1.9rem;'></div>", unsafe_allow_html=True)  # 입력창과 높이 맞춤
         if st.button("❌ 삭제", use_container_width=True):
             st.session_state.filename_input = ""
             st.success("파일명이 삭제되었습니다.")
