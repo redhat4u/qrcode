@@ -91,7 +91,7 @@ def clear_text_input():
     st.session_state.preview_image = None
     st.session_state.preview_info = None
     st.session_state.last_preview_data = ""
-    st.session_state.filename_input = ""  # ⭐ 파일명 입력창도 초기화되도록 추가
+    st.session_state.filename_input = ""
 
 # 초기화 플래그 추가
 if 'clear_requested' not in st.session_state:
@@ -362,6 +362,7 @@ with col2:
 
     # 저장된 미리보기가 있고 입력 내용이 변경되지 않았다면 미리보기 표시
     if st.session_state.preview_image is not None:
+        # 현재 입력 데이터 확인
         current_data = qr_data.strip() if strip_option else qr_data
         
         if current_data == st.session_state.last_preview_data:
@@ -372,16 +373,20 @@ with col2:
             # 입력 내용이 변경되었으면 전체 상태 초기화
             st.session_state.preview_image = None
             st.session_state.preview_info = None
-            st.session_state.last_preview_data = ""
-            st.session_state.qr_generated = False   # ⭐ 생성 완료 메시지도 초기화
+            st.session_state.qr_generated = False   # 생성 완료 메시지도 초기화
             st.session_state.qr_image_bytes = None
             st.session_state.qr_image = None
             st.session_state.qr_info = None
-            st.session_state.filename_input = ""    # (필요하면 파일명도 초기화)
-            st.session_state.last_filename = ""     # ⭐ 파일명 변경 메시지도 초기화
+            st.session_state.filename_input = ""    # 파일명도 초기화
+            st.session_state.last_filename = ""     # 파일명 변경 메시지도 초기화
+
+        # 마지막 입력값을 갱신
+        st.session_state.last_preview_data = current_data
 
     # 생성된 QR 코드가 있다면 다운로드 버튼 표시
     if st.session_state.qr_generated and st.session_state.qr_image_bytes is not None:
+        st.success("✅ QR 코드 생성 완료! 필요시 파일명을 변경하고 다운로드하세요.")
+
         st.markdown("---")
         st.subheader("📥 다운로드")
         
@@ -409,7 +414,7 @@ with col2:
             st.session_state.qr_image_bytes = None
             st.session_state.qr_image = None
             st.session_state.qr_info = None
-            st.session_state.filename_input = ""  # ⭐ 새 QR 코드 생성 시 파일명도 초기화되도록 추가
+            st.session_state.filename_input = ""  # 새 QR 코드 생성 시 파일명도 초기화
             st.rerun()
 
 
