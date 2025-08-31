@@ -210,7 +210,7 @@ with col1:
     # 파일명 변경 메시지 - QR 생성 여부와 상관없이 표시
     current_filename = filename.strip()
     if current_filename and current_filename != st.session_state.last_filename:
-        st.success("✅ 파일명이 변경되었습니다. QR 코드 생성 후 다운로드 버튼을 클릭하세요.")
+        st.success("✅ 파일명이 변경되었습니다.")
         st.session_state.last_filename = current_filename
     elif not current_filename and st.session_state.last_filename:
         # 파일명을 지웠을 때
@@ -384,4 +384,5 @@ st.markdown(
     '<p style="text-align: center; color: darkorange; font-size: 16px;">© 2025 QR 코드 생성기  |  Streamlit으로 제작  |  제작: 류종훈(redhat4u@gmail.com)</p>',
     unsafe_allow_html=True
 )
+
 
