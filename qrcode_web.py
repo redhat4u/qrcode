@@ -245,6 +245,11 @@ with col2:
     
     current_data = qr_data.strip() if strip_option else qr_data
     
+    # 미리보기용 유효성 검사 변수
+    is_pattern_color_invalid_preview = (pattern_color_choice == "<직접 선택>" and not custom_pattern_color.strip())
+    is_bg_color_invalid_preview = (bg_color_choice == "<직접 선택>" and not custom_bg_color.strip())
+    is_colors_same_preview = (pattern_color == bg_color)
+    
     # QR 코드 파라미터 해시 생성
     qr_params = (
         current_data,
@@ -259,11 +264,8 @@ with col2:
     )
     current_qr_params_hash = hashlib.md5(str(qr_params).encode('utf-8')).hexdigest()
 
-    # 미리보기 유효성 검사 및 업데이트 로직
-    is_pattern_color_invalid = (pattern_color_choice == "<직접 선택>" and not custom_pattern_color.strip())
-    is_bg_color_invalid = (bg_color_choice == "<직접 선택>" and not custom_bg_color.strip())
-    
-    if current_data and not is_pattern_color_invalid and not is_bg_color_invalid and (current_qr_params_hash != st.session_state.last_qr_params_hash):
+    # 미리보기 업데이트 로직
+    if current_data and not is_pattern_color_invalid_preview and not is_bg_color_invalid_preview and not is_colors_same_preview and (current_qr_params_hash != st.session_state.last_qr_params_hash):
         st.session_state.qr_generated = False
         st.session_state.qr_image_bytes = None
         st.session_state.qr_image = None
@@ -292,7 +294,7 @@ with col2:
             st.session_state.preview_info = qr_info_text
             st.session_state.last_preview_data = current_data
             st.session_state.last_qr_params_hash = current_qr_params_hash
-    elif not current_data or is_pattern_color_invalid or is_bg_color_invalid:
+    else:
         st.session_state.qr_generated = False
         st.session_state.qr_image_bytes = None
         st.session_state.qr_image = None
@@ -304,21 +306,31 @@ with col2:
         st.session_state.show_generate_success = False
         st.session_state.last_qr_params_hash = ""
 
-
     # QR 코드 생성 버튼
     generate_btn = st.button("⚡ QR 코드 생성", use_container_width=True)
     
+    # 생성 버튼 클릭 시 최종 유효성 검사 로직
     if generate_btn:
-        # 유효성 검사 로직 (QR 코드 생성 이전에 실행)
+        errors = []
         if not current_data:
-            st.error("생성할 QR 코드 내용을 입력해 주세요.")
-        elif pattern_color_choice == "<직접 선택>" and not custom_pattern_color.strip():
-            st.error("⚠️ QR 코드 **패턴 색상**을 직접 입력해 주세요.")
-        elif bg_color_choice == "<직접 선택>" and not custom_bg_color.strip():
-            st.error("⚠️ QR 코드 **배경 색상**을 직접 입력해 주세요.")
-        elif pattern_color == bg_color:
-            st.error("⚠️ 패턴과 배경은 같은 색을 사용할 수 없습니다.")
+            errors.append("생성할 QR 코드 내용을 입력해 주세요.")
+        
+        # 패턴 및 배경 색상 직접 입력 유효성 검사
+        if pattern_color_choice == "<직접 선택>" and not custom_pattern_color.strip():
+            errors.append("QR 코드 **패턴 색상**을 직접 입력해 주세요.")
+        
+        if bg_color_choice == "<직접 선택>" and not custom_bg_color.strip():
+            errors.append("QR 코드 **배경 색상**을 직접 입력해 주세요.")
+            
+        # 두 색상이 같은지 최종 검사
+        if pattern_color == bg_color:
+            errors.append("패턴과 배경은 같은 색을 사용할 수 없습니다.")
+
+        if errors:
+            for error_msg in errors:
+                st.error(f"⚠️ {error_msg}")
         else:
+            # 모든 유효성 검사를 통과했을 때만 QR 코드 생성
             img, qr = generate_qr_code(
                 current_data, int(box_size), int(border), error_correction,
                 int(mask_pattern), pattern_color, bg_color
@@ -347,16 +359,20 @@ with col2:
     st.markdown("---")
 
     # 미리보기 이미지 및 정보 표시
-    if st.session_state.preview_image and current_data and not is_pattern_color_invalid and not is_bg_color_invalid and (current_qr_params_hash == st.session_state.last_qr_params_hash):
+    if st.session_state.preview_image and current_data and not is_pattern_color_invalid_preview and not is_bg_color_invalid_preview and not is_colors_same_preview and (current_qr_params_hash == st.session_state.last_qr_params_hash):
         st.subheader("📱 QR 코드 미리보기")
         st.image(st.session_state.preview_image, caption="생성된 QR 코드", width=380)
         st.info(st.session_state.preview_info)
     elif not current_data:
         st.info("QR 코드 내용을 입력하시면 미리보기가 자동으로 나타납니다.")
-    elif is_pattern_color_invalid:
+    elif is_pattern_color_invalid_preview and is_bg_color_invalid_preview:
+        st.warning("⚠️ 패턴 색상 및 배경 색상을 직접 입력해 주세요. 미리보기를 위해 유효한 색상 값이 필요합니다.")
+    elif is_pattern_color_invalid_preview:
         st.warning("⚠️ 패턴 색상을 직접 입력해 주세요. 미리보기를 위해 유효한 색상 값이 필요합니다.")
-    elif is_bg_color_invalid:
+    elif is_bg_color_invalid_preview:
         st.warning("⚠️ 배경 색상을 직접 입력해 주세요. 미리보기를 위해 유효한 색상 값이 필요합니다.")
+    elif is_colors_same_preview:
+        st.warning("⚠️ 패턴과 배경은 같은 색을 사용할 수 없습니다.")
 
     # 생성 성공 메시지 (고정)
     if st.session_state.show_generate_success:
