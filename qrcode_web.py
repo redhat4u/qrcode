@@ -93,6 +93,7 @@ if 'reset_filename' not in st.session_state:
     st.session_state.reset_filename = False
 
 # 메인 앱 ============================================================================================
+
 st.title("🔲 QR 코드 생성기")
 st.markdown("---")
 
@@ -241,6 +242,8 @@ with col2:
     
     st.markdown("---")
     
+    st.caption("[⚡ QR 코드 생성] 버튼을 클릭하면 QR 코드가 생성되고, [📥 QR 코드 다운로드] 버튼이 활성화됩니다.")
+
     if preview_btn or generate_btn:
         if not current_data:
             st.error("생성할 QR 코드 내용을 입력해 주세요.")
@@ -293,8 +296,8 @@ with col2:
         current_data != "" and
         not generate_btn):  # 생성 버튼을 클릭한 직후가 아닐 때만
         st.success("✅ QR 코드 생성 완료! 필요시 파일명을 변경하고 다운로드하세요.")
-    elif not st.session_state.qr_generated:
-        st.caption("[⚡ QR 코드 생성] 버튼을 클릭하면 QR 코드가 생성되고, [📥 QR 코드 다운로드] 버튼이 활성화됩니다.")
+#    elif not st.session_state.qr_generated:
+#        st.caption("[⚡ QR 코드 생성] 버튼을 클릭하면 QR 코드가 생성되고, [📥 QR 코드 다운로드] 버튼이 활성화됩니다.")
 
     # 다운로드 섹션 - QR 코드가 생성되었을 때만 표시
     if (st.session_state.qr_generated and 
