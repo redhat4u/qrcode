@@ -243,11 +243,12 @@ with col1:
     # 파일명 변경 메시지 - QR 생성 여부와 상관없이 표시
     current_filename = filename.strip()
 
+    # 파일명 상태 관리 - QR 내용 삭제와 독립적으로 동작
     if current_filename and current_filename != st.session_state.last_filename:
         st.success("✅ 파일명이 입력되었습니다.")
         st.session_state.last_filename = current_filename
-    elif not current_filename and st.session_state.last_filename:
-        # 파일명을 지웠을 때
+    elif not current_filename and st.session_state.last_filename and not st.session_state.clear_requested:
+        # QR 내용 삭제가 아닌 경우에만 파일명 삭제 메시지 표시
         st.info("✅ 파일명이 삭제되었습니다. 빈칸일 경우 자동 생성됩니다.")
         st.session_state.last_filename = ""
 
