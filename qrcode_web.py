@@ -213,8 +213,12 @@ with col1:
     col_filename, col_filename_clear = st.columns([3, 1])
     
     with col_filename:
-        # 파일명 초기화 요청이 있으면 빈 값으로 시작
-        filename_default = "" if st.session_state.clear_filename_requested else st.session_state.get("filename_input", "")
+        # 파일명은 QR 내용 삭제와 완전히 독립적으로 관리
+        if st.session_state.clear_filename_requested:
+            filename_default = ""
+            st.session_state.clear_filename_requested = False
+        else:
+            filename_default = st.session_state.get("filename_input", "")
         
         filename = st.text_input(
             "다운로드 파일명 입력 (확장자는 제외, 파일명만 입력)",
@@ -231,9 +235,7 @@ with col1:
             clear_filename()
             st.rerun()
     
-    # 파일명 초기화 플래그 리셋
-    if st.session_state.clear_filename_requested:
-        st.session_state.clear_filename_requested = False
+    # 파일명 초기화 플래그 리셋은 위에서 처리됨
 
     # 파일명 변경 감지를 위한 별도 상태 관리
     if "last_filename" not in st.session_state:
