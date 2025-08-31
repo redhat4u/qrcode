@@ -77,8 +77,8 @@ if 'last_preview_data' not in st.session_state:
 
 # QR 내용만 초기화하는 함수 (파일명은 유지)
 def clear_text_input():
-    # QR 입력창만 초기화하고 파일명은 유지
-    st.session_state.qr_input_area = ""  # QR 입력창 직접 초기화
+    # QR 관련 상태만 초기화 (입력창은 rerun 후 초기화됨)
+    st.session_state.clear_qr_requested = True  # QR 입력창 초기화 플래그
     st.session_state.qr_generated = False
     st.session_state.qr_image_bytes = None
     st.session_state.qr_image = None  
@@ -92,9 +92,23 @@ def clear_filename():
     st.session_state.filename_input = ""  # 직접 값을 빈 문자열로 설정
     st.rerun()  # 즉시 화면 새로고침
 
+# 모든 입력창 초기화하는 함수
+def clear_all_inputs():
+    st.session_state.clear_all_requested = True
+    st.session_state.qr_generated = False
+    st.session_state.qr_image_bytes = None
+    st.session_state.qr_image = None
+    st.session_state.qr_info = None
+    st.session_state.preview_image = None
+    st.session_state.preview_info = None
+    st.session_state.last_preview_data = ""
+    st.session_state.last_filename = ""
+
 # 초기화 플래그 추가
-if 'clear_requested' not in st.session_state:
-    st.session_state.clear_requested = False
+if 'clear_qr_requested' not in st.session_state:
+    st.session_state.clear_qr_requested = False
+if 'clear_all_requested' not in st.session_state:
+    st.session_state.clear_all_requested = False
 if 'last_filename' not in st.session_state:
     st.session_state.last_filename = ""
 
@@ -113,20 +127,24 @@ with col1:
     st.subheader("📝 QR 코드 내용")
     st.info("최대 입력 가능한 문자는 종류에 따라 약 2,400~2,900자 정도입니다.")
     
-    # 초기화 요청이 있으면 빈 값으로 시작
-    default_value = "" if st.session_state.clear_requested else st.session_state.get("qr_input_area", "")
+    # QR 입력창 초기화 처리
+    qr_default_value = ""
+    if st.session_state.clear_qr_requested:
+        qr_default_value = ""
+        st.session_state.clear_qr_requested = False
+    elif st.session_state.clear_all_requested:
+        qr_default_value = ""
+        st.session_state.clear_all_requested = False
+    else:
+        qr_default_value = st.session_state.get("qr_input_area", "")
     
     qr_data = st.text_area(
         "QR 코드로 생성할 내용을 입력해 주세요",
         height=200,
         placeholder="이 곳에 QR 코드를 생성할 내용을 입력해 주세요.\n복사/붙여넣기를 사용할 수 있습니다.",
-        value=default_value,
+        value=qr_default_value,
         key="qr_input_area"
     )
-    
-    # 초기화 플래그 리셋
-    if st.session_state.clear_requested:
-        st.session_state.clear_requested = False
     
     # 문자 수 표시
     char_count = len(qr_data) if qr_data else 0
@@ -211,13 +229,17 @@ with col1:
     col_filename, col_filename_clear = st.columns([3, 1])
     
     with col_filename:
-        # filename_input 키가 없으면 빈 문자열로 초기화
-        if 'filename_input' not in st.session_state:
-            st.session_state.filename_input = ""
+        # 파일명 입력창 초기화 처리
+        filename_default_value = ""
+        if st.session_state.clear_all_requested:
+            filename_default_value = ""
+        else:
+            filename_default_value = st.session_state.get("filename_input", "")
 
         filename = st.text_input(
             "다운로드 파일명 입력 (확장자는 제외, 파일명만 입력)",
             placeholder="이 곳에 파일명을 입력해 주세요 (비어있으면 자동 생성됨)",
+            value=filename_default_value,
             key="filename_input"
         )
             
@@ -368,18 +390,8 @@ with col2:
             use_container_width=True,
             help="이 버튼을 누르면 현재 입력된 모든 내용이 초기화 됩니다.",
         ):
-            # 모든 상태와 입력창 초기화 (파일명 포함)
-            st.session_state.qr_generated = False
-            st.session_state.qr_image_bytes = None
-            st.session_state.qr_image = None
-            st.session_state.qr_info = None
-            st.session_state.preview_image = None
-            st.session_state.preview_info = None
-            st.session_state.last_preview_data = ""
-            st.session_state.last_filename = ""
-            # 입력창과 파일명 입력창 초기화
-            st.session_state.clear_requested = True
-            st.session_state.filename_input = ""  # 파일명도 직접 초기화
+            # 모든 입력창 초기화
+            clear_all_inputs()
             st.rerun()
 
 # 사이드바
