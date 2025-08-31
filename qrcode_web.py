@@ -75,13 +75,12 @@ if 'preview_info' not in st.session_state:
 if 'last_preview_data' not in st.session_state:
     st.session_state.last_preview_data = ""
 
-# QR 내용만 초기화하는 함수 (파일명은 유지)
+# QR 내용만 초기화하는 콜백 함수 (파일명은 유지)
 def clear_text_input():
-    # QR 관련 상태만 초기화 (입력창은 rerun 후 초기화됨)
-    st.session_state.clear_qr_requested = True  # QR 입력창 초기화 플래그
+    st.session_state.qr_input_area = "" # 직접 입력창의 상태를 변경
     st.session_state.qr_generated = False
     st.session_state.qr_image_bytes = None
-    st.session_state.qr_image = None  
+    st.session_state.qr_image = None
     st.session_state.qr_info = None
     st.session_state.preview_image = None
     st.session_state.preview_info = None
@@ -109,25 +108,18 @@ col1, col2 = st.columns([1.2, 1])
 
 with col1:
     st.header("⚙️ 입력 및 설정")
-    
+
     # QR 코드 입력창
     st.subheader("📝 QR 코드 내용")
     st.info("최대 입력 가능한 문자는 종류에 따라 약 2,400~2,900자 정도입니다.")
-    
-    # QR 입력창만 초기화 (파일명은 건드리지 않음)
-    qr_default_value = st.session_state.get("qr_input_area", "")
-    if st.session_state.clear_qr_requested:
-        qr_default_value = ""
-        st.session_state.clear_qr_requested = False
-    
+
     qr_data = st.text_area(
         "QR 코드로 생성할 내용을 입력해 주세요",
         height=200,
         placeholder="이 곳에 QR 코드를 생성할 내용을 입력해 주세요.\n복사/붙여넣기를 사용할 수 있습니다.",
-        value=qr_default_value,
         key="qr_input_area"
     )
-    
+
     # 문자 수 표시
     char_count = len(qr_data) if qr_data else 0
     if char_count > 0:
@@ -139,33 +131,38 @@ with col1:
             st.success(f"✅ 현재 입력된 총 문자 수: **{char_count}**")
     else:
         st.caption("현재 입력된 총 문자 수: 0")
-        
-    # 입력 내용 삭제 버튼 - 입력 내용이 있을 때만 활성화
+
+    # 입력 내용 삭제 버튼 - on_click 콜백을 사용하도록 수정
     col_clear1, col_clear2, col_clear3 = st.columns([1, 1, 1])
     with col_clear2:
         delete_btn_disabled = (char_count == 0)
-        if st.button("🗑️ 입력 내용 삭제", help="입력한 내용을 전부 삭제합니다 (파일명은 유지)", use_container_width=True, type="secondary", disabled=delete_btn_disabled):
-            clear_text_input()  # 파일명은 유지하고 QR 내용만 삭제
-            st.rerun()
-    
+        st.button(
+            "🗑️ 입력 내용 삭제",
+            help="입력한 내용을 전부 삭제합니다 (파일명은 유지)",
+            use_container_width=True,
+            type="secondary",
+            disabled=delete_btn_disabled,
+            on_click=clear_text_input  # on_click 콜백으로 함수 직접 연결
+        )
+
     # 공백/줄바꿈 제거 옵션
     strip_option = st.checkbox(
         "마지막 입력문자 이후 모든 공백/줄바꿈 제거",
         value=True,
         help="입력된 내용 맨끝에 공백/줄바꿈 문자가 한개라도 포함되면 완전히 다른 QR코드가 생성됩니다. 입력된 마지막 문자 뒤에 공백/줄바꿈이 추가되어도 QR코드에 반영되지 않도록 하고 싶다면, 이 옵션을 켜 두세요."
     )
-    
+
     st.markdown("---")
     st.markdown("---")
-    
+
     # QR 코드 설정
     st.subheader("🔧 QR 코드 설정")
-    
+
     col1_1, col1_2 = st.columns(2)
     with col1_1:
         box_size = st.number_input("QR 코드 1개의 사각 cell 크기 (px)", min_value=1, max_value=100, value=20)
         border = st.number_input("QR 코드 테두리/여백", min_value=0, max_value=10, value=2)
-    
+
     with col1_2:
         error_correction_options = {
             "Low (7%) - 오류 보정": qrcode.constants.ERROR_CORRECT_L,
@@ -176,12 +173,12 @@ with col1:
         error_correction_choice = st.selectbox("오류 보정 레벨", list(error_correction_options.keys()), index=0)
         error_correction = error_correction_options[error_correction_choice]
         mask_pattern = st.selectbox("마스크 패턴 선택 (0~7)", options=list(range(8)), index=2)
-    
+
     st.markdown("---")
     st.subheader("🔧 색상 설정")
-    
+
     colors = [
-        "<직접 선택>", "black", "white", "gray", "lightgray",  
+        "<직접 선택>", "black", "white", "gray", "lightgray",
         "lightyellow", "lightgreen", "lightcoral", "lightblue",
         "red", "green", "blue", "purple", "orange", "orangered",
         "darkorange", "maroon", "yellow", "brown", "navy", "mediumblue",
@@ -191,7 +188,7 @@ with col1:
         pattern_color_choice = st.selectbox("패턴 색상", colors, index=1)
     with col1_4:
         bg_color_choice = st.selectbox("배경 색상", colors, index=2)
-    
+
     st.markdown("원하는 색상이 리스트에 없다면, 아래에 직접 색상을 입력하세요.")
     st.caption("색상명 (예: crimson, gold) 또는 HEX 코드 (예: #FF5733, #00FF00)를 입력할 수 있습니다.")
     col1_5, col1_6 = st.columns(2)
@@ -199,14 +196,14 @@ with col1:
         custom_pattern_color = st.text_input("패턴 색상 직접 입력", placeholder="예: crimson 또는 #FF0000", disabled=(pattern_color_choice != "<직접 선택>"))
     with col1_6:
         custom_bg_color = st.text_input("배경 색상 직접 입력", placeholder="예: lightcyan 또는 #E0FFFF", disabled=(bg_color_choice != "<직접 선택>"))
-    
+
     pattern_color = custom_pattern_color if pattern_color_choice == "<직접 선택>" and custom_pattern_color else pattern_color_choice
     bg_color = custom_bg_color if bg_color_choice == "<직접 선택>" and custom_bg_color else bg_color_choice
-    
+
     st.markdown("---")
 
     st.subheader("🔧 파일 설정")
-    
+
     # 파일명 입력창과 삭제 버튼을 위한 컬럼
     col_filename_input, col_filename_delete = st.columns([3, 1.1])
 
@@ -233,7 +230,7 @@ with col1:
 
     # 파일명 상태 메시지 - 실제 변경사항만 반영
     current_filename = filename.strip()
-    
+
     # 파일명 변경 감지 및 메시지 표시
     if current_filename and current_filename != st.session_state.last_filename:
         st.success("✅ 파일명이 변경되었습니다.")
@@ -243,10 +240,10 @@ with col1:
 
 with col2:
     st.header("👀 미리보기 및 생성")
-    
+
     # 현재 입력된 데이터 처리
     current_data = qr_data.strip() if strip_option else qr_data
-    
+
     # 입력 내용이 변경되었을 때 상태 초기화 (파일명은 유지)
     if 'last_preview_data' in st.session_state and current_data != st.session_state.last_preview_data:
         st.session_state.qr_generated = False
@@ -261,9 +258,9 @@ with col2:
         preview_btn = st.button("🔍 미리 보기", use_container_width=True)
     with col2_2:
         generate_btn = st.button("⚡ QR 코드 생성", use_container_width=True)
-    
+
     st.markdown("---")
-    
+
     st.caption("[⚡ QR 코드 생성] 버튼을 클릭하면 QR 코드가 생성되고, [💾 QR 코드 다운로드] 버튼이 활성화됩니다.")
 
     if preview_btn or generate_btn:
@@ -323,22 +320,22 @@ with col2:
         st.session_state.qr_image_bytes is not None and
         current_data == st.session_state.last_preview_data and
         current_data != ""):
-        
+
         st.markdown("---")
 
         st.subheader("📥 다운로드")
-        
+
         now = datetime.now(ZoneInfo("Asia/Seoul"))
         current_filename = filename.strip()
-        
+
         # 파일명이 비어있으면 자동 생성
         if not current_filename:
             final_filename = now.strftime("QR_%Y-%m-%d_%H-%M-%S")
         else:
             final_filename = current_filename
-            
+
         download_filename = f"{sanitize_filename(final_filename)}.png"
-        
+
         st.download_button(
             label="💾 QR 코드 다운로드",
             data=st.session_state.qr_image_bytes,
@@ -380,7 +377,7 @@ with st.sidebar:
     st.markdown("""
     - **텍스트**: `QR 코드로 생성할 텍스트를 입력합니다`
     - **웹사이트**: `https://www.example.com`
-    - **이메일**: `mailto:user@example.com`  
+    - **이메일**: `mailto:user@example.com`
     - **전화번호**: `tel:010-1234-5678`
     - **SMS**: `sms:010-1234-5678`
     - **WiFi**: `WIFI:T:WPA;S:네트워크명(SSID);P:비밀번호;H:false;;`
@@ -393,10 +390,10 @@ with st.sidebar:
     - **Medium (15%)**: 일반적인 사용
     - **Quartile (25%)**: 약간의 손상 가능
     - **High (30%)**: 로고 삽입, 손상이 잦은 환경
-    
+
     **마스크 패턴:**
     - 0~7 중 선택 (같은 내용이라도 번호에 따라 패턴이 달라짐)
-    
+
     **색상 입력:**
     - **색상명**: red, blue, green, crimson, gold 등
     - **HEX 코드**: #FF0000, #0000FF, #00FF00 등
@@ -408,4 +405,3 @@ st.markdown(
     '<p style="text-align: center; color: darkorange; font-weight:bold; font-size: 18px;">© 2025 QR 코드 생성기  |  Streamlit으로 제작  |  제작: 류종훈(redhat4u@gmail.com)</p>',
     unsafe_allow_html=True
 )
-# 최신버전..
