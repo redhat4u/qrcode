@@ -75,8 +75,9 @@ if 'preview_info' not in st.session_state:
 if 'last_preview_data' not in st.session_state:
     st.session_state.last_preview_data = ""
 
-# 텍스트 영역 초기화를 위한 함수 (파일명은 건드리지 않음)
+# QR 내용만 초기화하는 함수
 def clear_text_input():
+    # 파일명과 관련된 어떤 상태도 건드리지 않음
     st.session_state.clear_requested = True
     st.session_state.qr_generated = False
     st.session_state.qr_image_bytes = None
@@ -89,8 +90,6 @@ def clear_text_input():
 # 파일명만 초기화하는 함수
 def clear_filename():
     st.session_state.clear_filename_requested = True
-    if 'filename_input' in st.session_state:
-        del st.session_state.filename_input
 
 # 초기화 플래그 추가
 if 'clear_requested' not in st.session_state:
