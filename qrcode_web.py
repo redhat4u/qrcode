@@ -209,9 +209,21 @@ with col1:
             key="filename_input"
         )
     with col_filename2:
+        # 버튼 높이 조절
+        st.markdown(
+            """
+            <style>
+            div[data-testid="stVerticalBlock"] div.stButton button {
+                height: 3rem;
+                margin-top: 0.25rem;
+            }
+            </style>
+            """,
+            unsafe_allow_html=True
+        )
         if st.button("❌ 삭제", use_container_width=True):
             st.session_state.filename_input = ""
-            st.success("✅ 파일명이 삭제되었습니다.")
+            st.success("파일명이 삭제되었습니다.")
 
     if "last_filename" not in st.session_state:
         st.session_state.last_filename = ""  # 처음엔 빈 문자열로 시작
