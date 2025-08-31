@@ -366,9 +366,9 @@ with col2:
         )
 
         if st.button(
-            label="🔄 새 QR 코드 생성",
+            label="🔄 전체 초기화",
             use_container_width=True,
-            help="이 버튼을 누르면 현재 입력된 모든 내용이 초기화 됩니다.",
+            help="이 버튼을 누르면 현재 입력된 모든 내용이 삭제됩니다.",
         ):
             # 모든 입력창 초기화
             clear_all_inputs()
@@ -421,3 +421,4 @@ st.markdown(
     '<p style="text-align: center; color: darkorange; font-weight:bold; font-size: 18px;">© 2025 QR 코드 생성기  |  Streamlit으로 제작  |  제작: 류종훈(redhat4u@gmail.com)</p>',
     unsafe_allow_html=True
 )
+# 최신버전..
