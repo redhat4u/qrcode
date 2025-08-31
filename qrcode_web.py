@@ -146,8 +146,9 @@ with col1:
     with col_clear2:
         delete_btn_disabled = (char_count == 0)
         if st.button("🗑️ 입력 내용 삭제", help="입력한 내용을 전부 삭제합니다", use_container_width=True, type="secondary", disabled=delete_btn_disabled):
-            # 즉시 입력창 상태 삭제
-            st.session_state.qr_input_area = ""
+            # 현재 파일명을 백업
+            if 'filename_input' in st.session_state:
+                st.session_state.filename_backup = st.session_state.filename_input
             clear_text_input()
             st.rerun()
     
@@ -233,9 +234,10 @@ with col1:
         # 파일명이 입력되어 있을 때만 삭제 버튼 활성화
         filename_delete_disabled = not filename.strip()
         if st.button("🗑️ 파일명 삭제", help="입력한 파일명을 삭제합니다", use_container_width=True, disabled=filename_delete_disabled):
-            # 즉시 파일명 입력창 상태 삭제
-            st.session_state.filename_input = ""
             clear_filename()
+            # 파일명 백업도 삭제
+            if 'filename_backup' in st.session_state:
+                del st.session_state.filename_backup
             st.rerun()
     
     # 파일명 초기화 플래그 리셋은 위에서 처리됨
