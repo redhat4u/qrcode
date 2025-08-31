@@ -5,19 +5,18 @@
 버튼 클릭시 파일명 입력창도 빈칸으로 초기화 되도록..
 
 파일명 입력칸 삭제 버튼 추가..
-"""
 
-'''
 QR 코드 생성 웹앱 - Streamlit 버전
 휴대폰에서도 사용 가능
 
-실행 방법:
+로컬 실행 방법:
 1. pip install streamlit qrcode[pil]
 2. streamlit run qrcode_web.py
 
 또는 온라인에서 실행:
 - Streamlit Cloud, Heroku, Replit 등에 배포 가능
-'''
+"""
+
 
 import streamlit as st
 import qrcode
@@ -295,7 +294,7 @@ with col2:
     # 저장된 미리보기가 있고 입력 내용이 같을 때만 표시
     if st.session_state.preview_image and current_data == st.session_state.last_preview_data:
         st.subheader("📱 QR 코드 미리보기")
-        st.image(st.session_state.preview_image, caption="생성된 QR 코드", width=600)
+        st.image(st.session_state.preview_image, caption="생성된 QR 코드", width=400)
         st.info(st.session_state.preview_info)
 
     # 생성 완료 메시지 표시 (다운로드 버튼 클릭시)
