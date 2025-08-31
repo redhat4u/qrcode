@@ -147,7 +147,7 @@ with col1:
         delete_btn_disabled = (char_count == 0)
         if st.button("🗑️ 입력 내용 삭제", help="입력한 내용을 전부 삭제합니다", use_container_width=True, type="secondary", disabled=delete_btn_disabled):
             clear_text_input()
-            st.rerun()
+            # st.rerun() 제거 - 자연스럽게 다음 렌더링에서 반영됨
     
     # 공백/줄바꿈 제거 옵션
     strip_option = st.checkbox(
@@ -232,7 +232,7 @@ with col1:
         filename_delete_disabled = not filename.strip()
         if st.button("🗑️ 파일명 삭제", help="입력한 파일명을 삭제합니다", use_container_width=True, disabled=filename_delete_disabled):
             clear_filename()
-            st.rerun()
+            # st.rerun() 제거 - 자연스럽게 다음 렌더링에서 반영됨
     
     # 파일명 초기화 플래그 리셋은 위에서 처리됨
 
