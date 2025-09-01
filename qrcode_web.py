@@ -49,7 +49,20 @@ if 'custom_bg_color_input_key' not in st.session_state:
     st.session_state.custom_bg_color_input_key = ""
 if 'filename_input_key' not in st.session_state:
     st.session_state.filename_input_key = ""
-
+if 'box_size_input' not in st.session_state:
+    st.session_state.box_size_input = 20
+if 'border_input' not in st.session_state:
+    st.session_state.border_input = 2
+if 'error_correction_select' not in st.session_state:
+    st.session_state.error_correction_select = "Low (7%) - 오류 보정"
+if 'mask_pattern_select' not in st.session_state:
+    st.session_state.mask_pattern_select = 2
+if 'pattern_color_select' not in st.session_state:
+    st.session_state.pattern_color_select = "black"
+if 'bg_color_select' not in st.session_state:
+    st.session_state.bg_color_select = "white"
+if 'strip_option' not in st.session_state:
+    st.session_state.strip_option = True
 
 # 파일명에 특수문자 포함시 '_' 문자로 치환
 def sanitize_filename(name: str) -> str:
@@ -101,6 +114,24 @@ def clear_text_input():
 def clear_filename_callback():
     st.session_state.filename_input_key = ""
     # 파일명만 변경되었으므로 다운로드 정보는 그대로 유지
+
+# 전체 초기화 콜백 함수
+def reset_all_settings():
+    st.session_state.qr_input_area = ""
+    st.session_state.custom_pattern_color_input_key = ""
+    st.session_state.custom_bg_color_input_key = ""
+    st.session_state.filename_input_key = ""
+    
+    st.session_state.box_size_input = 20
+    st.session_state.border_input = 2
+    st.session_state.error_correction_select = "Low (7%) - 오류 보정"
+    st.session_state.mask_pattern_select = 2
+    st.session_state.pattern_color_select = "black"
+    st.session_state.bg_color_select = "white"
+    st.session_state.strip_option = True
+
+    st.session_state.qr_generated = False
+    st.session_state.show_generate_success = False
 
 # 다운로드 버튼 클릭 시 호출되는 콜백 함수
 def set_download_initiated():
@@ -163,7 +194,7 @@ with col1:
     # 공백/줄바꿈 제거 옵션
     strip_option = st.checkbox(
         "마지막 입력문자 이후 모든 공백/줄바꿈 제거",
-        value=True,
+        value=st.session_state.strip_option,
         help="입력된 내용 맨끝에 공백/줄바꿈 문자가 한개라도 포함되면 완전히 다른 QR코드가 생성됩니다. 입력된 마지막 문자 뒤에 공백/줄바꿈이 추가되어도 QR코드에 반영되지 않도록 하고 싶다면, 이 옵션을 켜 두세요.",
         on_change=on_qr_setting_change
     )
@@ -176,8 +207,8 @@ with col1:
 
     col1_1, col1_2 = st.columns(2)
     with col1_1:
-        box_size = st.number_input("QR 코드 1개의 사각 cell 크기 (px)", min_value=1, max_value=100, value=20, key="box_size_input", on_change=on_qr_setting_change)
-        border = st.number_input("QR 코드 테두리/여백", min_value=0, max_value=10, value=2, key="border_input", on_change=on_qr_setting_change)
+        box_size = st.number_input("QR 코드 1개의 사각 cell 크기 (px)", min_value=1, max_value=100, key="box_size_input", on_change=on_qr_setting_change)
+        border = st.number_input("QR 코드 테두리/여백", min_value=0, max_value=10, key="border_input", on_change=on_qr_setting_change)
 
     with col1_2:
         error_correction_options = {
@@ -186,9 +217,9 @@ with col1:
             "Quartile (25%) - 오류 보정": qrcode.constants.ERROR_CORRECT_Q,
             "High (30%) - 오류 보정": qrcode.constants.ERROR_CORRECT_H,
         }
-        error_correction_choice = st.selectbox("오류 보정 레벨", list(error_correction_options.keys()), index=0, key="error_correction_select", on_change=on_qr_setting_change)
+        error_correction_choice = st.selectbox("오류 보정 레벨", list(error_correction_options.keys()), key="error_correction_select", on_change=on_qr_setting_change)
         error_correction = error_correction_options[error_correction_choice]
-        mask_pattern = st.selectbox("마스크 패턴 선택 (0~7)", options=list(range(8)), index=2, key="mask_pattern_select", on_change=on_qr_setting_change)
+        mask_pattern = st.selectbox("마스크 패턴 선택 (0~7)", options=list(range(8)), key="mask_pattern_select", on_change=on_qr_setting_change)
 
     st.markdown("---")
     st.subheader("🔧 색상 설정")
@@ -202,9 +233,9 @@ with col1:
     ]
     col1_3, col1_4 = st.columns(2)
     with col1_3:
-        pattern_color_choice = st.selectbox("패턴 색상", colors, index=1, key="pattern_color_select", on_change=on_qr_setting_change)
+        pattern_color_choice = st.selectbox("패턴 색상", colors, key="pattern_color_select", on_change=on_qr_setting_change)
     with col1_4:
-        bg_color_choice = st.selectbox("배경 색상", colors, index=2, key="bg_color_select", on_change=on_qr_setting_change)
+        bg_color_choice = st.selectbox("배경 색상", colors, key="bg_color_select", on_change=on_qr_setting_change)
 
     st.markdown("원하는 색상이 리스트에 없다면, 아래에 직접 **HEX 코드**를 입력하세요.")
     st.caption("예: #FF0000 (빨강), #00FF00 (초록), #0000FF (파랑)")
@@ -274,8 +305,8 @@ with col2:
     
     if current_data and is_pattern_color_valid_preview and is_bg_color_valid_preview and not is_colors_same_preview:
         img, qr = generate_qr_code(
-            current_data, int(box_size), int(border), error_correction,
-            int(mask_pattern), pattern_color, bg_color,
+            current_data, int(st.session_state.box_size_input), int(st.session_state.border_input), error_correction,
+            int(st.session_state.mask_pattern_select), pattern_color, bg_color,
         )
         if img and qr:
             preview_image = img
@@ -327,8 +358,8 @@ with col2:
         else:
             # 모든 유효성 검사를 통과했을 때만 QR 코드 생성
             img, qr = generate_qr_code(
-                current_data, int(box_size), int(border), error_correction,
-                int(mask_pattern), pattern_color, bg_color,
+                current_data, int(st.session_state.box_size_input), int(st.session_state.border_input), error_correction,
+                int(st.session_state.mask_pattern_select), pattern_color, bg_color,
             )
             
             if img and qr:
@@ -401,6 +432,11 @@ with col2:
             st.success("✅ 다운로드 준비 완료! 휴대폰의 경우 'Download' 폴더에 저장됩니다.")
             st.session_state.download_initiated = False
 
+# 전체 초기화 버튼
+st.markdown("---")
+st.button("🔄 전체 초기화", use_container_width=True, type="secondary", on_click=reset_all_settings, help="모든 내용을 초기화 합니다.")
+
+
 # 사이드바
 with st.sidebar:
     st.header("📖 사용 방법")
@@ -442,5 +478,3 @@ st.markdown(
     '<p style="text-align: center; color: hotpink; font-size: 15px;">© 2025 QR 코드 생성기  |  Streamlit으로 제작  |  제작: 류종훈(redhat4u@gmail.com)</p>',
     unsafe_allow_html=True
 )
-# final 버전 - 모든 기능 정상 작동함..
-
