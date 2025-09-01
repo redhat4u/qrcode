@@ -124,9 +124,29 @@ def generate_qr_code_svg(data, box_size, border, error_correction, mask_pattern,
         qr.make(fit=True)
         
         # SVG Image Factory 사용
-        img_svg = qr.make_image(image_factory=qrcode.image.svg.SvgPathImage, fill_color=fill_color, back_color=back_color)
+        # 기본적으로 fill_color와 back_color를 무시하므로, 생성 후 직접 색상을 변경해야 함
+        img_svg = qr.make_image(image_factory=qrcode.image.svg.SvgPathImage)
         
-        return img_svg, qr
+        # SVG 데이터를 io.BytesIO에 저장
+        svg_buffer = io.BytesIO()
+        img_svg.save(svg_buffer)
+        svg_data = svg_buffer.getvalue().decode('utf-8')
+        
+        # SVG 문자열에서 색상 직접 변경
+        # 첫 번째 fill="black"을 패턴 색상으로, 두 번째 fill="white"를 배경색으로 변경
+        # SVGPathImage는 path에 fill을, rect에 fill을 할당함
+        
+        # 패턴색(black) 변경: <path> 태그의 fill 속성 변경
+        pattern_hex = re.search(r'fill="([^"]+)"', svg_data)
+        if pattern_hex and "black" in pattern_hex.group(1):
+            svg_data = svg_data.replace(pattern_hex.group(1), fill_color, 1)
+
+        # 배경색(white) 변경: <rect> 태그의 fill 속성 변경
+        bg_hex = re.search(r'fill="([^"]+)"', svg_data)
+        if bg_hex and "white" in bg_hex.group(1):
+            svg_data = svg_data.replace(bg_hex.group(1), back_color, 1)
+
+        return svg_data, qr
     except Exception as e:
         st.error(f"QR 코드 SVG 생성 오류: {str(e)}")
         return None, None
@@ -415,17 +435,16 @@ with col2:
                     preview_image_display = img
                     preview_qr_object = qr
             else: # SVG
-                img_svg, qr = generate_qr_code_svg(
+                svg_data, qr = generate_qr_code_svg(
                     current_data, int(st.session_state.box_size_input), int(st.session_state.border_input), error_correction,
                     int(st.session_state.mask_pattern_select), final_pattern_color, final_bg_color,
                 )
-                if img_svg and qr:
-                    svg_buffer = io.BytesIO()
-                    img_svg.save(svg_buffer)
-                    st.session_state.qr_svg_bytes = svg_buffer.getvalue()
+                if svg_data and qr:
+                    st.session_state.qr_svg_bytes = svg_data.encode('utf-8')
                     st.session_state.qr_image_bytes = None
                     st.session_state.qr_generated = True
                     st.session_state.show_generate_success = True
+                    # 미리보기용 PNG도 별도로 생성
                     png_img, png_qr = generate_qr_code_png(
                         current_data, int(st.session_state.box_size_input), int(st.session_state.border_input), error_correction,
                         int(st.session_state.mask_pattern_select), final_pattern_color, final_bg_color,
