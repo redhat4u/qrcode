@@ -1,15 +1,3 @@
-"""
-QR 코드 생성 웹앱 - Streamlit 버전
-휴대폰에서도 사용 가능
-
-실행 방법:
-1. pip install streamlit qrcode[pil]
-2. streamlit run qrcode_web.py
-
-또는 온라인에서 실행:
-- Streamlit Cloud, Heroku, Replit 등에 배포 가능
-"""
-
 import streamlit as st
 import qrcode
 import io
@@ -43,6 +31,9 @@ if 'last_qr_params_hash' not in st.session_state:
     st.session_state.last_qr_params_hash = ""
 if 'last_filename_state' not in st.session_state:
     st.session_state.last_filename_state = ""
+if 'generate_button_clicked' not in st.session_state: # 새로 추가된 상태 변수
+    st.session_state.generate_button_clicked = False
+
 
 # 각 입력창에 대한 세션 상태 초기화 (필수)
 # None 대신 빈 문자열로 초기화하여 AttributeError 방지
@@ -148,6 +139,7 @@ def clear_text_input():
     st.session_state.qr_generated = False
     st.session_state.show_generate_success = False
     st.session_state.last_qr_params_hash = ""
+    st.session_state.generate_button_clicked = False # 상태 초기화
 
 # 파일명 초기화 콜백 함수
 def clear_filename_callback():
@@ -173,6 +165,7 @@ def reset_all_settings():
     st.session_state.show_generate_success = False
     st.session_state.qr_image_bytes = None
     st.session_state.qr_svg_bytes = None
+    st.session_state.generate_button_clicked = False
 
 
 # 다운로드 버튼 클릭 시 호출되는 콜백 함수
@@ -185,6 +178,7 @@ def on_qr_setting_change():
     st.session_state.show_generate_success = False
     st.session_state.qr_image_bytes = None
     st.session_state.qr_svg_bytes = None
+    st.session_state.generate_button_clicked = False # 설정 변경 시 버튼 클릭 상태 초기화
 
 
 # 메인 앱 ============================================================================================
@@ -388,9 +382,9 @@ with col2:
     
     # [수정] 생성 버튼 클릭 시 최종 유효성 검사 로직
     if generate_btn:
+        st.session_state.generate_button_clicked = True
         errors = []
         
-        # [수정] on_change 콜백이 없더라도 st.session_state에 값이 항상 존재하도록 로직 변경
         final_pattern_color = st.session_state.custom_pattern_color_input_key.strip() if st.session_state.pattern_color_select == "<직접 입력>" else st.session_state.pattern_color_select
         final_bg_color = st.session_state.custom_bg_color_input_key.strip() if st.session_state.bg_color_select == "<직접 입력>" else st.session_state.bg_color_select
         
@@ -463,13 +457,15 @@ with col2:
 
     st.markdown("---")
     
-    # [수정] 메시지 표시 로직
-    if st.session_state.show_generate_success:
-        st.success("✅ QR 코드 생성 완료!!  반드시 파일명을 확인하고, 화면 아래의 다운로드 버튼을 클릭하세요.")
-    elif preview_image_display: # QR 코드 내용이 유효할 때만 미리보기 메시지 표시
-        st.success("현재 입력된 내용으로 생성될 QR 코드를 미리 표현해 보았습니다.  이 QR 코드가 맘에 드신다면, 위의 [⚡ QR 코드 생성] 버튼을 클릭하세요.")
-    else: # QR 코드 내용이 유효하지 않을 때만 안내 메시지 표시
+    # [수정] 메시지 표시 로직 통합
+    # 내용이 없거나 (초기 상태) 또는 '생성' 버튼을 눌렀지만 내용이 없을 때
+    if not current_data and not st.session_state.generate_button_clicked:
         st.info("QR 코드 내용을 입력하면 생성될 QR 코드를 미리 보여드립니다.")
+    elif st.session_state.show_generate_success:
+        st.success("✅ QR 코드 생성 완료! 반드시 파일명을 확인하고 다운로드하세요.")
+    elif preview_image_display:
+        st.success("현재 입력된 내용으로 생성될 QR 코드를 미리 표현해 보았습니다.")
+    # 이외의 경우, 즉 내용이 없지만 버튼을 누른 경우, 오류 메시지는 위 if generate_btn: 블록에서 이미 처리됨.
 
     # 미리보기 이미지 및 정보는 항상 표시
     if preview_image_display:
@@ -609,5 +605,3 @@ st.markdown(
     '<p style="text-align: center; color: hotpink; font-size: 15px;">© 2025 QR 코드 생성기  |  Streamlit으로 제작  |  제작: 류종훈(redhat4u@gmail.com)</p>',
     unsafe_allow_html=True
 )
-# 최신버전(25/09/01-22:33)..
-
