@@ -11,7 +11,6 @@ QR 코드 생성 웹앱 - Streamlit 버전
 """
 
 import streamlit as st
-import streamlit.components.v1 as components
 import qrcode
 import io
 from datetime import datetime
@@ -151,19 +150,6 @@ def generate_qr_code_svg(data, box_size, border, error_correction, mask_pattern,
     except Exception as e:
         st.error(f"QR 코드 SVG 생성 오류: {str(e)}")
         return None, None
-
-# 'QR 코드 생성' 버튼 클릭 시, 화면을 자동으로 아래로 스크롤하는
-# JavaScript 코드가 포함된 Streamlit 컴포넌트를 호출하는 함수
-def scroll_to_element(element_id):
-    js_code = f"""
-    <script>
-        var element = window.parent.document.getElementById("{element_id}");
-        if (element) {{
-            element.scrollIntoView({{ behavior: 'smooth', block: 'center' }});
-        }}
-    </script>
-    """
-    components.html(js_code, height=0, width=0)
 
 
 # QR 내용만 초기화하는 콜백 함수 (파일명은 유지)
@@ -467,7 +453,6 @@ with col2:
                     st.session_state.show_generate_success = True
                     preview_image_display = img
                     preview_qr_object = qr
-                    scroll_to_element("download-anchor")  # 다운로드 섹션으로 강제 스크롤
             else: # SVG
                 # SVG 생성 함수는 색상 인자를 무시하므로 검정색과 흰색을 넘겨줌
                 svg_data, qr = generate_qr_code_svg(
@@ -538,11 +523,7 @@ with col2:
     if st.session_state.get('qr_generated', False) and (st.session_state.get('qr_image_bytes') is not None or st.session_state.get('qr_svg_bytes') is not None):
 
         st.markdown("---")
-        # 이 div는 스크롤 목표 지점입니다.
-        components.html("""
-            <div id="download-anchor"></div>
-        """, height=0, width=0)
-
+ 
         st.subheader("📥 다운로드")
         now = datetime.now(ZoneInfo("Asia/Seoul"))
         current_filename = filename.strip()
