@@ -432,7 +432,7 @@ with col2:
         )
 
         if st.session_state.download_initiated:
-            st.success("✅ 생성한 QR 코드를 다운로드할 수 있습니다! 휴대폰의 경우 'Download' 폴더에 저장됩니다.")
+            st.success("✅ 생성한 QR 코드를 다운로드할 수 있습니다! 휴대폰은 'Download' 폴더에 저장됩니다.")
             st.session_state.download_initiated = False
 
 # 전체 초기화 버튼
@@ -481,5 +481,6 @@ st.markdown(
     '<p style="text-align: center; color: hotpink; font-size: 15px;">© 2025 QR 코드 생성기  |  Streamlit으로 제작  |  제작: 류종훈(redhat4u@gmail.com)</p>',
     unsafe_allow_html=True
 )
+
 
 
