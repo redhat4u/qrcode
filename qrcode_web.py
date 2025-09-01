@@ -43,26 +43,9 @@ def is_valid_color(color_name):
     hex_pattern = re.compile(r'^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$')
     return hex_pattern.match(color_name)
 
-# QR 코드 생성 함수
+# QR 코드 생성 함수 (업데이트된 qrcode 라이브러리 문법 적용)
 def generate_qr_code(data, box_size, border, error_correction, mask_pattern, fill_color, back_color):
     try:
-        # fill_color와 back_color의 앞뒤 공백을 완벽히 제거
-        img = qrcode.make(
-            data,
-            box_size=box_size,
-            border=border,
-            error_correction=error_correction,
-            fill_color=fill_color.strip(),
-            back_color=back_color.strip(),
-        )
-        if hasattr(img, 'convert'):
-            img = img.convert('RGB')
-        else:
-            img_buffer = io.BytesIO()
-            img.save(img_buffer, format='PNG')
-            img_buffer.seek(0)
-            img = Image.open(img_buffer)
-            
         qr = qrcode.QRCode(
             version=1,
             error_correction=error_correction,
@@ -72,7 +55,13 @@ def generate_qr_code(data, box_size, border, error_correction, mask_pattern, fil
         )
         qr.add_data(data, optimize=0)
         qr.make(fit=True)
-            
+        
+        # 색상 관련 인자는 make_image() 함수로 전달하여 오류 방지
+        img = qr.make_image(fill_color=fill_color.strip(), back_color=back_color.strip())
+
+        if hasattr(img, 'convert'):
+            img = img.convert('RGB')
+        
         return img, qr
     except Exception as e:
         st.error(f"QR 코드 생성 오류: {str(e)}")
