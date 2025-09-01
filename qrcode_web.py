@@ -343,32 +343,19 @@ with col2:
     is_bg_color_valid_preview = (bg_color_choice != "<직접 입력>") or (bg_color_choice == "<직접 입력>" and bg_color and is_valid_color(bg_color))
     is_colors_same_preview = (is_pattern_color_valid_preview and is_bg_color_valid_preview and pattern_color and bg_color and pattern_color == bg_color)
     
-    # 미리보기 이미지와 정보 생성 로직
-    preview_image_display = None # Streamlit에 표시할 최종 이미지 (PNG 또는 SVG HTML)
+    # [수정] 미리보기 이미지와 정보 생성 로직을 PNG로 통일
+    preview_image_display = None # Streamlit에 표시할 최종 이미지 (PNG)
     preview_qr_object = None # QR 코드 정보 추출을 위한 qr 객체
-    
-    if current_data and is_pattern_color_valid_preview and is_bg_color_valid_preview and not is_colors_same_preview:
-        if file_format == "PNG":
-            img, qr = generate_qr_code_png(
-                current_data, int(st.session_state.box_size_input), int(st.session_state.border_input), error_correction,
-                int(st.session_state.mask_pattern_select), pattern_color, bg_color,
-            )
-            if img and qr:
-                preview_image_display = img
-                preview_qr_object = qr
-        else: # SVG
-            img_svg, qr = generate_qr_code_svg(
-                current_data, int(st.session_state.box_size_input), int(st.session_state.border_input), error_correction,
-                int(st.session_state.mask_pattern_select), pattern_color, bg_color,
-            )
-            if img_svg and qr:
-                # SVG를 미리보기로 표시하기 위해 Base64 인코딩
-                buf = io.BytesIO()
-                img_svg.save(buf)
-                svg_base64 = base64.b64encode(buf.getvalue()).decode("utf-8")
-                preview_image_display = f'<img src="data:image/svg+xml;base64,{svg_base64}" alt="Generated SVG QR Code" style="width: 100%; height: auto;">'
-                preview_qr_object = qr
 
+    if current_data and is_pattern_color_valid_preview and is_bg_color_valid_preview and not is_colors_same_preview:
+        img, qr = generate_qr_code_png(
+            current_data, int(st.session_state.box_size_input), int(st.session_state.border_input), error_correction,
+            int(st.session_state.mask_pattern_select), pattern_color, bg_color,
+        )
+        if img and qr:
+            preview_image_display = img
+            preview_qr_object = qr
+    
     # QR 코드 생성 버튼
     generate_btn = st.button("⚡ QR 코드 생성", use_container_width=True,)
     
@@ -421,7 +408,8 @@ with col2:
                     st.session_state.qr_svg_bytes = None # PNG 선택 시 SVG는 None
                     st.session_state.qr_generated = True
                     st.session_state.show_generate_success = True
-                    preview_image_display = img # 미리보기 업데이트
+                    # [변경 없음] 미리보기 업데이트
+                    preview_image_display = img
                     preview_qr_object = qr
             else: # SVG
                 img_svg, qr = generate_qr_code_svg(
@@ -435,23 +423,24 @@ with col2:
                     st.session_state.qr_image_bytes = None # SVG 선택 시 PNG는 None
                     st.session_state.qr_generated = True
                     st.session_state.show_generate_success = True
-                    # SVG 미리보기를 위한 Base64 인코딩
-                    svg_base64 = base64.b64encode(st.session_state.qr_svg_bytes).decode("utf-8")
-                    preview_image_display = f'<img src="data:image/svg+xml;base64,{svg_base64}" alt="Generated SVG QR Code" style="width: 100%; height: auto;">'
-                    preview_qr_object = qr
+                    # [변경] SVG 생성 완료 후 미리보기를 위해 PNG 재 생성
+                    png_img, png_qr = generate_qr_code_png(
+                        current_data, int(st.session_state.box_size_input), int(st.session_state.border_input), error_correction,
+                        int(st.session_state.mask_pattern_select), pattern_color, bg_color,
+                    )
+                    preview_image_display = png_img
+                    preview_qr_object = png_qr
 
 
     st.markdown("---")
     
-    # 미리보기 이미지 및 정보 표시
+    # [수정] 미리보기 이미지 및 정보 표시
     if preview_image_display:
         st.subheader("📱 QR 코드 미리보기")
         col_left, col_center, col_right = st.columns([1, 2, 1])
         with col_center:
-            if isinstance(preview_image_display, Image.Image): # PNG 이미지인 경우
-                st.image(preview_image_display, caption="생성된 QR 코드", width=380)
-            elif isinstance(preview_image_display, str): # SVG HTML string인 경우
-                st.markdown(preview_image_display, unsafe_allow_html=True)
+            # [수정] 미리보기는 항상 st.image를 사용
+            st.image(preview_image_display, caption="생성된 QR 코드", width=380)
         
         if preview_qr_object:
             st.info(f"""
