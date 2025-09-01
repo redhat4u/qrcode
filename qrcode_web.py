@@ -3,7 +3,7 @@
 # qrcode_web.py
 
 import streamlit as st
-import qrcode # qrcode 라이브러리를 직접 임포트하여 오류 보정 레벨 상수를 사용합니다.
+import qrcode
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
@@ -20,7 +20,6 @@ from state_manager import (
 from ui_components import (
     build_input_ui,
     build_preview_and_download_ui,
-    build_sidebar_ui,
     build_footer,
 )
 
@@ -30,6 +29,9 @@ from functions import (
     generate_qr_code_png,
     generate_qr_code_svg,
 )
+
+from sidebar import build_sidebar_ui
+
 
 # 페이지 설정
 st.set_page_config(
