@@ -133,19 +133,13 @@ def generate_qr_code_svg(data, box_size, border, error_correction, mask_pattern,
         svg_data = svg_buffer.getvalue().decode('utf-8')
         
         # SVG 문자열에서 색상 직접 변경
-        # 첫 번째 fill="black"을 패턴 색상으로, 두 번째 fill="white"를 배경색으로 변경
-        # SVGPathImage는 path에 fill을, rect에 fill을 할당함
+        # 'fill="black"' 문자열 전체를 찾아 원하는 색상값으로 교체
+        # replace() 메서드를 사용하여 `fill=` 부분을 포함하여 교체
+        svg_data = svg_data.replace('fill="black"', f'fill="{fill_color}"', 1) 
         
-        # 패턴색(black) 변경: <path> 태그의 fill 속성 변경
-        pattern_hex = re.search(r'fill="([^"]+)"', svg_data)
-        if pattern_hex and "black" in pattern_hex.group(1):
-            svg_data = svg_data.replace(pattern_hex.group(1), fill_color, 1)
-
-        # 배경색(white) 변경: <rect> 태그의 fill 속성 변경
-        bg_hex = re.search(r'fill="([^"]+)"', svg_data)
-        if bg_hex and "white" in bg_hex.group(1):
-            svg_data = svg_data.replace(bg_hex.group(1), back_color, 1)
-
+        # 'fill="white"' 문자열 전체를 찾아 원하는 색상값으로 교체
+        svg_data = svg_data.replace('fill="white"', f'fill="{back_color}"', 1)
+        
         return svg_data, qr
     except Exception as e:
         st.error(f"QR 코드 SVG 생성 오류: {str(e)}")
