@@ -374,9 +374,11 @@ with col2:
     # QR 코드 생성 버튼
     generate_btn = st.button("⚡ QR 코드 생성", use_container_width=True,)
     
+    # [수정] 생성 버튼 클릭 시 최종 유효성 검사 로직
     if generate_btn:
         errors = []
         
+        # [수정] on_change 콜백이 없더라도 st.session_state에 값이 항상 존재하도록 로직 변경
         final_pattern_color = st.session_state.custom_pattern_color_input_key.strip() if st.session_state.pattern_color_select == "<직접 입력>" else st.session_state.pattern_color_select
         final_bg_color = st.session_state.custom_bg_color_input_key.strip() if st.session_state.bg_color_select == "<직접 입력>" else st.session_state.bg_color_select
         
@@ -413,6 +415,7 @@ with col2:
             st.session_state.qr_svg_bytes = None
             st.session_state.show_generate_success = False
         else:
+            # [수정] 모든 유효성 검사를 통과했을 때만 QR 코드 생성 및 저장
             if file_format == "PNG":
                 img, qr = generate_qr_code_png(
                     current_data, int(st.session_state.box_size_input), int(st.session_state.border_input), error_correction,
@@ -428,6 +431,7 @@ with col2:
                     preview_image_display = img
                     preview_qr_object = qr
             else: # SVG
+                # SVG 생성 함수는 색상 인자를 무시하므로 검정색과 흰색을 넘겨줌
                 svg_data, qr = generate_qr_code_svg(
                     current_data, int(st.session_state.box_size_input), int(st.session_state.border_input), error_correction,
                     int(st.session_state.mask_pattern_select), "black", "white",
@@ -437,6 +441,7 @@ with col2:
                     st.session_state.qr_image_bytes = None
                     st.session_state.qr_generated = True
                     st.session_state.show_generate_success = True
+                    # 미리보기용 PNG도 별도로 생성
                     png_img, png_qr = generate_qr_code_png(
                         current_data, int(st.session_state.box_size_input), int(st.session_state.border_input), error_correction,
                         int(st.session_state.mask_pattern_select), "black", "white",
@@ -446,10 +451,15 @@ with col2:
 
     st.markdown("---")
     
-    # [수정] 성공 메시지와 미리보기를 동시에 표시하는 로직으로 변경
+    # [수정] 메시지 표시 로직
     if st.session_state.show_generate_success:
         st.success("✅ QR 코드 생성 완료! 반드시 파일명을 확인하고 다운로드하세요.")
-    
+    elif preview_image_display: # QR 코드 내용이 유효할 때만 미리보기 메시지 표시
+        st.success("현재 입력된 내용으로 생성될 QR 코드를 미리 표현해 보았습니다.")
+    else: # QR 코드 내용이 유효하지 않을 때만 안내 메시지 표시
+        st.info("QR 코드 내용을 입력하면 생성될 QR 코드를 미리 보여드립니다.")
+
+    # 미리보기 이미지 및 정보는 항상 표시
     if preview_image_display:
         st.subheader("📱 QR 코드 미리보기")
         col_left, col_center, col_right = st.columns([1, 2, 1])
@@ -469,7 +479,8 @@ with col2:
     else:
         # 오류 메시지 표시 로직
         if not current_data:
-            st.info("QR 코드 내용을 입력하면 생성될 QR 코드를 미리 보여드립니다.")
+            # 이 부분은 위의 st.info로 대체되므로 중복 제거
+            pass
         else:
             if not file_format_is_svg:
                 if pattern_color_choice == "<직접 입력>" and not pattern_color:
