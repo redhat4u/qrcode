@@ -129,7 +129,7 @@ def reset_all_settings():
     st.session_state.mask_pattern_select = 2
     st.session_state.pattern_color_select = "black"
     st.session_state.bg_color_select = "white"
-    st.session_state.strip_option_state = True # 이 부분을 수정했습니다.
+    st.session_state.strip_option_state = True
 
     st.session_state.qr_generated = False
     st.session_state.show_generate_success = False
@@ -375,7 +375,10 @@ with col2:
     # 미리보기 이미지 및 정보 표시
     if preview_image:
         st.subheader("📱 QR 코드 미리보기")
-        st.image(preview_image, caption="생성된 QR 코드", width=380)
+        # 중앙 정렬을 위한 컬럼 추가
+        col_left, col_center, col_right = st.columns([1, 1, 1])
+        with col_center:
+            st.image(preview_image, caption="생성된 QR 코드", width=380)
         st.info(preview_info_text)
     else:
         # 오류 메시지 표시 로직
