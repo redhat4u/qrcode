@@ -375,8 +375,8 @@ with col2:
     # 미리보기 이미지 및 정보 표시
     if preview_image:
         st.subheader("📱 QR 코드 미리보기")
-        # 중앙 정렬을 위한 컬럼 추가
-        col_left, col_center, col_right = st.columns([1, 1, 1])
+        # 중앙 정렬을 위한 컬럼 추가 및 비율 조정
+        col_left, col_center, col_right = st.columns([1, 2, 1])
         with col_center:
             st.image(preview_image, caption="생성된 QR 코드", width=380)
         st.info(preview_info_text)
