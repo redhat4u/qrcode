@@ -124,13 +124,13 @@ def build_preview_and_download_ui():
                  word-break: keep-all;
              '>
                  ✅ QR 코드 생성 완료!!<br>
-                 반드시 파일명을 하시고, 화면 아래의 [💾 QR 코드 다운로드] 버튼을 클릭하세요.
+                 반드시 파일명을 확인하고, 화면 아래의 [💾 QR 코드 다운로드] 버튼을 클릭하세요.
              </div>
              """,
              unsafe_allow_html=True,
          )
     elif preview_image_display:
-#        st.success("✅ 현재 입력된 내용으로 생성될 QR 코드를 미리 표현해 보았습니다. 이 QR 코드가 맘에 드신다면, 위의 [⚡ QR 코드 생성] 버튼을 클릭하세요.")
+#        st.success("✅ 현재 입력된 내용으로 QR 코드를 미리 표현해 보았습니다. 이 QR 코드가 맘에 드신다면, 위의 [⚡ QR 코드 생성] 버튼을 클릭하세요.")
          st.markdown(
              """
              <div style='
@@ -143,7 +143,7 @@ def build_preview_and_download_ui():
                  margin-bottom: 1rem;
                  word-break: keep-all;
              '>
-                 ✅ 현재 입력된 내용으로 생성될 QR 코드를 미리 표현해 보았습니다.<br>
+                 ✅ 현재 입력된 내용으로 QR 코드를 미리 표현해 보았습니다.<br>
                  아래의 QR 코드가 맘에 드시면, 위의 [⚡ QR 코드 생성] 버튼을 클릭하세요.
              </div>
              """,
