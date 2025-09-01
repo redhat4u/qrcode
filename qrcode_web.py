@@ -61,8 +61,8 @@ if 'pattern_color_select' not in st.session_state:
     st.session_state.pattern_color_select = "black"
 if 'bg_color_select' not in st.session_state:
     st.session_state.bg_color_select = "white"
-if 'strip_option_state' not in st.session_state:
-    st.session_state.strip_option_state = True
+if 'strip_option' not in st.session_state:  # 상태 변수 이름 통일
+    st.session_state.strip_option = True
 
 
 # 파일명에 특수문자 포함시 '_' 문자로 치환
@@ -129,7 +129,7 @@ def reset_all_settings():
     st.session_state.mask_pattern_select = 2
     st.session_state.pattern_color_select = "black"
     st.session_state.bg_color_select = "white"
-    st.session_state.strip_option_state = True
+    st.session_state.strip_option = True
 
     st.session_state.qr_generated = False
     st.session_state.show_generate_success = False
@@ -195,8 +195,8 @@ with col1:
     # 공백/줄바꿈 제거 옵션
     strip_option = st.checkbox(
         "마지막 입력문자 이후 모든 공백/줄바꿈 제거",
-        value=st.session_state.strip_option_state,
-        key="strip_option", # key를 추가하여 상태 추적
+        value=st.session_state.strip_option,
+        key="strip_option",
     )
 
     st.markdown("---")
