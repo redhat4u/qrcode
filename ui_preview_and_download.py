@@ -114,8 +114,8 @@ def build_preview_and_download_ui():
          st.markdown(
              """
              <div style='
-                 background-color: #e6f7e9;
-                 color: #1a5e31;
+                 background-color: #1a5e31;
+                 color: #e6f7e9;
                  padding: 1rem;
                  border-radius: 0.5rem;
                  border: 1px solid #1a5e31;
@@ -124,7 +124,7 @@ def build_preview_and_download_ui():
                  word-break: keep-all;
              '>
                  ✅ QR 코드 생성 완료!!<br>
-                 반드시 파일명을 한 후에 화면 아래의 [💾 QR 코드 다운로드] 버튼을 클릭하세요.
+                 반드시 파일명을 하시고, 화면 아래의 [💾 QR 코드 다운로드] 버튼을 클릭하세요.
              </div>
              """,
              unsafe_allow_html=True,
@@ -134,8 +134,8 @@ def build_preview_and_download_ui():
          st.markdown(
              """
              <div style='
-                 background-color: #e6f7e9;
-                 color: #1a5e31;
+                 background-color: #1a5e31;
+                 color: #e6f7e9;
                  padding: 1rem;
                  border-radius: 0.5rem;
                  border: 1px solid #1a5e31;
