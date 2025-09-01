@@ -1,3 +1,15 @@
+"""
+QR 코드 생성 웹앱 - Streamlit 버전
+휴대폰에서도 사용 가능
+
+실행 방법:
+1. pip install streamlit qrcode[pil]
+2. streamlit run qrcode_web.py
+
+또는 온라인에서 실행:
+- Streamlit Cloud, Heroku, Replit 등에 배포 가능
+"""
+
 import streamlit as st
 import qrcode
 import io
@@ -453,7 +465,7 @@ with col2:
     
     # [수정] 메시지 표시 로직
     if st.session_state.show_generate_success:
-        st.success("✅ QR 코드 생성 완료! 반드시 파일명을 확인하고 다운로드하세요.")
+        st.success("✅ QR 코드 생성 완료! 반드시 파일명을 확인하고, 화면 아래의 다운로드 버튼을 클릭하세요.")
     elif preview_image_display: # QR 코드 내용이 유효할 때만 미리보기 메시지 표시
         st.success("현재 입력된 내용으로 생성될 QR 코드를 미리 표현해 보았습니다.")
     else: # QR 코드 내용이 유효하지 않을 때만 안내 메시지 표시
@@ -597,3 +609,5 @@ st.markdown(
     '<p style="text-align: center; color: hotpink; font-size: 15px;">© 2025 QR 코드 생성기  |  Streamlit으로 제작  |  제작: 류종훈(redhat4u@gmail.com)</p>',
     unsafe_allow_html=True
 )
+# 최신버전(25/09/01-22:33)..
+
