@@ -119,6 +119,13 @@ def clear_filename_callback():
 def set_download_initiated():
     st.session_state.download_initiated = True
 
+# Streamlit 위젯 상태 변경 시 공백 제거
+def strip_color_inputs():
+    if st.session_state.custom_pattern_color_input:
+        st.session_state.custom_pattern_color_input = st.session_state.custom_pattern_color_input.strip()
+    if st.session_state.custom_bg_color_input:
+        st.session_state.custom_bg_color_input = st.session_state.custom_bg_color_input.strip()
+
 # 메인 앱 ============================================================================================
 
 st.title("🔲 QR 코드 생성기")
@@ -215,13 +222,19 @@ with col1:
     st.caption("예: #FF0000 (빨강), #00FF00 (초록), #0000FF (파랑)")
     col1_5, col1_6 = st.columns(2)
     with col1_5:
-        custom_pattern_color = st.text_input("패턴 색상 HEX 값", placeholder="예: #000000", disabled=(pattern_color_choice != "<직접 입력>"), key="custom_pattern_color_input",)
+        # on_change 콜백 함수를 사용하여 입력 시 공백 제거
+        custom_pattern_color = st.text_input("패턴 색상 HEX 값", placeholder="예: #000000", disabled=(pattern_color_choice != "<직접 입력>"), key="custom_pattern_color_input", on_change=strip_color_inputs)
     with col1_6:
-        custom_bg_color = st.text_input("배경 색상 HEX 값", placeholder="예: #FFFFFF", disabled=(bg_color_choice != "<직접 입력>"), key="custom_bg_color_input",)
+        # on_change 콜백 함수를 사용하여 입력 시 공백 제거
+        custom_bg_color = st.text_input("배경 색상 HEX 값", placeholder="예: #FFFFFF", disabled=(bg_color_choice != "<직접 입력>"), key="custom_bg_color_input", on_change=strip_color_inputs)
 
     # 사용될 최종 색상 값 결정
     pattern_color = custom_pattern_color if pattern_color_choice == "<직접 입력>" else pattern_color_choice
     bg_color = custom_bg_color if bg_color_choice == "<직접 입력>" else bg_color_choice
+    
+    # 최종 색상값에서 공백 제거를 한 번 더 보장
+    pattern_color = pattern_color.strip()
+    bg_color = bg_color.strip()
 
     st.markdown("---")
 
