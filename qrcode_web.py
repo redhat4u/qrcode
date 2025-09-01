@@ -280,7 +280,7 @@ with col1:
             placeholder="예: #000000",
             disabled=(pattern_color_choice != "<직접 입력>"),
             key="custom_pattern_color_input_key",
-            on_change=on_qr_setting_change,
+            on_change=on_qr_setting_change
         )
     with col1_6:
         st.text_input(
@@ -288,9 +288,9 @@ with col1:
             placeholder="예: #FFFFFF",
             disabled=(bg_color_choice != "<직접 입력>"),
             key="custom_bg_color_input_key",
-            on_change=on_qr_setting_change,
+            on_change=on_qr_setting_change
         )
-
+    
     # 이 변수들은 미리보기 용도로만 사용됩니다.
     pattern_color = st.session_state.custom_pattern_color_input_key.strip() if pattern_color_choice == "<직접 입력>" else pattern_color_choice
     bg_color = st.session_state.custom_bg_color_input_key.strip() if bg_color_choice == "<직접 입력>" else bg_color_choice
@@ -362,13 +362,21 @@ with col2:
     # [수정] 생성 버튼 클릭 시 최종 유효성 검사 로직
     if generate_btn:
         errors = []
+        
+        # [수정] 버튼이 눌리는 시점에 '최신' 입력 값을 세션 상태에 강제로 저장합니다.
+        # 이렇게 하면 텍스트 입력창에서 커서가 벗어나지 않아도 최신 값이 보장됩니다.
+        if st.session_state.pattern_color_select == "<직접 입력>":
+            st.session_state.custom_pattern_color_input_key = st.session_state.custom_pattern_color_input_key.strip()
+        if st.session_state.bg_color_select == "<직접 입력>":
+            st.session_state.custom_bg_color_input_key = st.session_state.custom_bg_color_input_key.strip()
+
+        # [수정] 버튼이 눌리는 시점에 최종 색상 값을 다시 결정합니다.
+        final_pattern_color = st.session_state.custom_pattern_color_input_key if st.session_state.pattern_color_select == "<직접 입력>" else st.session_state.pattern_color_select
+        final_bg_color = st.session_state.custom_bg_color_input_key if st.session_state.bg_color_select == "<직접 입력>" else st.session_state.bg_color_select
+
         if not current_data:
             errors.append("생성할 QR 코드 내용을 입력해 주세요.")
         
-        # [수정] 버튼 클릭 시점의 최종 색상 값을 세션 상태에서 다시 확인하고 변수에 할당
-        final_pattern_color = st.session_state.custom_pattern_color_input_key.strip() if st.session_state.pattern_color_select == "<직접 입력>" else st.session_state.pattern_color_select
-        final_bg_color = st.session_state.custom_bg_color_input_key.strip() if st.session_state.bg_color_select == "<직접 입력>" else st.session_state.bg_color_select
-
         is_pattern_ok = True
         if st.session_state.pattern_color_select == "<직접 입력>":
             if not final_pattern_color:
@@ -387,19 +395,18 @@ with col2:
                 errors.append("배경 색으로 입력한 HEX 값은 올바른 색상 값이 아닙니다. 다시 확인해주세요.")
                 is_bg_ok = False
             
-        if is_pattern_ok and is_bg_ok and is_valid_color(final_pattern_color) and is_valid_color(final_bg_color) and final_pattern_color == final_bg_color:
+        if is_pattern_ok and is_bg_ok and final_pattern_color and final_bg_color and final_pattern_color == final_bg_color:
             errors.append("패턴과 배경은 같은 색을 사용할 수 없습니다.")
 
         if errors:
             for error_msg in errors:
                 st.error(f"⚠️ {error_msg}")
-            # 에러 발생 시 다운로드 기능 비활성화 및 세션 상태 초기화
             st.session_state.qr_generated = False
             st.session_state.qr_image_bytes = None
             st.session_state.qr_svg_bytes = None
             st.session_state.show_generate_success = False
         else:
-            # 모든 유효성 검사를 통과했을 때만 QR 코드 생성
+            # [수정] 모든 유효성 검사를 통과했을 때만 QR 코드 생성 및 저장
             if file_format == "PNG":
                 img, qr = generate_qr_code_png(
                     current_data, int(st.session_state.box_size_input), int(st.session_state.border_input), error_correction,
@@ -409,10 +416,9 @@ with col2:
                     img_buffer = io.BytesIO()
                     img.save(img_buffer, format='PNG')
                     st.session_state.qr_image_bytes = img_buffer.getvalue()
-                    st.session_state.qr_svg_bytes = None # PNG 선택 시 SVG는 None
+                    st.session_state.qr_svg_bytes = None
                     st.session_state.qr_generated = True
                     st.session_state.show_generate_success = True
-                    # 미리보기 업데이트
                     preview_image_display = img
                     preview_qr_object = qr
             else: # SVG
@@ -424,10 +430,9 @@ with col2:
                     svg_buffer = io.BytesIO()
                     img_svg.save(svg_buffer)
                     st.session_state.qr_svg_bytes = svg_buffer.getvalue()
-                    st.session_state.qr_image_bytes = None # SVG 선택 시 PNG는 None
+                    st.session_state.qr_image_bytes = None
                     st.session_state.qr_generated = True
                     st.session_state.show_generate_success = True
-                    # SVG 생성 완료 후 미리보기를 위해 PNG 재 생성
                     png_img, png_qr = generate_qr_code_png(
                         current_data, int(st.session_state.box_size_input), int(st.session_state.border_input), error_correction,
                         int(st.session_state.mask_pattern_select), final_pattern_color, final_bg_color,
