@@ -366,24 +366,28 @@ with col2:
             errors.append("생성할 QR 코드 내용을 입력해 주세요.")
         
         is_pattern_ok = True
-        if pattern_color_choice == "<직접 입력>":
-            if not pattern_color:
+        if st.session_state.pattern_color_select == "<직접 입력>":
+            if not st.session_state.custom_pattern_color_input_key.strip():
                 errors.append("QR 코드 **패턴 색**의 HEX 값을 입력해 주세요.")
                 is_pattern_ok = False
-            elif not is_valid_color(pattern_color):
+            elif not is_valid_color(st.session_state.custom_pattern_color_input_key.strip()):
                 errors.append("패턴 색으로 입력한 HEX 값은 올바른 색상 값이 아닙니다. 다시 확인해주세요.")
                 is_pattern_ok = False
         
         is_bg_ok = True
-        if bg_color_choice == "<직접 입력>":
-            if not bg_color:
+        if st.session_state.bg_color_select == "<직접 입력>":
+            if not st.session_state.custom_bg_color_input_key.strip():
                 errors.append("QR 코드 **배경 색**의 HEX 값을 입력해 주세요.")
                 is_bg_ok = False
-            elif not is_valid_color(bg_color):
+            elif not is_valid_color(st.session_state.custom_bg_color_input_key.strip()):
                 errors.append("배경 색으로 입력한 HEX 값은 올바른 색상 값이 아닙니다. 다시 확인해주세요.")
                 is_bg_ok = False
             
-        if is_pattern_ok and is_bg_ok and is_valid_color(pattern_color) and is_valid_color(bg_color) and pattern_color == bg_color:
+        # [수정] 버튼 클릭 시점의 최종 색상 값 변수를 정의
+        final_pattern_color = st.session_state.custom_pattern_color_input_key.strip() if st.session_state.pattern_color_select == "<직접 입력>" else st.session_state.pattern_color_select
+        final_bg_color = st.session_state.custom_bg_color_input_key.strip() if st.session_state.bg_color_select == "<직접 입력>" else st.session_state.bg_color_select
+            
+        if is_pattern_ok and is_bg_ok and is_valid_color(final_pattern_color) and is_valid_color(final_bg_color) and final_pattern_color == final_bg_color:
             errors.append("패턴과 배경은 같은 색을 사용할 수 없습니다.")
 
         if errors:
@@ -399,7 +403,7 @@ with col2:
             if file_format == "PNG":
                 img, qr = generate_qr_code_png(
                     current_data, int(st.session_state.box_size_input), int(st.session_state.border_input), error_correction,
-                    int(st.session_state.mask_pattern_select), pattern_color, bg_color,
+                    int(st.session_state.mask_pattern_select), final_pattern_color, final_bg_color, # [수정] final_color 변수 사용
                 )
                 if img and qr:
                     img_buffer = io.BytesIO()
@@ -414,7 +418,7 @@ with col2:
             else: # SVG
                 img_svg, qr = generate_qr_code_svg(
                     current_data, int(st.session_state.box_size_input), int(st.session_state.border_input), error_correction,
-                    int(st.session_state.mask_pattern_select), pattern_color, bg_color,
+                    int(st.session_state.mask_pattern_select), final_pattern_color, final_bg_color, # [수정] final_color 변수 사용
                 )
                 if img_svg and qr:
                     svg_buffer = io.BytesIO()
@@ -426,7 +430,7 @@ with col2:
                     # [변경] SVG 생성 완료 후 미리보기를 위해 PNG 재 생성
                     png_img, png_qr = generate_qr_code_png(
                         current_data, int(st.session_state.box_size_input), int(st.session_state.border_input), error_correction,
-                        int(st.session_state.mask_pattern_select), pattern_color, bg_color,
+                        int(st.session_state.mask_pattern_select), final_pattern_color, final_bg_color, # [수정] final_color 변수 사용
                     )
                     preview_image_display = png_img
                     preview_qr_object = png_qr
