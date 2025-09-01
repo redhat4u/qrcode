@@ -1,4 +1,5 @@
-# 이 파일은 st.session_state를 관리하고, 사용자 상호 작용에 따라 호출되는 콜백 함수들을 정의합니다.
+# 이 파일은 st.session_state 상태를 관리하고,
+# 사용자 상호 작용에 따라 호출되는 콜백 함수들을 정의합니다.
 # state_manager.py
 
 import streamlit as st
@@ -45,6 +46,9 @@ def initialize_session_state():
         st.session_state.strip_option = True
     if 'file_format_select' not in st.session_state:
         st.session_state.file_format_select = "PNG"
+    # [추가] 패턴 모양 선택을 위한 세션 상태 초기화
+    if 'module_shape_select' not in st.session_state:
+        st.session_state.module_shape_select = "기본 사각형 (Square)"
 
 def clear_text_input():
     """QR 내용만 초기화하는 콜백 함수입니다 (파일명은 유지)."""
@@ -78,6 +82,8 @@ def reset_all_settings():
     st.session_state.qr_svg_bytes = None
     st.session_state.generate_button_clicked = False
     st.session_state.error_message = None
+    # [추가] 패턴 모양도 초기화
+    st.session_state.module_shape_select = "기본 사각형 (Square)"
 
 def on_qr_setting_change():
     """QR 코드 설정값 변경 시 다운로드 관련 상태를 초기화합니다."""
