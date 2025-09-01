@@ -20,6 +20,7 @@ def build_preview_and_download_ui():
     """미리보기 및 다운로드 섹션을 빌드합니다."""
     st.header("👀 미리보기 및 생성")
 
+    # --- 실시간 미리보기 로직 시작 ---
     qr_data = st.session_state.qr_input_area
     if st.session_state.strip_option:
         current_data = qr_data.strip()
@@ -28,6 +29,7 @@ def build_preview_and_download_ui():
 
     file_format_is_svg = st.session_state.file_format_select == "SVG"
 
+    # 유효성 검사 및 색상값 가져오기
     is_pattern_color_valid_preview = (
         st.session_state.pattern_color_select != "<직접 입력>"
     ) or (
@@ -51,6 +53,7 @@ def build_preview_and_download_ui():
         if st.session_state.bg_color_select == "<직접 입력>"
         else st.session_state.bg_color_select
     )
+    
     is_colors_same_preview = (
         is_pattern_color_valid_preview
         and is_bg_color_valid_preview
@@ -67,31 +70,26 @@ def build_preview_and_download_ui():
     }
     error_correction = error_correction_options[st.session_state.error_correction_select]
 
-    # 미리보기 이미지 생성 (generate_btn 클릭 여부와 관계 없이 항상 생성)
+    # 미리보기 이미지 생성 (버튼 클릭과 무관하게 항상 실행)
     preview_image_display = None
     preview_qr_object = None
 
-    if current_data and (
-        file_format_is_svg
-        or (
-            is_pattern_color_valid_preview
-            and is_bg_color_valid_preview
-            and not is_colors_same_preview
-        )
-    ):
+    if current_data and not file_format_is_svg and not is_colors_same_preview:
         img, qr = generate_qr_code_png(
             current_data,
             int(st.session_state.box_size_input),
             int(st.session_state.border_input),
             error_correction,
             int(st.session_state.mask_pattern_select),
-            "black" if file_format_is_svg else pattern_color,
-            "white" if file_format_is_svg else bg_color,
-            st.session_state.module_shape_select,  # 추가된 부분
+            pattern_color,
+            bg_color,
+            st.session_state.module_shape_select,
         )
         if img and qr:
             preview_image_display = img
             preview_qr_object = qr
+
+    # --- 실시간 미리보기 로직 끝 ---
 
     generate_btn = st.button("⚡ QR 코드 생성", use_container_width=True)
 
@@ -113,20 +111,16 @@ def build_preview_and_download_ui():
 
         if not current_data:
             errors.append("⚠️ 생성할 QR 코드 내용을 입력해 주세요.")
-
+            
         if not file_format_is_svg:
             if st.session_state.pattern_color_select == "<직접 입력>" and not final_pattern_color:
                 errors.append("⚠️ 패턴 색의 HEX 값을 입력해 주세요.")
-            elif st.session_state.pattern_color_select == "<직접 입력>" and not is_valid_color(
-                final_pattern_color
-            ):
+            elif st.session_state.pattern_color_select == "<직접 입력>" and not is_valid_color(final_pattern_color):
                 errors.append("⚠️ 패턴 색으로 입력한 HEX 값은 올바른 색상 값이 아닙니다. 다시 확인해주세요.")
 
             if st.session_state.bg_color_select == "<직접 입력>" and not final_bg_color:
                 errors.append("⚠️ 배경 색의 HEX 값을 입력해 주세요.")
-            elif st.session_state.bg_color_select == "<직접 입력>" and not is_valid_color(
-                final_bg_color
-            ):
+            elif st.session_state.bg_color_select == "<직접 입력>" and not is_valid_color(final_bg_color):
                 errors.append("⚠️ 배경 색으로 입력한 HEX 값은 올바른 색상 값이 아닙니다. 다시 확인해주세요.")
 
             if final_pattern_color and final_bg_color and final_pattern_color == final_bg_color:
@@ -146,7 +140,7 @@ def build_preview_and_download_ui():
                     int(st.session_state.mask_pattern_select),
                     final_pattern_color,
                     final_bg_color,
-                    st.session_state.module_shape_select,  # 추가된 부분
+                    st.session_state.module_shape_select,
                 )
                 if img and qr:
                     img_buffer = io.BytesIO()
@@ -207,8 +201,8 @@ def build_preview_and_download_ui():
                 margin-bottom: 1rem;
                 word-break: keep-all;
             '>
-                ✅ 현재 입력된 내용으로 아래에 QR 코드를 미리 보여드립니다.<br>
-                QR 코드가 맘에 드시면, 위의 [⚡ QR 코드 생성] 버튼을 클릭하세요.
+                ✅ 현재 입력된 내용으로 QR 코드를 미리 표현해 보았습니다.<br>
+                아래의 QR 코드가 맘에 드시면, 위의 [⚡ QR 코드 생성] 버튼을 클릭하세요.
             </div>
             """,
             unsafe_allow_html=True,
