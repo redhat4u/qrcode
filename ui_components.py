@@ -3,6 +3,7 @@
 
 import streamlit as st
 import qrcode
+import io
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
@@ -202,7 +203,7 @@ def build_preview_and_download_ui():
                     int(st.session_state.mask_pattern_select), final_pattern_color, final_bg_color,
                 )
                 if img and qr:
-                    img_buffer = st.io.BytesIO()
+                    img_buffer = io.BytesIO() # st.io.BytesIO() -> io.BytesIO()로 수정
                     img.save(img_buffer, format='PNG')
                     st.session_state.qr_image_bytes = img_buffer.getvalue()
                     st.session_state.qr_svg_bytes = None
