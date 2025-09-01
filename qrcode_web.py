@@ -31,6 +31,7 @@ from functions import (
 )
 
 from sidebar import build_sidebar_ui
+from footer import build_footer
 
 
 # 페이지 설정
@@ -73,3 +74,4 @@ with st.sidebar:
 
 # 하단 정보
 build_footer()
+
