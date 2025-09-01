@@ -55,6 +55,9 @@ if 'custom_pattern_color_input' not in st.session_state:
     st.session_state.custom_pattern_color_input = ""
 if 'custom_bg_color_input' not in st.session_state:
     st.session_state.custom_bg_color_input = ""
+if 'filename_input' not in st.session_state:
+    st.session_state.filename_input = ""
+
 
 # 파일명에 특수문자 포함시 '_' 문자로 치환
 def sanitize_filename(name: str) -> str:
@@ -224,10 +227,24 @@ with col1:
     col1_5, col1_6 = st.columns(2)
     with col1_5:
         # on_change 콜백 함수를 사용하여 입력 시 공백 제거
-        st.text_input("패턴 색상 HEX 값", placeholder="예: #000000", disabled=(pattern_color_choice != "<직접 입력>"), key="custom_pattern_color_input", on_change=strip_pattern_color_input)
+        st.text_input(
+            "패턴 색상 HEX 값",
+            value=st.session_state.custom_pattern_color_input,
+            placeholder="예: #000000",
+            disabled=(pattern_color_choice != "<직접 입력>"),
+            key="custom_pattern_color_input",
+            on_change=strip_pattern_color_input,
+        )
     with col1_6:
         # on_change 콜백 함수를 사용하여 입력 시 공백 제거
-        st.text_input("배경 색상 HEX 값", placeholder="예: #FFFFFF", disabled=(bg_color_choice != "<직접 입력>"), key="custom_bg_color_input", on_change=strip_bg_color_input)
+        st.text_input(
+            "배경 색상 HEX 값",
+            value=st.session_state.custom_bg_color_input,
+            placeholder="예: #FFFFFF",
+            disabled=(bg_color_choice != "<직접 입력>"),
+            key="custom_bg_color_input",
+            on_change=strip_bg_color_input,
+        )
 
     # 사용될 최종 색상 값 결정
     pattern_color = st.session_state.custom_pattern_color_input if pattern_color_choice == "<직접 입력>" else pattern_color_choice
@@ -241,8 +258,9 @@ with col1:
     col_filename_input, col_filename_delete = st.columns([3, 1.1])
 
     with col_filename_input:
-        filename = st.text_input(
+        st.text_input(
             "다운로드 파일명 입력 (확장자는 제외, 파일명만 입력)",
+            value=st.session_state.filename_input,
             placeholder="이 곳에 파일명을 입력해 주세요 (비어있으면 자동 생성됨)",
             key="filename_input",
         )
@@ -259,7 +277,7 @@ with col1:
             on_click=clear_filename_callback,
         )
 
-    current_filename = filename.strip()
+    current_filename = st.session_state.filename_input.strip()
 
     if st.session_state.filename_message == "deleted":
         st.success("✅ 파일명이 삭제되었습니다. 입력되지 않으면 자동으로 생성됩니다.")
@@ -436,7 +454,7 @@ with col2:
         st.markdown("---")
         st.subheader("📥 다운로드")
         now = datetime.now(ZoneInfo("Asia/Seoul"))
-        current_filename = filename.strip()
+        current_filename = st.session_state.filename_input.strip()
 
         if not current_filename:
             final_filename = now.strftime("QR_%Y-%m-%d_%H-%M-%S")
