@@ -291,7 +291,7 @@ with col1:
             on_change=on_qr_setting_change,
         )
 
-    # 사용될 최종 색상 값 결정 (공백 제거)
+    # 이 변수들은 미리보기 용도로만 사용됩니다.
     pattern_color = st.session_state.custom_pattern_color_input_key.strip() if pattern_color_choice == "<직접 입력>" else pattern_color_choice
     bg_color = st.session_state.custom_bg_color_input_key.strip() if bg_color_choice == "<직접 입력>" else bg_color_choice
     
@@ -343,7 +343,7 @@ with col2:
     is_bg_color_valid_preview = (bg_color_choice != "<직접 입력>") or (bg_color_choice == "<직접 입력>" and bg_color and is_valid_color(bg_color))
     is_colors_same_preview = (is_pattern_color_valid_preview and is_bg_color_valid_preview and pattern_color and bg_color and pattern_color == bg_color)
     
-    # [수정] 미리보기 이미지와 정보 생성 로직을 PNG로 통일
+    # 미리보기 이미지와 정보 생성 로직을 PNG로 통일
     preview_image_display = None # Streamlit에 표시할 최종 이미지 (PNG)
     preview_qr_object = None # QR 코드 정보 추출을 위한 qr 객체
 
@@ -359,33 +359,33 @@ with col2:
     # QR 코드 생성 버튼
     generate_btn = st.button("⚡ QR 코드 생성", use_container_width=True,)
     
-    # 생성 버튼 클릭 시 최종 유효성 검사 로직
+    # [수정] 생성 버튼 클릭 시 최종 유효성 검사 로직
     if generate_btn:
         errors = []
         if not current_data:
             errors.append("생성할 QR 코드 내용을 입력해 주세요.")
         
+        # [수정] 버튼 클릭 시점의 최종 색상 값을 세션 상태에서 다시 확인하고 변수에 할당
+        final_pattern_color = st.session_state.custom_pattern_color_input_key.strip() if st.session_state.pattern_color_select == "<직접 입력>" else st.session_state.pattern_color_select
+        final_bg_color = st.session_state.custom_bg_color_input_key.strip() if st.session_state.bg_color_select == "<직접 입력>" else st.session_state.bg_color_select
+
         is_pattern_ok = True
         if st.session_state.pattern_color_select == "<직접 입력>":
-            if not st.session_state.custom_pattern_color_input_key.strip():
+            if not final_pattern_color:
                 errors.append("QR 코드 **패턴 색**의 HEX 값을 입력해 주세요.")
                 is_pattern_ok = False
-            elif not is_valid_color(st.session_state.custom_pattern_color_input_key.strip()):
+            elif not is_valid_color(final_pattern_color):
                 errors.append("패턴 색으로 입력한 HEX 값은 올바른 색상 값이 아닙니다. 다시 확인해주세요.")
                 is_pattern_ok = False
         
         is_bg_ok = True
         if st.session_state.bg_color_select == "<직접 입력>":
-            if not st.session_state.custom_bg_color_input_key.strip():
+            if not final_bg_color:
                 errors.append("QR 코드 **배경 색**의 HEX 값을 입력해 주세요.")
                 is_bg_ok = False
-            elif not is_valid_color(st.session_state.custom_bg_color_input_key.strip()):
+            elif not is_valid_color(final_bg_color):
                 errors.append("배경 색으로 입력한 HEX 값은 올바른 색상 값이 아닙니다. 다시 확인해주세요.")
                 is_bg_ok = False
-            
-        # [수정] 버튼 클릭 시점의 최종 색상 값 변수를 정의
-        final_pattern_color = st.session_state.custom_pattern_color_input_key.strip() if st.session_state.pattern_color_select == "<직접 입력>" else st.session_state.pattern_color_select
-        final_bg_color = st.session_state.custom_bg_color_input_key.strip() if st.session_state.bg_color_select == "<직접 입력>" else st.session_state.bg_color_select
             
         if is_pattern_ok and is_bg_ok and is_valid_color(final_pattern_color) and is_valid_color(final_bg_color) and final_pattern_color == final_bg_color:
             errors.append("패턴과 배경은 같은 색을 사용할 수 없습니다.")
@@ -403,7 +403,7 @@ with col2:
             if file_format == "PNG":
                 img, qr = generate_qr_code_png(
                     current_data, int(st.session_state.box_size_input), int(st.session_state.border_input), error_correction,
-                    int(st.session_state.mask_pattern_select), final_pattern_color, final_bg_color, # [수정] final_color 변수 사용
+                    int(st.session_state.mask_pattern_select), final_pattern_color, final_bg_color,
                 )
                 if img and qr:
                     img_buffer = io.BytesIO()
@@ -412,13 +412,13 @@ with col2:
                     st.session_state.qr_svg_bytes = None # PNG 선택 시 SVG는 None
                     st.session_state.qr_generated = True
                     st.session_state.show_generate_success = True
-                    # [변경 없음] 미리보기 업데이트
+                    # 미리보기 업데이트
                     preview_image_display = img
                     preview_qr_object = qr
             else: # SVG
                 img_svg, qr = generate_qr_code_svg(
                     current_data, int(st.session_state.box_size_input), int(st.session_state.border_input), error_correction,
-                    int(st.session_state.mask_pattern_select), final_pattern_color, final_bg_color, # [수정] final_color 변수 사용
+                    int(st.session_state.mask_pattern_select), final_pattern_color, final_bg_color,
                 )
                 if img_svg and qr:
                     svg_buffer = io.BytesIO()
@@ -427,10 +427,10 @@ with col2:
                     st.session_state.qr_image_bytes = None # SVG 선택 시 PNG는 None
                     st.session_state.qr_generated = True
                     st.session_state.show_generate_success = True
-                    # [변경] SVG 생성 완료 후 미리보기를 위해 PNG 재 생성
+                    # SVG 생성 완료 후 미리보기를 위해 PNG 재 생성
                     png_img, png_qr = generate_qr_code_png(
                         current_data, int(st.session_state.box_size_input), int(st.session_state.border_input), error_correction,
-                        int(st.session_state.mask_pattern_select), final_pattern_color, final_bg_color, # [수정] final_color 변수 사용
+                        int(st.session_state.mask_pattern_select), final_pattern_color, final_bg_color,
                     )
                     preview_image_display = png_img
                     preview_qr_object = png_qr
@@ -438,12 +438,11 @@ with col2:
 
     st.markdown("---")
     
-    # [수정] 미리보기 이미지 및 정보 표시
+    # 미리보기 이미지 및 정보 표시
     if preview_image_display:
         st.subheader("📱 QR 코드 미리보기")
         col_left, col_center, col_right = st.columns([1, 2, 1])
         with col_center:
-            # [수정] 미리보기는 항상 st.image를 사용
             st.image(preview_image_display, caption="생성된 QR 코드", width=380)
         
         if preview_qr_object:
