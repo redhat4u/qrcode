@@ -31,6 +31,12 @@ if 'download_initiated' not in st.session_state:
     st.session_state.download_initiated = False
 if 'show_generate_success' not in st.session_state:
     st.session_state.show_generate_success = False
+if 'qr_generated' not in st.session_state:
+    st.session_state.qr_generated = False
+if 'qr_image_bytes' not in st.session_state:
+    st.session_state.qr_image_bytes = None
+if 'last_qr_params_hash' not in st.session_state:
+    st.session_state.last_qr_params_hash = ""
 
 # 각 입력창에 대한 세션 상태 초기화 (필수)
 if 'qr_input_area' not in st.session_state:
@@ -84,6 +90,9 @@ def generate_qr_code(data, box_size, border, error_correction, mask_pattern, fil
 # QR 내용만 초기화하는 콜백 함수 (파일명은 유지)
 def clear_text_input():
     st.session_state.qr_input_area = ""
+    # 입력 내용이 변경되었으므로 다운로드 관련 정보 초기화
+    st.session_state.qr_generated = False
+    st.session_state.show_generate_success = False
 
 # 파일명 초기화 콜백 함수
 def clear_filename_callback():
@@ -92,6 +101,13 @@ def clear_filename_callback():
 # 다운로드 버튼 클릭 시 호출되는 콜백 함수
 def set_download_initiated():
     st.session_state.download_initiated = True
+
+# 설정값 변경 시 다운로드 관련 상태 초기화
+def on_setting_change():
+    st.session_state.qr_generated = False
+    st.session_state.show_generate_success = False
+    st.session_state.last_qr_params_hash = ""
+
 
 # 메인 앱 ============================================================================================
 
@@ -113,6 +129,7 @@ with col1:
         height=200,
         placeholder="이 곳에 QR 코드를 생성할 내용을 입력해 주세요.\n복사/붙여넣기를 사용할 수 있습니다.",
         key="qr_input_area",
+        on_change=on_setting_change # 설정 변경 감지
     )
 
     # 문자 수 표시
@@ -145,6 +162,7 @@ with col1:
         "마지막 입력문자 이후 모든 공백/줄바꿈 제거",
         value=True,
         help="입력된 내용 맨끝에 공백/줄바꿈 문자가 한개라도 포함되면 완전히 다른 QR코드가 생성됩니다. 입력된 마지막 문자 뒤에 공백/줄바꿈이 추가되어도 QR코드에 반영되지 않도록 하고 싶다면, 이 옵션을 켜 두세요.",
+        on_change=on_setting_change # 설정 변경 감지
     )
 
     st.markdown("---")
@@ -155,8 +173,8 @@ with col1:
 
     col1_1, col1_2 = st.columns(2)
     with col1_1:
-        box_size = st.number_input("QR 코드 1개의 사각 cell 크기 (px)", min_value=1, max_value=100, value=20, key="box_size_input")
-        border = st.number_input("QR 코드 테두리/여백", min_value=0, max_value=10, value=2, key="border_input")
+        box_size = st.number_input("QR 코드 1개의 사각 cell 크기 (px)", min_value=1, max_value=100, value=20, key="box_size_input", on_change=on_setting_change)
+        border = st.number_input("QR 코드 테두리/여백", min_value=0, max_value=10, value=2, key="border_input", on_change=on_setting_change)
 
     with col1_2:
         error_correction_options = {
@@ -165,9 +183,9 @@ with col1:
             "Quartile (25%) - 오류 보정": qrcode.constants.ERROR_CORRECT_Q,
             "High (30%) - 오류 보정": qrcode.constants.ERROR_CORRECT_H,
         }
-        error_correction_choice = st.selectbox("오류 보정 레벨", list(error_correction_options.keys()), index=0, key="error_correction_select")
+        error_correction_choice = st.selectbox("오류 보정 레벨", list(error_correction_options.keys()), index=0, key="error_correction_select", on_change=on_setting_change)
         error_correction = error_correction_options[error_correction_choice]
-        mask_pattern = st.selectbox("마스크 패턴 선택 (0~7)", options=list(range(8)), index=2, key="mask_pattern_select")
+        mask_pattern = st.selectbox("마스크 패턴 선택 (0~7)", options=list(range(8)), index=2, key="mask_pattern_select", on_change=on_setting_change)
 
     st.markdown("---")
     st.subheader("🔧 색상 설정")
@@ -181,9 +199,9 @@ with col1:
     ]
     col1_3, col1_4 = st.columns(2)
     with col1_3:
-        pattern_color_choice = st.selectbox("패턴 색상", colors, index=1, key="pattern_color_select",)
+        pattern_color_choice = st.selectbox("패턴 색상", colors, index=1, key="pattern_color_select", on_change=on_setting_change)
     with col1_4:
-        bg_color_choice = st.selectbox("배경 색상", colors, index=2, key="bg_color_select",)
+        bg_color_choice = st.selectbox("배경 색상", colors, index=2, key="bg_color_select", on_change=on_setting_change)
 
     st.markdown("원하는 색상이 리스트에 없다면, 아래에 직접 **HEX 코드**를 입력하세요.")
     st.caption("예: #FF0000 (빨강), #00FF00 (초록), #0000FF (파랑)")
@@ -194,6 +212,7 @@ with col1:
             placeholder="예: #000000",
             disabled=(pattern_color_choice != "<직접 입력>"),
             key="custom_pattern_color_input_key",
+            on_change=on_setting_change,
         )
     with col1_6:
         st.text_input(
@@ -201,6 +220,7 @@ with col1:
             placeholder="예: #FFFFFF",
             disabled=(bg_color_choice != "<직접 입력>"),
             key="custom_bg_color_input_key",
+            on_change=on_setting_change,
         )
 
     # 사용될 최종 색상 값 결정 (공백 제거)
@@ -219,6 +239,7 @@ with col1:
             "다운로드 파일명 입력 (확장자는 제외, 파일명만 입력)",
             placeholder="이 곳에 파일명을 입력해 주세요 (비어있으면 자동 생성됨)",
             key="filename_input_key",
+            on_change=on_setting_change
         )
 
     with col_filename_delete:
@@ -312,21 +333,8 @@ with col2:
                 img_buffer = io.BytesIO()
                 img.save(img_buffer, format='PNG')
                 st.session_state.qr_image_bytes = img_buffer.getvalue()
-                st.session_state.qr_image = img
                 st.session_state.qr_generated = True
                 st.session_state.show_generate_success = True
-            
-                qr_info_text = f"""
-                **QR 코드 정보**
-                - QR 버전: {qr.version}
-                - 가로/세로 각 cell 개수: {qr.modules_count}개
-                - 이미지 크기: {img.size[0]} x {img.size[1]} px
-                - 패턴 색상: {pattern_color}
-                - 배경 색상: {bg_color}
-                - 이미지 크기 = (각 cell 개수 + 좌/우 여백 총 개수) × 1개의 사각 cell 크기
-                """
-                st.session_state.qr_info = qr_info_text
-                st.session_state.last_qr_params_hash = hashlib.md5(str((current_data, box_size, border, error_correction_choice, mask_pattern, pattern_color_choice, bg_color_choice, pattern_color, bg_color)).encode('utf-8')).hexdigest()
 
     st.markdown("---")
     
