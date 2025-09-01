@@ -33,13 +33,11 @@ def sanitize_filename(name: str) -> str:
         name = name.replace(ch, "_")
     return name.strip()
 
-# 유효한 색상인지 확인하는 함수 (이제 16진수 값만 유효하며, 공백을 자동으로 제거)
+# 유효한 색상인지 확인하는 함수 (16진수 값만 유효하며, 공백을 자동으로 제거)
 def is_valid_color(color_name):
     if not color_name:
         return False
-    # 입력된 문자열의 앞뒤 공백을 제거
     color_name = color_name.strip()
-    # 16진수 코드 (# 뒤에 3자리 또는 6자리)만 허용
     hex_pattern = re.compile(r'^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$')
     return hex_pattern.match(color_name)
 
@@ -56,7 +54,6 @@ def generate_qr_code(data, box_size, border, error_correction, mask_pattern, fil
         qr.add_data(data, optimize=0)
         qr.make(fit=True)
         
-        # 색상 관련 인자는 make_image() 함수로 전달하여 오류 방지
         img = qr.make_image(fill_color=fill_color.strip(), back_color=back_color.strip())
 
         if hasattr(img, 'convert'):
