@@ -374,12 +374,9 @@ with col2:
     # QR 코드 생성 버튼
     generate_btn = st.button("⚡ QR 코드 생성", use_container_width=True,)
     
-    # [수정] 생성 버튼 클릭 시 최종 유효성 검사 로직
     if generate_btn:
         errors = []
-        st.session_state.show_generate_success = False  # 버튼 클릭 시 성공 메시지 숨김
         
-        # [수정] on_change 콜백이 없더라도 st.session_state에 값이 항상 존재하도록 로직 변경
         final_pattern_color = st.session_state.custom_pattern_color_input_key.strip() if st.session_state.pattern_color_select == "<직접 입력>" else st.session_state.pattern_color_select
         final_bg_color = st.session_state.custom_bg_color_input_key.strip() if st.session_state.bg_color_select == "<직접 입력>" else st.session_state.bg_color_select
         
@@ -416,7 +413,6 @@ with col2:
             st.session_state.qr_svg_bytes = None
             st.session_state.show_generate_success = False
         else:
-            # [수정] 모든 유효성 검사를 통과했을 때만 QR 코드 생성 및 저장
             if file_format == "PNG":
                 img, qr = generate_qr_code_png(
                     current_data, int(st.session_state.box_size_input), int(st.session_state.border_input), error_correction,
@@ -432,7 +428,6 @@ with col2:
                     preview_image_display = img
                     preview_qr_object = qr
             else: # SVG
-                # SVG 생성 함수는 색상 인자를 무시하므로 검정색과 흰색을 넘겨줌
                 svg_data, qr = generate_qr_code_svg(
                     current_data, int(st.session_state.box_size_input), int(st.session_state.border_input), error_correction,
                     int(st.session_state.mask_pattern_select), "black", "white",
@@ -442,7 +437,6 @@ with col2:
                     st.session_state.qr_image_bytes = None
                     st.session_state.qr_generated = True
                     st.session_state.show_generate_success = True
-                    # 미리보기용 PNG도 별도로 생성
                     png_img, png_qr = generate_qr_code_png(
                         current_data, int(st.session_state.box_size_input), int(st.session_state.border_input), error_correction,
                         int(st.session_state.mask_pattern_select), "black", "white",
@@ -451,46 +445,43 @@ with col2:
                     preview_qr_object = png_qr
 
     st.markdown("---")
-
-    # [수정] QR 코드 생성 성공 메시지 (생성 버튼 클릭 시에만 표시)
+    
+    # [수정] 성공 메시지와 미리보기를 동시에 표시하는 로직으로 변경
     if st.session_state.show_generate_success:
         st.success("✅ QR 코드 생성 완료! 반드시 파일명을 확인하고 다운로드하세요.")
     
-    # [수정] 미리보기 이미지 및 정보 표시 (생성 성공 상태가 아닐 때만 표시)
-    if not st.session_state.show_generate_success:
-        if preview_image_display:
-            st.success("현재 입력된 내용으로 생성될 QR 코드를 미리 표현해 보았습니다.")
-            st.subheader("📱 QR 코드 미리보기")
-            col_left, col_center, col_right = st.columns([1, 2, 1])
-            with col_center:
-                st.image(preview_image_display, caption="생성된 QR 코드", width=380)
-            
-            if preview_qr_object:
-                st.info(f"""
-                **QR 코드 정보**
-                - QR 버전: {preview_qr_object.version}
-                - 가로/세로 각 cell 개수: {preview_qr_object.modules_count}개
-                - 이미지 크기 (참고): {(preview_qr_object.modules_count + 2 * int(st.session_state.border_input)) * int(st.session_state.box_size_input)} x {(preview_qr_object.modules_count + 2 * int(st.session_state.border_input)) * int(st.session_state.box_size_input)} px
-                - 패턴 색상: {"black" if file_format_is_svg else pattern_color}
-                - 배경 색상: {"white" if file_format_is_svg else bg_color}
-                - 이미지 크기 = (각 cell 개수 + 좌/우 여백 총 개수) × 1개의 사각 cell 크기
-                """)
+    if preview_image_display:
+        st.subheader("📱 QR 코드 미리보기")
+        col_left, col_center, col_right = st.columns([1, 2, 1])
+        with col_center:
+            st.image(preview_image_display, caption="생성된 QR 코드", width=380)
+        
+        if preview_qr_object:
+            st.info(f"""
+            **QR 코드 정보**
+            - QR 버전: {preview_qr_object.version}
+            - 가로/세로 각 cell 개수: {preview_qr_object.modules_count}개
+            - 이미지 크기 (참고): {(preview_qr_object.modules_count + 2 * int(st.session_state.border_input)) * int(st.session_state.box_size_input)} x {(preview_qr_object.modules_count + 2 * int(st.session_state.border_input)) * int(st.session_state.box_size_input)} px
+            - 패턴 색상: {"black" if file_format_is_svg else pattern_color}
+            - 배경 색상: {"white" if file_format_is_svg else bg_color}
+            - 이미지 크기 = (각 cell 개수 + 좌/우 여백 총 개수) × 1개의 사각 cell 크기
+            """)
+    else:
+        # 오류 메시지 표시 로직
+        if not current_data:
+            st.info("QR 코드 내용을 입력하면 생성될 QR 코드를 미리 보여드립니다.")
         else:
-            # 오류 메시지 표시 로직
-            if not current_data:
-                st.info("QR 코드 내용을 입력하면 생성될 QR 코드를 미리 보여드립니다.")
-            else:
-                if not file_format_is_svg:
-                    if pattern_color_choice == "<직접 입력>" and not pattern_color:
-                        st.warning("⚠️ 패턴 색의 HEX 값을 입력해 주세요. 미리보기를 위해 유효한 색상 값이 필요합니다.")
-                    if bg_color_choice == "<직접 입력>" and not bg_color:
-                        st.warning("⚠️ 배경 색의 HEX 값을 입력해 주세요. 미리보기를 위해 유효한 색상 값이 필요합니다.")
-                    if pattern_color_choice == "<직접 입력>" and pattern_color and not is_valid_color(pattern_color):
-                        st.warning("⚠️ 패턴 색으로 입력한 HEX 값은 올바른 색상 값이 아닙니다. 다시 확인해주세요.")
-                    if bg_color_choice == "<직접 입력>" and bg_color and not is_valid_color(bg_color):
-                        st.warning("⚠️ 배경 색으로 입력한 HEX 값은 올바른 색상 값이 아닙니다. 다시 확인해주세요.")
-                    if is_colors_same_preview:
-                        st.warning("⚠️ 패턴과 배경은 같은 색을 사용할 수 없습니다.")
+            if not file_format_is_svg:
+                if pattern_color_choice == "<직접 입력>" and not pattern_color:
+                    st.warning("⚠️ 패턴 색의 HEX 값을 입력해 주세요. 미리보기를 위해 유효한 색상 값이 필요합니다.")
+                if bg_color_choice == "<직접 입력>" and not bg_color:
+                    st.warning("⚠️ 배경 색의 HEX 값을 입력해 주세요. 미리보기를 위해 유효한 색상 값이 필요합니다.")
+                if pattern_color_choice == "<직접 입력>" and pattern_color and not is_valid_color(pattern_color):
+                    st.warning("⚠️ 패턴 색으로 입력한 HEX 값은 올바른 색상 값이 아닙니다. 다시 확인해주세요.")
+                if bg_color_choice == "<직접 입력>" and bg_color and not is_valid_color(bg_color):
+                    st.warning("⚠️ 배경 색으로 입력한 HEX 값은 올바른 색상 값이 아닙니다. 다시 확인해주세요.")
+                if is_colors_same_preview:
+                    st.warning("⚠️ 패턴과 배경은 같은 색을 사용할 수 없습니다.")
 
     # 다운로드 섹션
     if st.session_state.get('qr_generated', False) and (st.session_state.get('qr_image_bytes') is not None or st.session_state.get('qr_svg_bytes') is not None):
