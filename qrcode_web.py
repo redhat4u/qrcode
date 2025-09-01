@@ -52,6 +52,16 @@ if 'show_generate_success' not in st.session_state:
 if 'last_qr_params_hash' not in st.session_state:
     st.session_state.last_qr_params_hash = ""
 
+# 각 입력창에 대한 세션 상태 초기화 (필수)
+if 'qr_input_area' not in st.session_state:
+    st.session_state.qr_input_area = ""
+if 'custom_pattern_color_input_key' not in st.session_state:
+    st.session_state.custom_pattern_color_input_key = ""
+if 'custom_bg_color_input_key' not in st.session_state:
+    st.session_state.custom_bg_color_input_key = ""
+if 'filename_input_key' not in st.session_state:
+    st.session_state.filename_input_key = ""
+
 
 # 파일명에 특수문자 포함시 '_' 문자로 치환
 def sanitize_filename(name: str) -> str:
@@ -60,10 +70,11 @@ def sanitize_filename(name: str) -> str:
         name = name.replace(ch, "_")
     return name.strip()
 
-# 유효한 색상인지 확인하는 함수
+# 유효한 색상인지 확인하는 함수 (16진수 값만 유효하며, 공백을 자동으로 제거)
 def is_valid_color(color_name):
     if not color_name:
         return False
+    color_name = color_name.strip()
     hex_pattern = re.compile(r'^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$')
     return hex_pattern.match(color_name)
 
@@ -107,7 +118,7 @@ def clear_text_input():
 
 # 파일명 초기화 콜백 함수
 def clear_filename_callback():
-    st.session_state.filename_input = ""
+    st.session_state.filename_input_key = ""
     st.session_state.filename_message = "deleted"
     st.session_state.last_filename_state = ""
     st.session_state.download_initiated = False
@@ -116,6 +127,14 @@ def clear_filename_callback():
 def set_download_initiated():
     st.session_state.download_initiated = True
 
+# 색상 입력 위젯의 on_change 콜백 함수
+def strip_pattern_color_input_callback():
+    st.session_state.custom_pattern_color_input_key = st.session_state.custom_pattern_color_input_key.strip()
+    st.session_state.last_qr_params_hash = ""  # 해시 초기화하여 미리보기 갱신 유도
+
+def strip_bg_color_input_callback():
+    st.session_state.custom_bg_color_input_key = st.session_state.custom_bg_color_input_key.strip()
+    st.session_state.last_qr_params_hash = "" # 해시 초기화하여 미리보기 갱신 유도
 
 # 메인 앱 ============================================================================================
 
@@ -213,23 +232,27 @@ with col1:
     st.caption("예: #FF0000 (빨강), #00FF00 (초록), #0000FF (파랑)")
     col1_5, col1_6 = st.columns(2)
     with col1_5:
-        custom_pattern_color_input = st.text_input(
+        st.text_input(
             "패턴 색상 HEX 값",
+            value=st.session_state.custom_pattern_color_input_key,
             placeholder="예: #000000",
             disabled=(pattern_color_choice != "<직접 입력>"),
-            key="custom_pattern_color_input_key"
+            key="custom_pattern_color_input_key",
+            on_change=strip_pattern_color_input_callback,
         )
     with col1_6:
-        custom_bg_color_input = st.text_input(
+        st.text_input(
             "배경 색상 HEX 값",
+            value=st.session_state.custom_bg_color_input_key,
             placeholder="예: #FFFFFF",
             disabled=(bg_color_choice != "<직접 입력>"),
-            key="custom_bg_color_input_key"
+            key="custom_bg_color_input_key",
+            on_change=strip_bg_color_input_callback,
         )
 
     # 사용될 최종 색상 값 결정 (공백 제거)
-    pattern_color = custom_pattern_color_input.strip() if pattern_color_choice == "<직접 입력>" else pattern_color_choice
-    bg_color = custom_bg_color_input.strip() if bg_color_choice == "<직접 입력>" else bg_color_choice
+    pattern_color = st.session_state.custom_pattern_color_input_key.strip() if pattern_color_choice == "<직접 입력>" else pattern_color_choice
+    bg_color = st.session_state.custom_bg_color_input_key.strip() if bg_color_choice == "<직접 입력>" else bg_color_choice
     
     st.markdown("---")
 
@@ -336,6 +359,7 @@ with col2:
         st.session_state.download_initiated = False
         st.session_state.show_generate_success = False
         st.session_state.last_qr_params_hash = ""
+
 
     # QR 코드 생성 버튼
     generate_btn = st.button("⚡ QR 코드 생성", use_container_width=True,)
