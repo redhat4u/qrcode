@@ -33,6 +33,8 @@ if 'last_filename_state' not in st.session_state:
     st.session_state.last_filename_state = ""
 if 'generate_button_clicked' not in st.session_state: # 새로 추가된 상태 변수
     st.session_state.generate_button_clicked = False
+if 'error_message' not in st.session_state:
+    st.session_state.error_message = None
 
 
 # 각 입력창에 대한 세션 상태 초기화 (필수)
@@ -140,6 +142,7 @@ def clear_text_input():
     st.session_state.show_generate_success = False
     st.session_state.last_qr_params_hash = ""
     st.session_state.generate_button_clicked = False # 상태 초기화
+    st.session_state.error_message = None
 
 # 파일명 초기화 콜백 함수
 def clear_filename_callback():
@@ -166,6 +169,7 @@ def reset_all_settings():
     st.session_state.qr_image_bytes = None
     st.session_state.qr_svg_bytes = None
     st.session_state.generate_button_clicked = False
+    st.session_state.error_message = None
 
 
 # 다운로드 버튼 클릭 시 호출되는 콜백 함수
@@ -179,6 +183,7 @@ def on_qr_setting_change():
     st.session_state.qr_image_bytes = None
     st.session_state.qr_svg_bytes = None
     st.session_state.generate_button_clicked = False # 설정 변경 시 버튼 클릭 상태 초기화
+    st.session_state.error_message = None
 
 
 # 메인 앱 ============================================================================================
@@ -383,44 +388,36 @@ with col2:
     # [수정] 생성 버튼 클릭 시 최종 유효성 검사 로직
     if generate_btn:
         st.session_state.generate_button_clicked = True
-        errors = []
+        st.session_state.error_message = None # 버튼 클릭 시 기존 오류 메시지 초기화
         
+        # 유효성 검사 로직을 하나의 리스트로 통합
+        errors = []
         final_pattern_color = st.session_state.custom_pattern_color_input_key.strip() if st.session_state.pattern_color_select == "<직접 입력>" else st.session_state.pattern_color_select
         final_bg_color = st.session_state.custom_bg_color_input_key.strip() if st.session_state.bg_color_select == "<직접 입력>" else st.session_state.bg_color_select
         
         if not current_data:
-            errors.append("생성할 QR 코드 내용을 입력해 주세요.")
+            errors.append("⚠️ 생성할 QR 코드 내용을 입력해 주세요.")
         
         if not file_format_is_svg:
-            is_pattern_ok = True
-            if st.session_state.pattern_color_select == "<직접 입력>":
-                if not final_pattern_color:
-                    errors.append("QR 코드 **패턴 색**의 HEX 값을 입력해 주세요.")
-                    is_pattern_ok = False
-                elif not is_valid_color(final_pattern_color):
-                    errors.append("패턴 색으로 입력한 HEX 값은 올바른 색상 값이 아닙니다. 다시 확인해주세요.")
-                    is_pattern_ok = False
+            if st.session_state.pattern_color_select == "<직접 입력>" and not final_pattern_color:
+                errors.append("⚠️ 패턴 색의 HEX 값을 입력해 주세요.")
+            elif st.session_state.pattern_color_select == "<직접 입력>" and not is_valid_color(final_pattern_color):
+                errors.append("⚠️ 패턴 색으로 입력한 HEX 값은 올바른 색상 값이 아닙니다. 다시 확인해주세요.")
             
-            is_bg_ok = True
-            if st.session_state.bg_color_select == "<직접 입력>":
-                if not final_bg_color:
-                    errors.append("QR 코드 **배경 색**의 HEX 값을 입력해 주세요.")
-                    is_bg_ok = False
-                elif not is_valid_color(final_bg_color):
-                    errors.append("배경 색으로 입력한 HEX 값은 올바른 색상 값이 아닙니다. 다시 확인해주세요.")
-                    is_bg_ok = False
+            if st.session_state.bg_color_select == "<직접 입력>" and not final_bg_color:
+                errors.append("⚠️ 배경 색의 HEX 값을 입력해 주세요.")
+            elif st.session_state.bg_color_select == "<직접 입력>" and not is_valid_color(final_bg_color):
+                errors.append("⚠️ 배경 색으로 입력한 HEX 값은 올바른 색상 값이 아닙니다. 다시 확인해주세요.")
                 
-            if is_pattern_ok and is_bg_ok and final_pattern_color and final_bg_color and final_pattern_color == final_bg_color:
-                errors.append("패턴과 배경은 같은 색을 사용할 수 없습니다.")
+            if final_pattern_color and final_bg_color and final_pattern_color == final_bg_color:
+                errors.append("⚠️ 패턴과 배경은 같은 색을 사용할 수 없습니다.")
 
         if errors:
-            for error_msg in errors:
-                st.error(f"⚠️ {error_msg}")
-            st.session_state.qr_generated = False
-            st.session_state.qr_image_bytes = None
-            st.session_state.qr_svg_bytes = None
+            # 오류 메시지를 세션 상태에 저장하여 다른 곳에서 참조 가능하게 함
+            st.session_state.error_message = errors[0] # 첫 번째 오류 메시지만 표시
             st.session_state.show_generate_success = False
         else:
+            st.session_state.error_message = None
             # [수정] 모든 유효성 검사를 통과했을 때만 QR 코드 생성 및 저장
             if file_format == "PNG":
                 img, qr = generate_qr_code_png(
@@ -458,14 +455,14 @@ with col2:
     st.markdown("---")
     
     # [수정] 메시지 표시 로직 통합
-    # 내용이 없거나 (초기 상태) 또는 '생성' 버튼을 눌렀지만 내용이 없을 때
-    if not current_data and not st.session_state.generate_button_clicked:
-        st.info("QR 코드 내용을 입력하면 생성될 QR 코드를 미리 보여드립니다.")
+    if st.session_state.error_message:
+        st.error(st.session_state.error_message)
     elif st.session_state.show_generate_success:
         st.success("✅ QR 코드 생성 완료! 반드시 파일명을 확인하고 다운로드하세요.")
     elif preview_image_display:
         st.success("현재 입력된 내용으로 생성될 QR 코드를 미리 표현해 보았습니다.")
-    # 이외의 경우, 즉 내용이 없지만 버튼을 누른 경우, 오류 메시지는 위 if generate_btn: 블록에서 이미 처리됨.
+    else:
+        st.info("QR 코드 내용을 입력하면 생성될 QR 코드를 미리 보여드립니다.")
 
     # 미리보기 이미지 및 정보는 항상 표시
     if preview_image_display:
