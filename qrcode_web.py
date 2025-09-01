@@ -203,7 +203,7 @@ with col1:
     st.markdown("---")
 
     # QR 코드 설정
-    st.subheader("🔧 QR 코드 설정")
+    st.subheader("🛠️ QR 코드 설정")
 
     col1_1, col1_2 = st.columns(2)
     with col1_1:
@@ -222,7 +222,7 @@ with col1:
         mask_pattern = st.selectbox("마스크 패턴 선택 (0~7)", options=list(range(8)), key="mask_pattern_select", on_change=on_qr_setting_change)
 
     st.markdown("---")
-    st.subheader("🔧 색상 설정")
+    st.subheader("🛠️ 색상 설정")
 
     # 색상 선택 옵션을 확장 (약 20개 이상)
     colors = [
@@ -263,7 +263,7 @@ with col1:
     
     st.markdown("---")
 
-    st.subheader("🔧 파일 설정")
+    st.subheader("🛠️ 파일명 설정")
 
     # 파일명 입력창과 삭제 버튼을 위한 컬럼
     col_filename_input, col_filename_delete = st.columns([3, 1.1])
@@ -481,6 +481,4 @@ st.markdown(
     '<p style="text-align: center; color: hotpink; font-size: 15px;">© 2025 QR 코드 생성기  |  Streamlit으로 제작  |  제작: 류종훈(redhat4u@gmail.com)</p>',
     unsafe_allow_html=True
 )
-
-
-
+# 최종버전..
