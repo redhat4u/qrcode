@@ -110,11 +110,45 @@ def build_preview_and_download_ui():
     if st.session_state.error_message:
         st.error(st.session_state.error_message)
     elif st.session_state.show_generate_success:
-        st.success("✅ QR 코드 생성 완료!!")
-        st.markdown(" ==> 반드시 파일명을 확인하고, 화면 아래의 [💾 QR 코드 다운로드] 버튼을 클릭하세요.")
+#        st.success("✅ QR 코드 생성 완료!! 반드시 파일명을 확인하고, 화면 아래의 [💾 QR 코드 다운로드] 버튼을 클릭하세요.")
+         st.markdown(
+             """
+             <div style='
+                 background-color: #e6f7e9;
+                 color: #1a5e31;
+                 padding: 1rem;
+                 border-radius: 0.5rem;
+                 border: 1px solid #1a5e31;
+                 font-size: 1rem;
+                 margin-bottom: 1rem;
+                 word-break: keep-all;
+             '>
+                 ✅ QR 코드 생성 완료!!<br>
+                 반드시 파일명을 한 후에 화면 아래의 [💾 QR 코드 다운로드] 버튼을 클릭하세요.
+             </div>
+             """,
+             unsafe_allow_html=True,
+         )
     elif preview_image_display:
-        st.success("현재 입력된 내용으로 생성될 QR 코드를 미리 표현해 보았습니다.")
-        st.markdown(" ==> 이 QR 코드가 맘에 드신다면, 위의 [⚡ QR 코드 생성] 버튼을 클릭하세요.")
+#        st.success("✅ 현재 입력된 내용으로 생성될 QR 코드를 미리 표현해 보았습니다. 이 QR 코드가 맘에 드신다면, 위의 [⚡ QR 코드 생성] 버튼을 클릭하세요.")
+         st.markdown(
+             """
+             <div style='
+                 background-color: #e6f7e9;
+                 color: #1a5e31;
+                 padding: 1rem;
+                 border-radius: 0.5rem;
+                 border: 1px solid #1a5e31;
+                 font-size: 1rem;
+                 margin-bottom: 1rem;
+                 word-break: keep-all;
+             '>
+                 ✅ 현재 입력된 내용으로 생성될 QR 코드를 미리 표현해 보았습니다.<br>
+                 이 QR 코드가 맘에 드신다면, 위의 [⚡ QR 코드 생성] 버튼을 클릭하세요.
+             </div>
+             """,
+             unsafe_allow_html=True,
+         )
     else:
         st.info("QR 코드 내용을 입력하면 생성될 QR 코드를 미리 보여드립니다.")
 
