@@ -461,12 +461,12 @@ with col2:
                     preview_image_display = png_img
                     preview_qr_object = png_qr
 
+    st.markdown("---")
+    
     # 생성 성공 메시지 (고정)
     if st.session_state.show_generate_success:
         st.success("✅ QR 코드 생성 완료! 반드시 파일명을 확인하고 다운로드하세요.")
 
-    st.markdown("---")
-    
     # 미리보기 이미지 및 정보 표시
     if preview_image_display:
         st.subheader("📱 QR 코드 미리보기")
