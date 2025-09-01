@@ -207,8 +207,8 @@ def build_preview_and_download_ui():
                 margin-bottom: 1rem;
                 word-break: keep-all;
             '>
-                ✅ 현재 입력된 내용으로 QR 코드를 미리 표현해 보았습니다.<br>
-                아래의 QR 코드가 맘에 드시면, 위의 [⚡ QR 코드 생성] 버튼을 클릭하세요.
+                ✅ 현재 입력된 내용으로 아래에 QR 코드를 미리 보여드립니다.<br>
+                QR 코드가 맘에 드시면, 위의 [⚡ QR 코드 생성] 버튼을 클릭하세요.
             </div>
             """,
             unsafe_allow_html=True,
