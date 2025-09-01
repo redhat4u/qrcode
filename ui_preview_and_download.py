@@ -223,7 +223,7 @@ def build_preview_and_download_ui():
                 margin-bottom: 1rem;
                 word-break: keep-all;
             '>
-                ✅ 생성된 QR 코드 다운로드 준비 완료!!<br>
+                ✅ 생성된 QR 코드 다운로드 완료!!<br>
                 휴대폰은 'Download' 폴더에 저장됩니다.
             </div>
             """,
