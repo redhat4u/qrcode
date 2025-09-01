@@ -45,6 +45,7 @@ if 'last_filename_state' not in st.session_state:
     st.session_state.last_filename_state = ""
 
 # 각 입력창에 대한 세션 상태 초기화 (필수)
+# None 대신 빈 문자열로 초기화하여 AttributeError 방지
 if 'qr_input_area' not in st.session_state:
     st.session_state.qr_input_area = ""
 if 'custom_pattern_color_input_key' not in st.session_state:
@@ -291,8 +292,8 @@ with col1:
         )
     
     # 이 변수들은 미리보기 용도로만 사용됩니다.
-    pattern_color = st.session_state.custom_pattern_color_input_key.strip() if pattern_color_choice == "<직접 입력>" else pattern_color_choice
-    bg_color = st.session_state.custom_bg_color_input_key.strip() if bg_color_choice == "<직접 입력>" else bg_color_choice
+    pattern_color = st.session_state.get('custom_pattern_color_input_key', '').strip() if pattern_color_choice == "<직접 입력>" else pattern_color_choice
+    bg_color = st.session_state.get('custom_bg_color_input_key', '').strip() if bg_color_choice == "<직접 입력>" else bg_color_choice
     
     st.markdown("---")
 
@@ -362,17 +363,10 @@ with col2:
     if generate_btn:
         errors = []
         
-        # [수정] 버튼이 눌리는 시점에 '최신' 입력 값을 세션 상태에 강제로 저장합니다.
-        # 이렇게 하면 텍스트 입력창에서 커서가 벗어나지 않아도 최신 값이 보장됩니다.
-        if st.session_state.pattern_color_select == "<직접 입력>":
-            st.session_state.custom_pattern_color_input_key = st.session_state.custom_pattern_color_input_key.strip()
-        if st.session_state.bg_color_select == "<직접 입력>":
-            st.session_state.custom_bg_color_input_key = st.session_state.custom_bg_color_input_key.strip()
-
-        # [수정] 버튼이 눌리는 시점에 최종 색상 값을 다시 결정합니다.
-        final_pattern_color = st.session_state.custom_pattern_color_input_key if st.session_state.pattern_color_select == "<직접 입력>" else st.session_state.pattern_color_select
-        final_bg_color = st.session_state.custom_bg_color_input_key if st.session_state.bg_color_select == "<직접 입력>" else st.session_state.bg_color_select
-
+        # [수정] on_change 콜백이 없더라도 st.session_state에 값이 항상 존재하도록 로직 변경
+        final_pattern_color = st.session_state.custom_pattern_color_input_key.strip() if st.session_state.pattern_color_select == "<직접 입력>" else st.session_state.pattern_color_select
+        final_bg_color = st.session_state.custom_bg_color_input_key.strip() if st.session_state.bg_color_select == "<직접 입력>" else st.session_state.bg_color_select
+        
         if not current_data:
             errors.append("생성할 QR 코드 내용을 입력해 주세요.")
         
