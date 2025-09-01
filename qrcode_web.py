@@ -484,7 +484,7 @@ with col2:
     else:
         # 오류 메시지 표시 로직
         if not current_data:
-            st.info("QR 코드 내용을 입력하시면 미리보기가 자동으로 나타납니다.")
+            st.info("QR 코드 내용을 입력하면, 생성될 QR 코드를 미리 보여줍니다.")
         else:
             if not file_format_is_svg:
                 if pattern_color_choice == "<직접 입력>" and not pattern_color:
@@ -606,3 +606,4 @@ st.markdown(
     unsafe_allow_html=True
 )
 # 최신버전..
+
