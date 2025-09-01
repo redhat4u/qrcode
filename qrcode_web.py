@@ -196,6 +196,7 @@ with col1:
     strip_option = st.checkbox(
         "마지막 입력문자 이후 모든 공백/줄바꿈 제거",
         value=st.session_state.strip_option_state,
+        key="strip_option", # key를 추가하여 상태 추적
         help="입력된 내용 맨끝에 공백/줄바꿈 문자가 한개라도 포함되면 완전히 다른 QR코드가 생성됩니다. 입력된 마지막 문자 뒤에 공백/줄바꿈이 추가되어도 QR코드에 반영되지 않도록 하고 싶다면, 이 옵션을 켜 두세요.",
         on_change=on_qr_setting_change
     )
