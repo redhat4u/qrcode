@@ -461,6 +461,9 @@ with col2:
                     preview_image_display = png_img
                     preview_qr_object = png_qr
 
+    # 생성 성공 메시지 (고정)
+    if st.session_state.show_generate_success:
+        st.success("✅ QR 코드 생성 완료! 반드시 파일명을 확인하고 다운로드하세요.")
 
     st.markdown("---")
     
@@ -497,10 +500,6 @@ with col2:
                     st.warning("⚠️ 배경 색으로 입력한 HEX 값은 올바른 색상 값이 아닙니다. 다시 확인해주세요.")
                 if is_colors_same_preview:
                     st.warning("⚠️ 패턴과 배경은 같은 색을 사용할 수 없습니다.")
-
-    # 생성 성공 메시지 (고정)
-    if st.session_state.show_generate_success:
-        st.success("✅ QR 코드 생성 완료! 반드시 파일명을 확인하고 다운로드하세요.")
 
     # 다운로드 섹션
     if st.session_state.get('qr_generated', False) and (st.session_state.get('qr_image_bytes') is not None or st.session_state.get('qr_svg_bytes') is not None):
@@ -605,6 +604,4 @@ st.markdown(
     '<p style="text-align: center; color: hotpink; font-size: 15px;">© 2025 QR 코드 생성기  |  Streamlit으로 제작  |  제작: 류종훈(redhat4u@gmail.com)</p>',
     unsafe_allow_html=True
 )
-# 최신버전..
-
-
+# 최신버전(25/09/01-21:13)..
