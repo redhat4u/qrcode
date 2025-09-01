@@ -144,7 +144,7 @@ def build_preview_and_download_ui():
                  word-break: keep-all;
              '>
                  ✅ 현재 입력된 내용으로 생성될 QR 코드를 미리 표현해 보았습니다.<br>
-                 이 QR 코드가 맘에 드신다면, 위의 [⚡ QR 코드 생성] 버튼을 클릭하세요.
+                 아래의 QR 코드가 맘에 드시면, 위의 [⚡ QR 코드 생성] 버튼을 클릭하세요.
              </div>
              """,
              unsafe_allow_html=True,
