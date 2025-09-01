@@ -203,8 +203,8 @@ def build_preview_and_download_ui():
 
         st.markdown(
             f'<p style="font-size:18px;">'
-            f'<span style="color:darkorange; font-weight:bold;">📄 다운로드 파일명: </span> '
-            f'<span style="color:dodgerblue;"> {download_filename}</span>'
+            f'<span style="color:dodgerblue; font-weight:bold;">📄 다운로드 파일명: </span> '
+            f'<span style="color:darkorange;"> {download_filename}</span>'
             f'</p>',
             unsafe_allow_html=True,
         )
