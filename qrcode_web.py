@@ -46,6 +46,23 @@ def is_valid_color(color_name):
 # QR 코드 생성 함수
 def generate_qr_code(data, box_size, border, error_correction, mask_pattern, fill_color, back_color):
     try:
+        # fill_color와 back_color의 앞뒤 공백을 완벽히 제거
+        img = qrcode.make(
+            data,
+            box_size=box_size,
+            border=border,
+            error_correction=error_correction,
+            fill_color=fill_color.strip(),
+            back_color=back_color.strip(),
+        )
+        if hasattr(img, 'convert'):
+            img = img.convert('RGB')
+        else:
+            img_buffer = io.BytesIO()
+            img.save(img_buffer, format='PNG')
+            img_buffer.seek(0)
+            img = Image.open(img_buffer)
+            
         qr = qrcode.QRCode(
             version=1,
             error_correction=error_correction,
@@ -55,15 +72,7 @@ def generate_qr_code(data, box_size, border, error_correction, mask_pattern, fil
         )
         qr.add_data(data, optimize=0)
         qr.make(fit=True)
-        img = qr.make_image(fill_color=fill_color, back_color=back_color)
-
-        if hasattr(img, 'convert'):
-            img = img.convert('RGB')
-        else:
-            img_buffer = io.BytesIO()
-            img.save(img_buffer, format='PNG')
-            img_buffer.seek(0)
-            img = Image.open(img_buffer)
+            
         return img, qr
     except Exception as e:
         st.error(f"QR 코드 생성 오류: {str(e)}")
@@ -221,7 +230,7 @@ with col1:
     with col1_6:
         custom_bg_color = st.text_input("배경 색상 HEX 값", placeholder="예: #FFFFFF", disabled=(bg_color_choice != "<직접 입력>"), key="custom_bg_color_input",)
 
-    # 사용될 최종 색상 값 결정 (여기서는 strip()을 하지 않음)
+    # 사용될 최종 색상 값 결정
     pattern_color = custom_pattern_color if pattern_color_choice == "<직접 입력>" else pattern_color_choice
     bg_color = custom_bg_color if bg_color_choice == "<직접 입력>" else bg_color_choice
 
@@ -310,8 +319,8 @@ with col2:
             - QR 버전: {qr.version}
             - 가로/세로 각 cell 개수: {qr.modules_count}개
             - 이미지 크기: {img.size[0]} x {img.size[1]} px
-            - 패턴 색상: {pattern_color}
-            - 배경 색상: {bg_color}
+            - 패턴 색상: {pattern_color.strip()}
+            - 배경 색상: {bg_color.strip()}
             - 이미지 크기 = (각 cell 개수 + 좌/우 여백 총 개수) × 1개의 사각 cell 크기
             """
             st.session_state.preview_image = img
