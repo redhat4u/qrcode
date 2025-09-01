@@ -124,7 +124,7 @@ def build_preview_and_download_ui():
                  word-break: keep-all;
              '>
                  ✅ QR 코드 생성 완료!!<br>
-                 반드시 파일명을 확인하고, 화면 아래의 [💾 QR 코드 다운로드] 버튼을 클릭하세요.
+                 반드시 파일명을 확인하시고, 화면 아래의 [💾 QR 코드 다운로드] 버튼을 클릭하세요.
              </div>
              """,
              unsafe_allow_html=True,
@@ -210,5 +210,23 @@ def build_preview_and_download_ui():
         )
 
         if st.session_state.download_initiated:
-            st.success("✅ 생성한 QR 코드를 다운로드할 수 있습니다! 휴대폰은 'Download' 폴더에 저장됩니다.")
+#            st.success("✅ 생성한 QR 코드를 다운로드할 수 있습니다! 휴대폰은 'Download' 폴더에 저장됩니다.")
+             st.markdown(
+                 """
+                 <div style='
+                     background-color: #0c4145;
+                     color: #dffde9;
+                     padding: 1rem;
+                     border-radius: 0.5rem;
+                     border: 1px solid #1a5e31;
+                     font-size: 1rem;
+                     margin-bottom: 1rem;
+                     word-break: keep-all;
+                 '>
+                     ✅ 생성된 QR 코드를 다운로드 완료!!<br>
+                     휴대폰은 'Download' 폴더에 저장됩니다.
+                 </div>
+                 """,
+                 unsafe_allow_html=True,
+            )
             st.session_state.download_initiated = False
