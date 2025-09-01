@@ -11,6 +11,7 @@ QR 코드 생성 웹앱 - Streamlit 버전
 """
 
 import streamlit as st
+import streamlit.components.v1 as components
 import qrcode
 import io
 from datetime import datetime
@@ -21,12 +22,14 @@ import re
 import base64 # SVG 이미지 표시를 위해 추가
 import qrcode.image.svg # SVG 생성을 위해 추가
 
+
 # 페이지 설정
 st.set_page_config(
     page_title="QR 코드 생성기",
     page_icon="🔲",
     layout="wide",
 )
+
 
 # 세션 상태 초기화
 if 'download_initiated' not in st.session_state:
@@ -84,6 +87,7 @@ def sanitize_filename(name: str) -> str:
         name = name.replace(ch, "_")
     return name.strip()
 
+
 # 유효한 색상인지 확인하는 함수 (16진수 값만 유효하며, 공백을 자동으로 제거)
 def is_valid_color(color_name):
     if not color_name:
@@ -91,6 +95,7 @@ def is_valid_color(color_name):
     color_name = color_name.strip()
     hex_pattern = re.compile(r'^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$')
     return hex_pattern.match(color_name)
+
 
 # QR 코드 생성 함수 (업데이트된 qrcode 라이브러리 문법 적용)
 def generate_qr_code_png(data, box_size, border, error_correction, mask_pattern, fill_color, back_color):
@@ -114,6 +119,7 @@ def generate_qr_code_png(data, box_size, border, error_correction, mask_pattern,
     except Exception as e:
         st.error(f"QR 코드 생성 오류: {str(e)}")
         return None, None
+
 
 # QR 코드 SVG 생성 함수
 def generate_qr_code_svg(data, box_size, border, error_correction, mask_pattern, fill_color, back_color):
@@ -146,6 +152,19 @@ def generate_qr_code_svg(data, box_size, border, error_correction, mask_pattern,
         st.error(f"QR 코드 SVG 생성 오류: {str(e)}")
         return None, None
 
+# 'QR 코드 생성' 버튼 클릭 시, 화면을 자동으로 아래로 스크롤하는
+# JavaScript 코드가 포함된 Streamlit 컴포넌트를 호출하는 함수
+def scroll_to_element(element_id):
+    js_code = f"""
+    <script>
+        var element = window.parent.document.getElementById("{element_id}");
+        if (element) {{
+            element.scrollIntoView({{ behavior: 'smooth', block: 'center' }});
+        }}
+    </script>
+    """
+    components.html(js_code, height=0, width=0)
+
 
 # QR 내용만 초기화하는 콜백 함수 (파일명은 유지)
 def clear_text_input():
@@ -156,10 +175,12 @@ def clear_text_input():
     st.session_state.generate_button_clicked = False # 상태 초기화
     st.session_state.error_message = None
 
+
 # 파일명 초기화 콜백 함수
 def clear_filename_callback():
     st.session_state.filename_input_key = ""
-    
+
+
 # 전체 초기화 콜백 함수
 def reset_all_settings():
     st.session_state.qr_input_area = ""
@@ -187,6 +208,7 @@ def reset_all_settings():
 # 다운로드 버튼 클릭 시 호출되는 콜백 함수
 def set_download_initiated():
     st.session_state.download_initiated = True
+
 
 # QR 코드 설정값 변경 시 다운로드 관련 상태 초기화
 def on_qr_setting_change():
@@ -445,6 +467,7 @@ with col2:
                     st.session_state.show_generate_success = True
                     preview_image_display = img
                     preview_qr_object = qr
+                    scroll_to_element("download-anchor")  # 다운로드 섹션으로 강제 스크롤
             else: # SVG
                 # SVG 생성 함수는 색상 인자를 무시하므로 검정색과 흰색을 넘겨줌
                 svg_data, qr = generate_qr_code_svg(
@@ -513,7 +536,13 @@ with col2:
 
     # 다운로드 섹션
     if st.session_state.get('qr_generated', False) and (st.session_state.get('qr_image_bytes') is not None or st.session_state.get('qr_svg_bytes') is not None):
+
         st.markdown("---")
+        # 이 div는 스크롤 목표 지점입니다.
+        components.html("""
+            <div id="download-anchor"></div>
+        """, height=0, width=0)
+
         st.subheader("📥 다운로드")
         now = datetime.now(ZoneInfo("Asia/Seoul"))
         current_filename = filename.strip()
