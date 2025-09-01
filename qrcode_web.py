@@ -271,7 +271,7 @@ with col1:
     # [수정] 파일 형식에 따라 색상 설정을 활성화/비활성화
     file_format_is_svg = (st.session_state.file_format_select == "SVG")
     if file_format_is_svg:
-        st.warning("⚠️ SVG 파일은 벡터 형식이므로 색상 설정이 적용되지 않습니다. 다양한 색상을 원한다면 'PNG' 포맷을 선택해 주세요.")
+        st.warning("⚠️ SVG 파일은 벡터 형식이므로 원하는 색상을 선택할 수 없습니다. 다양한 색상을 원한다면 'PNG' 형식을 선택하세요.")
 
     # 색상 선택 옵션을 확장 (약 20개 이상)
     colors = [
@@ -606,4 +606,5 @@ st.markdown(
     unsafe_allow_html=True
 )
 # 최신버전..
+
 
