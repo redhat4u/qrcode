@@ -6,6 +6,9 @@ import io
 import re
 from PIL import Image
 import qrcode.image.svg
+# [추가] 모듈 모양 변경을 위한 클래스 임포트
+from qrcode.image.styledpil import StyledPilImage
+from qrcode.image.styles.moduledrawers import RoundedModuleDrawer, CircleModuleDrawer
 
 # 파일명에 특수문자 포함시 '_' 문자로 치환
 def sanitize_filename(name: str) -> str:
@@ -31,6 +34,7 @@ def generate_qr_code_png(
     mask_pattern,
     fill_color,
     back_color,
+    module_shape, # [추가] 모듈 모양을 인자로 받음
 ):
     try:
         qr = qrcode.QRCode(
@@ -43,11 +47,28 @@ def generate_qr_code_png(
 
         qr.add_data(data, optimize=0)
         qr.make(fit=True)
-        
-        img = qr.make_image(fill_color=fill_color, back_color=back_color)
+
+        # [수정] 모듈 모양 선택에 따라 다른 Drawer를 사용하도록 로직 변경
+        if module_shape == "둥근 사각형 (Rounded)":
+            img = qr.make_image(
+                image_factory=StyledPilImage,
+                module_drawer=RoundedModuleDrawer(),
+                fill_color=fill_color,
+                back_color=back_color
+            )
+        elif module_shape == "원형 (Circle)":
+            img = qr.make_image(
+                image_factory=StyledPilImage,
+                module_drawer=CircleModuleDrawer(),
+                fill_color=fill_color,
+                back_color=back_color
+            )
+        else: # "기본 사각형 (Square)" 또는 기본값
+            img = qr.make_image(fill_color=fill_color, back_color=back_color)
+
         if hasattr(img, 'convert'):
             img = img.convert('RGB')
-        
+
         return img, qr
     except Exception as e:
         return None, None
@@ -73,16 +94,19 @@ def generate_qr_code_svg(
 
         qr.add_data(data, optimize=0)
         qr.make(fit=True)
-        
+
         img_svg = qr.make_image(image_factory=qrcode.image.svg.SvgPathImage)
-        
+
         svg_buffer = io.BytesIO()
         img_svg.save(svg_buffer)
         svg_data = svg_buffer.getvalue().decode('utf-8')
-        
-        svg_data = svg_data.replace('fill="black"', f'fill="{fill_color}"', 1)
-        svg_data = svg_data.replace('fill="white"', f'fill="{back_color}"', 1)
-        
+
+        # [수정] SVG 색상 변경 로직을 더 안정적인 방식으로 개선
+        # 패턴(기본 검정) 색상을 사용자가 지정한 색으로 변경
+        svg_data = svg_data.replace('fill="black"', f'fill="{fill_color}"')
+        # 배경색을 채우기 위한 사각형(rect)을 맨 앞에 추가
+        svg_data = svg_data.replace('<path', f'<rect width="100%" height="100%" fill="{back_color}"/><path')
+
         return svg_data, qr
     except Exception as e:
         return None, None
