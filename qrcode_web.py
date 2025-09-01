@@ -33,10 +33,12 @@ def sanitize_filename(name: str) -> str:
         name = name.replace(ch, "_")
     return name.strip()
 
-# 유효한 색상인지 확인하는 함수 (이제 16진수 값만 유효)
+# 유효한 색상인지 확인하는 함수 (이제 16진수 값만 유효하며, 공백을 자동으로 제거)
 def is_valid_color(color_name):
     if not color_name:
         return False
+    # 입력된 문자열의 앞뒤 공백을 제거
+    color_name = color_name.strip()
     # 16진수 코드 (# 뒤에 3자리 또는 6자리)만 허용
     hex_pattern = re.compile(r'^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$')
     return hex_pattern.match(color_name)
@@ -219,10 +221,7 @@ with col1:
     with col1_6:
         custom_bg_color = st.text_input("배경 색상 HEX 값", placeholder="예: #FFFFFF", disabled=(bg_color_choice != "<직접 입력>"), key="custom_bg_color_input",)
 
-    # 색상 값 앞뒤 공백을 제거
-    custom_pattern_color = custom_pattern_color.strip()
-    custom_bg_color = custom_bg_color.strip()
-
+    # 사용될 최종 색상 값 결정 (여기서는 strip()을 하지 않음)
     pattern_color = custom_pattern_color if pattern_color_choice == "<직접 입력>" else pattern_color_choice
     bg_color = custom_bg_color if bg_color_choice == "<직접 입력>" else bg_color_choice
 
@@ -273,7 +272,7 @@ with col2:
     # 미리보기용 유효성 검사 변수
     is_pattern_color_valid_preview = (pattern_color_choice != "<직접 입력>") or (pattern_color_choice == "<직접 입력>" and custom_pattern_color and is_valid_color(custom_pattern_color))
     is_bg_color_valid_preview = (bg_color_choice != "<직접 입력>") or (bg_color_choice == "<직접 입력>" and custom_bg_color and is_valid_color(custom_bg_color))
-    is_colors_same_preview = (is_pattern_color_valid_preview and is_bg_color_valid_preview and pattern_color and bg_color and pattern_color == bg_color)
+    is_colors_same_preview = (is_pattern_color_valid_preview and is_bg_color_valid_preview and pattern_color.strip() and bg_color.strip() and pattern_color.strip() == bg_color.strip())
 
     # QR 코드 파라미터 해시 생성
     qr_params = (
@@ -284,8 +283,8 @@ with col2:
         mask_pattern,
         pattern_color_choice,
         bg_color_choice,
-        custom_pattern_color,
-        custom_bg_color,
+        custom_pattern_color.strip(), # 해시 생성 시에도 공백 제거
+        custom_bg_color.strip(),
     )
     current_qr_params_hash = hashlib.md5(str(qr_params).encode('utf-8')).hexdigest()
 
@@ -358,7 +357,7 @@ with col2:
                 errors.append("배경 색으로 입력한 HEX 값은 올바른 색상 값이 아닙니다. 다시 확인해주세요.")
                 is_bg_ok = False
             
-        if is_pattern_ok and is_bg_ok and pattern_color and bg_color and pattern_color == bg_color:
+        if is_pattern_ok and is_bg_ok and is_valid_color(pattern_color) and is_valid_color(bg_color) and pattern_color.strip() == bg_color.strip():
             errors.append("패턴과 배경은 같은 색을 사용할 수 없습니다.")
 
         if errors:
