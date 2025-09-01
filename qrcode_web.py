@@ -219,6 +219,10 @@ with col1:
     with col1_6:
         custom_bg_color = st.text_input("배경 색상 HEX 값", placeholder="예: #FFFFFF", disabled=(bg_color_choice != "<직접 입력>"), key="custom_bg_color_input",)
 
+    # 색상 값 앞뒤 공백을 제거
+    custom_pattern_color = custom_pattern_color.strip()
+    custom_bg_color = custom_bg_color.strip()
+
     pattern_color = custom_pattern_color if pattern_color_choice == "<직접 입력>" else pattern_color_choice
     bg_color = custom_bg_color if bg_color_choice == "<직접 입력>" else bg_color_choice
 
@@ -267,8 +271,8 @@ with col2:
     current_data = qr_data.strip() if strip_option else qr_data
     
     # 미리보기용 유효성 검사 변수
-    is_pattern_color_valid_preview = (pattern_color_choice != "<직접 입력>") or (pattern_color_choice == "<직접 입력>" and custom_pattern_color.strip() and is_valid_color(custom_pattern_color))
-    is_bg_color_valid_preview = (bg_color_choice != "<직접 입력>") or (bg_color_choice == "<직접 입력>" and custom_bg_color.strip() and is_valid_color(custom_bg_color))
+    is_pattern_color_valid_preview = (pattern_color_choice != "<직접 입력>") or (pattern_color_choice == "<직접 입력>" and custom_pattern_color and is_valid_color(custom_pattern_color))
+    is_bg_color_valid_preview = (bg_color_choice != "<직접 입력>") or (bg_color_choice == "<직접 입력>" and custom_bg_color and is_valid_color(custom_bg_color))
     is_colors_same_preview = (is_pattern_color_valid_preview and is_bg_color_valid_preview and pattern_color and bg_color and pattern_color == bg_color)
 
     # QR 코드 파라미터 해시 생성
@@ -338,7 +342,7 @@ with col2:
         
         is_pattern_ok = True
         if pattern_color_choice == "<직접 입력>":
-            if not custom_pattern_color.strip():
+            if not custom_pattern_color:
                 errors.append("QR 코드 **패턴 색**의 HEX 값을 입력해 주세요.")
                 is_pattern_ok = False
             elif not is_valid_color(custom_pattern_color):
@@ -347,7 +351,7 @@ with col2:
         
         is_bg_ok = True
         if bg_color_choice == "<직접 입력>":
-            if not custom_bg_color.strip():
+            if not custom_bg_color:
                 errors.append("QR 코드 **배경 색**의 HEX 값을 입력해 주세요.")
                 is_bg_ok = False
             elif not is_valid_color(custom_bg_color):
@@ -399,13 +403,13 @@ with col2:
         if not current_data:
             st.info("QR 코드 내용을 입력하시면 미리보기가 자동으로 나타납니다.")
         else:
-            if pattern_color_choice == "<직접 입력>" and not custom_pattern_color.strip():
+            if pattern_color_choice == "<직접 입력>" and not custom_pattern_color:
                 st.warning("⚠️ 패턴 색의 HEX 값을 입력해 주세요. 미리보기를 위해 유효한 색상 값이 필요합니다.")
-            if bg_color_choice == "<직접 입력>" and not custom_bg_color.strip():
+            if bg_color_choice == "<직접 입력>" and not custom_bg_color:
                 st.warning("⚠️ 배경 색의 HEX 값을 입력해 주세요. 미리보기를 위해 유효한 색상 값이 필요합니다.")
-            if pattern_color_choice == "<직접 입력>" and custom_pattern_color.strip() and not is_valid_color(custom_pattern_color):
+            if pattern_color_choice == "<직접 입력>" and custom_pattern_color and not is_valid_color(custom_pattern_color):
                 st.warning("⚠️ 패턴 색으로 입력한 HEX 값은 올바른 색상 값이 아닙니다. 다시 확인해주세요.")
-            if bg_color_choice == "<직접 입력>" and custom_bg_color.strip() and not is_valid_color(custom_bg_color):
+            if bg_color_choice == "<직접 입력>" and custom_bg_color and not is_valid_color(custom_bg_color):
                 st.warning("⚠️ 배경 색으로 입력한 HEX 값은 올바른 색상 값이 아닙니다. 다시 확인해주세요.")
             if is_colors_same_preview:
                 st.warning("⚠️ 패턴과 배경은 같은 색을 사용할 수 없습니다.")
