@@ -17,11 +17,6 @@ from state_manager import (
     set_download_initiated,
 )
 
-from ui_components import (
-    build_input_ui,
-    build_preview_and_download_ui,
-)
-
 from functions import (
     sanitize_filename,
     is_valid_color,
@@ -29,6 +24,8 @@ from functions import (
     generate_qr_code_svg,
 )
 
+from ui_input_and_settings import build_input_and_settings_ui
+from ui_preview_and_download import build_preview_and_download_ui
 from sidebar import build_sidebar_ui
 from footer import build_footer
 
@@ -52,8 +49,7 @@ col1, col2 = st.columns([1.2, 1])
 
 # 각 섹션의 UI를 별도의 함수로 분리하여 호출
 with col1:
-    build_input_ui()
-
+    build_input_and_settings_ui() # <-- 함수 이름 변경
 with col2:
     build_preview_and_download_ui()
 
@@ -67,11 +63,9 @@ st.button(
     help="모든 내용을 초기화 합니다.",
 )
 
-# 사이드바
+# 사이드바를 별도 파일에서 만든 함수로 호출
 with st.sidebar:
     build_sidebar_ui()
 
 # 하단 정보
 build_footer()
-
-
