@@ -114,8 +114,8 @@ def build_preview_and_download_ui():
          st.markdown(
              """
              <div style='
-                 background-color: #1a5e31;
-                 color: #e6f7e9;
+                 background-color: #0c4145;
+                 color: #dffde9;
                  padding: 1rem;
                  border-radius: 0.5rem;
                  border: 1px solid #1a5e31;
@@ -134,8 +134,8 @@ def build_preview_and_download_ui():
          st.markdown(
              """
              <div style='
-                 background-color: #1a5e31;
-                 color: #e6f7e9;
+                 background-color: #0c4145;
+                 color: #dffde9;
                  padding: 1rem;
                  border-radius: 0.5rem;
                  border: 1px solid #1a5e31;
