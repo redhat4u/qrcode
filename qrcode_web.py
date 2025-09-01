@@ -139,12 +139,10 @@ def clear_text_input():
     st.session_state.show_generate_success = False
     st.session_state.last_qr_params_hash = ""
 
-
 # 파일명 초기화 콜백 함수
 def clear_filename_callback():
     st.session_state.filename_input_key = ""
-    # 파일명만 변경되었으므로 다운로드 정보는 그대로 유지
-
+    
 # 전체 초기화 콜백 함수
 def reset_all_settings():
     st.session_state.qr_input_area = ""
@@ -305,11 +303,11 @@ with col1:
     col_filename_input, col_filename_delete = st.columns([3, 1.1])
 
     with col_filename_input:
+        # 파일명 입력 시에는 다운로드 초기화가 발생하지 않도록 on_change 콜백 제거
         filename = st.text_input(
             "다운로드 파일명 입력 (확장자는 제외, 파일명만 입력)",
             placeholder="이 곳에 파일명을 입력해 주세요 (비어있으면 자동 생성됨)",
             key="filename_input_key",
-            on_change=on_qr_setting_change, # 파일명 변경시 초기화
         )
 
     with col_filename_delete:
