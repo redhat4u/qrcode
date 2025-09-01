@@ -132,7 +132,6 @@ def generate_qr_code_svg(data, box_size, border, error_correction, mask_pattern,
         img_svg.save(svg_buffer)
         svg_data = svg_buffer.getvalue().decode('utf-8')
         
-        # SVG 문자열에서 색상 직접 변경
         # 'fill="black"' 문자열 전체를 찾아 원하는 색상값으로 교체
         # replace() 메서드를 사용하여 `fill=` 부분을 포함하여 교체
         svg_data = svg_data.replace('fill="black"', f'fill="{fill_color}"', 1) 
