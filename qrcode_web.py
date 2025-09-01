@@ -51,12 +51,6 @@ if 'show_generate_success' not in st.session_state:
     st.session_state.show_generate_success = False
 if 'last_qr_params_hash' not in st.session_state:
     st.session_state.last_qr_params_hash = ""
-if 'custom_pattern_color_input' not in st.session_state:
-    st.session_state.custom_pattern_color_input = ""
-if 'custom_bg_color_input' not in st.session_state:
-    st.session_state.custom_bg_color_input = ""
-if 'filename_input' not in st.session_state:
-    st.session_state.filename_input = ""
 
 
 # 파일명에 특수문자 포함시 '_' 문자로 치환
@@ -66,11 +60,10 @@ def sanitize_filename(name: str) -> str:
         name = name.replace(ch, "_")
     return name.strip()
 
-# 유효한 색상인지 확인하는 함수 (16진수 값만 유효하며, 공백을 자동으로 제거)
+# 유효한 색상인지 확인하는 함수
 def is_valid_color(color_name):
     if not color_name:
         return False
-    color_name = color_name.strip()
     hex_pattern = re.compile(r'^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$')
     return hex_pattern.match(color_name)
 
@@ -123,12 +116,6 @@ def clear_filename_callback():
 def set_download_initiated():
     st.session_state.download_initiated = True
 
-# Streamlit 위젯 상태 변경 시 공백 제거
-def strip_pattern_color_input():
-    st.session_state.custom_pattern_color_input = st.session_state.custom_pattern_color_input.strip()
-
-def strip_bg_color_input():
-    st.session_state.custom_bg_color_input = st.session_state.custom_bg_color_input.strip()
 
 # 메인 앱 ============================================================================================
 
@@ -226,29 +213,23 @@ with col1:
     st.caption("예: #FF0000 (빨강), #00FF00 (초록), #0000FF (파랑)")
     col1_5, col1_6 = st.columns(2)
     with col1_5:
-        # on_change 콜백 함수를 사용하여 입력 시 공백 제거
-        st.text_input(
+        custom_pattern_color_input = st.text_input(
             "패턴 색상 HEX 값",
-            value=st.session_state.custom_pattern_color_input,
             placeholder="예: #000000",
             disabled=(pattern_color_choice != "<직접 입력>"),
-            key="custom_pattern_color_input",
-            on_change=strip_pattern_color_input,
+            key="custom_pattern_color_input_key"
         )
     with col1_6:
-        # on_change 콜백 함수를 사용하여 입력 시 공백 제거
-        st.text_input(
+        custom_bg_color_input = st.text_input(
             "배경 색상 HEX 값",
-            value=st.session_state.custom_bg_color_input,
             placeholder="예: #FFFFFF",
             disabled=(bg_color_choice != "<직접 입력>"),
-            key="custom_bg_color_input",
-            on_change=strip_bg_color_input,
+            key="custom_bg_color_input_key"
         )
 
-    # 사용될 최종 색상 값 결정
-    pattern_color = st.session_state.custom_pattern_color_input if pattern_color_choice == "<직접 입력>" else pattern_color_choice
-    bg_color = st.session_state.custom_bg_color_input if bg_color_choice == "<직접 입력>" else bg_color_choice
+    # 사용될 최종 색상 값 결정 (공백 제거)
+    pattern_color = custom_pattern_color_input.strip() if pattern_color_choice == "<직접 입력>" else pattern_color_choice
+    bg_color = custom_bg_color_input.strip() if bg_color_choice == "<직접 입력>" else bg_color_choice
     
     st.markdown("---")
 
@@ -258,16 +239,15 @@ with col1:
     col_filename_input, col_filename_delete = st.columns([3, 1.1])
 
     with col_filename_input:
-        st.text_input(
+        filename = st.text_input(
             "다운로드 파일명 입력 (확장자는 제외, 파일명만 입력)",
-            value=st.session_state.filename_input,
             placeholder="이 곳에 파일명을 입력해 주세요 (비어있으면 자동 생성됨)",
-            key="filename_input",
+            key="filename_input_key",
         )
 
     with col_filename_delete:
         st.markdown('<div style="margin-top: 28px;"></div>', unsafe_allow_html=True)
-        filename_delete_disabled = not st.session_state.get("filename_input", "")
+        filename_delete_disabled = not st.session_state.get("filename_input_key", "")
         st.button(
             "🗑️ 파일명 삭제",
             help="입력한 파일명을 삭제합니다",
@@ -277,7 +257,7 @@ with col1:
             on_click=clear_filename_callback,
         )
 
-    current_filename = st.session_state.filename_input.strip()
+    current_filename = filename.strip()
 
     if st.session_state.filename_message == "deleted":
         st.success("✅ 파일명이 삭제되었습니다. 입력되지 않으면 자동으로 생성됩니다.")
@@ -295,12 +275,12 @@ with col2:
     
     current_data = qr_data.strip() if strip_option else qr_data
     
-    # 미리보기용 유효성 검사 변수
-    is_pattern_color_valid_preview = (pattern_color_choice != "<직접 입력>") or (pattern_color_choice == "<직접 입력>" and st.session_state.custom_pattern_color_input and is_valid_color(st.session_state.custom_pattern_color_input))
-    is_bg_color_valid_preview = (bg_color_choice != "<직접 입력>") or (bg_color_choice == "<직접 입력>" and st.session_state.custom_bg_color_input and is_valid_color(st.session_state.custom_bg_color_input))
+    # 미리보기용 유효성 검사 변수 (공백이 제거된 최종 값을 사용)
+    is_pattern_color_valid_preview = (pattern_color_choice != "<직접 입력>") or (pattern_color_choice == "<직접 입력>" and pattern_color and is_valid_color(pattern_color))
+    is_bg_color_valid_preview = (bg_color_choice != "<직접 입력>") or (bg_color_choice == "<직접 입력>" and bg_color and is_valid_color(bg_color))
     is_colors_same_preview = (is_pattern_color_valid_preview and is_bg_color_valid_preview and pattern_color and bg_color and pattern_color == bg_color)
 
-    # QR 코드 파라미터 해시 생성
+    # QR 코드 파라미터 해시 생성 (공백이 제거된 최종 값을 사용)
     qr_params = (
         current_data,
         box_size,
@@ -309,8 +289,8 @@ with col2:
         mask_pattern,
         pattern_color_choice,
         bg_color_choice,
-        st.session_state.custom_pattern_color_input, 
-        st.session_state.custom_bg_color_input,
+        pattern_color,
+        bg_color,
     )
     current_qr_params_hash = hashlib.md5(str(qr_params).encode('utf-8')).hexdigest()
 
@@ -357,7 +337,6 @@ with col2:
         st.session_state.show_generate_success = False
         st.session_state.last_qr_params_hash = ""
 
-
     # QR 코드 생성 버튼
     generate_btn = st.button("⚡ QR 코드 생성", use_container_width=True,)
     
@@ -369,19 +348,19 @@ with col2:
         
         is_pattern_ok = True
         if pattern_color_choice == "<직접 입력>":
-            if not st.session_state.custom_pattern_color_input:
+            if not pattern_color:
                 errors.append("QR 코드 **패턴 색**의 HEX 값을 입력해 주세요.")
                 is_pattern_ok = False
-            elif not is_valid_color(st.session_state.custom_pattern_color_input):
+            elif not is_valid_color(pattern_color):
                 errors.append("패턴 색으로 입력한 HEX 값은 올바른 색상 값이 아닙니다. 다시 확인해주세요.")
                 is_pattern_ok = False
         
         is_bg_ok = True
         if bg_color_choice == "<직접 입력>":
-            if not st.session_state.custom_bg_color_input:
+            if not bg_color:
                 errors.append("QR 코드 **배경 색**의 HEX 값을 입력해 주세요.")
                 is_bg_ok = False
-            elif not is_valid_color(st.session_state.custom_bg_color_input):
+            elif not is_valid_color(bg_color):
                 errors.append("배경 색으로 입력한 HEX 값은 올바른 색상 값이 아닙니다. 다시 확인해주세요.")
                 is_bg_ok = False
             
@@ -430,13 +409,13 @@ with col2:
         if not current_data:
             st.info("QR 코드 내용을 입력하시면 미리보기가 자동으로 나타납니다.")
         else:
-            if pattern_color_choice == "<직접 입력>" and not st.session_state.custom_pattern_color_input:
+            if pattern_color_choice == "<직접 입력>" and not pattern_color:
                 st.warning("⚠️ 패턴 색의 HEX 값을 입력해 주세요. 미리보기를 위해 유효한 색상 값이 필요합니다.")
-            if bg_color_choice == "<직접 입력>" and not st.session_state.custom_bg_color_input:
+            if bg_color_choice == "<직접 입력>" and not bg_color:
                 st.warning("⚠️ 배경 색의 HEX 값을 입력해 주세요. 미리보기를 위해 유효한 색상 값이 필요합니다.")
-            if pattern_color_choice == "<직접 입력>" and st.session_state.custom_pattern_color_input and not is_valid_color(st.session_state.custom_pattern_color_input):
+            if pattern_color_choice == "<직접 입력>" and pattern_color and not is_valid_color(pattern_color):
                 st.warning("⚠️ 패턴 색으로 입력한 HEX 값은 올바른 색상 값이 아닙니다. 다시 확인해주세요.")
-            if bg_color_choice == "<직접 입력>" and st.session_state.custom_bg_color_input and not is_valid_color(st.session_state.custom_bg_color_input):
+            if bg_color_choice == "<직접 입력>" and bg_color and not is_valid_color(bg_color):
                 st.warning("⚠️ 배경 색으로 입력한 HEX 값은 올바른 색상 값이 아닙니다. 다시 확인해주세요.")
             if is_colors_same_preview:
                 st.warning("⚠️ 패턴과 배경은 같은 색을 사용할 수 없습니다.")
@@ -454,7 +433,7 @@ with col2:
         st.markdown("---")
         st.subheader("📥 다운로드")
         now = datetime.now(ZoneInfo("Asia/Seoul"))
-        current_filename = st.session_state.filename_input.strip()
+        current_filename = filename.strip()
 
         if not current_filename:
             final_filename = now.strftime("QR_%Y-%m-%d_%H-%M-%S")
