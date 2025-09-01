@@ -5,8 +5,20 @@ import streamlit as st
 import qrcode
 from datetime import datetime
 from zoneinfo import ZoneInfo
-from functions import sanitize_filename, is_valid_color, generate_qr_code_png, generate_qr_code_svg
-from state_manager import clear_text_input, clear_filename_callback, on_qr_setting_change, set_download_initiated
+
+from functions import (
+   sanitize_filename,
+   is_valid_color,
+   generate_qr_code_png,
+   generate_qr_code_svg,
+)
+
+from state_manager import (
+   clear_text_input,
+   clear_filename_callback,
+   on_qr_setting_change,
+   set_download_initiated,
+)
 
 def build_input_ui():
     """입력 및 설정 섹션을 빌드합니다."""
@@ -279,36 +291,3 @@ def build_preview_and_download_ui():
             st.success("✅ 생성한 QR 코드를 다운로드할 수 있습니다! 휴대폰은 'Download' 폴더에 저장됩니다.")
             st.session_state.download_initiated = False
 
-def build_sidebar_ui():
-    """사이드바를 빌드합니다."""
-    st.header("📖 사용 방법")
-    st.markdown("""
-    1. **QR 코드 내용** 영역에 변환할 텍스트를 입력하세요
-    2. **QR 코드 설정**에서 크기와 오류 보정 레벨을 조정하세요
-    3. **색상 설정**에서 패턴과 배경 색상을 선택하세요
-    4. **파일 설정**에서 원하는 파일 형식(PNG/SVG)을 선택하고 파일명을 지정하세요.
-    5. **QR 코드 생성** 버튼으로 최종 파일을 다운로드하세요
-    """)
-    st.markdown("---")
-    st.header("💡 용도별 QR 코드 생성 팁")
-    st.markdown("""
-    - **텍스트**: `QR 코드로 생성할 텍스트를 입력합니다`
-    - **웹사이트**: `https://www.example.com`
-    - **이메일**: `mailto:user@example.com`
-    - **전화번호**: `tel:010-1234-5678`
-    - **SMS**: `sms:010-1234-5678`
-    - **WiFi**: `WIFI:T:WPA;S:네트워크명(SSID);P:비밀번호;H:false;;`
-    """)
-    st.markdown("---")
-    st.header("⚙️ 설정 가이드")
-    st.markdown("""
-    **오류 보정 레벨:**
-    - **Low (7%)**: 손상되지 않는 환경
-    - **Medium (15%)**: 일반적인 사용
-    - **Quartile (25%)**: 약간의 손상 가능
-    - **High (30%)**: 로고 삽입, 손상이 잦은 환경
-    **마스크 패턴:**
-    - 0~7 중 선택 (같은 내용이라도 번호에 따라 패턴이 달라짐)
-    **색상 입력:**
-    - **HEX 코드**: #FF0000, #0000FF, #00FF00 등
-    """)
