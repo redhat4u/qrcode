@@ -469,7 +469,7 @@ with col2:
 
     # 미리보기 이미지 및 정보 표시
     if preview_image_display:
-        st.success("입력된 내용으로 생성될 QR 코드를 미리 보여 드립니다.")
+        st.success("현재 입력된 내용으로 생성될 QR 코드를 미리 표현해 보았습니다.")
         st.subheader("📱 QR 코드 미리보기")
         col_left, col_center, col_right = st.columns([1, 2, 1])
         with col_center:
@@ -488,7 +488,7 @@ with col2:
     else:
         # 오류 메시지 표시 로직
         if not current_data:
-            st.info("QR 코드 내용을 입력하면 생성될 QR 코드를 미리 보여줍니다.")
+            st.info("QR 코드 내용을 입력하면 생성될 QR 코드를 미리 보여드립니다.")
         else:
             if not file_format_is_svg:
                 if pattern_color_choice == "<직접 입력>" and not pattern_color:
