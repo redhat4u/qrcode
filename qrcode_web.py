@@ -18,6 +18,8 @@ from zoneinfo import ZoneInfo
 from PIL import Image
 import hashlib
 import re
+import base64 # SVG 이미지 표시를 위해 추가
+import qrcode.image.svg # SVG 생성을 위해 추가
 
 # 페이지 설정
 st.set_page_config(
@@ -35,6 +37,8 @@ if 'qr_generated' not in st.session_state:
     st.session_state.qr_generated = False
 if 'qr_image_bytes' not in st.session_state:
     st.session_state.qr_image_bytes = None
+if 'qr_svg_bytes' not in st.session_state: # SVG 바이트 저장용
+    st.session_state.qr_svg_bytes = None
 if 'last_qr_params_hash' not in st.session_state:
     st.session_state.last_qr_params_hash = ""
 if 'last_filename_state' not in st.session_state:
@@ -63,6 +67,8 @@ if 'bg_color_select' not in st.session_state:
     st.session_state.bg_color_select = "white"
 if 'strip_option' not in st.session_state:  # 상태 변수 이름 통일
     st.session_state.strip_option = True
+if 'file_format_select' not in st.session_state: # 파일 형식 선택 상태 추가
+    st.session_state.file_format_select = "PNG"
 
 
 # 파일명에 특수문자 포함시 '_' 문자로 치환
@@ -81,7 +87,8 @@ def is_valid_color(color_name):
     return hex_pattern.match(color_name)
 
 # QR 코드 생성 함수 (업데이트된 qrcode 라이브러리 문법 적용)
-def generate_qr_code(data, box_size, border, error_correction, mask_pattern, fill_color, back_color):
+# 기존 generate_qr_code 함수는 PNG 생성을 기본으로 하고, SVG는 별도 함수로 분리
+def generate_qr_code_png(data, box_size, border, error_correction, mask_pattern, fill_color, back_color):
     try:
         qr = qrcode.QRCode(
             version=1,
@@ -102,6 +109,28 @@ def generate_qr_code(data, box_size, border, error_correction, mask_pattern, fil
     except Exception as e:
         st.error(f"QR 코드 생성 오류: {str(e)}")
         return None, None
+
+# QR 코드 SVG 생성 함수
+def generate_qr_code_svg(data, box_size, border, error_correction, mask_pattern, fill_color, back_color):
+    try:
+        qr = qrcode.QRCode(
+            version=1,
+            error_correction=error_correction,
+            box_size=box_size,
+            border=border,
+            mask_pattern=mask_pattern,
+        )
+        qr.add_data(data, optimize=0)
+        qr.make(fit=True)
+        
+        # SVG Image Factory 사용
+        img_svg = qr.make_image(image_factory=qrcode.image.svg.SvgPathImage, fill_color=fill_color, back_color=back_color)
+        
+        return img_svg, qr
+    except Exception as e:
+        st.error(f"QR 코드 SVG 생성 오류: {str(e)}")
+        return None, None
+
 
 # QR 내용만 초기화하는 콜백 함수 (파일명은 유지)
 def clear_text_input():
@@ -130,9 +159,13 @@ def reset_all_settings():
     st.session_state.pattern_color_select = "black"
     st.session_state.bg_color_select = "white"
     st.session_state.strip_option = True
+    st.session_state.file_format_select = "PNG" # 파일 형식도 초기화
 
     st.session_state.qr_generated = False
     st.session_state.show_generate_success = False
+    st.session_state.qr_image_bytes = None
+    st.session_state.qr_svg_bytes = None
+
 
 # 다운로드 버튼 클릭 시 호출되는 콜백 함수
 def set_download_initiated():
@@ -142,6 +175,8 @@ def set_download_initiated():
 def on_qr_setting_change():
     st.session_state.qr_generated = False
     st.session_state.show_generate_success = False
+    st.session_state.qr_image_bytes = None
+    st.session_state.qr_svg_bytes = None
 
 
 # 메인 앱 ============================================================================================
@@ -197,6 +232,7 @@ with col1:
         "마지막 입력문자 이후 모든 공백/줄바꿈 제거",
         value=st.session_state.strip_option,
         key="strip_option",
+        on_change=on_qr_setting_change # 설정 변경 시 초기화
     )
 
     st.markdown("---")
@@ -263,7 +299,7 @@ with col1:
     
     st.markdown("---")
 
-    st.subheader("🛠️ 파일명 설정")
+    st.subheader("🛠️ 파일 설정")
 
     # 파일명 입력창과 삭제 버튼을 위한 컬럼
     col_filename_input, col_filename_delete = st.columns([3, 1.1])
@@ -273,6 +309,7 @@ with col1:
             "다운로드 파일명 입력 (확장자는 제외, 파일명만 입력)",
             placeholder="이 곳에 파일명을 입력해 주세요 (비어있으면 자동 생성됨)",
             key="filename_input_key",
+            on_change=on_qr_setting_change, # 파일명 변경시 초기화
         )
 
     with col_filename_delete:
@@ -287,6 +324,15 @@ with col1:
             on_click=clear_filename_callback,
         )
 
+    # 파일 형식 선택 라디오 버튼
+    file_format = st.radio(
+        "파일 형식 선택",
+        ("PNG", "SVG"),
+        index=0 if st.session_state.file_format_select == "PNG" else 1, # 세션 상태에 따라 초기값 설정
+        key="file_format_select",
+        on_change=on_qr_setting_change, # 파일 형식 변경시 초기화
+    )
+
     current_filename = filename.strip()
 
 with col2:
@@ -300,25 +346,30 @@ with col2:
     is_colors_same_preview = (is_pattern_color_valid_preview and is_bg_color_valid_preview and pattern_color and bg_color and pattern_color == bg_color)
     
     # 미리보기 이미지와 정보 생성 로직
-    preview_image = None
-    preview_info_text = ""
+    preview_image_display = None # Streamlit에 표시할 최종 이미지 (PNG 또는 SVG HTML)
+    preview_qr_object = None # QR 코드 정보 추출을 위한 qr 객체
     
     if current_data and is_pattern_color_valid_preview and is_bg_color_valid_preview and not is_colors_same_preview:
-        img, qr = generate_qr_code(
-            current_data, int(st.session_state.box_size_input), int(st.session_state.border_input), error_correction,
-            int(st.session_state.mask_pattern_select), pattern_color, bg_color,
-        )
-        if img and qr:
-            preview_image = img
-            preview_info_text = f"""
-            **QR 코드 정보**
-            - QR 버전: {qr.version}
-            - 가로/세로 각 cell 개수: {qr.modules_count}개
-            - 이미지 크기: {img.size[0]} x {img.size[1]} px
-            - 패턴 색상: {pattern_color}
-            - 배경 색상: {bg_color}
-            - 이미지 크기 = (각 cell 개수 + 좌/우 여백 총 개수) × 1개의 사각 cell 크기
-            """
+        if file_format == "PNG":
+            img, qr = generate_qr_code_png(
+                current_data, int(st.session_state.box_size_input), int(st.session_state.border_input), error_correction,
+                int(st.session_state.mask_pattern_select), pattern_color, bg_color,
+            )
+            if img and qr:
+                preview_image_display = img
+                preview_qr_object = qr
+        else: # SVG
+            img_svg, qr = generate_qr_code_svg(
+                current_data, int(st.session_state.box_size_input), int(st.session_state.border_input), error_correction,
+                int(st.session_state.mask_pattern_select), pattern_color, bg_color,
+            )
+            if img_svg and qr:
+                # SVG를 미리보기로 표시하기 위해 Base64 인코딩
+                buf = io.BytesIO()
+                img_svg.save(buf)
+                svg_base64 = base64.b64encode(buf.getvalue()).decode("utf-8")
+                preview_image_display = f'<img src="data:image/svg+xml;base64,{svg_base64}" alt="Generated SVG QR Code" style="width: 100%; height: auto;">'
+                preview_qr_object = qr
 
     # QR 코드 생성 버튼
     generate_btn = st.button("⚡ QR 코드 생성", use_container_width=True,)
@@ -353,32 +404,67 @@ with col2:
         if errors:
             for error_msg in errors:
                 st.error(f"⚠️ {error_msg}")
-            # 에러 발생 시 다운로드 기능 비활성화
+            # 에러 발생 시 다운로드 기능 비활성화 및 세션 상태 초기화
             st.session_state.qr_generated = False
+            st.session_state.qr_image_bytes = None
+            st.session_state.qr_svg_bytes = None
+            st.session_state.show_generate_success = False
         else:
             # 모든 유효성 검사를 통과했을 때만 QR 코드 생성
-            img, qr = generate_qr_code(
-                current_data, int(st.session_state.box_size_input), int(st.session_state.border_input), error_correction,
-                int(st.session_state.mask_pattern_select), pattern_color, bg_color,
-            )
-            
-            if img and qr:
-                img_buffer = io.BytesIO()
-                img.save(img_buffer, format='PNG')
-                st.session_state.qr_image_bytes = img_buffer.getvalue()
-                st.session_state.qr_generated = True
-                st.session_state.show_generate_success = True
+            if file_format == "PNG":
+                img, qr = generate_qr_code_png(
+                    current_data, int(st.session_state.box_size_input), int(st.session_state.border_input), error_correction,
+                    int(st.session_state.mask_pattern_select), pattern_color, bg_color,
+                )
+                if img and qr:
+                    img_buffer = io.BytesIO()
+                    img.save(img_buffer, format='PNG')
+                    st.session_state.qr_image_bytes = img_buffer.getvalue()
+                    st.session_state.qr_svg_bytes = None # PNG 선택 시 SVG는 None
+                    st.session_state.qr_generated = True
+                    st.session_state.show_generate_success = True
+                    preview_image_display = img # 미리보기 업데이트
+                    preview_qr_object = qr
+            else: # SVG
+                img_svg, qr = generate_qr_code_svg(
+                    current_data, int(st.session_state.box_size_input), int(st.session_state.border_input), error_correction,
+                    int(st.session_state.mask_pattern_select), pattern_color, bg_color,
+                )
+                if img_svg and qr:
+                    svg_buffer = io.BytesIO()
+                    img_svg.save(svg_buffer)
+                    st.session_state.qr_svg_bytes = svg_buffer.getvalue()
+                    st.session_state.qr_image_bytes = None # SVG 선택 시 PNG는 None
+                    st.session_state.qr_generated = True
+                    st.session_state.show_generate_success = True
+                    # SVG 미리보기를 위한 Base64 인코딩
+                    svg_base64 = base64.b64encode(st.session_state.qr_svg_bytes).decode("utf-8")
+                    preview_image_display = f'<img src="data:image/svg+xml;base64,{svg_base64}" alt="Generated SVG QR Code" style="width: 100%; height: auto;">'
+                    preview_qr_object = qr
+
 
     st.markdown("---")
     
     # 미리보기 이미지 및 정보 표시
-    if preview_image:
+    if preview_image_display:
         st.subheader("📱 QR 코드 미리보기")
-        # 중앙 정렬을 위한 컬럼 추가 및 비율 조정
         col_left, col_center, col_right = st.columns([1, 2, 1])
         with col_center:
-            st.image(preview_image, caption="생성된 QR 코드", width=380)
-        st.info(preview_info_text)
+            if isinstance(preview_image_display, Image.Image): # PNG 이미지인 경우
+                st.image(preview_image_display, caption="생성된 QR 코드", width=380)
+            elif isinstance(preview_image_display, str): # SVG HTML string인 경우
+                st.markdown(preview_image_display, unsafe_allow_html=True)
+        
+        if preview_qr_object:
+            st.info(f"""
+            **QR 코드 정보**
+            - QR 버전: {preview_qr_object.version}
+            - 가로/세로 각 cell 개수: {preview_qr_object.modules_count}개
+            - 이미지 크기 (참고): {(preview_qr_object.modules_count + 2 * int(st.session_state.border_input)) * int(st.session_state.box_size_input)} x {(preview_qr_object.modules_count + 2 * int(st.session_state.border_input)) * int(st.session_state.box_size_input)} px
+            - 패턴 색상: {pattern_color}
+            - 배경 색상: {bg_color}
+            - 이미지 크기 = (각 cell 개수 + 좌/우 여백 총 개수) × 1개의 사각 cell 크기
+            """)
     else:
         # 오류 메시지 표시 로직
         if not current_data:
@@ -400,7 +486,7 @@ with col2:
         st.success("✅ QR 코드 생성 완료! 반드시 파일명을 확인하고 다운로드하세요.")
 
     # 다운로드 섹션
-    if st.session_state.get('qr_generated', False) and st.session_state.get('qr_image_bytes', None) is not None:
+    if st.session_state.get('qr_generated', False) and (st.session_state.get('qr_image_bytes') is not None or st.session_state.get('qr_svg_bytes') is not None):
         st.markdown("---")
         st.subheader("📥 다운로드")
         now = datetime.now(ZoneInfo("Asia/Seoul"))
@@ -411,13 +497,26 @@ with col2:
         else:
             final_filename = current_filename
 
-        download_filename = f"{sanitize_filename(final_filename)}.png"
+        download_data = None
+        download_mime = ""
+        download_extension = ""
+
+        if file_format == "PNG":
+            download_data = st.session_state.qr_image_bytes
+            download_mime = "image/png"
+            download_extension = ".png"
+        else: # SVG
+            download_data = st.session_state.qr_svg_bytes
+            download_mime = "image/svg+xml"
+            download_extension = ".svg"
+        
+        download_filename = f"{sanitize_filename(final_filename)}{download_extension}"
 
         st.download_button(
             label="💾 QR 코드 다운로드",
-            data=st.session_state.qr_image_bytes,
+            data=download_data,
             file_name=download_filename,
-            mime="image/png",
+            mime=download_mime,
             use_container_width=True,
             help="PC는 'Download' 폴더, 휴대폰은 'Download' 폴더에 저장됩니다.",
             on_click=set_download_initiated,
@@ -435,9 +534,16 @@ with col2:
             st.success("✅ 생성한 QR 코드를 다운로드할 수 있습니다! 휴대폰은 'Download' 폴더에 저장됩니다.")
             st.session_state.download_initiated = False
 
-# 전체 초기화 버튼
 st.markdown("---")
-st.button("🔄 전체 초기화", use_container_width=True, type="secondary", on_click=reset_all_settings, help="모든 내용을 초기화 합니다.")
+
+# 전체 초기화 버튼
+st.button(
+    label="🔄 전체 초기화", 
+    use_container_width=True,
+    type="secondary",
+    on_click=reset_all_settings,
+    help="모든 내용을 초기화 합니다.",
+)
 
 
 # 사이드바
@@ -447,7 +553,8 @@ with st.sidebar:
     1. **QR 코드 내용** 영역에 변환할 텍스트를 입력하세요
     2. **QR 코드 설정**에서 크기와 오류 보정 레벨을 조정하세요
     3. **색상 설정**에서 패턴과 배경 색상을 선택하세요
-    4. **QR 코드 생성** 버튼으로 최종 파일을 다운로드하세요
+    4. **파일 설정**에서 원하는 파일 형식(PNG/SVG)을 선택하고 파일명을 지정하세요.
+    5. **QR 코드 생성** 버튼으로 최종 파일을 다운로드하세요
     """)
     st.markdown("---")
     st.header("💡 용도별 QR 코드 생성 팁")
@@ -481,4 +588,3 @@ st.markdown(
     '<p style="text-align: center; color: hotpink; font-size: 15px;">© 2025 QR 코드 생성기  |  Streamlit으로 제작  |  제작: 류종훈(redhat4u@gmail.com)</p>',
     unsafe_allow_html=True
 )
-# 최종버전..
