@@ -51,7 +51,7 @@ if 'show_generate_success' not in st.session_state:
     st.session_state.show_generate_success = False
 if 'last_qr_params_hash' not in st.session_state:
     st.session_state.last_qr_params_hash = ""
-
+    
 # 각 입력창에 대한 세션 상태 초기화 (필수)
 if 'qr_input_area' not in st.session_state:
     st.session_state.qr_input_area = ""
