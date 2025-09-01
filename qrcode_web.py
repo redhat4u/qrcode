@@ -465,9 +465,9 @@ with col2:
     
     # [수정] 메시지 표시 로직
     if st.session_state.show_generate_success:
-        st.success("✅ QR 코드 생성 완료! 반드시 파일명을 확인하고, 화면 아래의 다운로드 버튼을 클릭하세요.")
+        st.success("✅ QR 코드 생성 완료!!  반드시 파일명을 확인하고, 화면 아래의 다운로드 버튼을 클릭하세요.")
     elif preview_image_display: # QR 코드 내용이 유효할 때만 미리보기 메시지 표시
-        st.success("현재 입력된 내용으로 생성될 QR 코드를 미리 표현해 보았습니다.")
+        st.success("현재 입력된 내용으로 생성될 QR 코드를 미리 표현해 보았습니다.  이 QR 코드가 맘에 드신다면, 위의 [⚡ QR 코드 생성] 버튼을 클릭하세요.")
     else: # QR 코드 내용이 유효하지 않을 때만 안내 메시지 표시
         st.info("QR 코드 내용을 입력하면 생성될 QR 코드를 미리 보여드립니다.")
 
