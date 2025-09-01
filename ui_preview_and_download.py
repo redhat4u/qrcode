@@ -188,6 +188,8 @@ def build_preview_and_download_ui():
             """,
             unsafe_allow_html=True,
         )
+    elif file_format_is_svg: # SVG를 선택했을 때의 안내 메시지 추가
+        st.info("SVG 형식은 미리보기를 지원하지 않습니다. [⚡ QR 코드 생성] 버튼을 클릭하면 다운로드할 수 있습니다.")
     elif preview_image_display:
         st.markdown(
             """
