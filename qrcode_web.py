@@ -20,7 +20,6 @@ from state_manager import (
 from ui_components import (
     build_input_ui,
     build_preview_and_download_ui,
-    build_footer,
 )
 
 from functions import (
@@ -74,4 +73,5 @@ with st.sidebar:
 
 # 하단 정보
 build_footer()
+
 
