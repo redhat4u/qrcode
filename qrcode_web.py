@@ -61,8 +61,9 @@ if 'pattern_color_select' not in st.session_state:
     st.session_state.pattern_color_select = "black"
 if 'bg_color_select' not in st.session_state:
     st.session_state.bg_color_select = "white"
-if 'strip_option' not in st.session_state:
-    st.session_state.strip_option = True
+if 'strip_option_state' not in st.session_state:
+    st.session_state.strip_option_state = True
+
 
 # 파일명에 특수문자 포함시 '_' 문자로 치환
 def sanitize_filename(name: str) -> str:
@@ -128,7 +129,7 @@ def reset_all_settings():
     st.session_state.mask_pattern_select = 2
     st.session_state.pattern_color_select = "black"
     st.session_state.bg_color_select = "white"
-    st.session_state.strip_option = True
+    st.session_state.strip_option_state = True # 이 부분을 수정했습니다.
 
     st.session_state.qr_generated = False
     st.session_state.show_generate_success = False
@@ -194,7 +195,7 @@ with col1:
     # 공백/줄바꿈 제거 옵션
     strip_option = st.checkbox(
         "마지막 입력문자 이후 모든 공백/줄바꿈 제거",
-        value=st.session_state.strip_option,
+        value=st.session_state.strip_option_state,
         help="입력된 내용 맨끝에 공백/줄바꿈 문자가 한개라도 포함되면 완전히 다른 QR코드가 생성됩니다. 입력된 마지막 문자 뒤에 공백/줄바꿈이 추가되어도 QR코드에 반영되지 않도록 하고 싶다면, 이 옵션을 켜 두세요.",
         on_change=on_qr_setting_change
     )
