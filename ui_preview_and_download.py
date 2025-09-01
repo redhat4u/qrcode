@@ -74,7 +74,8 @@ def build_preview_and_download_ui():
     preview_image_display = None
     preview_qr_object = None
 
-    if current_data and not file_format_is_svg and not is_colors_same_preview:
+    # PNG 미리보기를 SVG 형식에서도 표시
+    if current_data and not is_colors_same_preview:
         img, qr = generate_qr_code_png(
             current_data,
             int(st.session_state.box_size_input),
@@ -188,27 +189,30 @@ def build_preview_and_download_ui():
             """,
             unsafe_allow_html=True,
         )
-    elif file_format_is_svg: # SVG를 선택했을 때의 안내 메시지 추가
-        st.info("SVG 형식은 미리보기를 지원하지 않습니다. [⚡ QR 코드 생성] 버튼을 클릭하면 다운로드할 수 있습니다.")
+    elif is_colors_same_preview:
+        st.warning("⚠️ 미리보기를 위해 패턴과 배경 색상을 다르게 설정해 주세요.")
     elif preview_image_display:
-        st.markdown(
-            """
-            <div style='
-                background-color: #0c4145;
-                color: #dffde9;
-                padding: 1rem;
-                border-radius: 0.5rem;
-                border: 1px solid #1a5e31;
-                font-size: 1rem;
-                margin-bottom: 1rem;
-                word-break: keep-all;
-            '>
-                ✅ 현재 입력된 내용으로 QR 코드를 미리 표현해 보았습니다.<br>
-                아래의 QR 코드가 맘에 드시면, 위의 [⚡ QR 코드 생성] 버튼을 클릭하세요.
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
+        if file_format_is_svg:
+            st.info("💡 아래 미리보기는 PNG 형식입니다. [⚡ QR 코드 생성] 버튼을 클릭하면 SVG 파일이 생성됩니다.")
+        else:
+            st.markdown(
+                """
+                <div style='
+                    background-color: #0c4145;
+                    color: #dffde9;
+                    padding: 1rem;
+                    border-radius: 0.5rem;
+                    border: 1px solid #1a5e31;
+                    font-size: 1rem;
+                    margin-bottom: 1rem;
+                    word-break: keep-all;
+                '>
+                    ✅ 현재 입력된 내용으로 QR 코드를 미리 표현해 보았습니다.<br>
+                    아래의 QR 코드가 맘에 드시면, 위의 [⚡ QR 코드 생성] 버튼을 클릭하세요.
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
     else:
         st.info("QR 코드 내용을 입력하면 생성될 QR 코드를 미리 보여드립니다.")
 
