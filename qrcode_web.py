@@ -123,11 +123,8 @@ def generate_qr_code_svg(data, box_size, border, error_correction, mask_pattern,
         qr.add_data(data, optimize=0)
         qr.make(fit=True)
         
-        # SVG Image Factory 사용
-        # 기본적으로 fill_color와 back_color를 무시하므로, 생성 후 직접 색상을 변경해야 함
         img_svg = qr.make_image(image_factory=qrcode.image.svg.SvgPathImage)
         
-        # SVG 데이터를 io.BytesIO에 저장
         svg_buffer = io.BytesIO()
         img_svg.save(svg_buffer)
         svg_data = svg_buffer.getvalue().decode('utf-8')
@@ -270,6 +267,11 @@ with col1:
 
     st.markdown("---")
     st.subheader("🛠️ 색상 설정")
+    
+    # [수정] 파일 형식에 따라 색상 설정을 활성화/비활성화
+    file_format_is_svg = (st.session_state.file_format_select == "SVG")
+    if file_format_is_svg:
+        st.warning("⚠️ SVG 파일은 벡터 형식이므로 색상 설정이 적용되지 않습니다. 'PNG'를 선택해 주세요.")
 
     # 색상 선택 옵션을 확장 (약 20개 이상)
     colors = [
@@ -280,9 +282,19 @@ with col1:
     ]
     col1_3, col1_4 = st.columns(2)
     with col1_3:
-        pattern_color_choice = st.selectbox("패턴 색상", colors, key="pattern_color_select", on_change=on_qr_setting_change)
+        pattern_color_choice = st.selectbox(
+            "패턴 색상", colors, 
+            key="pattern_color_select", 
+            on_change=on_qr_setting_change,
+            disabled=file_format_is_svg
+        )
     with col1_4:
-        bg_color_choice = st.selectbox("배경 색상", colors, key="bg_color_select", on_change=on_qr_setting_change)
+        bg_color_choice = st.selectbox(
+            "배경 색상", colors, 
+            key="bg_color_select", 
+            on_change=on_qr_setting_change,
+            disabled=file_format_is_svg
+        )
 
     st.markdown("원하는 색상이 리스트에 없다면, 아래에 직접 **HEX 코드**를 입력하세요.")
     st.caption("예: #FF0000 (빨강), #00FF00 (초록), #0000FF (파랑)")
@@ -291,7 +303,7 @@ with col1:
         st.text_input(
             "패턴 색상 HEX 값",
             placeholder="예: #000000",
-            disabled=(pattern_color_choice != "<직접 입력>"),
+            disabled=(pattern_color_choice != "<직접 입력>") or file_format_is_svg,
             key="custom_pattern_color_input_key",
             on_change=on_qr_setting_change
         )
@@ -299,7 +311,7 @@ with col1:
         st.text_input(
             "배경 색상 HEX 값",
             placeholder="예: #FFFFFF",
-            disabled=(bg_color_choice != "<직접 입력>"),
+            disabled=(bg_color_choice != "<직접 입력>") or file_format_is_svg,
             key="custom_bg_color_input_key",
             on_change=on_qr_setting_change
         )
@@ -360,10 +372,12 @@ with col2:
     preview_image_display = None # Streamlit에 표시할 최종 이미지 (PNG)
     preview_qr_object = None # QR 코드 정보 추출을 위한 qr 객체
 
-    if current_data and is_pattern_color_valid_preview and is_bg_color_valid_preview and not is_colors_same_preview:
+    if current_data and (file_format_is_svg or (is_pattern_color_valid_preview and is_bg_color_valid_preview and not is_colors_same_preview)):
         img, qr = generate_qr_code_png(
             current_data, int(st.session_state.box_size_input), int(st.session_state.border_input), error_correction,
-            int(st.session_state.mask_pattern_select), pattern_color, bg_color,
+            int(st.session_state.mask_pattern_select), 
+            "black" if file_format_is_svg else pattern_color, # SVG일 경우 검정으로 고정
+            "white" if file_format_is_svg else bg_color,     # SVG일 경우 하양으로 고정
         )
         if img and qr:
             preview_image_display = img
@@ -383,26 +397,27 @@ with col2:
         if not current_data:
             errors.append("생성할 QR 코드 내용을 입력해 주세요.")
         
-        is_pattern_ok = True
-        if st.session_state.pattern_color_select == "<직접 입력>":
-            if not final_pattern_color:
-                errors.append("QR 코드 **패턴 색**의 HEX 값을 입력해 주세요.")
-                is_pattern_ok = False
-            elif not is_valid_color(final_pattern_color):
-                errors.append("패턴 색으로 입력한 HEX 값은 올바른 색상 값이 아닙니다. 다시 확인해주세요.")
-                is_pattern_ok = False
-        
-        is_bg_ok = True
-        if st.session_state.bg_color_select == "<직접 입력>":
-            if not final_bg_color:
-                errors.append("QR 코드 **배경 색**의 HEX 값을 입력해 주세요.")
-                is_bg_ok = False
-            elif not is_valid_color(final_bg_color):
-                errors.append("배경 색으로 입력한 HEX 값은 올바른 색상 값이 아닙니다. 다시 확인해주세요.")
-                is_bg_ok = False
+        if not file_format_is_svg:
+            is_pattern_ok = True
+            if st.session_state.pattern_color_select == "<직접 입력>":
+                if not final_pattern_color:
+                    errors.append("QR 코드 **패턴 색**의 HEX 값을 입력해 주세요.")
+                    is_pattern_ok = False
+                elif not is_valid_color(final_pattern_color):
+                    errors.append("패턴 색으로 입력한 HEX 값은 올바른 색상 값이 아닙니다. 다시 확인해주세요.")
+                    is_pattern_ok = False
             
-        if is_pattern_ok and is_bg_ok and final_pattern_color and final_bg_color and final_pattern_color == final_bg_color:
-            errors.append("패턴과 배경은 같은 색을 사용할 수 없습니다.")
+            is_bg_ok = True
+            if st.session_state.bg_color_select == "<직접 입력>":
+                if not final_bg_color:
+                    errors.append("QR 코드 **배경 색**의 HEX 값을 입력해 주세요.")
+                    is_bg_ok = False
+                elif not is_valid_color(final_bg_color):
+                    errors.append("배경 색으로 입력한 HEX 값은 올바른 색상 값이 아닙니다. 다시 확인해주세요.")
+                    is_bg_ok = False
+                
+            if is_pattern_ok and is_bg_ok and final_pattern_color and final_bg_color and final_pattern_color == final_bg_color:
+                errors.append("패턴과 배경은 같은 색을 사용할 수 없습니다.")
 
         if errors:
             for error_msg in errors:
@@ -428,9 +443,10 @@ with col2:
                     preview_image_display = img
                     preview_qr_object = qr
             else: # SVG
+                # SVG 생성 함수는 색상 인자를 무시하므로 검정색과 흰색을 넘겨줌
                 svg_data, qr = generate_qr_code_svg(
                     current_data, int(st.session_state.box_size_input), int(st.session_state.border_input), error_correction,
-                    int(st.session_state.mask_pattern_select), final_pattern_color, final_bg_color,
+                    int(st.session_state.mask_pattern_select), "black", "white",
                 )
                 if svg_data and qr:
                     st.session_state.qr_svg_bytes = svg_data.encode('utf-8')
@@ -440,7 +456,7 @@ with col2:
                     # 미리보기용 PNG도 별도로 생성
                     png_img, png_qr = generate_qr_code_png(
                         current_data, int(st.session_state.box_size_input), int(st.session_state.border_input), error_correction,
-                        int(st.session_state.mask_pattern_select), final_pattern_color, final_bg_color,
+                        int(st.session_state.mask_pattern_select), "black", "white",
                     )
                     preview_image_display = png_img
                     preview_qr_object = png_qr
@@ -461,8 +477,8 @@ with col2:
             - QR 버전: {preview_qr_object.version}
             - 가로/세로 각 cell 개수: {preview_qr_object.modules_count}개
             - 이미지 크기 (참고): {(preview_qr_object.modules_count + 2 * int(st.session_state.border_input)) * int(st.session_state.box_size_input)} x {(preview_qr_object.modules_count + 2 * int(st.session_state.border_input)) * int(st.session_state.box_size_input)} px
-            - 패턴 색상: {pattern_color}
-            - 배경 색상: {bg_color}
+            - 패턴 색상: {"black" if file_format_is_svg else pattern_color}
+            - 배경 색상: {"white" if file_format_is_svg else bg_color}
             - 이미지 크기 = (각 cell 개수 + 좌/우 여백 총 개수) × 1개의 사각 cell 크기
             """)
     else:
@@ -470,16 +486,17 @@ with col2:
         if not current_data:
             st.info("QR 코드 내용을 입력하시면 미리보기가 자동으로 나타납니다.")
         else:
-            if pattern_color_choice == "<직접 입력>" and not pattern_color:
-                st.warning("⚠️ 패턴 색의 HEX 값을 입력해 주세요. 미리보기를 위해 유효한 색상 값이 필요합니다.")
-            if bg_color_choice == "<직접 입력>" and not bg_color:
-                st.warning("⚠️ 배경 색의 HEX 값을 입력해 주세요. 미리보기를 위해 유효한 색상 값이 필요합니다.")
-            if pattern_color_choice == "<직접 입력>" and pattern_color and not is_valid_color(pattern_color):
-                st.warning("⚠️ 패턴 색으로 입력한 HEX 값은 올바른 색상 값이 아닙니다. 다시 확인해주세요.")
-            if bg_color_choice == "<직접 입력>" and bg_color and not is_valid_color(bg_color):
-                st.warning("⚠️ 배경 색으로 입력한 HEX 값은 올바른 색상 값이 아닙니다. 다시 확인해주세요.")
-            if is_colors_same_preview:
-                st.warning("⚠️ 패턴과 배경은 같은 색을 사용할 수 없습니다.")
+            if not file_format_is_svg:
+                if pattern_color_choice == "<직접 입력>" and not pattern_color:
+                    st.warning("⚠️ 패턴 색의 HEX 값을 입력해 주세요. 미리보기를 위해 유효한 색상 값이 필요합니다.")
+                if bg_color_choice == "<직접 입력>" and not bg_color:
+                    st.warning("⚠️ 배경 색의 HEX 값을 입력해 주세요. 미리보기를 위해 유효한 색상 값이 필요합니다.")
+                if pattern_color_choice == "<직접 입력>" and pattern_color and not is_valid_color(pattern_color):
+                    st.warning("⚠️ 패턴 색으로 입력한 HEX 값은 올바른 색상 값이 아닙니다. 다시 확인해주세요.")
+                if bg_color_choice == "<직접 입력>" and bg_color and not is_valid_color(bg_color):
+                    st.warning("⚠️ 배경 색으로 입력한 HEX 값은 올바른 색상 값이 아닙니다. 다시 확인해주세요.")
+                if is_colors_same_preview:
+                    st.warning("⚠️ 패턴과 배경은 같은 색을 사용할 수 없습니다.")
 
     # 생성 성공 메시지 (고정)
     if st.session_state.show_generate_success:
