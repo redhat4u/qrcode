@@ -27,31 +27,11 @@ st.set_page_config(
 )
 
 # 세션 상태 초기화
-if 'qr_generated' not in st.session_state:
-    st.session_state.qr_generated = False
-if 'qr_image_bytes' not in st.session_state:
-    st.session_state.qr_image_bytes = None
-if 'qr_image' not in st.session_state:
-    st.session_state.qr_image = None
-if 'qr_info' not in st.session_state:
-    st.session_state.qr_info = None
-if 'preview_image' not in st.session_state:
-    st.session_state.preview_image = None
-if 'preview_info' not in st.session_state:
-    st.session_state.preview_info = None
-if 'last_preview_data' not in st.session_state:
-    st.session_state.last_preview_data = ""
-if 'last_filename_state' not in st.session_state:
-    st.session_state.last_filename_state = ""
-if 'filename_message' not in st.session_state:
-    st.session_state.filename_message = ""
 if 'download_initiated' not in st.session_state:
     st.session_state.download_initiated = False
 if 'show_generate_success' not in st.session_state:
     st.session_state.show_generate_success = False
-if 'last_qr_params_hash' not in st.session_state:
-    st.session_state.last_qr_params_hash = ""
-    
+
 # 각 입력창에 대한 세션 상태 초기화 (필수)
 if 'qr_input_area' not in st.session_state:
     st.session_state.qr_input_area = ""
@@ -104,37 +84,14 @@ def generate_qr_code(data, box_size, border, error_correction, mask_pattern, fil
 # QR 내용만 초기화하는 콜백 함수 (파일명은 유지)
 def clear_text_input():
     st.session_state.qr_input_area = ""
-    st.session_state.qr_generated = False
-    st.session_state.qr_image_bytes = None
-    st.session_state.qr_image = None
-    st.session_state.qr_info = None
-    st.session_state.preview_image = None
-    st.session_state.qr_info = None
-    st.session_state.preview_info = None
-    st.session_state.last_preview_data = ""
-    st.session_state.download_initiated = False
-    st.session_state.show_generate_success = False
-    st.session_state.last_qr_params_hash = ""
 
 # 파일명 초기화 콜백 함수
 def clear_filename_callback():
     st.session_state.filename_input_key = ""
-    st.session_state.filename_message = "deleted"
-    st.session_state.last_filename_state = ""
-    st.session_state.download_initiated = False
 
 # 다운로드 버튼 클릭 시 호출되는 콜백 함수
 def set_download_initiated():
     st.session_state.download_initiated = True
-
-# 색상 입력 위젯의 on_change 콜백 함수
-def strip_pattern_color_input_callback():
-    st.session_state.custom_pattern_color_input_key = st.session_state.custom_pattern_color_input_key.strip()
-    st.session_state.last_qr_params_hash = ""  # 해시 초기화하여 미리보기 갱신 유도
-
-def strip_bg_color_input_callback():
-    st.session_state.custom_bg_color_input_key = st.session_state.custom_bg_color_input_key.strip()
-    st.session_state.last_qr_params_hash = "" # 해시 초기화하여 미리보기 갱신 유도
 
 # 메인 앱 ============================================================================================
 
@@ -234,20 +191,16 @@ with col1:
     with col1_5:
         st.text_input(
             "패턴 색상 HEX 값",
-            value=st.session_state.custom_pattern_color_input_key,
             placeholder="예: #000000",
             disabled=(pattern_color_choice != "<직접 입력>"),
             key="custom_pattern_color_input_key",
-            on_change=strip_pattern_color_input_callback,
         )
     with col1_6:
         st.text_input(
             "배경 색상 HEX 값",
-            value=st.session_state.custom_bg_color_input_key,
             placeholder="예: #FFFFFF",
             disabled=(bg_color_choice != "<직접 입력>"),
             key="custom_bg_color_input_key",
-            on_change=strip_bg_color_input_callback,
         )
 
     # 사용될 최종 색상 값 결정 (공백 제거)
@@ -282,59 +235,28 @@ with col1:
 
     current_filename = filename.strip()
 
-    if st.session_state.filename_message == "deleted":
-        st.success("✅ 파일명이 삭제되었습니다. 입력되지 않으면 자동으로 생성됩니다.")
-        st.session_state.filename_message = ""
-        st.session_state.last_filename_state = ""
-    elif current_filename and current_filename != st.session_state.last_filename_state:
-        st.success("✅ 파일명이 변경되었습니다.")
-        st.session_state.last_filename_state = current_filename
-    elif not current_filename and st.session_state.last_filename_state:
-        st.session_state.last_filename_state = ""
-        st.session_state.filename_message = ""
-
 with col2:
     st.header("👀 미리보기 및 생성")
     
     current_data = qr_data.strip() if strip_option else qr_data
     
-    # 미리보기용 유효성 검사 변수 (공백이 제거된 최종 값을 사용)
+    # 미리보기를 위한 유효성 검사
     is_pattern_color_valid_preview = (pattern_color_choice != "<직접 입력>") or (pattern_color_choice == "<직접 입력>" and pattern_color and is_valid_color(pattern_color))
     is_bg_color_valid_preview = (bg_color_choice != "<직접 입력>") or (bg_color_choice == "<직접 입력>" and bg_color and is_valid_color(bg_color))
     is_colors_same_preview = (is_pattern_color_valid_preview and is_bg_color_valid_preview and pattern_color and bg_color and pattern_color == bg_color)
-
-    # QR 코드 파라미터 해시 생성 (공백이 제거된 최종 값을 사용)
-    qr_params = (
-        current_data,
-        box_size,
-        border,
-        error_correction_choice,
-        mask_pattern,
-        pattern_color_choice,
-        bg_color_choice,
-        pattern_color,
-        bg_color,
-    )
-    current_qr_params_hash = hashlib.md5(str(qr_params).encode('utf-8')).hexdigest()
-
-    # 미리보기 업데이트 로직
-    if current_data and is_pattern_color_valid_preview and is_bg_color_valid_preview and not is_colors_same_preview and (current_qr_params_hash != st.session_state.last_qr_params_hash):
-        st.session_state.qr_generated = False
-        st.session_state.qr_image_bytes = None
-        st.session_state.qr_image = None
-        st.session_state.qr_info = None
-        st.session_state.preview_image = None
-        st.session_state.preview_info = None
-        st.session_state.download_initiated = False
-        st.session_state.show_generate_success = False
-
+    
+    # 미리보기 이미지와 정보 생성 로직
+    preview_image = None
+    preview_info_text = ""
+    
+    if current_data and is_pattern_color_valid_preview and is_bg_color_valid_preview and not is_colors_same_preview:
         img, qr = generate_qr_code(
             current_data, int(box_size), int(border), error_correction,
             int(mask_pattern), pattern_color, bg_color,
         )
-        
         if img and qr:
-            qr_info_text = f"""
+            preview_image = img
+            preview_info_text = f"""
             **QR 코드 정보**
             - QR 버전: {qr.version}
             - 가로/세로 각 cell 개수: {qr.modules_count}개
@@ -343,23 +265,6 @@ with col2:
             - 배경 색상: {bg_color}
             - 이미지 크기 = (각 cell 개수 + 좌/우 여백 총 개수) × 1개의 사각 cell 크기
             """
-            st.session_state.preview_image = img
-            st.session_state.preview_info = qr_info_text
-            st.session_state.last_preview_data = current_data
-            st.session_state.last_qr_params_hash = current_qr_params_hash
-    else:
-        # 상태 초기화
-        st.session_state.qr_generated = False
-        st.session_state.qr_image_bytes = None
-        st.session_state.qr_image = None
-        st.session_state.qr_info = None
-        st.session_state.preview_image = None
-        st.session_state.preview_info = None
-        st.session_state.last_preview_data = ""
-        st.session_state.download_initiated = False
-        st.session_state.show_generate_success = False
-        st.session_state.last_qr_params_hash = ""
-
 
     # QR 코드 생성 버튼
     generate_btn = st.button("⚡ QR 코드 생성", use_container_width=True,)
@@ -394,6 +299,8 @@ with col2:
         if errors:
             for error_msg in errors:
                 st.error(f"⚠️ {error_msg}")
+            # 에러 발생 시 다운로드 기능 비활성화
+            st.session_state.qr_generated = False
         else:
             # 모든 유효성 검사를 통과했을 때만 QR 코드 생성
             img, qr = generate_qr_code(
@@ -419,15 +326,15 @@ with col2:
                 - 이미지 크기 = (각 cell 개수 + 좌/우 여백 총 개수) × 1개의 사각 cell 크기
                 """
                 st.session_state.qr_info = qr_info_text
-                st.session_state.last_qr_params_hash = current_qr_params_hash
-    
-    st.markdown("---")
+                st.session_state.last_qr_params_hash = hashlib.md5(str((current_data, box_size, border, error_correction_choice, mask_pattern, pattern_color_choice, bg_color_choice, pattern_color, bg_color)).encode('utf-8')).hexdigest()
 
+    st.markdown("---")
+    
     # 미리보기 이미지 및 정보 표시
-    if st.session_state.preview_image and current_data and is_pattern_color_valid_preview and is_bg_color_valid_preview and not is_colors_same_preview and (current_qr_params_hash == st.session_state.last_qr_params_hash):
+    if preview_image:
         st.subheader("📱 QR 코드 미리보기")
-        st.image(st.session_state.preview_image, caption="생성된 QR 코드", width=380)
-        st.info(st.session_state.preview_info)
+        st.image(preview_image, caption="생성된 QR 코드", width=380)
+        st.info(preview_info_text)
     else:
         # 오류 메시지 표시 로직
         if not current_data:
@@ -449,11 +356,7 @@ with col2:
         st.success("✅ QR 코드 생성 완료! 반드시 파일명을 확인하고 다운로드하세요.")
 
     # 다운로드 섹션
-    if (st.session_state.qr_generated and
-        st.session_state.qr_image_bytes is not None and
-        current_data and
-        current_qr_params_hash == st.session_state.last_qr_params_hash):
-
+    if st.session_state.get('qr_generated', False) and st.session_state.get('qr_image_bytes', None) is not None:
         st.markdown("---")
         st.subheader("📥 다운로드")
         now = datetime.now(ZoneInfo("Asia/Seoul"))
