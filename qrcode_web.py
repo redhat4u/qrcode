@@ -1,3 +1,15 @@
+"""
+QR 코드 생성 웹앱 - Streamlit 버전
+휴대폰에서도 사용 가능
+
+실행 방법:
+1. pip install streamlit qrcode[pil]
+2. streamlit run qrcode_web.py
+
+또는 온라인에서 실행:
+- Streamlit Cloud, Heroku, Replit 등에 배포 가능
+"""
+
 import streamlit as st
 import qrcode
 import io
@@ -11,7 +23,7 @@ import re
 st.set_page_config(
     page_title="QR 코드 생성기",
     page_icon="🔲",
-    layout="wide"
+    layout="wide",
 )
 
 # 파일명에 특수문자 포함시 '_' 문자로 치환
@@ -135,7 +147,7 @@ with col1:
         "QR 코드로 생성할 내용을 입력해 주세요",
         height=200,
         placeholder="이 곳에 QR 코드를 생성할 내용을 입력해 주세요.\n복사/붙여넣기를 사용할 수 있습니다.",
-        key="qr_input_area"
+        key="qr_input_area",
     )
 
     # 문자 수 표시
@@ -160,14 +172,14 @@ with col1:
             use_container_width=True,
             type="secondary",
             disabled=delete_btn_disabled,
-            on_click=clear_text_input
+            on_click=clear_text_input,
         )
 
     # 공백/줄바꿈 제거 옵션
     strip_option = st.checkbox(
         "마지막 입력문자 이후 모든 공백/줄바꿈 제거",
         value=True,
-        help="입력된 내용 맨끝에 공백/줄바꿈 문자가 한개라도 포함되면 완전히 다른 QR코드가 생성됩니다. 입력된 마지막 문자 뒤에 공백/줄바꿈이 추가되어도 QR코드에 반영되지 않도록 하고 싶다면, 이 옵션을 켜 두세요."
+        help="입력된 내용 맨끝에 공백/줄바꿈 문자가 한개라도 포함되면 완전히 다른 QR코드가 생성됩니다. 입력된 마지막 문자 뒤에 공백/줄바꿈이 추가되어도 QR코드에 반영되지 않도록 하고 싶다면, 이 옵션을 켜 두세요.",
     )
 
     st.markdown("---")
@@ -186,7 +198,7 @@ with col1:
             "Low (7%) - 오류 보정": qrcode.constants.ERROR_CORRECT_L,
             "Medium (15%) - 오류 보정": qrcode.constants.ERROR_CORRECT_M,
             "Quartile (25%) - 오류 보정": qrcode.constants.ERROR_CORRECT_Q,
-            "High (30%) - 오류 보정": qrcode.constants.ERROR_CORRECT_H
+            "High (30%) - 오류 보정": qrcode.constants.ERROR_CORRECT_H,
         }
         error_correction_choice = st.selectbox("오류 보정 레벨", list(error_correction_options.keys()), index=0, key="error_correction_select")
         error_correction = error_correction_options[error_correction_choice]
@@ -203,17 +215,17 @@ with col1:
     ]
     col1_3, col1_4 = st.columns(2)
     with col1_3:
-        pattern_color_choice = st.selectbox("패턴 색상", colors, index=1, key="pattern_color_select")
+        pattern_color_choice = st.selectbox("패턴 색상", colors, index=1, key="pattern_color_select",)
     with col1_4:
-        bg_color_choice = st.selectbox("배경 색상", colors, index=2, key="bg_color_select")
+        bg_color_choice = st.selectbox("배경 색상", colors, index=2, key="bg_color_select",)
 
     st.markdown("원하는 색상이 리스트에 없다면, 아래에 직접 색상을 입력하세요.")
     st.caption("색상명 (예: crimson, gold) 또는 HEX 코드 (예: #FF5733, #00FF00)를 입력할 수 있습니다.")
     col1_5, col1_6 = st.columns(2)
     with col1_5:
-        custom_pattern_color = st.text_input("패턴 색상 직접 입력", placeholder="예: crimson 또는 #FF0000", disabled=(pattern_color_choice != "<직접 선택>"), key="custom_pattern_color_input")
+        custom_pattern_color = st.text_input("패턴 색상 직접 입력", placeholder="예: crimson 또는 #FF0000", disabled=(pattern_color_choice != "<직접 선택>"), key="custom_pattern_color_input",)
     with col1_6:
-        custom_bg_color = st.text_input("배경 색상 직접 입력", placeholder="예: lightcyan 또는 #E0FFFF", disabled=(bg_color_choice != "<직접 선택>"), key="custom_bg_color_input")
+        custom_bg_color = st.text_input("배경 색상 직접 입력", placeholder="예: lightcyan 또는 #E0FFFF", disabled=(bg_color_choice != "<직접 선택>"), key="custom_bg_color_input",)
 
     pattern_color = custom_pattern_color if pattern_color_choice == "<직접 선택>" else pattern_color_choice
     bg_color = custom_bg_color if bg_color_choice == "<직접 선택>" else bg_color_choice
@@ -229,7 +241,7 @@ with col1:
         filename = st.text_input(
             "다운로드 파일명 입력 (확장자는 제외, 파일명만 입력)",
             placeholder="이 곳에 파일명을 입력해 주세요 (비어있으면 자동 생성됨)",
-            key="filename_input"
+            key="filename_input",
         )
 
     with col_filename_delete:
@@ -241,7 +253,7 @@ with col1:
             use_container_width=True,
             type="secondary",
             disabled=filename_delete_disabled,
-            on_click=clear_filename_callback
+            on_click=clear_filename_callback,
         )
 
     current_filename = filename.strip()
@@ -277,7 +289,7 @@ with col2:
         pattern_color_choice,
         bg_color_choice,
         custom_pattern_color,
-        custom_bg_color
+        custom_bg_color,
     )
     current_qr_params_hash = hashlib.md5(str(qr_params).encode('utf-8')).hexdigest()
 
@@ -294,7 +306,7 @@ with col2:
 
         img, qr = generate_qr_code(
             current_data, int(box_size), int(border), error_correction,
-            int(mask_pattern), pattern_color, bg_color
+            int(mask_pattern), pattern_color, bg_color,
         )
         
         if img and qr:
@@ -324,7 +336,7 @@ with col2:
         st.session_state.last_qr_params_hash = ""
 
     # QR 코드 생성 버튼
-    generate_btn = st.button("⚡ QR 코드 생성", use_container_width=True)
+    generate_btn = st.button("⚡ QR 코드 생성", use_container_width=True,)
     
     # 생성 버튼 클릭 시 최종 유효성 검사 로직
     if generate_btn:
@@ -335,19 +347,19 @@ with col2:
         is_pattern_ok = True
         if pattern_color_choice == "<직접 선택>":
             if not custom_pattern_color.strip():
-                errors.append("QR 코드 **패턴 색상**을 직접 입력해 주세요.")
+                errors.append("QR 코드 **패턴 색**을 입력해 주세요.")
                 is_pattern_ok = False
             elif not is_valid_color(custom_pattern_color):
-                errors.append("패턴 색상으로 입력한 색상은 올바른 값이 아닙니다. 다시 확인해주세요.")
+                errors.append("패턴 색으로 입력한 값은 올바른 색상 값이 아닙니다. 다시 확인해주세요.")
                 is_pattern_ok = False
         
         is_bg_ok = True
         if bg_color_choice == "<직접 선택>":
             if not custom_bg_color.strip():
-                errors.append("QR 코드 **배경 색상**을 직접 입력해 주세요.")
+                errors.append("QR 코드 **배경 색**을 입력해 주세요.")
                 is_bg_ok = False
             elif not is_valid_color(custom_bg_color):
-                errors.append("배경 색상으로 입력한 색상은 올바른 값이 아닙니다. 다시 확인해주세요.")
+                errors.append("배경 색으로 입력한 값은 올바른 색상 값이 아닙니다. 다시 확인해주세요.")
                 is_bg_ok = False
             
         if is_pattern_ok and is_bg_ok and pattern_color and bg_color and pattern_color == bg_color:
@@ -360,7 +372,7 @@ with col2:
             # 모든 유효성 검사를 통과했을 때만 QR 코드 생성
             img, qr = generate_qr_code(
                 current_data, int(box_size), int(border), error_correction,
-                int(mask_pattern), pattern_color, bg_color
+                int(mask_pattern), pattern_color, bg_color,
             )
             
             if img and qr:
@@ -396,19 +408,19 @@ with col2:
             st.info("QR 코드 내용을 입력하시면 미리보기가 자동으로 나타납니다.")
         else:
             if pattern_color_choice == "<직접 선택>" and not custom_pattern_color.strip():
-                st.warning("⚠️ 패턴 색상을 직접 입력해 주세요. 미리보기를 위해 유효한 색상 값이 필요합니다.")
+                st.warning("⚠️ 패턴 색을 입력해 주세요. 미리보기를 위한 색상 값이 필요합니다.")
             if bg_color_choice == "<직접 선택>" and not custom_bg_color.strip():
-                st.warning("⚠️ 배경 색상을 직접 입력해 주세요. 미리보기를 위해 유효한 색상 값이 필요합니다.")
+                st.warning("⚠️ 배경 색을 입력해 주세요. 미리보기를 위한 색상 값이 필요합니다.")
             if pattern_color_choice == "<직접 선택>" and custom_pattern_color.strip() and not is_valid_color(custom_pattern_color):
-                st.warning("⚠️ 패턴 색상으로 입력한 값은 올바른 색상이 아닙니다. 다시 확인해주세요.")
+                st.warning("⚠️ 패턴 색으로 입력한 값은 올바른 색상 값이 아닙니다. 다시 확인해주세요.")
             if bg_color_choice == "<직접 선택>" and custom_bg_color.strip() and not is_valid_color(custom_bg_color):
-                st.warning("⚠️ 배경 색상으로 입력한 값은 올바른 색상이 아닙니다. 다시 확인해주세요.")
+                st.warning("⚠️ 배경 색으로 입력한 값은 올바른 색상 값이 아닙니다. 다시 확인해주세요.")
             if is_colors_same_preview:
                 st.warning("⚠️ 패턴과 배경은 같은 색을 사용할 수 없습니다.")
 
     # 생성 성공 메시지 (고정)
     if st.session_state.show_generate_success:
-        st.success("✅ QR 코드 생성 완료! 필요시 파일명을 변경하고 다운로드하세요.")
+        st.success("✅ QR 코드 생성 완료! 반드시 파일명을 확인하고 다운로드하세요.")
 
     # 다운로드 섹션
     if (st.session_state.qr_generated and
@@ -435,7 +447,7 @@ with col2:
             mime="image/png",
             use_container_width=True,
             help="PC는 'Download' 폴더, 휴대폰은 'Download' 폴더에 저장됩니다.",
-            on_click=set_download_initiated
+            on_click=set_download_initiated,
         )
 
         st.markdown(
@@ -443,11 +455,11 @@ with col2:
             f'<span style="color:darkorange; font-weight:bold;">📄 다운로드 파일명: </span> '
             f'<span style="color:dodgerblue;"> {download_filename}</span>'
             f'</p>',
-            unsafe_allow_html=True
+            unsafe_allow_html=True,
         )
 
         if st.session_state.download_initiated:
-            st.success("✅ 파일을 다운로드 합니다! 파일이 저장되는 경로를 확인하세요.")
+            st.success("✅ 다운로드 준비 완료! 휴대폰의 경우 'Download' 폴더에 저장됩니다.")
             st.session_state.download_initiated = False
 
 # 사이드바
@@ -492,3 +504,4 @@ st.markdown(
     '<p style="text-align: center; color: darkorange; font-weight:bold; font-size: 18px;">© 2025 QR 코드 생성기  |  Streamlit으로 제작  |  제작: 류종훈(redhat4u@gmail.com)</p>',
     unsafe_allow_html=True
 )
+# final 버전 - 모두 정상적으로 잘 동작함..
