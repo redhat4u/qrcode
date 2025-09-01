@@ -23,7 +23,15 @@ def is_valid_color(color_name):
     return hex_pattern.match(color_name)
 
 # QR 코드 PNG 생성 함수
-def generate_qr_code_png(data, box_size, border, error_correction, mask_pattern, fill_color, back_color):
+def generate_qr_code_png(
+    data,
+    box_size,
+    border,
+    error_correction,
+    mask_pattern,
+    fill_color,
+    back_color,
+):
     try:
         qr = qrcode.QRCode(
             version=1,
@@ -32,6 +40,7 @@ def generate_qr_code_png(data, box_size, border, error_correction, mask_pattern,
             border=border,
             mask_pattern=mask_pattern,
         )
+
         qr.add_data(data, optimize=0)
         qr.make(fit=True)
         
@@ -44,7 +53,15 @@ def generate_qr_code_png(data, box_size, border, error_correction, mask_pattern,
         return None, None
 
 # QR 코드 SVG 생성 함수
-def generate_qr_code_svg(data, box_size, border, error_correction, mask_pattern, fill_color, back_color):
+def generate_qr_code_svg(
+    data,
+    box_size,
+    border,
+    error_correction,
+    mask_pattern,
+    fill_color,
+    back_color,
+):
     try:
         qr = qrcode.QRCode(
             version=1,
@@ -53,6 +70,7 @@ def generate_qr_code_svg(data, box_size, border, error_correction, mask_pattern,
             border=border,
             mask_pattern=mask_pattern,
         )
+
         qr.add_data(data, optimize=0)
         qr.make(fit=True)
         
