@@ -139,16 +139,15 @@ def draw_custom_shape_image(qr_object, box_size, border, fill_color, back_color,
                 x = (c + border) * box_size
                 y = (r + border) * box_size
                 
-                if shape == "사각형":
+                if shape == "사각":
                     draw.rectangle([x, y, x + box_size, y + box_size], fill=fill_color)
-                elif shape == "원형":
+                elif shape == "둥근사각":
+                    radius = box_size // 4 # 둥근 정도
+                    draw_rounded_rectangle(draw, [x, y, x + box_size, y + box_size], radius, fill_color)
+                elif shape == "동그라미":
                     draw.ellipse([x, y, x + box_size, y + box_size], fill=fill_color)
                 elif shape == "마름모":
                     draw.polygon([(x + box_size/2, y), (x + box_size, y + box_size/2), (x + box_size/2, y + box_size), (x, y + box_size/2)], fill=fill_color)
-                elif shape == "둥근 사각":
-                    radius = box_size // 4 # 둥근 정도
-                    draw_rounded_rectangle(draw, [x, y, x + box_size, y + box_size], radius, fill_color)
-
     return img
 
 
