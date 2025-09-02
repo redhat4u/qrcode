@@ -58,31 +58,37 @@ def generate_qr_code_png(
         qr.add_data(data, optimize=0)
         qr.make(fit=True)
 
-        # [수정] 배경 이미지를 먼저 생성하고 QR 코드를 합성하는 방식으로 변경
-        qr_image = None
+        # [수정] 색상을 16진수 문자열로 변환하여 안정성을 높입니다.
+        try:
+            fill_color_hex = '#' + ''.join(f'{c:02x}' for c in ImageColor.getrgb(fill_color))
+        except ValueError:
+            fill_color_hex = fill_color
+            
+        try:
+            back_color_hex = '#' + ''.join(f'{c:02x}' for c in ImageColor.getrgb(back_color))
+        except ValueError:
+            back_color_hex = back_color
+
+        # [수정] 모듈 모양 선택에 따라 다른 Drawer를 사용하도록 로직 변경
         if module_shape == "둥근 사각형 (Rounded)":
-            qr_image = qr.make_image(
+            img = qr.make_image(
                 image_factory=StyledPilImage,
                 module_drawer=RoundedModuleDrawer(),
-                fill_color=fill_color,
-                back_color="rgba(0,0,0,0)" # 투명 배경
+                fill_color=fill_color_hex,
+                back_color=back_color_hex
             )
         elif module_shape == "원형 (Circle)":
-            qr_image = qr.make_image(
+            img = qr.make_image(
                 image_factory=StyledPilImage,
                 module_drawer=CircleModuleDrawer(),
-                fill_color=fill_color,
-                back_color="rgba(0,0,0,0)" # 투명 배경
+                fill_color=fill_color_hex,
+                back_color=back_color_hex
             )
         else: # "기본 사각형 (Square)" 또는 기본값
-            qr_image = qr.make_image(fill_color=fill_color, back_color="rgba(0,0,0,0)") # 투명 배경
+            img = qr.make_image(fill_color=fill_color_hex, back_color=back_color_hex)
 
-        # 배경 이미지를 생성
-        width, height = qr_image.size
-        background_image = Image.new("RGB", (width, height), color=back_color)
-        
-        # QR 코드 이미지를 배경 이미지에 합성
-        img = Image.alpha_composite(background_image.convert("RGBA"), qr_image.convert("RGBA")).convert("RGB")
+        if hasattr(img, 'convert'):
+            img = img.convert('RGB')
 
         return img, qr
     except Exception as e:
