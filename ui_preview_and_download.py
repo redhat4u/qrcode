@@ -1,3 +1,4 @@
+# 이 파일은 생성된 QR 코드의 미리보기와 다운로드 UI를 정의합니다.
 # ui_preview_and_download.py
 
 import streamlit as st
@@ -11,22 +12,6 @@ from state_manager import set_download_initiated
 def build_preview_and_download_ui():
     """미리보기 및 다운로드 섹션을 빌드합니다."""
     st.header("👀 미리보기 및 생성")
-
-    # --- 새로 추가된 코드 시작 ---
-    # QR 모듈 모양 선택 드롭다운
-    module_shape_options = {
-        "사각형": "square",
-        "원형": "circular",
-        "둥근 사각형": "rounded"
-    }
-    st.session_state.module_shape_select = st.selectbox(
-        "패턴 모양",
-        options=list(module_shape_options.keys()),
-        index=0,
-        key="module_shape_select"
-    )
-    selected_module_shape = module_shape_options[st.session_state.module_shape_select]
-    # --- 새로 추가된 코드 끝 ---
     
     qr_data = st.session_state.qr_input_area
     if st.session_state.strip_option:
@@ -54,17 +39,13 @@ def build_preview_and_download_ui():
     preview_image_display = None
     preview_qr_object = None
     
-    # SVG 형식은 모듈 모양 변경이 어려우므로 PNG일 때만 모양을 변경합니다.
-    # 사용자가 SVG를 선택하고 원형/둥근 모양을 선택하면 미리보기는 기본 사각형으로 표시
-    preview_module_shape = selected_module_shape if st.session_state.file_format_select == "PNG" else 'square'
-
     if current_data and (file_format_is_svg or (is_pattern_color_valid_preview and is_bg_color_valid_preview and not is_colors_same_preview)):
         img, qr = generate_qr_code_png(
             current_data, int(st.session_state.box_size_input), int(st.session_state.border_input), error_correction,
             int(st.session_state.mask_pattern_select),
             "black" if file_format_is_svg else pattern_color,
             "white" if file_format_is_svg else bg_color,
-            module_shape=preview_module_shape # module_shape 인자 전달
+            st.session_state.dot_style_select # <-- dot_style 매개변수 추가
         )
         if img and qr:
             preview_image_display = img
@@ -106,7 +87,7 @@ def build_preview_and_download_ui():
                 img, qr = generate_qr_code_png(
                     current_data, int(st.session_state.box_size_input), int(st.session_state.border_input), error_correction,
                     int(st.session_state.mask_pattern_select), final_pattern_color, final_bg_color,
-                    module_shape=selected_module_shape # module_shape 인자 전달
+                    st.session_state.dot_style_select # <-- dot_style 매개변수 추가
                 )
                 if img and qr:
                     img_buffer = io.BytesIO()
@@ -116,10 +97,9 @@ def build_preview_and_download_ui():
                     st.session_state.qr_generated = True
                     st.session_state.show_generate_success = True
             else: # SVG
-                # SVG는 현재 모듈 모양 변경을 지원하지 않음
                 svg_data, qr = generate_qr_code_svg(
                     current_data, int(st.session_state.box_size_input), int(st.session_state.border_input), error_correction,
-                    int(st.session_state.mask_pattern_select), final_pattern_color, final_bg_color,
+                    int(st.session_state.mask_pattern_select), "black", "white",
                 )
                 if svg_data and qr:
                     st.session_state.qr_svg_bytes = svg_data.encode('utf-8')
@@ -132,6 +112,7 @@ def build_preview_and_download_ui():
     if st.session_state.error_message:
         st.error(st.session_state.error_message)
     elif st.session_state.show_generate_success:
+#        st.success("✅ QR 코드 생성 완료!! 반드시 파일명을 확인하고, 화면 아래의 [💾 QR 코드 다운로드] 버튼을 클릭하세요.")
          st.markdown(
              """
              <div style='
@@ -151,6 +132,7 @@ def build_preview_and_download_ui():
              unsafe_allow_html=True,
          )
     elif preview_image_display:
+#        st.success("✅ 현재 입력된 내용으로 QR 코드를 미리 표현해 보았습니다. 이 QR 코드가 맘에 드신다면, 위의 [⚡ QR 코드 생성] 버튼을 클릭하세요.")
          st.markdown(
              """
              <div style='
@@ -186,7 +168,6 @@ def build_preview_and_download_ui():
             - 이미지 크기 (참고): {(preview_qr_object.modules_count + 2 * int(st.session_state.border_input)) * int(st.session_state.box_size_input)} x {(preview_qr_object.modules_count + 2 * int(st.session_state.border_input)) * int(st.session_state.box_size_input)} px
             - 패턴 색상: {"black" if file_format_is_svg else pattern_color}
             - 배경 색상: {"white" if file_format_is_svg else bg_color}
-            - 패턴 모양: {st.session_state.module_shape_select}
             - 이미지 크기 = (각 cell 개수 + 좌/우 여백 총 개수) × 1개의 사각 cell 크기
             """)
     
@@ -231,6 +212,7 @@ def build_preview_and_download_ui():
         )
 
     if st.session_state.download_initiated:
+#       st.success("✅ 생성한 QR 코드를 다운로드할 수 있습니다! 휴대폰은 'Download' 폴더에 저장됩니다.")
         st.markdown(
             """
             <div style='
