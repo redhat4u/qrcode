@@ -4,7 +4,7 @@ import streamlit as st
 import qrcode
 import io
 from messages import get_message
-from functions import create_qr_code, get_qr_info, is_valid_hex_color
+from functions import create_qr_code, get_qr_info, is_valid_hex_color, get_error_correction_constant
 from state_manager import set_download_initiated
 
 def build_preview_and_download_ui():
@@ -24,9 +24,12 @@ def build_preview_and_download_ui():
 
     # 입력창에 내용이 있을 때만 QR 코드 생성 및 미리보기 표시
     if qr_data:
+        # 오류 보정 레벨을 문자열에서 상수로 변환
+        error_correction_constant = get_error_correction_constant(st.session_state.error_correction_select)
+        
         img_bytes, qr_version = create_qr_code(
             qr_data=qr_data,
-            error_correction=st.session_state.error_correction_select,
+            error_correction=error_correction_constant, # 변환된 상수 사용
             box_size=st.session_state.box_size_input,
             border=st.session_state.border_input,
             pattern_color=st.session_state.pattern_color_select,
