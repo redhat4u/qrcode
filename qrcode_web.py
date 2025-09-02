@@ -646,7 +646,7 @@ with st.sidebar:
 
     st.header(msgs["sidebar_title_tips"])
     st.markdown(f"""
-    {msgs["sidebar_tip_text"]}
+    - {msgs["sidebar_tip_text"]}
     - {msgs["sidebar_tip_website"]}
     - {msgs["sidebar_tip_email"]}
     - {msgs["sidebar_tip_email_full"]}
