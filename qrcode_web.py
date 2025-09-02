@@ -1,3 +1,7 @@
+# 이 파일은 앱의 전체적인 구조를 담당하는 메인 실행 파일이며,
+# 다른 파일의 함수를 불러와서 화면을 구성합니다.
+# qrcode_web.py
+
 import streamlit as st
 import qrcode
 from datetime import datetime
