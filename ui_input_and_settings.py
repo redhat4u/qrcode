@@ -103,10 +103,11 @@ def build_input_and_settings_ui():
     with col1_6:
         st.text_input("배경 색상 HEX 값", placeholder="예: #FFFFFF", disabled=(st.session_state.bg_color_select != "<직접 입력>") or file_format_is_svg, key="custom_bg_color_input_key", on_change=on_qr_setting_change)
         
-    # 새로운 패턴 스타일 선택 드롭다운 메뉴 추가
+    file_format_is_svg = (st.session_state.file_format_select == "SVG")
+
+    # 패턴 모양 드롭다운
     st.markdown("---")
     st.subheader("🛠️ 패턴 모양")
-    # '마름모'를 옵션에 추가
     st.selectbox("패턴 모양 선택", options=["사각형", "원형", "둥근 원형", "마름모"], key="dot_style_select", on_change=on_qr_setting_change, disabled=file_format_is_svg)
 
     st.markdown("---")
