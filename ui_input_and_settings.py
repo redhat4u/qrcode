@@ -61,9 +61,14 @@ def build_input_and_settings_ui():
     )
 
     st.markdown("---")
-    st.markdown("---")
     
+    # 패턴 설정
+    st.markdown("---")
+    st.subheader(UI_SUBHEADER_DOT_STYLE)
+    st.selectbox(UI_SELECTBOX_DOT_STYLE_LABEL, options=[UI_DOT_STYLE_SQUARE, UI_DOT_STYLE_CIRCLE, UI_DOT_STYLE_ROUNDED, UI_DOT_STYLE_DIAMOND], key="dot_style_select", on_change=on_qr_setting_change, disabled=file_format_is_svg)
+
     # QR 코드 설정
+    st.markdown("---")
     st.subheader(UI_SUBHEADER_QR_SETTINGS)
     col1_1, col1_2 = st.columns(2)
     with col1_1:
@@ -78,7 +83,8 @@ def build_input_and_settings_ui():
         }
         st.selectbox(UI_ERROR_CORRECTION_LABEL, list(error_correction_options.keys()), key="error_correction_select", on_change=on_qr_setting_change)
         st.selectbox(UI_MASK_PATTERN_LABEL, options=list(range(8)), key="mask_pattern_select", on_change=on_qr_setting_change)
-        
+
+    # 색상 설정
     st.markdown("---")
     st.subheader(UI_SUBHEADER_COLOR_SETTINGS)
     file_format_is_svg = (st.session_state.file_format_select == "SVG")
@@ -104,12 +110,8 @@ def build_input_and_settings_ui():
         st.text_input(UI_TEXT_INPUT_PATTERN_COLOR_LABEL, placeholder=UI_TEXT_INPUT_PATTERN_COLOR_PLACEHOLDER, disabled=(st.session_state.pattern_color_select != UI_COLOR_OPTION_DIRECT_INPUT) or file_format_is_svg, key="custom_pattern_color_input_key", on_change=on_qr_setting_change)
     with col1_6:
         st.text_input(UI_TEXT_INPUT_BG_COLOR_LABEL, placeholder=UI_TEXT_INPUT_BG_COLOR_PLACEHOLDER, disabled=(st.session_state.bg_color_select != UI_COLOR_OPTION_DIRECT_INPUT) or file_format_is_svg, key="custom_bg_color_input_key", on_change=on_qr_setting_change)
-        
-    # 새로운 패턴 스타일 선택 드롭다운 메뉴 추가
-    st.markdown("---")
-    st.subheader(UI_SUBHEADER_DOT_STYLE)
-    st.selectbox(UI_SELECTBOX_DOT_STYLE_LABEL, options=[UI_DOT_STYLE_SQUARE, UI_DOT_STYLE_CIRCLE, UI_DOT_STYLE_ROUNDED, UI_DOT_STYLE_DIAMOND], key="dot_style_select", on_change=on_qr_setting_change, disabled=file_format_is_svg)
 
+    # 파일명 설정
     st.markdown("---")
     st.subheader(UI_SUBHEADER_FILE_SETTINGS)
     col_filename_input, col_filename_delete = st.columns([3, 1.1])
@@ -120,5 +122,6 @@ def build_input_and_settings_ui():
         filename_delete_disabled = not st.session_state.get("filename_input_key", "")
         st.button(UI_BUTTON_DELETE_FILENAME_LABEL, help=UI_BUTTON_DELETE_FILENAME_HELP, use_container_width=True, type="secondary", disabled=filename_delete_disabled, on_click=clear_filename_callback)
 
+    # 파일 형식 설정
     st.radio(UI_RADIO_FILE_FORMAT, ("PNG", "SVG"), index=0 if st.session_state.file_format_select == "PNG" else 1, key="file_format_select", on_change=on_file_format_change)
     
