@@ -445,10 +445,10 @@ with col1:
 
     with col1_2:
         error_correction_options = {
-            "Low (7%) - 오류 보정": qrcode.constants.ERROR_CORRECT_L,
-            "Medium (15%) - 오류 보정": qrcode.constants.ERROR_CORRECT_M,
-            "Quartile (25%) - 오류 보정": qrcode.constants.ERROR_CORRECT_Q,
-            "High (30%) - 오류 보정": qrcode.constants.ERROR_CORRECT_H,
+            get_message(LANG, "error_correction_options_low"): qrcode.constants.ERROR_CORRECT_L,
+            get_message(LANG, "error_correction_options_medium"): qrcode.constants.ERROR_CORRECT_M,
+            get_message(LANG, "error_correction_options_quartile"): qrcode.constants.ERROR_CORRECT_Q,
+            get_message(LANG, "error_correction_options_high"): qrcode.constants.ERROR_CORRECT_H,
         }
         error_correction_choice = st.selectbox(get_message(LANG, "error_correction_label"), list(error_correction_options.keys()), key="error_correction_select")
         error_correction = error_correction_options[error_correction_choice]
