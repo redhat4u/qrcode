@@ -6,17 +6,26 @@ from messages import * # <-- 추가
 
 def build_sidebar_ui():
     """사이드바를 빌드합니다."""
-    st.header(SIDEBAR_HEADER_HOWTO) # <-- 수정
-    st.markdown(SIDEBAR_INSTRUCTIONS) # <-- 수정
+    st.header(SIDEBAR_HEADER_HOWTO)
+    st.markdown(SIDEBAR_GUIDE_HOWTO)
 
     st.markdown("---")
 
-    st.header(SIDEBAR_HEADER_TIPS) # <-- 수정
-    st.markdown(SIDEBAR_TIPS) # <-- 수정
-    
+    st.header(SIDEBAR_HEADER_USAGE_TIPS)
+    st.markdown(SIDEBAR_GUIDE_USAGE_TIPS)
+
     st.markdown("---")
 
-    st.header("⚙️ 참고 사항")
-    st.markdown("- QR 코드 생성에 문제가 있으면, 새로고침 후 다시 시도해주세요.")
-    st.markdown("- 문자열이 길어지면 QR 코드의 복잡도가 높아져서 인식률이 낮아질 수 있습니다. 간결하게 작성해주세요.")
+    st.header(SIDEBAR_HEADER_SETTINGS_GUIDE)
+    st.markdown(SIDEBAR_GUIDE_ERROR_CORRECTION)
+    st.markdown(SIDEBAR_GUIDE_ERROR_CORRECTION_DESC)
+
+    st.markdown(SIDEBAR_GUIDE_MASK_PATTERN)
+    st.markdown(SIDEBAR_GUIDE_MASK_PATTERN_DESC)
+
+    st.markdown(SIDEBAR_GUIDE_DOT_STYLE)
+    st.markdown(SIDEBAR_GUIDE_DOT_STYLE_DESC)
+
+    st.markdown(SIDEBAR_GUIDE_COLOR_INPUT)
+    st.markdown(SIDEBAR_GUIDE_COLOR_INPUT_DESC)
     
