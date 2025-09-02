@@ -13,11 +13,10 @@ from state_manager import (
     on_qr_setting_change,
     on_file_format_change,
 )
-from messages import * # <-- 추가
+from messages import *
 
 def build_input_and_settings_ui():
     """입력 및 설정 섹션을 빌드합니다."""
-    # 파일 형식이 SVG인지 여부를 함수 초반에 정의
     file_format_is_svg = (st.session_state.file_format_select == "SVG")
     
     st.header(UI_HEADER_INPUT_AND_SETTINGS)
@@ -46,6 +45,7 @@ def build_input_and_settings_ui():
         
     col_clear1, col_clear2, col_clear3 = st.columns([1, 1, 1])
     with col_clear2:
+        # 입력 내용이 없을 때 버튼 비활성화
         delete_btn_disabled = (char_count == 0)
         st.button(
             UI_BUTTON_DELETE_TEXT_LABEL,
