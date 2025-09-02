@@ -119,4 +119,9 @@ def build_input_and_settings_ui():
         filename_delete_disabled = not st.session_state.get("filename_input_key", "")
         st.button("🗑️ 파일명 삭제", help="입력한 파일명을 삭제합니다", use_container_width=True, type="secondary", disabled=filename_delete_disabled, on_click=clear_filename_callback)
 
-    st.radio("파일 형식 선택", ("PNG", "SVG"), index=0 if st.session_state.file_format_select == "PNG" else 1, key="file_format_select", on_change=on_qr_setting_change)
+     # 파일 형식 라디오 버튼
+    current_file_format = st.radio("파일 형식 선택", ("PNG", "SVG"), index=0 if st.session_state.file_format_select == "PNG" else 1, key="file_format_select", on_change=on_qr_setting_change)
+
+    # 파일 형식이 SVG로 변경되면 패턴 모양을 '사각형'으로 고정
+    if current_file_format == "SVG" and st.session_state.dot_style_select != "사각형":
+        st.session_state.dot_style_select = "사각형"
