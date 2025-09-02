@@ -320,7 +320,7 @@ with col1:
         jpg_quality = st.slider(
             "JPG 품질 (압축률)",
             min_value=1,
-            max_value=95,
+            max_value=100,
             value=st.session_state.jpg_quality_input,
             key="jpg_quality_input",
             help="높은 품질(95)은 파일 크기가 크고 선명하며, 낮은 품질(1)은 파일 크기가 작고 화질이 저하됩니다."
