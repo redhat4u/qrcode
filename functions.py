@@ -6,11 +6,12 @@ import io
 import re
 from PIL import Image, ImageDraw
 import qrcode.image.svg
-import streamlit as st # Streamlit을 임포트합니다.
+import streamlit as st 
 
 def get_message(key):
-    # 이 함수는 UI 메시지를 제공합니다.
-    # qrcode_web.py에 있는 messages.py 파일과 호환되도록 임시로 추가합니다.
+    """
+    이 함수는 UI에 사용되는 텍스트 메시지를 관리합니다.
+    """
     messages = {
         'UI_ERROR_CORRECTION_LEVEL_L': 'L (7% 보정)',
         'UI_ERROR_CORRECTION_LEVEL_M': 'M (15% 보정)',
@@ -20,6 +21,11 @@ def get_message(key):
         'UI_DOT_STYLE_ROUNDED': '둥근 사각',
         'UI_DOT_STYLE_CIRCLE': '원형',
         'UI_DOT_STYLE_DIAMOND': '마름모',
+        "UI_ERROR_INVALID_COLOR_FORMAT": "유효한 16진수 색상 코드를 입력해주세요. 예: #000000 또는 #FFF",
+        "UI_WARNING_SAME_COLOR": "패턴 색상과 배경 색상이 동일합니다. QR 코드를 인식할 수 없게 됩니다.",
+        "UI_PREVIEW_IMAGE_CAPTION": "QR 코드 미리보기",
+        "UI_DOWNLOAD_PNG_BUTTON": "PNG 다운로드",
+        "UI_DOWNLOAD_SVG_BUTTON": "SVG 다운로드",
     }
     return messages.get(key, key)
 
@@ -38,6 +44,21 @@ def is_valid_color(color_name):
     hex_pattern = re.compile(r'^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$')
     return hex_pattern.match(color_name)
 
+def get_error_correction_constant(level_str):
+    """
+    사용자가 선택한 오류 보정 레벨 문자열에 해당하는 QR 코드 상수를 반환합니다.
+    """
+    if level_str == get_message('UI_ERROR_CORRECTION_LEVEL_L'):
+        return qrcode.constants.ERROR_CORRECT_L
+    elif level_str == get_message('UI_ERROR_CORRECTION_LEVEL_M'):
+        return qrcode.constants.ERROR_CORRECT_M
+    elif level_str == get_message('UI_ERROR_CORRECTION_LEVEL_Q'):
+        return qrcode.constants.ERROR_CORRECT_Q
+    elif level_str == get_message('UI_ERROR_CORRECTION_LEVEL_H'):
+        return qrcode.constants.ERROR_CORRECT_H
+    else:
+        return qrcode.constants.ERROR_CORRECT_H
+
 # QR 코드 PNG 생성 함수 (패턴 스타일 추가)
 def generate_qr_code_png(
     data,
@@ -51,14 +72,14 @@ def generate_qr_code_png(
 ):
     try:
         qr = qrcode.QRCode(
-            version=1,
+            version=None, # auto version
             error_correction=error_correction,
             box_size=box_size,
             border=border,
             mask_pattern=mask_pattern,
         )
 
-        qr.add_data(data, optimize=0)
+        qr.add_data(data)
         qr.make(fit=True)
         
         # QR 코드 패턴 스타일 적용 (기존 코드와 동일)
@@ -117,14 +138,14 @@ def generate_qr_code_svg(
         factory = qrcode.image.svg.SvgPathImage
         
         qr = qrcode.QRCode(
-            version=1,
+            version=None,
             error_correction=error_correction,
             box_size=box_size,
             border=border,
             mask_pattern=mask_pattern,
         )
 
-        qr.add_data(data, optimize=0)
+        qr.add_data(data)
         qr.make(fit=True)
         
         img_svg = qr.make_image(image_factory=factory)
