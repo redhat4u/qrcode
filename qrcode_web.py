@@ -8,7 +8,6 @@ QR 코드 생성 웹앱 - Streamlit 버전
 
 또는 온라인에서 실행:
 - Streamlit Cloud, Heroku, Replit 등에 배포 가능
-
 """
 
 import streamlit as st
@@ -77,7 +76,7 @@ if 'strip_option' not in st.session_state:
 if 'file_format_select' not in st.session_state:
     st.session_state.file_format_select = "PNG"
 if 'pattern_shape_select' not in st.session_state: # 패턴 모양 선택 상태 추가
-    st.session_state.pattern_shape_select = "사각형"
+    st.session_state.pattern_shape_select = "사각"
 
 
 # 파일명에 특수문자 포함시 '_' 문자로 치환
@@ -140,11 +139,11 @@ def draw_custom_shape_image(qr_object, box_size, border, fill_color, back_color,
                 x = (c + border) * box_size
                 y = (r + border) * box_size
                 
-                if shape == "사각":
+                if shape == "사각" or shape == "사각형":
                     draw.rectangle([x, y, x + box_size, y + box_size], fill=fill_color)
                 elif shape == "둥근사각":
                     radius = box_size // 4 # 둥근 정도
-                    draw_rounded_rectangle(draw, [x, y, x + box_size, y + box_size], radius, fill_color)
+                    draw_rounded_rectangle(draw, [x, y, x + box_size, y + box_size], radius, fill=fill_color)
                 elif shape == "동그라미":
                     draw.ellipse([x, y, x + box_size, y + box_size], fill=fill_color)
                 elif shape == "마름모":
@@ -213,7 +212,7 @@ def reset_all_settings():
     st.session_state.bg_color_select = "white"
     st.session_state.strip_option = True
     st.session_state.file_format_select = "PNG"
-    st.session_state.pattern_shape_select = "사각형"
+    st.session_state.pattern_shape_select = "사각"
 
     st.session_state.qr_generated = False
     st.session_state.show_generate_success = False
@@ -234,7 +233,7 @@ def on_qr_setting_change():
     st.session_state.show_generate_success = False
     st.session_state.qr_image_bytes = None
     st.session_state.qr_svg_bytes = None
-    # st.session_state.generate_button_clicked = False # 이 줄은 삭제 또는 주석 처리
+    st.session_state.generate_button_clicked = False
     st.session_state.error_message = None
 
 
@@ -259,7 +258,7 @@ with col1:
         height=200,
         placeholder="이 곳에 QR 코드를 생성할 내용을 입력해 주세요.\n복사/붙여넣기를 사용할 수 있습니다.",
         key="qr_input_area",
-        on_change=on_qr_setting_change # on_change 추가
+        on_change=on_qr_setting_change
     )
 
     # 문자 수 표시
@@ -302,7 +301,7 @@ with col1:
 
     # QR 코드 설정
     st.markdown("---")
-    st.subheader("🛠️ QR 코드 설정")
+    st.subheader("🔨 QR 코드 설정")
 
     col1_1, col1_2 = st.columns(2)
     with col1_1:
@@ -325,7 +324,7 @@ with col1:
 
     # 색상 설정
     st.markdown("---")
-    st.subheader("🛠️ 색상 설정")
+    st.subheader("🎨 색상 설정")
     
     file_format_is_svg = (st.session_state.file_format_select == "SVG")
     
@@ -382,7 +381,7 @@ with col1:
 
     # 파일 설정
     st.markdown("---")
-    st.subheader("🛠️ 파일 설정")
+    st.subheader("💾 파일 설정")
     
     col_filename_input, col_filename_delete = st.columns([3, 1.1])
 
@@ -418,7 +417,7 @@ with col1:
     # 패턴 모양 선택
     pattern_shape_disabled = (file_format == "SVG")
     st.markdown("---")
-    st.subheader("🛠️ 패턴 모양 설정")
+    st.subheader("🖼️ 패턴 모양 설정")
     st.caption("⚠️ SVG 형식은 사각만 지원합니다.")
     pattern_shape = st.selectbox(
         "패턴 모양 선택",
@@ -436,50 +435,28 @@ with col2:
     
     current_data = qr_data.strip() if st.session_state.strip_option else qr_data
     
+    is_pattern_color_valid_preview = (pattern_color_choice != "<직접 입력>") or (pattern_color_choice == "<직접 입력>" and pattern_color and is_valid_color(pattern_color))
+    is_bg_color_valid_preview = (bg_color_choice != "<직접 입력>") or (bg_color_choice == "<직접 입력>" and bg_color and is_valid_color(bg_color))
+    is_colors_same_preview = (is_pattern_color_valid_preview and is_bg_color_valid_preview and pattern_color and bg_color and pattern_color == bg_color)
+    
     preview_image_display = None
     preview_qr_object = None
-    
-    # 미리보기 이미지 생성에 필요한 모든 유효성 검사
-    can_generate_preview = False
-    
-    # QR 내용이 있어야 미리보기를 시도
-    if current_data:
-        if file_format_is_svg:
-            # SVG는 색상 유효성 검사가 필요 없으므로 바로 True
-            can_generate_preview = True
-        else:
-            # PNG는 색상 유효성 및 패턴/배경색이 동일한지 검사 필요
-            is_pattern_color_valid = (pattern_color_choice != "<직접 입력>") or (is_valid_color(pattern_color))
-            is_bg_color_valid = (bg_color_choice != "<직접 입력>") or (is_valid_color(bg_color))
-            is_colors_same = (pattern_color and bg_color and pattern_color == bg_color)
-            
-            if is_pattern_color_valid and is_bg_color_valid and not is_colors_same:
-                can_generate_preview = True
-            
-            # 미리보기 생성 불가능 시 경고 메시지 표시
-            if not can_generate_preview:
-                if not is_pattern_color_valid:
-                    st.warning("⚠️ 패턴 색의 HEX 값이 유효하지 않습니다. 미리보기를 위해 유효한 색상 값이 필요합니다.")
-                if not is_bg_color_valid:
-                    st.warning("⚠️ 배경 색의 HEX 값이 유효하지 않습니다. 미리보기를 위해 유효한 색상 값이 필요합니다.")
-                if is_colors_same:
-                    st.warning("⚠️ 패턴과 배경은 같은 색을 사용할 수 없습니다. 미리보기를 위해 다른 색을 선택해주세요.")
 
-    # 유효성 검사를 통과한 경우에만 미리보기 이미지 생성
-    if can_generate_preview:
-        if file_format_is_svg:
-            # SVG 미리보기는 항상 PNG로 생성
-            qr = get_qr_data_object(current_data, int(st.session_state.box_size_input), int(st.session_state.border_input), error_correction, int(st.session_state.mask_pattern_select))
-            if qr:
-                preview_image_display = draw_custom_shape_image(qr, int(st.session_state.box_size_input), int(st.session_state.border_input), "black", "white", "사각형")
-                preview_qr_object = qr
-        else:
-            # PNG 미리보기
-            qr = get_qr_data_object(current_data, int(st.session_state.box_size_input), int(st.session_state.border_input), error_correction, int(st.session_state.mask_pattern_select))
-            if qr:
-                preview_image_display = draw_custom_shape_image(qr, int(st.session_state.box_size_input), int(st.session_state.border_input), pattern_color, bg_color, st.session_state.pattern_shape_select)
-                preview_qr_object = qr
-
+    if current_data and (file_format_is_svg or (is_pattern_color_valid_preview and is_bg_color_valid_preview and not is_colors_same_preview)):
+        qr = get_qr_data_object(
+            current_data, int(st.session_state.box_size_input), int(st.session_state.border_input), error_correction,
+            int(st.session_state.mask_pattern_select)
+        )
+        if qr:
+            # 미리보기는 항상 PNG로 생성 (SVG 색상 고정)
+            preview_image_display = draw_custom_shape_image(
+                qr, int(st.session_state.box_size_input), int(st.session_state.border_input),
+                "black" if file_format_is_svg else pattern_color,
+                "white" if file_format_is_svg else bg_color,
+                "사각" if file_format_is_svg else st.session_state.pattern_shape_select
+            )
+            preview_qr_object = qr
+    
     generate_btn = st.button("⚡ QR 코드 생성", use_container_width=True,)
     
     if generate_btn:
@@ -542,16 +519,12 @@ with col2:
                     st.session_state.qr_generated = True
                     st.session_state.show_generate_success = True
                     
-                    # SVG 다운로드 시 PNG 미리보기 재구성
-                    qr_for_preview = get_qr_data_object(
-                        current_data, int(st.session_state.box_size_input), int(st.session_state.border_input), error_correction,
-                        int(st.session_state.mask_pattern_select)
+                    # [수정된 부분] SVG 미리보기를 위해 draw_custom_shape_image 함수를 사용합니다.
+                    preview_image_display = draw_custom_shape_image(
+                        qr, int(st.session_state.box_size_input), int(st.session_state.border_input),
+                        "black", "white", "사각"
                     )
-                    if qr_for_preview:
-                        preview_image_display = draw_custom_shape_image(
-                            qr_for_preview, int(st.session_state.box_size_input), int(st.session_state.border_input), "black", "white", "사각형"
-                        )
-                        preview_qr_object = qr_for_preview
+                    preview_qr_object = qr
 
     st.markdown("---")
     
@@ -561,8 +534,6 @@ with col2:
         st.success("✅ QR 코드 생성 완료!!  반드시 파일명을 확인하고, 화면 아래의 [💾 QR 코드 다운로드] 버튼을 클릭하세요.")
     elif preview_image_display:
         st.success("현재 입력된 내용으로 생성될 QR 코드를 미리 표현해 보았습니다.  이 QR 코드가 맘에 드신다면, 위의 [⚡ QR 코드 생성] 버튼을 클릭하세요.")
-    elif current_data:
-        pass # 미리보기 유효성 검사 실패 메시지는 이미 위에서 출력됨
     else:
         st.info("QR 코드 내용을 입력하면 생성될 QR 코드를 미리 보여드립니다.")
 
@@ -595,13 +566,13 @@ with col2:
                     st.warning("⚠️ 패턴 색으로 입력한 HEX 값은 올바른 색상 값이 아닙니다. 다시 확인해주세요.")
                 if bg_color_choice == "<직접 입력>" and bg_color and not is_valid_color(bg_color):
                     st.warning("⚠️ 배경 색으로 입력한 HEX 값은 올바른 색상 값이 아닙니다. 다시 확인해주세요.")
-                if is_colors_same:
+                if is_colors_same_preview:
                     st.warning("⚠️ 패턴과 배경은 같은 색을 사용할 수 없습니다.")
 
     if st.session_state.get('qr_generated', False) and (st.session_state.get('qr_image_bytes') is not None or st.session_state.get('qr_svg_bytes') is not None):
 
         st.markdown("---")
-
+ 
         st.subheader("📥 다운로드")
         now = datetime.now(ZoneInfo("Asia/Seoul"))
         current_filename = filename.strip()
