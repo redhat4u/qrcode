@@ -664,10 +664,10 @@ with st.sidebar:
     st.markdown(f"- **{current_messages['tips_text'].split(':')[0]}**: `{current_messages['tips_text'].split(':')[1].strip()}`")
     st.markdown(f"- **웹사이트**: `{current_messages['tips_website']}`")
     st.markdown(f"- **이메일**: `{current_messages['tips_email']}`")
-    st.markdown(f"- **이메일({current_messages['tips_email_body'].split('body=')[0].split('?')[0].split('title&body=')[0].split(',')[1].split('?')[0].split('제목')[0].strip()}**: `{current_messages['tips_email_body']}`")
+    st.markdown(f"- **이메일(내용, 다수에게 전송)**: `{current_messages['tips_email_body'].split('body=')[0].split('?')[0].split('title&body=')[0].split(',')[1].split('?')[0].split('제목')[0].strip()}**: `{current_messages['tips_email_body']}`")
     st.markdown(f"- **전화번호**: `{current_messages['tips_phone']}`")
-    st.markdown(f"- **SMS ({current_messages['tips_sms'].split(':')[0]}**: `{current_messages['tips_sms']}`")
-    st.markdown(f"- **SMS ({current_messages['tips_sms_body'].split('?')[1].split('=')[0]}**: `{current_messages['tips_sms_body']}`")
+    st.markdown(f"- **SMS(전화번호만)**: `{current_messages['tips_sms'].split(':')[0]}**: `{current_messages['tips_sms']}`")
+    st.markdown(f"- **SMS(내용포함)**: `{current_messages['tips_sms_body'].split('?')[1].split('=')[0]}**: `{current_messages['tips_sms_body']}`")
     st.markdown(f"- **WiFi**: `{current_messages['tips_wifi']}`")
 
 
