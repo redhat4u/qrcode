@@ -9,6 +9,9 @@ from messages import *
 
 def initialize_session_state():
     """세션 상태를 초기화합니다."""
+    if 'current_lang' not in st.session_state:
+        st.session_state.current_lang = 'ko' # 기본 언어는 한국어
+
     if 'download_initiated' not in st.session_state:
         st.session_state.download_initiated = False
     if 'show_generate_success' not in st.session_state:
@@ -108,4 +111,12 @@ def on_file_format_change():
     st.session_state.qr_svg_bytes = None
     st.session_state.generate_button_clicked = False
     st.session_state.error_message = None
+
+def set_lang_ko():
+    """언어를 한국어로 변경하는 콜백 함수입니다."""
+    st.session_state.current_lang = 'ko'
+
+def set_lang_en():
+    """언어를 영어로 변경하는 콜백 함수입니다."""
+    st.session_state.current_lang = 'en'
     
