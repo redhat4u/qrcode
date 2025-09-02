@@ -8,7 +8,7 @@ from datetime import datetime
 from zoneinfo import ZoneInfo
 from functions import generate_qr_code_png, generate_qr_code_svg, is_valid_color, sanitize_filename
 from state_manager import set_download_initiated, reset_all_settings
-from messages import get_message  # messages.py에서 get_message 함수를 가져옵니다.
+from messages import get_message
 
 def build_preview_and_download_ui():
     """미리보기 및 다운로드 섹션을 빌드합니다."""
