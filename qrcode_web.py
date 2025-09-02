@@ -15,22 +15,26 @@ from state_manager import (
     clear_filename_callback,
     on_qr_setting_change,
     set_download_initiated,
+    set_lang_ko, # 추가
+    set_lang_en, # 추가
 )
+
 from functions import (
     sanitize_filename,
     is_valid_color,
     generate_qr_code_png,
     generate_qr_code_svg,
 )
+
 from ui_input_and_settings import build_input_and_settings_ui
 from ui_preview_and_download import build_preview_and_download_ui
 from sidebar import build_sidebar_ui
 from footer import build_footer
-from messages import * # <-- messages.py의 모든 변수를 가져오도록 수정
+from messages import get_message # get_message 함수만 가져오도록 수정
 
 # 페이지 설정
 st.set_page_config(
-    page_title=APP_TITLE,
+    page_title=get_message('APP_TITLE'), # 수정
     page_icon="🔲",
     layout="wide",
 )
@@ -39,7 +43,14 @@ st.set_page_config(
 initialize_session_state()
 
 # 메인 앱 헤더
-st.title(APP_MAIN_HEADER)
+header_col1, header_col2, header_col3 = st.columns([10, 1, 1])
+with header_col1:
+    st.title(get_message('APP_MAIN_HEADER')) # 수정
+with header_col2:
+    st.button("🇰🇷", key="lang_ko", on_click=set_lang_ko)
+with header_col3:
+    st.button("🇺🇸", key="lang_en", on_click=set_lang_en)
+
 st.markdown("---")
 
 # 레이아웃 설정 (2개 컬럼)
@@ -54,11 +65,11 @@ with col2:
 # 전체 초기화 버튼
 st.markdown("---")
 st.button(
-    label=APP_RESET_BUTTON_LABEL,
+    label=get_message('APP_RESET_BUTTON_LABEL'), # 수정
     use_container_width=True,
     type="secondary",
     on_click=reset_all_settings,
-    help=APP_RESET_BUTTON_HELP,
+    help=get_message('APP_RESET_BUTTON_HELP'), # 수정
 )
 
 # 사이드바를 별도 파일에서 만든 함수로 호출
