@@ -133,19 +133,19 @@ def draw_custom_shape_image(qr_object, box_size, border, fill_color, back_color,
             points.append((x_inner, y_inner))
         
         draw.polygon(points, fill=fill)
-    
-    # 물결 모양을 그리는 로직
-    def draw_wave(draw, xy, fill):
-        x1, y1, x2, y2 = xy
-        points = [
-            (x1, y1 + box_size/2), 
-            (x1 + box_size/4, y2), 
-            (x1 + box_size/2, y1), 
-            (x1 + box_size*3/4, y2), 
-            (x2, y1 + box_size/2)
-        ]
-        draw.polygon(points, fill=fill)
 
+    # 십자가 모양을 그리는 로직
+    def draw_cross(draw, xy, fill):
+        x1, y1, x2, y2 = xy
+        cross_width = box_size * 0.3 # 십자가 팔의 두께
+        x_center = (x1 + x2) / 2
+        y_center = (y1 + y2) / 2
+        
+        # 가로 팔
+        draw.rectangle([x1, y_center - cross_width/2, x2, y_center + cross_width/2], fill=fill)
+        # 세로 팔
+        draw.rectangle([x_center - cross_width/2, y1, x_center + cross_width/2, y2], fill=fill)
+    
     for r in range(qr_object.modules_count):
         for c in range(qr_object.modules_count):
             if qr_object.modules[r][c]:
@@ -163,8 +163,8 @@ def draw_custom_shape_image(qr_object, box_size, border, fill_color, back_color,
                     draw.polygon([(x + box_size/2, y), (x + box_size, y + box_size/2), (x + box_size/2, y + box_size), (x, y + box_size/2)], fill=fill_color)
                 elif shape == "별":
                     draw_star(draw, [x, y, x + box_size, y + box_size], fill_color)
-                elif shape == "물결":
-                    draw_wave(draw, [x, y, x + box_size, y + box_size], fill_color)
+                elif shape == "십자가":
+                    draw_cross(draw, [x, y, x + box_size, y + box_size], fill_color)
 
     return img
 
@@ -296,7 +296,7 @@ with col1:
     st.caption("⚠️ SVG 형식은 사각만 지원합니다.")
     pattern_shape = st.selectbox(
         "패턴 모양 선택",
-        ("사각", "둥근사각", "동그라미", "마름모", "별", "물결"),
+        ("사각", "둥근사각", "동그라미", "마름모", "별", "십자가"),
         key="pattern_shape_select",
         disabled=pattern_shape_disabled,
     )
@@ -577,7 +577,7 @@ with st.sidebar:
 
     st.markdown("**패턴 모양:**")
     st.markdown("""
-    - 사각, 둥근사각, 동그라미, 마름모, 별, 물결 중 선택
+    - 사각, 둥근사각, 동그라미, 마름모, 별, 십자가 중 선택
     - **SVG** 파일 형식 선택 시에는 **사각**만 지원합니다.
     """)
 
