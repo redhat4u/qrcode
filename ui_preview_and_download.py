@@ -26,7 +26,7 @@ def build_preview_and_download_ui():
                     st.image(st.session_state.qr_svg_bytes, width=380, use_container_width=False)
             else:
                 if st.session_state.qr_image_bytes:
-                    st.image(st.session_state.qr_image_bytes, width=380, use_container_width=False)
+                    st.image(st.session_state.qr_image_bytes, width=600, use_container_width=False)
                     
         st.success(get_message('UI_SUCCESS_MESSAGE'))
 
