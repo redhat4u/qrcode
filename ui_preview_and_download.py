@@ -16,20 +16,23 @@ def build_preview_and_download_ui():
     qr_data = st.session_state.qr_input_area
     
     if st.session_state.qr_generated:
-        st.success(get_message('UI_SUCCESS_MESSAGE'))
+        # QR 코드 이미지를 중앙에 정렬하고 크기를 380px로 고정
+        col_left, col_center, col_right = st.columns([1, 1, 1])
         
-        col_preview, col_download_reset = st.columns([1, 1])
-        
-        with col_preview:
+        with col_center:
             # QR 코드 이미지 표시
             if st.session_state.file_format_select == get_message('UI_FILE_FORMAT_SVG'):
                 if st.session_state.qr_svg_bytes:
-                    st.image(st.session_state.qr_svg_bytes, use_container_width=True)
+                    st.image(st.session_state.qr_svg_bytes, width=380, use_container_width=False)
             else:
                 if st.session_state.qr_image_bytes:
-                    st.image(st.session_state.qr_image_bytes, use_container_width=True)
+                    st.image(st.session_state.qr_image_bytes, width=380, use_container_width=False)
                     
-        with col_download_reset:
+        st.success(get_message('UI_SUCCESS_MESSAGE'))
+
+        # 다운로드 버튼 및 기타 정보 표시
+        col_generate, col_reset = st.columns([1, 1])
+        with col_generate:
             # 최종 파일명 설정
             now = datetime.now(ZoneInfo('Asia/Seoul'))
             default_filename = now.strftime("QR_%y%m%d_%H%M%S")
@@ -54,15 +57,16 @@ def build_preview_and_download_ui():
                 on_click=set_download_initiated,
             )
             
+        with col_reset:
             st.button(get_message('UI_BUTTON_RESET'), use_container_width=True, type="secondary", on_click=reset_all_settings)
-            
-            # 파일명 관련 경고 및 정보 메시지
-            if not st.session_state.filename_input_key:
-                st.warning(get_message('UI_WARNING_EMPTY_FILENAME'))
-            elif not sanitize_filename(st.session_state.filename_input_key):
-                st.error(get_message('UI_WARNING_INVALID_FILENAME'))
-            
-            st.info(get_message('UI_DOWNLOAD_INFO').format(download_filename=download_filename))
+        
+        # 파일명 관련 경고 및 정보 메시지
+        if not st.session_state.filename_input_key:
+            st.warning(get_message('UI_WARNING_EMPTY_FILENAME'))
+        elif not sanitize_filename(st.session_state.filename_input_key):
+            st.error(get_message('UI_WARNING_INVALID_FILENAME'))
+        
+        st.info(get_message('UI_DOWNLOAD_INFO').format(download_filename=download_filename))
             
     elif st.session_state.error_message:
         st.error(st.session_state.error_message)
