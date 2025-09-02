@@ -39,7 +39,6 @@ def build_preview_and_download_ui():
 
     # 미리보기 이미지 생성 및 표시
     if current_data:
-        # 색상 유효성 검사 (SVG는 제외)
         if not file_format_is_svg and (not is_pattern_color_valid or not is_bg_color_valid or is_colors_same):
             if not is_pattern_color_valid:
                 st.error(UI_ERROR_HEX_PATTERN_INVALID)
@@ -61,7 +60,8 @@ def build_preview_and_download_ui():
                     img_buffer = io.BytesIO()
                     img.save(img_buffer, format='PNG')
                     st.session_state.qr_image_bytes = img_buffer.getvalue()
-                    st.image(st.session_state.qr_image_bytes, use_column_width=True)
+                    # use_column_width를 use_container_width로 변경
+                    st.image(st.session_state.qr_image_bytes, use_container_width=True)
             elif st.session_state.file_format_select == UI_FILE_FORMAT_SVG:
                 img_svg, qr = generate_qr_code_svg(
                     current_data, int(st.session_state.box_size_input), int(st.session_state.border_input), error_correction,
@@ -71,7 +71,8 @@ def build_preview_and_download_ui():
                 )
                 if img_svg:
                     st.session_state.qr_svg_bytes = img_svg
-                    st.image(st.session_state.qr_svg_bytes, use_column_width=True)
+                    # use_column_width를 use_container_width로 변경
+                    st.image(st.session_state.qr_svg_bytes, use_container_width=True)
     else:
         st.caption(UI_CAPTION_QR_DATA_EMPTY)
 
@@ -118,7 +119,6 @@ def build_preview_and_download_ui():
         elif st.session_state.show_generate_success:
             st.success(UI_SUCCESS_MESSAGE)
             
-            # 다운로드 버튼 표시
             if current_data:
                 final_filename = st.session_state.filename_input_key.strip()
                 if not final_filename:
@@ -127,5 +127,49 @@ def build_preview_and_download_ui():
                     final_filename = f"qrcode_{timestamp}"
                 
                 if st.session_state.file_format_select == UI_FILE_FORMAT_PNG:
-                    download_data = st
-                    
+                    download_data = st.session_state.qr_image_bytes
+                    download_mime = "image/png"
+                    download_extension = ".png"
+                else:
+                    download_data = st.session_state.qr_svg_bytes
+                    download_mime = "image/svg+xml"
+                    download_extension = ".svg"
+                
+                download_filename = f"{sanitize_filename(final_filename)}{download_extension}"
+                
+                st.download_button(
+                    label=UI_BUTTON_DOWNLOAD,
+                    data=download_data,
+                    file_name=download_filename,
+                    mime=download_mime,
+                    use_container_width=True,
+                    help=UI_BUTTON_DOWNLOAD_HELP,
+                    on_click=set_download_initiated,
+                )
+        
+                st.markdown(
+                    f'<p style="font-size:18px;">'
+                    f'<span style="color:darkorange; font-weight:bold;">📄 다운로드 파일명: </span> '
+                    f'<span style="color:dodgerblue;"> {download_filename}</span>'
+                    f'</p>',
+                    unsafe_allow_html=True,
+                )
+    
+    if st.session_state.download_initiated:
+        st.markdown(
+            """
+            <div style='
+                background-color: #0c4145;
+                color: #dffde9;
+                padding: 1rem;
+                border-radius: 0.5rem;
+                border: 1px solid #1a5e31;
+                font-size: 1rem;
+                margin-bottom: 1rem;
+            '>
+            """, unsafe_allow_html=True
+        )
+        st.markdown(UI_SUCCESS_DOWNLOAD_MESSAGE)
+        st.markdown("</div>", unsafe_allow_html=True)
+        st.session_state.download_initiated = False
+        
