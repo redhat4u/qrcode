@@ -26,7 +26,7 @@ def build_input_and_settings_ui():
         height=200,
         placeholder=get_message('UI_TEXT_AREA_PLACEHOLDER'),
         key="qr_input_area",
-        on_change=on_qr_setting_change # <-- 이 콜백 함수가 누락되어 있을 수 있습니다.
+        on_change=on_qr_setting_change # <-- 이 부분이 중요합니다.
     )
     
     char_count = len(qr_data) if qr_data else 0
