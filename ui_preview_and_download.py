@@ -133,8 +133,17 @@ def build_preview_and_download_ui():
              """,
              unsafe_allow_html=True,
          )
-    elif is_colors_same_preview: # <-- 이 부분이 추가됨
+    # --- 💡 메시지 출력 로직 수정 부분 ---
+    elif st.session_state.pattern_color_select == "<직접 입력>" and not st.session_state.custom_pattern_color_input_key:
+        st.warning("⚠️ 패턴 색을 입력해 주세요.")
+    elif st.session_state.bg_color_select == "<직접 입력>" and not st.session_state.custom_bg_color_input_key:
+        st.warning("⚠️ 배경 색을 입력해 주세요.")
+    elif (st.session_state.pattern_color_select == "<직접 입력>" and not is_valid_color(st.session_state.custom_pattern_color_input_key)) or \
+         (st.session_state.bg_color_select == "<직접 입력>" and not is_valid_color(st.session_state.custom_bg_color_input_key)):
+        st.warning("⚠️ 올바른 색상값이 아닙니다. 다시 확인해 주세요.")
+    elif is_colors_same_preview:
         st.warning("⚠️ 패턴과 배경은 같은 색을 사용할 수 없습니다. 다른 색을 선택해 주세요.")
+    # ------------------------------------
     elif preview_image_display:
          st.markdown(
              """
@@ -234,4 +243,3 @@ def build_preview_and_download_ui():
             unsafe_allow_html=True,
         )
         st.session_state.download_initiated = False
-        
