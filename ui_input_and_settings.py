@@ -108,7 +108,7 @@ def build_input_and_settings_ui():
     # 패턴 모양 드롭다운
     st.markdown("---")
     st.subheader("🛠️ 패턴 모양")
-    st.selectbox("패턴 모양 선택", options=["사각형", "원형", "둥근 원형", "마름모"], key="dot_style_select", on_change=on_qr_setting_change, disabled=file_format_is_svg)
+    st.selectbox("패턴 모양 선택", options=["사각형", "둥근 사각", "원형", "마름모"], key="dot_style_select", on_change=on_qr_setting_change, disabled=file_format_is_svg)
 
     st.markdown("---")
     st.subheader("🛠️ 파일 설정")
