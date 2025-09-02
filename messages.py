@@ -5,7 +5,7 @@ import streamlit as st
 MESSAGES = {
     "ko": {
         "APP_TITLE": "QR 코드 생성기",
-        "UI_LANG_SELECT_LABEL": "언어 선택",
+        "UI_LANG_SELECT_LABEL": "언어 선택(Select Language)",
         "UI_LANG_SELECT_OPTIONS": ["한국어", "English"],
 
         "UI_SIDEBAR_HEADER_GUIDE": "📖 사용 방법",
