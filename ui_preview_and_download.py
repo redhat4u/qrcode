@@ -1,4 +1,3 @@
-# ui_preview_and_download.py
 import streamlit as st
 import qrcode
 import io
@@ -22,24 +21,24 @@ def build_preview_and_download_ui():
     current_data = qr_data.strip() if st.session_state.strip_option else qr_data
     file_format_is_svg = st.session_state.file_format_select == "SVG"
 
-    # 수정된 미리보기 색상 및 모듈 모양 변수 설정
-    preview_pattern_color = (
-        st.session_state.custom_pattern_color_input_key.strip()
-        if st.session_state.pattern_color_select == "<직접 입력>"
-        else st.session_state.pattern_color_select
-    )
-    preview_bg_color = (
-        st.session_state.custom_bg_color_input_key.strip()
-        if st.session_state.bg_color_select == "<직접 입력>"
-        else st.session_state.bg_color_select
-    )
-    preview_module_shape = st.session_state.module_shape_select
-
-    # SVG 형식일 경우, 미리보기 색상과 모양을 하드코딩된 값으로 강제 설정
+    # PNG와 SVG에 따라 미리보기 색상 및 모듈 모양을 명확히 분리
     if file_format_is_svg:
+        # SVG는 색상/패턴 고정
         preview_module_shape = "사각형 (Square)"
         preview_pattern_color = "black"
         preview_bg_color = "white"
+    else:  # PNG인 경우, 세션 상태에서 색상값 가져오기
+        preview_pattern_color = (
+            st.session_state.custom_pattern_color_input_key.strip()
+            if st.session_state.pattern_color_select == "<직접 입력>"
+            else st.session_state.pattern_color_select
+        )
+        preview_bg_color = (
+            st.session_state.custom_bg_color_input_key.strip()
+            if st.session_state.bg_color_select == "<직접 입력>"
+            else st.session_state.bg_color_select
+        )
+        preview_module_shape = st.session_state.module_shape_select
 
     # 오류 보정 매핑 (PNG / SVG 공통 사용)
     error_correction_options = {
