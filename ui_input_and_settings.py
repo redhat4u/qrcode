@@ -41,7 +41,15 @@ def build_input_and_settings_ui():
     
     col_1, col_2 = st.columns([1, 1])
     with col_1:
-        st.button(get_message('UI_BUTTON_DELETE_TEXT_LABEL'), use_container_width=True, help=get_message('UI_BUTTON_DELETE_TEXT_HELP'), on_click=clear_text_input)
+        # 입력창이 비어있으면 버튼 비활성화
+        is_qr_input_empty = st.session_state.qr_input_area == ""
+        st.button(
+            get_message('UI_BUTTON_DELETE_TEXT_LABEL'),
+            use_container_width=True,
+            help=get_message('UI_BUTTON_DELETE_TEXT_HELP'),
+            on_click=clear_text_input,
+            disabled=is_qr_input_empty
+        )
     with col_2:
         st.checkbox(get_message('UI_CHECKBOX_STRIP_TEXT'), value=True, key='strip_option', on_change=generate_and_store_qr)
 
@@ -116,6 +124,13 @@ def build_input_and_settings_ui():
         with col_filename_input:
             st.text_input(get_message('UI_TEXT_INPUT_FILENAME_LABEL'), placeholder=get_message('UI_TEXT_INPUT_FILENAME_PLACEHOLDER'), key="filename_input_key")
         with col_filename_delete:
+            is_filename_input_empty = st.session_state.filename_input_key == ""
             st.markdown("<div style='height: 20px;'></div>", unsafe_allow_html=True)
-            st.button(get_message('UI_BUTTON_DELETE_FILENAME_LABEL'), use_container_width=True, help=get_message('UI_BUTTON_DELETE_FILENAME_HELP'), on_click=clear_filename_callback)
+            st.button(
+                get_message('UI_BUTTON_DELETE_FILENAME_LABEL'),
+                use_container_width=True,
+                help=get_message('UI_BUTTON_DELETE_FILENAME_HELP'),
+                on_click=clear_filename_callback,
+                disabled=is_filename_input_empty
+            )
             
