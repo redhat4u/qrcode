@@ -6,7 +6,7 @@ import io
 import re
 from PIL import Image, ImageColor
 import qrcode.image.svg
-# [추가] 모듈 모양 변경을 위한 클래스 임포트
+# 모듈 모양 변경을 위한 클래스 임포트
 from qrcode.image.styledpil import StyledPilImage
 from qrcode.image.styles.moduledrawers import RoundedModuleDrawer, CircleModuleDrawer
 
@@ -17,7 +17,7 @@ def sanitize_filename(name: str) -> str:
         name = name.replace(ch, "_")
     return name.strip()
 
-# [수정] 유효한 색상인지 확인하는 함수 (16진수 및 일반 색상 이름 모두 유효)
+# 유효한 색상인지 확인하는 함수 (16진수 및 일반 색상 이름 모두 유효)
 def is_valid_color(color_name):
     if not color_name:
         return False
@@ -44,7 +44,7 @@ def generate_qr_code_png(
     mask_pattern,
     fill_color,
     back_color,
-    module_shape, # [추가] 모듈 모양을 인자로 받음
+    module_shape, # 모듈 모양을 인자로 받음
 ):
     try:
         qr = qrcode.QRCode(
@@ -58,27 +58,24 @@ def generate_qr_code_png(
         qr.add_data(data, optimize=0)
         qr.make(fit=True)
 
-        # [추가] PIL이 모든 색상 입력을 올바르게 처리하도록 RGB 튜플로 변환
-        fill_color_rgb = ImageColor.getrgb(fill_color)
-        back_color_rgb = ImageColor.getrgb(back_color)
-
         # [수정] 모듈 모양 선택에 따라 다른 Drawer를 사용하도록 로직 변경
+        # fill_color와 back_color는 문자열 형태로 직접 전달
         if module_shape == "둥근 사각형 (Rounded)":
             img = qr.make_image(
                 image_factory=StyledPilImage,
                 module_drawer=RoundedModuleDrawer(),
-                fill_color=fill_color_rgb,
-                back_color=back_color_rgb
+                fill_color=fill_color,
+                back_color=back_color
             )
         elif module_shape == "원형 (Circle)":
             img = qr.make_image(
                 image_factory=StyledPilImage,
                 module_drawer=CircleModuleDrawer(),
-                fill_color=fill_color_rgb,
-                back_color=back_color_rgb
+                fill_color=fill_color,
+                back_color=back_color
             )
         else: # "기본 사각형 (Square)" 또는 기본값
-            img = qr.make_image(fill_color=fill_color_rgb, back_color=back_color_rgb)
+            img = qr.make_image(fill_color=fill_color, back_color=back_color)
 
         if hasattr(img, 'convert'):
             img = img.convert('RGB')
@@ -115,7 +112,7 @@ def generate_qr_code_svg(
         img_svg.save(svg_buffer)
         svg_data = svg_buffer.getvalue().decode('utf-8')
 
-        # [수정] SVG 색상 변경 로직을 더 안정적인 방식으로 개선
+        # SVG 색상 변경 로직을 더 안정적인 방식으로 개선
         # 패턴(기본 검정) 색상을 사용자가 지정한 색으로 변경
         svg_data = svg_data.replace('fill="black"', f'fill="{fill_color}"')
         # 배경색을 채우기 위한 사각형(rect)을 맨 앞에 추가
