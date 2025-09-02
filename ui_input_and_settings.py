@@ -11,7 +11,7 @@ from state_manager import (
     clear_text_input,
     clear_filename_callback,
     on_qr_setting_change,
-    on_file_format_change, # <-- 새로 추가
+    on_file_format_change, # <-- 추가
 )
 
 def build_input_and_settings_ui():
@@ -104,12 +104,10 @@ def build_input_and_settings_ui():
     with col1_6:
         st.text_input("배경 색상 HEX 값", placeholder="예: #FFFFFF", disabled=(st.session_state.bg_color_select != "<직접 입력>") or file_format_is_svg, key="custom_bg_color_input_key", on_change=on_qr_setting_change)
         
-    file_format_is_svg = (st.session_state.file_format_select == "SVG")
-
-    # 패턴 모양 드롭다운
+    # 새로운 패턴 스타일 선택 드롭다운 메뉴 추가
     st.markdown("---")
     st.subheader("🛠️ 패턴 모양")
-    st.selectbox("패턴 모양 선택", options=["사각형", "둥근 사각", "원형", "마름모"], key="dot_style_select", on_change=on_qr_setting_change, disabled=file_format_is_svg)
+    st.selectbox("패턴 모양 선택", options=["사각형", "원형", "둥근 원형", "마름모"], key="dot_style_select", on_change=on_qr_setting_change, disabled=file_format_is_svg)
 
     st.markdown("---")
     st.subheader("🛠️ 파일 설정")
@@ -121,9 +119,4 @@ def build_input_and_settings_ui():
         filename_delete_disabled = not st.session_state.get("filename_input_key", "")
         st.button("🗑️ 파일명 삭제", help="입력한 파일명을 삭제합니다", use_container_width=True, type="secondary", disabled=filename_delete_disabled, on_click=clear_filename_callback)
 
-    # st.radio에 on_change 콜백 함수 연결
     st.radio("파일 형식 선택", ("PNG", "SVG"), index=0 if st.session_state.file_format_select == "PNG" else 1, key="file_format_select", on_change=on_file_format_change)
-
-    # 파일 형식이 SVG로 변경되면 패턴 모양을 '사각형'으로 고정
-    if current_file_format == "SVG" and st.session_state.dot_style_select != "사각형":
-        st.session_state.dot_style_select = "사각형"
