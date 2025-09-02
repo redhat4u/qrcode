@@ -32,30 +32,31 @@ def initialize_session_state():
     if 'filename_input_key' not in st.session_state:
         st.session_state.filename_input_key = ""
     if 'box_size_input' not in st.session_state:
-        st.session_state.box_size_input = 20
+        st.session_state.box_size_input = UI_DEFAULT_BOX_SIZE
     if 'border_input' not in st.session_state:
-        st.session_state.border_input = 2
+        st.session_state.border_input = UI_DEFAULT_BORDER
     if 'error_correction_select' not in st.session_state:
-        st.session_state.error_correction_select = "Low (7%) - 오류 보정"
+        st.session_state.error_correction_select = UI_DEFAULT_ERROR_CORRECTION
     if 'mask_pattern_select' not in st.session_state:
-        st.session_state.mask_pattern_select = 2
+        st.session_state.mask_pattern_select = UI_DEFAULT_MASK_PATTERN
     if 'pattern_color_select' not in st.session_state:
-        st.session_state.pattern_color_select = "black"
+        st.session_state.pattern_color_select = UI_DEFAULT_PATTERN_COLOR
     if 'bg_color_select' not in st.session_state:
-        st.session_state.bg_color_select = "white"
+        st.session_state.bg_color_select = UI_DEFAULT_BG_COLOR
     if 'strip_option' not in st.session_state:
-        st.session_state.strip_option = True
+        st.session_state.strip_option = UI_DEFAULT_STRIP_OPTION
     if 'file_format_select' not in st.session_state:
-        st.session_state.file_format_select = UI_FILE_FORMAT_PNG # <-- 수정
+        st.session_state.file_format_select = UI_FILE_FORMAT_PNG
     if 'dot_style_select' not in st.session_state:
-        st.session_state.dot_style_select = UI_DOT_STYLE_SQUARE # <-- 수정
-    if 'is_custom_filename' not in st.session_state:
-        st.session_state.is_custom_filename = False
+        st.session_state.dot_style_select = UI_DEFAULT_DOT_STYLE
+
+def set_download_initiated():
+    """다운로드 버튼 클릭 상태를 True로 설정하는 콜백 함수입니다."""
+    st.session_state.download_initiated = True
 
 def clear_text_input():
     """입력 내용 초기화 콜백 함수입니다."""
     st.session_state.qr_input_area = ""
-    on_qr_setting_change()
 
 def clear_filename_callback():
     """파일명 초기화 콜백 함수입니다."""
@@ -67,15 +68,15 @@ def reset_all_settings():
     st.session_state.custom_pattern_color_input_key = ""
     st.session_state.custom_bg_color_input_key = ""
     st.session_state.filename_input_key = ""
-    st.session_state.box_size_input = 20
-    st.session_state.border_input = 2
-    st.session_state.error_correction_select = "Low (7%) - 오류 보정"
-    st.session_state.mask_pattern_select = 2
-    st.session_state.pattern_color_select = "black"
-    st.session_state.bg_color_select = "white"
-    st.session_state.strip_option = True
-    st.session_state.file_format_select = UI_FILE_FORMAT_PNG # <-- 수정
-    st.session_state.dot_style_select = UI_DOT_STYLE_SQUARE # <-- 수정
+    st.session_state.box_size_input = UI_DEFAULT_BOX_SIZE
+    st.session_state.border_input = UI_DEFAULT_BORDER
+    st.session_state.error_correction_select = UI_DEFAULT_ERROR_CORRECTION
+    st.session_state.mask_pattern_select = UI_DEFAULT_MASK_PATTERN
+    st.session_state.pattern_color_select = UI_DEFAULT_PATTERN_COLOR
+    st.session_state.bg_color_select = UI_DEFAULT_BG_COLOR
+    st.session_state.strip_option = UI_DEFAULT_STRIP_OPTION
+    st.session_state.file_format_select = UI_FILE_FORMAT_PNG
+    st.session_state.dot_style_select = UI_DEFAULT_DOT_STYLE
     st.session_state.qr_generated = False
     st.session_state.show_generate_success = False
     st.session_state.qr_image_bytes = None
@@ -92,15 +93,12 @@ def on_qr_setting_change():
     st.session_state.generate_button_clicked = False
     st.session_state.error_message = None
 
-def set_download_initiated():
-    """다운로드 버튼 클릭 시 호출되어 다운로드 상태를 설정합니다."""
-    st.session_state.download_initiated = True
-
 def on_file_format_change():
-    """파일 형식 변경 시 패턴 색상, 배경 색상, 점 모양을 SVG 기본값으로 리셋합니다."""
-    if st.session_state.file_format_select == UI_FILE_FORMAT_SVG: # <-- 수정
-        st.session_state.pattern_color_select = "black"
-        st.session_state.bg_color_select = "white"
-        st.session_state.dot_style_select = UI_DOT_STYLE_SQUARE # <-- 수정
-    on_qr_setting_change()
+    """파일 형식 변경 시 상태를 초기화합니다."""
+    st.session_state.qr_generated = False
+    st.session_state.show_generate_success = False
+    st.session_state.qr_image_bytes = None
+    st.session_state.qr_svg_bytes = None
+    st.session_state.generate_button_clicked = False
+    st.session_state.error_message = None
     
