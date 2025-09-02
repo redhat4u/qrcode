@@ -1,5 +1,8 @@
 # messages.py
 
+import streamlit as st
+import qrcode
+
 MESSAGES = {
     "ko": {
         "APP_TITLE": "QR 코드 생성기",
@@ -137,7 +140,7 @@ MESSAGES = {
         "UI_SIDEBAR_HEADER_TIPS": "💡 Tips for Creating QR Codes",
         "UI_SIDEBAR_TIPS_CONTENT": """
         - **Text**: `Enter text you want to generate a QR code for`
-        - **Website**: `https://www.example.com`
+        - **Website**: `https://www.google.com`
         - **Email**: `mailto:user@example.com`
         - **Email (with subject, body, multiple recipients)**: `mailto:user1@example.com,user2@example.com?subject=Subject&body=Message content`
         - **Phone Number**: `tel:type=CELL:+82 10-1234-5678`
@@ -236,16 +239,31 @@ MESSAGES = {
         "UI_SUBHEADER_DOWNLOAD": "📥 Download QR Code",
         "UI_DOWNLOAD_LABEL": "💾 Download QR Code",
         "UI_DOWNLOAD_HELP": "Click to save the QR code.",
-        "UI_BUTTON_RESET": "Reset",
-        "UI_DOWNLOAD_FILENAME_LABEL": "Generated Filename",
+        "UI_BUTTON_RESET": "초기화",
+        "UI_DOWNLOAD_FILENAME_LABEL": "생성 파일명",
     }
 }
-def get_message(key):
-    # This is a placeholder function, you'll need a way to determine the current language
-    # For now, let's assume 'ko' is the default.
-    return MESSAGES.get("ko").get(key, "Message not found")
 
-def get_current_language():
-    # This function is not used in the final version but kept for consistency
-    return "ko"
+def get_message(key):
+    """
+    현재 선택된 언어에 따라 메시지를 반환합니다.
+    언어 설정이 세션 상태에 저장됩니다.
+    """
+    if 'language_select' not in st.session_state:
+        # 초기 로드 시 기본 언어 설정
+        st.session_state.language_select = MESSAGES['ko']['UI_LANG_SELECT_OPTIONS'][0]
+        st.session_state.current_language = 'ko'
     
+    current_lang_code = get_current_language_code()
+    
+    # 딕셔너리에서 키를 찾아서 반환
+    return MESSAGES.get(current_lang_code, {}).get(key, f"Missing message for key: {key}")
+
+def get_current_language_code():
+    """현재 언어 선택에 따른 언어 코드를 반환합니다."""
+    lang_name = st.session_state.get('language_select', '한국어')
+    if lang_name == "한국어":
+        return "ko"
+    elif lang_name == "English":
+        return "en"
+    return "ko"  # 기본값
