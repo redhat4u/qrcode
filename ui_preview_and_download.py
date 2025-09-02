@@ -52,7 +52,7 @@ def build_preview_and_download_ui():
         qrcode.constants.ERROR_CORRECT_L,
     )
 
-    # --- 미리보기 생성 ---
+    # --- 미리보기 생성 로직 수정 ---
     preview_image_display = None
     preview_qr_object = None
 
@@ -61,21 +61,21 @@ def build_preview_and_download_ui():
         and is_valid_color(preview_pattern_color)
         and is_valid_color(preview_bg_color)
         and preview_pattern_color != preview_bg_color
+        and not file_format_is_svg # PNG 미리보기만 여기서 처리
     ):
-        if not file_format_is_svg:  # PNG만 미리보기 지원
-            img, qr = generate_qr_code_png(
-                current_data,
-                int(st.session_state.box_size_input),
-                int(st.session_state.border_input),
-                error_correction,
-                int(st.session_state.mask_pattern_select),
-                preview_pattern_color,
-                preview_bg_color,
-                preview_module_shape,
-            )
-            if img and qr:
-                preview_image_display = img
-                preview_qr_object = qr
+        img, qr = generate_qr_code_png(
+            current_data,
+            int(st.session_state.box_size_input),
+            int(st.session_state.border_input),
+            error_correction,
+            int(st.session_state.mask_pattern_select),
+            preview_pattern_color,
+            preview_bg_color,
+            preview_module_shape,
+        )
+        if img and qr:
+            preview_image_display = img
+            preview_qr_object = qr
 
     # --- QR 코드 생성 버튼 ---
     generate_btn = st.button("⚡ QR 코드 생성", use_container_width=True)
@@ -288,3 +288,4 @@ def build_preview_and_download_ui():
             unsafe_allow_html=True,
         )
         st.session_state.download_initiated = False
+        
