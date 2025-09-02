@@ -106,7 +106,8 @@ def build_input_and_settings_ui():
     # 새로운 패턴 스타일 선택 드롭다운 메뉴 추가
     st.markdown("---")
     st.subheader("🛠️ 패턴 모양")
-    st.selectbox("패턴 모양 선택", options=["사각형", "원형", "둥근 원형"], key="dot_style_select", on_change=on_qr_setting_change, disabled=file_format_is_svg)
+    # '마름모'를 옵션에 추가
+    st.selectbox("패턴 모양 선택", options=["사각형", "원형", "둥근 원형", "마름모"], key="dot_style_select", on_change=on_qr_setting_change, disabled=file_format_is_svg)
 
     st.markdown("---")
     st.subheader("🛠️ 파일 설정")
