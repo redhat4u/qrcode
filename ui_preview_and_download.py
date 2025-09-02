@@ -7,7 +7,7 @@ import io
 from datetime import datetime
 from zoneinfo import ZoneInfo
 from functions import generate_qr_code_png, generate_qr_code_svg, is_valid_color, sanitize_filename
-from state_manager import set_download_initiated
+from state_manager import set_download_initiated, reset_all_settings
 
 def build_preview_and_download_ui():
     """미리보기 및 다운로드 섹션을 빌드합니다."""
@@ -196,34 +196,42 @@ def build_preview_and_download_ui():
     if st.session_state.get('qr_generated', False) and (st.session_state.get('qr_image_bytes') is not None or st.session_state.get('qr_svg_bytes') is not None):
         st.markdown("---")
         st.subheader("📥 다운로드")
-        now = datetime.now(ZoneInfo("Asia/Seoul"))
-        current_filename = st.session_state.filename_input_key.strip()
-        final_filename = current_filename if current_filename else now.strftime("QR_%Y-%m-%d_%H-%M-%S")
-        
-        download_data = None
-        download_mime = ""
-        download_extension = ""
 
-        if st.session_state.file_format_select == "PNG":
-            download_data = st.session_state.qr_image_bytes
-            download_mime = "image/png"
-            download_extension = ".png"
-        else: # SVG
-            download_data = st.session_state.qr_svg_bytes
-            download_mime = "image/svg+xml"
-            download_extension = ".svg"
+        col_generate, col_reset = st.columns([1, 1])
         
-        download_filename = f"{sanitize_filename(final_filename)}{download_extension}"
-        
-        st.download_button(
-            label="💾 QR 코드 다운로드",
-            data=download_data,
-            file_name=download_filename,
-            mime=download_mime,
-            use_container_width=True,
-            help="PC는 'Download' 폴더, 휴대폰은 'Download' 폴더에 저장됩니다.",
-            on_click=set_download_initiated,
-        )
+        with col_generate:
+            now = datetime.now(ZoneInfo("Asia/Seoul"))
+            current_filename = st.session_state.filename_input_key.strip()
+            final_filename = current_filename if current_filename else now.strftime("QR_%Y-%m-%d_%H-%M-%S")
+            
+            download_data = None
+            download_mime = ""
+            download_extension = ""
+
+            if st.session_state.file_format_select == "PNG":
+                download_data = st.session_state.qr_image_bytes
+                download_mime = "image/png"
+                download_extension = ".png"
+            else: # SVG
+                download_data = st.session_state.qr_svg_bytes
+                download_mime = "image/svg+xml"
+                download_extension = ".svg"
+            
+            download_filename = f"{sanitize_filename(final_filename)}{download_extension}"
+            
+            st.download_button(
+                label="💾 QR 코드 다운로드",
+                data=download_data,
+                file_name=download_filename,
+                mime=download_mime,
+                use_container_width=True,
+                help="PC는 'Download' 폴더, 휴대폰은 'Download' 폴더에 저장됩니다.",
+                on_click=set_download_initiated,
+            )
+            
+        with col_reset:
+            st.button("🔄 설정 초기화", use_container_width=True, type="secondary", on_click=reset_all_settings)
+
 
         st.markdown(
             f'<p style="font-size:18px;">'
