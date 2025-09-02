@@ -1,4 +1,3 @@
-# 이 파일은 생성된 QR 코드의 미리보기와 다운로드 UI를 정의합니다.
 # ui_preview_and_download.py
 
 import streamlit as st
@@ -8,7 +7,7 @@ from datetime import datetime
 from zoneinfo import ZoneInfo
 from functions import generate_qr_code_png, generate_qr_code_svg, is_valid_color, sanitize_filename
 from state_manager import set_download_initiated, reset_all_settings, on_qr_setting_change
-from messages import get_message # <-- 이 부분을 수정했습니다.
+from messages import get_message
 
 def build_preview_and_download_ui():
     """미리보기 및 다운로드 섹션을 빌드합니다."""
@@ -16,7 +15,7 @@ def build_preview_and_download_ui():
     FILE_FORMAT_PNG_RAW = "PNG"
     FILE_FORMAT_SVG_RAW = "SVG"
 
-    st.header(get_message('UI_HEADER_PREVIEW_AND_GENERATE')) # <-- 수정
+    st.header(get_message('UI_HEADER_PREVIEW_AND_GENERATE'))
     
     qr_data = st.session_state.qr_input_area
     if st.session_state.strip_option:
@@ -31,21 +30,21 @@ def build_preview_and_download_ui():
 
     # 입력값 유효성 검사
     if not current_data:
-        st.info(get_message('UI_INFO_QR_GENERATION_GUIDE')) # <-- 수정
-        st.error(get_message('UI_ERROR_EMPTY_DATA')) # <-- 수정
+        st.info(get_message('UI_INFO_QR_GENERATION_GUIDE'))
+        st.error(get_message('UI_ERROR_EMPTY_DATA'))
     elif not is_pattern_color_valid_preview or not is_bg_color_valid_preview:
-        st.error(get_message('UI_ERROR_INVALID_QR_INPUT')) # <-- 수정
-        st.warning(get_message('UI_ERROR_INVALID_PATTERN_COLOR')) # <-- 수정
-        st.warning(get_message('UI_ERROR_INVALID_BG_COLOR')) # <-- 수정
+        st.error(get_message('UI_ERROR_INVALID_QR_INPUT'))
+        st.warning(get_message('UI_ERROR_INVALID_PATTERN_COLOR'))
+        st.warning(get_message('UI_ERROR_INVALID_BG_COLOR'))
     else:
         pattern_color_final = st.session_state.custom_pattern_color_input_key if st.session_state.pattern_color_select == get_message('UI_COLOR_OPTION_DIRECT_INPUT') else st.session_state.pattern_color_select
         bg_color_final = st.session_state.custom_bg_color_input_key if st.session_state.bg_color_select == get_message('UI_COLOR_OPTION_DIRECT_INPUT') else st.session_state.bg_color_select
 
         col_generate, col_reset = st.columns([1, 1])
         with col_generate:
-            st.button(get_message('UI_BUTTON_GENERATE'), use_container_width=True, type="primary", key="generate_button", on_click=on_qr_setting_change) # <-- 수정
+            st.button(get_message('UI_BUTTON_GENERATE'), use_container_width=True, type="primary", key="generate_button", on_click=on_qr_setting_change)
         with col_reset:
-            st.button(get_message('UI_BUTTON_RESET'), use_container_width=True, type="secondary", on_click=reset_all_settings) # <-- 수정
+            st.button(get_message('UI_BUTTON_RESET'), use_container_width=True, type="secondary", on_click=reset_all_settings) # <-- 이 부분입니다.
 
         if st.session_state.generate_button_clicked:
             try:
@@ -97,7 +96,7 @@ def build_preview_and_download_ui():
 
             download_filename = f"{sanitize_filename(final_filename)}{download_extension}"
 
-            st.markdown(get_message('UI_SUCCESS_MESSAGE')) # <-- 수정
+            st.markdown(get_message('UI_SUCCESS_MESSAGE'))
 
             col_preview, col_download = st.columns([1, 1])
             with col_preview:
@@ -108,22 +107,22 @@ def build_preview_and_download_ui():
 
             with col_download:
                 st.download_button(
-                    label=get_message('UI_DOWNLOAD_LABEL'), # <-- 수정
+                    label=get_message('UI_DOWNLOAD_LABEL'),
                     data=download_data,
                     file_name=download_filename,
                     mime=download_mime,
                     use_container_width=True,
-                    help=get_message('UI_DOWNLOAD_HELP'), # <-- 수정
+                    help=get_message('UI_DOWNLOAD_HELP'),
                     on_click=set_download_initiated,
                 )
             
             # 파일명 관련 경고 및 정보 메시지
             if not st.session_state.filename_input_key:
-                st.warning(get_message('UI_WARNING_EMPTY_FILENAME')) # <-- 수정
+                st.warning(get_message('UI_WARNING_EMPTY_FILENAME'))
             elif not sanitize_filename(st.session_state.filename_input_key):
-                st.error(get_message('UI_WARNING_INVALID_FILENAME')) # <-- 수정
+                st.error(get_message('UI_WARNING_INVALID_FILENAME'))
             
-            st.info(get_message('UI_DOWNLOAD_INFO').format(download_filename=download_filename)) # <-- 수정
+            st.info(get_message('UI_DOWNLOAD_INFO').format(download_filename=download_filename))
 
         if st.session_state.error_message:
             st.error(st.session_state.error_message)
