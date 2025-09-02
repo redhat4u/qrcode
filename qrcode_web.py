@@ -22,6 +22,8 @@ st.set_page_config(
 )
 
 # 세션 상태 초기화
+if 'lang' not in st.session_state:
+    st.session_state.lang = "ko"
 if 'qr_input_area' not in st.session_state:
     st.session_state.qr_input_area = ""
 if 'custom_pattern_color_input_key' not in st.session_state:
@@ -35,7 +37,7 @@ if 'box_size_input' not in st.session_state:
 if 'border_input' not in st.session_state:
     st.session_state.border_input = 2
 if 'error_correction_select' not in st.session_state:
-    st.session_state.error_correction_select = "Low (7%) - 오류 보정"
+    st.session_state.error_correction_select = messages[st.session_state.lang]['error_correction_low_select']
 if 'mask_pattern_select' not in st.session_state:
     st.session_state.mask_pattern_select = 2
 if 'pattern_color_select' not in st.session_state:
@@ -47,17 +49,16 @@ if 'strip_option' not in st.session_state:
 if 'file_format_select' not in st.session_state:
     st.session_state.file_format_select = "PNG"
 if 'pattern_shape_select' not in st.session_state:
-    st.session_state.pattern_shape_select = "사각"
+    st.session_state.pattern_shape_select = messages[st.session_state.lang]['pattern_shape_square']
 if 'finder_pattern_shape_select' not in st.session_state:
-    st.session_state.finder_pattern_shape_select = "사각"
+    st.session_state.finder_pattern_shape_select = messages[st.session_state.lang]['pattern_shape_square']
 if 'corner_radius_input' not in st.session_state:
     st.session_state.corner_radius_input = 25
 if 'cell_gap_input' not in st.session_state:
     st.session_state.cell_gap_input = 0
 if 'jpg_quality_input' not in st.session_state:
     st.session_state.jpg_quality_input = 70
-if 'lang' not in st.session_state:
-    st.session_state.lang = "ko"
+
 
 # 현재 언어 설정 불러오기
 lang_messages = messages[st.session_state.lang]
@@ -248,6 +249,13 @@ def set_language():
     # 선택된 언어 이름을 언어 코드로 변환
     lang_map = {"한국어": "ko", "English": "en"}
     st.session_state.lang = lang_map.get(st.session_state.lang_select, "ko")
+
+    # 언어 변경 시 기본값 재설정
+    st.session_state.error_correction_select = messages[st.session_state.lang]['error_correction_low_select']
+    st.session_state.pattern_shape_select = messages[st.session_state.lang]['pattern_shape_square']
+    st.session_state.finder_pattern_shape_select = messages[st.session_state.lang]['finder_pattern_select_label']
+    st.session_state.pattern_color_select = "black"
+    st.session_state.bg_color_select = "white"
     
 #[메인]====================================================================================================================================================================
 
