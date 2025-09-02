@@ -104,7 +104,7 @@ MESSAGES = {
         "UI_WARNING_BG_COLOR_INPUT": "⚠️ 배경 색상 16진수 값을 입력하세요.",
         "UI_WARNING_INVALID_COLOR_HEX": "⚠️ 유효하지 않은 16진수 색상 값입니다.",
         "UI_WARNING_SAME_COLOR": "⚠️ 패턴과 배경 색상이 같으면 QR 코드가 보이지 않습니다.",
-        "UI_INFO_QR_GENERATION_GUIDE": "💡 QR 코드 내용을 입력하고 '⚡ QR 코드 생성' 버튼을 누르면 여기에 미리보기가 나타납니다.",
+        "UI_INFO_QR_GENERATION_GUIDE": "💡 QR 코드 내용을 입력하고 위의 [⚡ QR 코드 생성] 버튼을 누르면, 아래에 미리보기가 나타납니다.",
 
         "UI_SUBHEADER_QR_PREVIEW": "QR 코드 미리보기",
         "UI_PREVIEW_IMAGE_CAPTION": "생성된 QR 코드",
