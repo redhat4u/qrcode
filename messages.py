@@ -121,6 +121,7 @@ MESSAGES = {
         "UI_DOWNLOAD_HELP": "클릭하여 QR 코드를 저장합니다.",
         "UI_BUTTON_RESET": "초기화",
         "UI_DOWNLOAD_FILENAME_LABEL": "생성 파일명",
+        "UI_FOOTER": "© 2025 QR 코드 생성기 | Streamlit으로 제작 | 제작: 류종훈(redhat4u@gmail.com)"
     },
     "en": {
         "APP_TITLE": "QR Code Generator",
@@ -238,8 +239,9 @@ MESSAGES = {
         "UI_SUBHEADER_DOWNLOAD": "📥 Download QR Code",
         "UI_DOWNLOAD_LABEL": "💾 Download QR Code",
         "UI_DOWNLOAD_HELP": "Click to save the QR code.",
-        "UI_BUTTON_RESET": "Reset",
-        "UI_DOWNLOAD_FILENAME_LABEL": "Generated Filename",
+        "UI_BUTTON_RESET": "초기화",
+        "UI_DOWNLOAD_FILENAME_LABEL": "생성 파일명",
+        "UI_FOOTER": "© 2025 QR Code Generator | Built with Streamlit | Developed by JongHoon Ryu (redhat4u@gmail.com)"
     }
 }
 
@@ -254,4 +256,3 @@ def get_message(key):
     current_lang_code = 'ko' if st.session_state.language_select == '한국어' else 'en'
     
     return MESSAGES.get(current_lang_code, {}).get(key, f"Missing message for key: {key}")
-    
