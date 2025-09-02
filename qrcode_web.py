@@ -20,6 +20,7 @@ import hashlib
 import re
 import base64 # SVG 이미지 표시를 위해 추가
 import qrcode.image.svg # SVG 생성을 위해 추가
+import math
 
 
 # 페이지 설정
@@ -112,6 +113,27 @@ def draw_custom_shape_image(qr_object, box_size, border, fill_color, back_color,
         draw.pieslice([x1, y2 - radius * 2, x1 + radius * 2, y2], 90, 180, fill=fill)
         draw.pieslice([x2 - radius * 2, y2 - radius * 2, x2, y2], 0, 90, fill=fill)
 
+    # 별 모양을 그리는 로직
+    def draw_star(draw, xy, fill):
+        x_center = (xy[0] + xy[2]) / 2
+        y_center = (xy[1] + xy[3]) / 2
+        radius_outer = (xy[2] - xy[0]) / 2
+        radius_inner = radius_outer * 0.4 # 별의 안쪽 반지름
+
+        points = []
+        for i in range(5):
+            angle_outer = math.radians(i * 72 + 54) # 바깥쪽 점의 각도
+            x_outer = x_center + radius_outer * math.cos(angle_outer)
+            y_outer = y_center + radius_outer * math.sin(angle_outer)
+            points.append((x_outer, y_outer))
+
+            angle_inner = math.radians(i * 72 + 90) # 안쪽 점의 각도
+            x_inner = x_center + radius_inner * math.cos(angle_inner)
+            y_inner = y_center + radius_inner * math.sin(angle_inner)
+            points.append((x_inner, y_inner))
+        
+        draw.polygon(points, fill=fill)
+    
     for r in range(qr_object.modules_count):
         for c in range(qr_object.modules_count):
             if qr_object.modules[r][c]:
@@ -127,6 +149,9 @@ def draw_custom_shape_image(qr_object, box_size, border, fill_color, back_color,
                     draw.ellipse([x, y, x + box_size, y + box_size], fill=fill_color)
                 elif shape == "마름모":
                     draw.polygon([(x + box_size/2, y), (x + box_size, y + box_size/2), (x + box_size/2, y + box_size), (x, y + box_size/2)], fill=fill_color)
+                elif shape == "별":
+                    draw_star(draw, [x, y, x + box_size, y + box_size], fill_color)
+
     return img
 
 
@@ -257,7 +282,7 @@ with col1:
     st.caption("⚠️ SVG 형식은 사각만 지원합니다.")
     pattern_shape = st.selectbox(
         "패턴 모양 선택",
-        ("사각", "둥근사각", "동그라미", "마름모"),
+        ("사각", "둥근사각", "동그라미", "마름모", "별"),
         key="pattern_shape_select",
         disabled=pattern_shape_disabled,
     )
@@ -499,10 +524,10 @@ with st.sidebar:
     st.header("📖 사용 방법")
     st.markdown("""
     1. **QR 코드 내용** 영역에 변환할 텍스트를 입력하세요
-    2. **QR 코드 설정**에서 크기와 오류 보정 레벨을 조정하세요
-    3. **패턴 모양**에서 QR 코드 점의 모양을 선택하세요 (SVG 형식은 사각형만 가능합니다)
+    2. **파일 형식**과 **패턴 모양**을 선택하세요
+    3. **QR 코드 설정**에서 크기와 오류 보정 레벨을 조정하세요
     4. **색상 설정**에서 패턴과 배경 색상을 선택하세요 (SVG 형식은 기본색만 가능합니다)
-    5. **파일 설정**에서 원하는 파일 형식(PNG/SVG)을 선택하고 파일명을 지정하세요
+    5. **파일명 설정**에서 파일명을 지정하세요
     6. 모든 설정이 유효하면 **자동으로 미리보기와 다운로드 버튼이 표시됩니다**
     """)
 
@@ -538,7 +563,7 @@ with st.sidebar:
 
     st.markdown("**패턴 모양:**")
     st.markdown("""
-    - 사각, 둥근사각, 동그라미, 마름모 중 선택
+    - 사각, 둥근사각, 동그라미, 마름모, 별 중 선택
     - **SVG** 파일 형식 선택 시에는 **사각**만 지원합니다.
     """)
 
