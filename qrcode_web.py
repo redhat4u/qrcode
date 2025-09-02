@@ -620,7 +620,7 @@ with col2:
             if is_colors_same_preview:
                 st.warning("⚠️ 패턴과 배경은 같은 색을 사용할 수 없습니다.")
     else:
-        st.info("QR 코드 내용을 입력하면 생성될 QR 코드를 미리 보여드립니다.")
+        st.info("QR 코드 내용을 입력하면 생성될 QR 코드가 아래에 나타납니다.")
         st.info("입력과 동시에 다운로드 버튼도 활성화됩니다.")
 
 
