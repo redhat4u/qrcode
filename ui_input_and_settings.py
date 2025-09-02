@@ -125,7 +125,7 @@ def build_input_and_settings_ui():
             st.text_input(get_message('UI_TEXT_INPUT_FILENAME_LABEL'), placeholder=get_message('UI_TEXT_INPUT_FILENAME_PLACEHOLDER'), key="filename_input_key")
         with col_filename_delete:
             is_filename_input_empty = st.session_state.filename_input_key == ""
-            st.markdown("<div style='height: 20px;'></div>", unsafe_allow_html=True)
+            # 이전에 추가했던 빈 div를 제거합니다.
             st.button(
                 get_message('UI_BUTTON_DELETE_FILENAME_LABEL'),
                 use_container_width=True,
