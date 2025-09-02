@@ -58,6 +58,8 @@ if 'file_format_select' not in st.session_state:
     st.session_state.file_format_select = "PNG"
 if 'pattern_shape_select' not in st.session_state:
     st.session_state.pattern_shape_select = "사각"
+if 'corner_radius_input' not in st.session_state:
+    st.session_state.corner_radius_input = 25
 
 
 # 파일명에 특수문자 포함시 '_' 문자로 치환
@@ -96,7 +98,7 @@ def get_qr_data_object(data, box_size, border, error_correction, mask_pattern):
 
 
 # 사용자 정의 모양으로 QR 코드 이미지 생성 함수 (PNG)
-def draw_custom_shape_image(qr_object, box_size, border, fill_color, back_color, shape):
+def draw_custom_shape_image(qr_object, box_size, border, fill_color, back_color, shape, corner_radius):
     if not qr_object:
         return None
 
@@ -155,7 +157,8 @@ def draw_custom_shape_image(qr_object, box_size, border, fill_color, back_color,
                 if shape == "사각" or shape == "사각형":
                     draw.rectangle([x, y, x + box_size, y + box_size], fill=fill_color)
                 elif shape == "둥근사각":
-                    radius = box_size // 4
+                    # 슬라이더 값에 따라 라운딩 반경 계산
+                    radius = int(box_size * (corner_radius / 100))
                     draw_rounded_rectangle(draw, [x, y, x + box_size, y + box_size], radius, fill=fill_color)
                 elif shape == "동그라미":
                     draw.ellipse([x, y, x + box_size, y + box_size], fill=fill_color)
@@ -221,6 +224,7 @@ def reset_all_settings():
     st.session_state.strip_option = True
     st.session_state.file_format_select = "PNG"
     st.session_state.pattern_shape_select = "사각"
+    st.session_state.corner_radius_input = 25
 
 
 #[메인]====================================================================================================================================================================
@@ -300,6 +304,19 @@ with col1:
         key="pattern_shape_select",
         disabled=pattern_shape_disabled,
     )
+    
+    # 둥근사각 전용 슬라이더
+    if pattern_shape == "둥근사각":
+        corner_radius = st.slider(
+            "둥근 모서리 반경 (%)", 
+            min_value=0, 
+            max_value=50, 
+            value=st.session_state.corner_radius_input,
+            help="모서리를 얼마나 둥글게 할지 결정합니다. 0%는 사각, 50%는 원에 가까워집니다.",
+            key="corner_radius_input"
+        )
+    else:
+        corner_radius = 0
 
 
 #========================================================================================================================================================================
@@ -441,7 +458,8 @@ with col2:
                     qr, int(st.session_state.box_size_input), int(st.session_state.border_input),
                     "black" if file_format == "SVG" else pattern_color,
                     "white" if file_format == "SVG" else bg_color,
-                    "사각" if file_format == "SVG" else st.session_state.pattern_shape_select
+                    "사각" if file_format == "SVG" else st.session_state.pattern_shape_select,
+                    st.session_state.corner_radius_input
                 )
 
                 if file_format == "PNG":
