@@ -244,7 +244,7 @@ def reset_all_settings():
     st.session_state.finder_pattern_shape_select = "사각"
     st.session_state.corner_radius_input = 25
     st.session_state.cell_gap_input = 0
-    st.session_state.jpg_quality_input = 90
+    st.session_state.jpg_quality_input = 70
 
 
 #[메인]====================================================================================================================================================================
@@ -574,6 +574,7 @@ with col2:
             **QR 코드 정보**
             - QR 버전: {preview_qr_object.version}
             - 가로/세로 각 cell 개수: {preview_qr_object.modules_count}개
+            - 좌/우 여백 총 개수: {2 * int(st.session_state.border_input)}개
             - 이미지 크기 (참고): {(preview_qr_object.modules_count + 2 * int(st.session_state.border_input)) * int(st.session_state.box_size_input)} x {(preview_qr_object.modules_count + 2 * int(st.session_state.border_input)) * int(st.session_state.box_size_input)} px
             - 패턴 색상: {"black" if file_format == "SVG" else pattern_color}
             - 배경 색상: {"white" if file_format == "SVG" else bg_color}
