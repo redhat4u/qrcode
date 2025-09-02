@@ -286,7 +286,7 @@ def get_messages(lang):
         "sidebar_error_correction_medium": "  - **Medium**: ~15% data recovery",
         "sidebar_error_correction_quartile": "  - **Quartile**: ~25% data recovery",
         "sidebar_error_correction_high": "  - **High**: ~30% data recovery",
-        "sidebar_mask_pattern_title": "- **Mask Pattern**: A technique to subtly change the pattern of the QR code to improve scanability when the pattern is too regular.",
+        "sidebar_mask_pattern_title": "- **마스크 패턴**: QR 코드의 패턴이 너무 규칙적이어서 스캔이 어려울 때, 패턴의 모양을 미세하게 변경하여 스캔율을 높이는 기술입니다.",
         # 푸터
         "footer_info": "This web app was developed using Streamlit and the Python qrcode library.",
     }
@@ -349,4 +349,3 @@ def get_message(lang_code, message_key, *args):
             return message_template
     except IndexError:
         return f"Formatting error for '{message_key}'"
-        
