@@ -118,7 +118,7 @@ def build_input_and_settings_ui():
                  get_message('UI_DOT_STYLE_CIRCLE'),
                  get_message('UI_DOT_STYLE_DIAMOND')],
         key='dot_style_select',
-        on_change=on_qr_setting_change # 이 줄을 추가합니다.
+        on_change=on_qr_setting_change
     )
 
     st.markdown("---")
