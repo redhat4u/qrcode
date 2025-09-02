@@ -17,6 +17,9 @@ from messages import * # <-- 추가
 
 def build_input_and_settings_ui():
     """입력 및 설정 섹션을 빌드합니다."""
+    # 파일 형식이 SVG인지 여부를 함수 초반에 정의
+    file_format_is_svg = (st.session_state.file_format_select == "SVG")
+    
     st.header(UI_HEADER_INPUT_AND_SETTINGS)
     
     # QR 코드 내용 입력
@@ -87,7 +90,6 @@ def build_input_and_settings_ui():
     # 색상 설정
     st.markdown("---")
     st.subheader(UI_SUBHEADER_COLOR_SETTINGS)
-    file_format_is_svg = (st.session_state.file_format_select == "SVG")
     if file_format_is_svg:
         st.warning(UI_WARNING_SVG_COLOR)
 
