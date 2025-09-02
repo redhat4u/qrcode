@@ -441,8 +441,12 @@ with col2:
     
     preview_image_display = None
     preview_qr_object = None
+    
+    # [수정] 미리보기 이미지를 생성하는 조건 로직
+    # 입력 내용이 있고, 파일 형식이 SVG이거나, PNG의 경우 색상 유효성 검사를 통과할 때만 미리보기 이미지를 생성합니다.
+    can_generate_preview = current_data and (file_format_is_svg or (is_pattern_color_valid_preview and is_bg_color_valid_preview and not is_colors_same_preview))
 
-    if current_data and (file_format_is_svg or (is_pattern_color_valid_preview and is_bg_color_valid_preview and not is_colors_same_preview)):
+    if can_generate_preview:
         qr = get_qr_data_object(
             current_data, int(st.session_state.box_size_input), int(st.session_state.border_input), error_correction,
             int(st.session_state.mask_pattern_select)
@@ -519,7 +523,7 @@ with col2:
                     st.session_state.qr_generated = True
                     st.session_state.show_generate_success = True
                     
-                    # [수정된 부분] SVG 미리보기를 위해 draw_custom_shape_image 함수를 사용합니다.
+                    # [수정] SVG 미리보기를 위해 draw_custom_shape_image 함수를 사용합니다.
                     preview_image_display = draw_custom_shape_image(
                         qr, int(st.session_state.box_size_input), int(st.session_state.border_input),
                         "black", "white", "사각"
@@ -534,6 +538,9 @@ with col2:
         st.success("✅ QR 코드 생성 완료!!  반드시 파일명을 확인하고, 화면 아래의 [💾 QR 코드 다운로드] 버튼을 클릭하세요.")
     elif preview_image_display:
         st.success("현재 입력된 내용으로 생성될 QR 코드를 미리 표현해 보았습니다.  이 QR 코드가 맘에 드신다면, 위의 [⚡ QR 코드 생성] 버튼을 클릭하세요.")
+    # [수정] 입력 내용이 있는데 미리보기가 표시되지 않는 경우의 메시지
+    elif current_data and not preview_image_display:
+        st.warning("⚠️ 선택하신 설정으로는 미리보기를 제공할 수 없습니다. (패턴과 배경색이 같거나, 색상값이 유효하지 않습니다.)")
     else:
         st.info("QR 코드 내용을 입력하면 생성될 QR 코드를 미리 보여드립니다.")
 
@@ -553,6 +560,7 @@ with col2:
             - 배경 색상: {"white" if file_format_is_svg else bg_color}
             - 이미지 크기 = (각 cell 개수 + 좌/우 여백 총 개수) × 1개의 사각 cell 크기
             """)
+    # [수정] 미리보기 유효성 검사 실패 메시지를 별도로 출력합니다.
     else:
         if not current_data:
             pass
