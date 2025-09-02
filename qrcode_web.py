@@ -238,7 +238,8 @@ def on_qr_setting_change():
     st.session_state.error_message = None
 
 
-# 메인 앱 ============================================================================================
+#[메인]====================================================================================================================================================================
+
 
 st.title("🔲 QR 코드 생성기")
 st.markdown("---")
@@ -273,6 +274,14 @@ with col1:
     else:
         st.caption("현재 입력된 총 문자 수: 0")
 
+    # 공백/줄바꿈 제거 옵션
+    strip_option = st.checkbox(
+        "마지막 입력문자 이후 모든 공백/줄바꿈 제거",
+        value=st.session_state.strip_option,
+        key="strip_option",
+        on_change=on_qr_setting_change
+    )
+
     # 입력 내용 삭제 버튼 - on_click 콜백을 사용하도록 수정
     col_clear1, col_clear2, col_clear3 = st.columns([1, 1, 1])
     with col_clear2:
@@ -286,18 +295,27 @@ with col1:
             on_click=clear_text_input,
         )
 
-    # 공백/줄바꿈 제거 옵션
-    strip_option = st.checkbox(
-        "마지막 입력문자 이후 모든 공백/줄바꿈 제거",
-        value=st.session_state.strip_option,
-        key="strip_option",
-        on_change=on_qr_setting_change
+    st.markdown("---")
+    st.markdown("---")
+
+    # 패턴 모양 선택
+    pattern_shape_disabled = (file_format == "SVG")
+    st.markdown("---")
+    st.subheader("🛠️ 패턴 모양 설정")
+    st.caption("⚠️ SVG 형식은 사각만 지원합니다.")
+    pattern_shape = st.selectbox(
+        "패턴 모양 선택",
+        ("사각", "둥근사각", "동그라미", "마름모"),
+        key="pattern_shape_select",
+        on_change=on_qr_setting_change,
+        disabled=pattern_shape_disabled,
     )
 
-    st.markdown("---")
-    st.markdown("---")
+
+#========================================================================================================================================================================
 
     # QR 코드 설정
+    st.markdown("---")
     st.subheader("🛠️ QR 코드 설정")
 
     col1_1, col1_2 = st.columns(2)
@@ -316,6 +334,10 @@ with col1:
         error_correction = error_correction_options[error_correction_choice]
         mask_pattern = st.selectbox("마스크 패턴 선택 (0~7)", options=list(range(8)), key="mask_pattern_select", on_change=on_qr_setting_change)
 
+
+#========================================================================================================================================================================
+
+    # 색상 설정
     st.markdown("---")
     st.subheader("🛠️ 색상 설정")
     
@@ -368,9 +390,12 @@ with col1:
     
     pattern_color = st.session_state.get('custom_pattern_color_input_key', '').strip() if pattern_color_choice == "<직접 입력>" else pattern_color_choice
     bg_color = st.session_state.get('custom_bg_color_input_key', '').strip() if bg_color_choice == "<직접 입력>" else bg_color_choice
-    
-    st.markdown("---")
 
+
+#========================================================================================================================================================================
+
+    # 파일 설정
+    st.markdown("---")
     st.subheader("🛠️ 파일 설정")
     
     col_filename_input, col_filename_delete = st.columns([3, 1.1])
@@ -402,20 +427,10 @@ with col1:
         on_change=on_qr_setting_change,
     )
     
-    # [추가] 패턴 모양 선택 로직
-    pattern_shape_disabled = (file_format == "SVG")
-    st.markdown("---")
-    st.subheader("🛠️ 패턴 모양 설정")
-    st.caption("⚠️ SVG 형식은 사각형만 지원합니다.")
-    pattern_shape = st.selectbox(
-        "패턴 모양 선택",
-        ("사각형", "둥근 사각", "원형", "마름모"),
-        key="pattern_shape_select",
-        on_change=on_qr_setting_change,
-        disabled=pattern_shape_disabled,
-    )
-
     current_filename = filename.strip()
+
+
+#========================================================================================================================================================================
 
 with col2:
     st.header("👀 미리보기 및 생성")
