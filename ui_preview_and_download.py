@@ -21,25 +21,25 @@ def build_preview_and_download_ui():
     qr_data = st.session_state.qr_input_area
     current_data = qr_data.strip() if st.session_state.strip_option else qr_data
     file_format_is_svg = st.session_state.file_format_select == "SVG"
-    
-    # 미리보기 색상 및 모듈 모양 변수 설정 (PNG와 SVG 로직 분리)
+
+    # 수정된 미리보기 색상 및 모듈 모양 변수 설정
+    preview_pattern_color = (
+        st.session_state.custom_pattern_color_input_key.strip()
+        if st.session_state.pattern_color_select == "<직접 입력>"
+        else st.session_state.pattern_color_select
+    )
+    preview_bg_color = (
+        st.session_state.custom_bg_color_input_key.strip()
+        if st.session_state.bg_color_select == "<직접 입력>"
+        else st.session_state.bg_color_select
+    )
+    preview_module_shape = st.session_state.module_shape_select
+
+    # SVG 형식일 경우, 미리보기 색상과 모양을 하드코딩된 값으로 강제 설정
     if file_format_is_svg:
-        # SVG는 색상/패턴 고정
-        preview_module_shape = "기본 사각형 (Square)"
+        preview_module_shape = "사각형 (Square)"
         preview_pattern_color = "black"
         preview_bg_color = "white"
-    else: # PNG인 경우
-        preview_pattern_color = (
-            st.session_state.custom_pattern_color_input_key.strip()
-            if st.session_state.pattern_color_select == "<직접 입력>"
-            else st.session_state.pattern_color_select
-        )
-        preview_bg_color = (
-            st.session_state.custom_bg_color_input_key.strip()
-            if st.session_state.bg_color_select == "<직접 입력>"
-            else st.session_state.bg_color_select
-        )
-        preview_module_shape = st.session_state.module_shape_select
 
     # 오류 보정 매핑 (PNG / SVG 공통 사용)
     error_correction_options = {
@@ -145,10 +145,10 @@ def build_preview_and_download_ui():
                     current_data,
                     int(st.session_state.box_size_input),
                     int(st.session_state.border_input),
-                    error_correction,  # 통일된 상수 사용
+                    error_correction,
                     int(st.session_state.mask_pattern_select),
-                    "black", # 원래대로 하드코딩된 색상으로 변경
-                    "white", # 원래대로 하드코딩된 색상으로 변경
+                    "black",
+                    "white",
                 )
                 if svg_data and qr:
                     st.session_state.qr_svg_bytes = svg_data.encode("utf-8")
