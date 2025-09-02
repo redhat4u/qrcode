@@ -21,7 +21,7 @@ def build_sidebar_ui():
     - **텍스트**: `QR 코드로 생성할 텍스트를 입력합니다`
     - **웹사이트**: `https://www.example.com`
     - **이메일**: `mailto:user@example.com`
-    - **전화번호**: `tel:010-1234-5678`
+    - **전화번호**: `tel:type=CELL:+82 10-1234-5678`
     - **SMS**: `sms:010-1234-5678`
     - **WiFi**: `WIFI:T:WPA;S:네트워크명(SSID);P:비밀번호;H:false;;`
     """)
