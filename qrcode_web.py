@@ -381,13 +381,14 @@ with col2:
     preview_image_display = None
     preview_qr_object = None
     
-    # 미리보기 이미지를 생성하는 조건 로직
-    # 입력 내용이 있고, 파일 형식이 SVG이거나, PNG의 경우 색상 유효성 검사를 통과할 때만 미리보기 이미지를 생성합니다.
     can_generate_preview = current_data and (file_format_is_svg or (is_pattern_color_valid_preview and is_bg_color_valid_preview and not is_colors_same_preview))
+
+    download_data = None
+    download_mime = ""
+    download_extension = ""
 
     if can_generate_preview:
         try:
-            # QR 코드 데이터 생성
             qr = get_qr_data_object(
                 current_data, int(st.session_state.box_size_input), int(st.session_state.border_input), error_correction,
                 int(st.session_state.mask_pattern_select)
@@ -395,7 +396,6 @@ with col2:
             if qr:
                 preview_qr_object = qr
 
-                # 미리보기 이미지 (PNG) 생성
                 preview_image_display = draw_custom_shape_image(
                     qr, int(st.session_state.box_size_input), int(st.session_state.border_input),
                     "black" if file_format_is_svg else pattern_color,
@@ -403,7 +403,6 @@ with col2:
                     "사각" if file_format_is_svg else st.session_state.pattern_shape_select
                 )
 
-                # 다운로드 데이터 생성
                 if file_format == "PNG":
                     img_buffer = io.BytesIO()
                     preview_image_display.save(img_buffer, format='PNG')
@@ -418,34 +417,8 @@ with col2:
                     download_data = svg_data.encode('utf-8')
                     download_mime = "image/svg+xml"
                     download_extension = ".svg"
-                
-                # 다운로드 버튼 표시
-                st.markdown("---")
-                st.subheader("📥 다운로드")
-                now = datetime.now(ZoneInfo("Asia/Seoul"))
-                final_filename = sanitize_filename(st.session_state.filename_input_key.strip() if st.session_state.filename_input_key.strip() else now.strftime("QR_%Y-%m-%d_%H-%M-%S"))
-                download_filename = f"{final_filename}{download_extension}"
-
-                st.download_button(
-                    label="💾 QR 코드 다운로드",
-                    data=download_data,
-                    file_name=download_filename,
-                    mime=download_mime,
-                    use_container_width=True,
-                    help="PC는 'Download' 폴더, 휴대폰은 'Download' 폴더에 저장됩니다."
-                )
-                
-                st.markdown(
-                    f'<p style="font-size:18px;">'
-                    f'<span style="color:darkorange; font-weight:bold;">📄 다운로드 파일명: </span> '
-                    f'<span style="color:dodgerblue;"> {download_filename}</span>'
-                    f'</p>',
-                    unsafe_allow_html=True,
-                )
-
         except Exception as e:
             st.error(f"오류가 발생했습니다: {str(e)}")
-
 
     st.markdown("---")
     
@@ -466,6 +439,31 @@ with col2:
             - 배경 색상: {"white" if file_format_is_svg else bg_color}
             - 이미지 크기 = (각 cell 개수 + 좌/우 여백 총 개수) × 1개의 사각 cell 크기
             """)
+
+        # 다운로드 섹션의 위치를 미리보기 아래로 이동
+        st.markdown("---")
+        st.subheader("📥 다운로드")
+        now = datetime.now(ZoneInfo("Asia/Seoul"))
+        final_filename = sanitize_filename(st.session_state.filename_input_key.strip() if st.session_state.filename_input_key.strip() else now.strftime("QR_%Y-%m-%d_%H-%M-%S"))
+        download_filename = f"{final_filename}{download_extension}"
+
+        st.download_button(
+            label="💾 QR 코드 다운로드",
+            data=download_data,
+            file_name=download_filename,
+            mime=download_mime,
+            use_container_width=True,
+            help="PC는 'Download' 폴더, 휴대폰은 'Download' 폴더에 저장됩니다."
+        )
+        
+        st.markdown(
+            f'<p style="font-size:18px;">'
+            f'<span style="color:darkorange; font-weight:bold;">📄 다운로드 파일명: </span> '
+            f'<span style="color:dodgerblue;"> {download_filename}</span>'
+            f'</p>',
+            unsafe_allow_html=True,
+        )
+
     elif current_data:
         st.warning("⚠️ 선택하신 설정으로는 QR 코드를 생성할 수 없습니다. 아래의 경고 메시지를 확인해주세요.")
         
