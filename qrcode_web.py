@@ -326,13 +326,16 @@ with col1:
     
     # 둥근사각 전용 슬라이더
     if pattern_shape == "둥근사각":
+        corner_radius_disabled = (file_format == "SVG")
+        st.caption("⚠️ SVG 형식은 둥근 모서리를 지원하지 않습니다.")
         corner_radius = st.slider(
             "둥근 모서리 반경 (%)", 
             min_value=0, 
             max_value=50, 
             value=st.session_state.corner_radius_input,
             help="모서리를 얼마나 둥글게 할지 결정합니다. 0%는 사각, 50%는 원에 가까워집니다.",
-            key="corner_radius_input"
+            key="corner_radius_input",
+            disabled=corner_radius_disabled
         )
     else:
         corner_radius = 0
