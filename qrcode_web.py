@@ -28,11 +28,11 @@ from ui_input_and_settings import build_input_and_settings_ui
 from ui_preview_and_download import build_preview_and_download_ui
 from sidebar import build_sidebar_ui
 from footer import build_footer
-from messages import * # <-- 추가
+from messages import *
 
 # 페이지 설정
 st.set_page_config(
-    page_title=APP_TITLE, # <-- 수정
+    page_title=APP_TITLE,
     page_icon="🔲",
     layout="wide",
 )
@@ -41,11 +41,11 @@ st.set_page_config(
 initialize_session_state()
 
 # 메인 앱 헤더
-st.title(APP_TITLE) # <-- 수정
+st.title(APP_TITLE)
 st.markdown("---")
 
 # 레이아웃 설정 (2개 컬럼)
-col_left, col_right = st.columns([1, 2], gap="medium")
+col_left, col_right = st.columns([1, 1], gap="medium") # <-- 이 부분을 [1, 1]로 수정했습니다.
 
 # 사이드바
 with st.sidebar:
