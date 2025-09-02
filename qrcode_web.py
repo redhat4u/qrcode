@@ -3,7 +3,7 @@
 
 import streamlit as st
 import qrcode
-from messages import get_message, get_current_language
+from messages import get_message
 from state_manager import (
     initialize_session_state_with_language,
     on_qr_setting_change,
@@ -27,16 +27,11 @@ initialize_session_state_with_language()
 # 사이드바
 with st.sidebar:
     st.header(get_message("APP_TITLE"))
-    
     st.markdown(get_message("UI_SIDEBAR_DESCRIPTION"))
-    
     st.markdown("---")
-    
     st.subheader(get_message("UI_SIDEBAR_INFO_HEADER"))
     st.markdown(get_message("UI_SIDEBAR_INFO_CONTENT"))
-    
     st.markdown("---")
-    
     st.subheader(get_message("UI_SIDEBAR_DEVELOPER_HEADER"))
     st.markdown(get_message("UI_SIDEBAR_DEVELOPER_INFO"))
 
