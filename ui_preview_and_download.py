@@ -55,7 +55,7 @@ def build_preview_and_download_ui():
             int(st.session_state.mask_pattern_select),
             "black" if file_format_is_svg else pattern_color,
             "white" if file_format_is_svg else bg_color,
-            pattern_shape,  # 새로운 파라미터 전달
+            pattern_shape,
         )
         if img and qr:
             preview_image_display = img
@@ -97,7 +97,7 @@ def build_preview_and_download_ui():
                 img, qr = generate_qr_code_png(
                     current_data, int(st.session_state.box_size_input), int(st.session_state.border_input), error_correction,
                     int(st.session_state.mask_pattern_select), final_pattern_color, final_bg_color,
-                    pattern_shape,  # 새로운 파라미터 전달
+                    pattern_shape,
                 )
                 if img and qr:
                     img_buffer = io.BytesIO()
@@ -110,7 +110,7 @@ def build_preview_and_download_ui():
                 svg_data, qr = generate_qr_code_svg(
                     current_data, int(st.session_state.box_size_input), int(st.session_state.border_input), error_correction,
                     int(st.session_state.mask_pattern_select), final_pattern_color, final_bg_color,
-                    pattern_shape,  # 새로운 파라미터 전달
+                    pattern_shape,
                 )
                 if svg_data and qr:
                     st.session_state.qr_svg_bytes = svg_data.encode('utf-8')
@@ -241,4 +241,3 @@ def build_preview_and_download_ui():
             unsafe_allow_html=True,
         )
         st.session_state.download_initiated = False
-        
