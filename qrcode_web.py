@@ -63,7 +63,7 @@ if 'corner_radius_input' not in st.session_state:
 if 'cell_gap_input' not in st.session_state:
     st.session_state.cell_gap_input = 0
 if 'jpg_quality_input' not in st.session_state:
-    st.session_state.jpg_quality_input = 90
+    st.session_state.jpg_quality_input = 70
 
 
 # 파일명에 특수문자 포함시 '_' 문자로 치환
