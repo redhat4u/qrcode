@@ -118,9 +118,9 @@ def draw_custom_shape_image(qr_object, box_size, border, fill_color, back_color,
     def draw_shape(draw, xy, shape, fill, corner_radius):
         x1, y1, x2, y2 = xy
         effective_size = x2 - x1
-        if shape == "사각":
+        if shape == "사각" or shape == "Square":
             draw.rectangle(xy, fill=fill)
-        elif shape == "둥근사각":
+        elif shape == "둥근사각" or shape == "Rounded Square":
             radius = int(effective_size * (corner_radius / 100))
             draw.rectangle([x1 + radius, y1, x2 - radius, y2], fill=fill)
             draw.rectangle([x1, y1 + radius, x2, y2 - radius], fill=fill)
@@ -128,11 +128,11 @@ def draw_custom_shape_image(qr_object, box_size, border, fill_color, back_color,
             draw.pieslice([x2 - radius * 2, y1, x2, y1 + radius * 2], 270, 360, fill=fill)
             draw.pieslice([x1, y2 - radius * 2, x1 + radius * 2, y2], 90, 180, fill=fill)
             draw.pieslice([x2 - radius * 2, y2 - radius * 2, x2, y2], 0, 90, fill=fill)
-        elif shape == "동그라미":
+        elif shape == "동그라미" or shape == "Circle":
             draw.ellipse(xy, fill=fill)
-        elif shape == "마름모":
+        elif shape == "마름모" or shape == "Diamond":
             draw.polygon([(x1 + effective_size/2, y1), (x1 + effective_size, y1 + effective_size/2), (x1 + effective_size/2, y1 + effective_size), (x1, y1 + effective_size/2)], fill=fill)
-        elif shape == "별":
+        elif shape == "별" or shape == "Star":
             x_center = (x1 + x2) / 2
             y_center = (y1 + y2) / 2
             radius_outer = (x2 - x1) / 2
@@ -148,7 +148,7 @@ def draw_custom_shape_image(qr_object, box_size, border, fill_color, back_color,
                 y_inner = y_center + radius_inner * math.sin(angle_inner)
                 points.append((x_inner, y_inner))
             draw.polygon(points, fill=fill)
-        elif shape == "십자가":
+        elif shape == "십자가" or shape == "Cross":
             x_center = (x1 + x2) / 2
             y_center = (y1 + y2) / 2
             cross_width = (x2 - x1) * 0.3
@@ -243,10 +243,11 @@ st.title(msgs["main_title"])
 st.markdown(msgs["main_separator"])
 
 # 언어 선택
+lang_options = list(messages.LANGUAGES.keys())
 st.selectbox(
     msgs["language_select_label"],
-    list(messages.LANGUAGES.keys()),
-    index=list(messages.LANGUAGES.keys()).index(st.session_state.lang),
+    lang_options,
+    index=lang_options.index(st.session_state.lang),
     key='lang'
 )
 
@@ -261,7 +262,7 @@ with col1:
     st.info(msgs["content_info"])
 
     qr_data = st.text_area(
-        "QR 코드로 생성할 내용을 입력해 주세요",
+        msgs["content_subheader"],
         height=200,
         placeholder=msgs["content_placeholder"],
         key="qr_input_area",
@@ -547,10 +548,10 @@ with col2:
                     
                     preview_image_display = draw_custom_shape_image(
                         qr, int(st.session_state.box_size_input), int(st.session_state.border_input),
-                        "black", "white", "사각",
+                        "black", "white", msgs["pattern_shape_options"][0], # '사각'
                         st.session_state.corner_radius_input,
                         st.session_state.cell_gap_input,
-                        "사각",
+                        msgs["pattern_shape_options"][0], # '사각'
                     )
         except Exception as e:
             st.error(msgs["error_general"].format(error=str(e)))
@@ -631,7 +632,7 @@ st.button(
 )
 
 with st.sidebar:
-    st.header(msgs["sidebar_title"])
+    st.header(msgs["sidebar_title_usage"])
     st.markdown(f"""
     1. {msgs["sidebar_usage_1"]}
     2. {msgs["sidebar_usage_2"]}
@@ -643,49 +644,49 @@ with st.sidebar:
 
     st.markdown(msgs["main_separator"])
 
-    st.header(msgs["sidebar_tips_title"])
+    st.header(msgs["sidebar_title_tips"])
     st.markdown(f"""
-    - {msgs["sidebar_tip_text"]}
-    - {msgs["sidebar_tip_website"]}
-    - {msgs["sidebar_tip_email"]}
-    - {msgs["sidebar_tip_email_full"]}
-    - {msgs["sidebar_tip_tel"]}
-    - {msgs["sidebar_tip_sms"]}
-    - {msgs["sidebar_tip_sms_full"]}
-    - {msgs["sidebar_tip_wifi"]}
+    {msgs["sidebar_tip_text"]}
+    {msgs["sidebar_tip_website"]}
+    {msgs["sidebar_tip_email"]}
+    {msgs["sidebar_tip_email_full"]}
+    {msgs["sidebar_tip_tel"]}
+    {msgs["sidebar_tip_sms"]}
+    {msgs["sidebar_tip_sms_full"]}
+    {msgs["sidebar_tip_wifi"]}
     """)
 
     st.markdown(msgs["main_separator"])
 
-    st.header(msgs["sidebar_guide_title"])
+    st.header(msgs["sidebar_title_guide"])
     st.markdown(msgs["sidebar_guide_file_format"])
     st.markdown(f"""
-    - {msgs["sidebar_guide_png"]}
-    - {msgs["sidebar_guide_jpg"]}
-    - {msgs["sidebar_guide_svg"]}
+    {msgs["sidebar_guide_png"]}
+    {msgs["sidebar_guide_jpg"]}
+    {msgs["sidebar_guide_svg"]}
     """)
 
     st.markdown(msgs["main_separator"])
 
     st.markdown(msgs["sidebar_guide_pattern_shape"])
     st.markdown(f"""
-    - {msgs["sidebar_guide_pattern_shape_desc_1"]}
-    - {msgs["sidebar_guide_pattern_shape_desc_2"]}
+    {msgs["sidebar_guide_pattern_shape_desc_1"]}
+    {msgs["sidebar_guide_pattern_shape_desc_2"]}
     """)
     
     st.markdown(msgs["sidebar_guide_cell_gap"])
     st.markdown(f"""
-    - {msgs["sidebar_guide_cell_gap_desc_1"]}
-    - {msgs["sidebar_guide_cell_gap_desc_2"]}
+    {msgs["sidebar_guide_cell_gap_desc_1"]}
+    {msgs["sidebar_guide_cell_gap_desc_2"]}
     """)
 
     st.markdown(msgs["main_separator"])
 
     st.markdown(msgs["sidebar_guide_color"])
     st.markdown(f"""
-    - {msgs["sidebar_guide_color_desc_1"]}
-    - {msgs["sidebar_guide_color_desc_2"]}
-    - {msgs["sidebar_guide_color_desc_3"]}
+    {msgs["sidebar_guide_color_desc_1"]}
+    {msgs["sidebar_guide_color_desc_2"]}
+    {msgs["sidebar_guide_color_desc_3"]}
     """)
 
     st.markdown(msgs["main_separator"])
@@ -693,15 +694,15 @@ with st.sidebar:
     st.markdown(msgs["sidebar_guide_qr_settings"])
     st.markdown(msgs["sidebar_guide_error_correction"])
     st.markdown(f"""
-    - {msgs["sidebar_guide_ec_L"]}
-    - {msgs["sidebar_guide_ec_M"]}
-    - {msgs["sidebar_guide_ec_Q"]}
-    - {msgs["sidebar_guide_ec_H"]}
+    {msgs["sidebar_guide_ec_L"]}
+    {msgs["sidebar_guide_ec_M"]}
+    {msgs["sidebar_guide_ec_Q"]}
+    {msgs["sidebar_guide_ec_H"]}
     """)
 
     st.markdown(msgs["sidebar_guide_mask_pattern"])
     st.markdown(f"""
-    - {msgs["sidebar_guide_mask_pattern_desc"]}
+    {msgs["sidebar_guide_mask_pattern_desc"]}
     """)
 
 # 하단 정보
