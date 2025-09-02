@@ -6,6 +6,7 @@ import io
 import streamlit as st
 from messages import get_message
 from qrcode.image.styles.colormasks import SolidFillColorMask
+from qrcode.image.styles.moduledrawers import Rounded, Circle, GappedSquare, Square
 
 def get_error_correction_constant(level_str):
     """
@@ -28,7 +29,7 @@ def get_dot_style(style_name):
     사용자가 선택한 점 스타일 이름에 해당하는 qrcode-with-dots 클래스를 반환합니다.
     """
     if style_name == get_message('UI_DOT_STYLE_SQUARE'):
-        return qrcode.image.base.Square
+        return qrcode.image.styles.moduledrawers.Square
     elif style_name == get_message('UI_DOT_STYLE_ROUNDED'):
         return qrcode.image.styles.moduledrawers.Rounded
     elif style_name == get_message('UI_DOT_STYLE_CIRCLE'):
@@ -37,7 +38,7 @@ def get_dot_style(style_name):
         return qrcode.image.styles.moduledrawers.GappedSquare
     else:
         # 기본값은 Square
-        return qrcode.image.base.Square
+        return qrcode.image.styles.moduledrawers.Square
 
 def is_valid_hex_color(hex_code):
     """
