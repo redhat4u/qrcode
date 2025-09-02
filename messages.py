@@ -69,7 +69,7 @@ MESSAGES = {
         "UI_NUMBER_INPUT_BORDER": "테두리 두께 (사각형 개수)",
 
         "UI_SUBHEADER_COLOR_SETTINGS": "3. 색상 설정",
-        "UI_INFO_COLOR_SETTINGS": "**⚠️ SVG 포맷은 이 설정을 무시합니다.**",
+        "UI_INFO_COLOR_SETTINGS": "**⚠️ SVG 형식은 이 설정을 적용할 수 없습니다.**",
         "UI_COLOR_OPTION_DIRECT_INPUT": "직접 16진수 입력 (예: #1A5E31)",
         "UI_SELECTBOX_PATTERN_COLOR": "패턴 색상",
         "UI_SELECTBOX_BG_COLOR": "배경 색상",
