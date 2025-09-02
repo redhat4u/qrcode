@@ -205,3 +205,5 @@ def get_qr_info(qr_version, qr_size, border, pattern_color, bg_color):
         get_message('UI_INFO_QR_PATTERN_COLOR'): pattern_color,
         get_message('UI_INFO_QR_BG_COLOR'): bg_color,
     }
+
+
