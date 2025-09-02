@@ -75,7 +75,7 @@ def reset_all_settings():
     st.session_state.bg_color_select = "white"
     st.session_state.strip_option = True
     st.session_state.file_format_select = "PNG"
-    st.session_state.dot_style_select = "사각형"  # <-- 초기화 로직에 추가
+    st.session_state.dot_style_select = "사각형"
     st.session_state.qr_generated = False
     st.session_state.show_generate_success = False
     st.session_state.qr_image_bytes = None
@@ -91,6 +91,13 @@ def on_qr_setting_change():
     st.session_state.qr_svg_bytes = None
     st.session_state.generate_button_clicked = False
     st.session_state.error_message = None
+
+def on_file_format_change():
+    """파일 형식이 변경될 때 호출되는 콜백 함수입니다."""
+    on_qr_setting_change() # 다른 설정 변경과 동일하게 상태 초기화
+    # 파일 형식이 SVG로 변경되면 패턴 모양을 '사각형'으로 고정
+    if st.session_state.file_format_select == "SVG":
+        st.session_state.dot_style_select = "사각형"
 
 def set_download_initiated():
     """다운로드 버튼 클릭 시 호출되는 콜백 함수입니다."""
