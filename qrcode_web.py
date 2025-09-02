@@ -20,9 +20,8 @@ import hashlib
 import re
 import base64 # SVG 이미지 표시를 위해 추가
 import qrcode.image.svg # SVG 생성을 위해 추가
-# [추가] 패턴 모양 선택을 위해 qrcode.image.styles를 import
-import qrcode.image.styles
-
+import qrcode.image.styles # qrcode.image.styles 모듈 임포트
+import qrcode.image.styled # [수정] 스타일을 위한 styled 모듈 임포트
 
 # 페이지 설정
 st.set_page_config(
@@ -105,6 +104,27 @@ def is_valid_color(color_name):
 # [수정] pattern_style 인자 추가
 def generate_qr_code_png(data, box_size, border, error_correction, mask_pattern, fill_color, back_color, pattern_style):
     try:
+        # [수정] 패턴 스타일에 따른 ModuleDrawer 선택
+        style_mapping = {
+            "Square": qrcode.image.styles.SquareModuleDrawer(),
+            "Rounded": qrcode.image.styles.RoundedModuleDrawer(),
+            "Circle": qrcode.image.styles.CircleModuleDrawer(),
+            "Diamond": qrcode.image.styles.VerticalBarsDrawer(), # 마름모는 VerticalBarsDrawer 사용
+        }
+        
+        # [수정] StyledPilImage를 사용하여 QR 코드 객체 생성
+        img = qrcode.image.styled.StyledPilImage(
+            data=data,
+            box_size=box_size,
+            border=border,
+            error_correction=error_correction,
+            mask_pattern=mask_pattern,
+            fill_color=fill_color,
+            back_color=back_color,
+            module_drawer=style_mapping.get(pattern_style)
+        )
+        
+        # QR 코드 정보 추출을 위한 QR 객체는 별도로 생성
         qr = qrcode.QRCode(
             version=1,
             error_correction=error_correction,
@@ -114,24 +134,7 @@ def generate_qr_code_png(data, box_size, border, error_correction, mask_pattern,
         )
         qr.add_data(data, optimize=0)
         qr.make(fit=True)
-        
-        # [추가] 패턴 스타일에 따른 image_factory 선택
-        style_mapping = {
-            "Square": qrcode.image.styles.SquareModuleDrawer(),
-            "Rounded": qrcode.image.styles.RoundedModuleDrawer(),
-            "Circle": qrcode.image.styles.CircleModuleDrawer(),
-            "Diamond": qrcode.image.styles.VerticalBarsDrawer(), # 마름모는 VerticalBarsDrawer 사용
-        }
-        
-        img = qr.make_image(
-            fill_color=fill_color,
-            back_color=back_color,
-            module_drawer=style_mapping[pattern_style]
-        )
 
-        if hasattr(img, 'convert'):
-            img = img.convert('RGB')
-        
         return img, qr
     except Exception as e:
         st.error(f"QR 코드 생성 오류: {str(e)}")
@@ -424,6 +427,7 @@ with col2:
     preview_qr_object = None # QR 코드 정보 추출을 위한 qr 객체
 
     if current_data and (file_format_is_svg or (is_pattern_color_valid_preview and is_bg_color_valid_preview and not is_colors_same_preview)):
+        # 미리보기는 항상 PNG로 생성
         img, qr = generate_qr_code_png(
             current_data, int(st.session_state.box_size_input), int(st.session_state.border_input), error_correction,
             int(st.session_state.mask_pattern_select), 
@@ -478,13 +482,14 @@ with col2:
                     int(st.session_state.mask_pattern_select), final_pattern_color, final_bg_color,
                     st.session_state.pattern_shape_select # 패턴 모양 인자 전달
                 )
-                if img and qr:
+                if img:
                     img_buffer = io.BytesIO()
                     img.save(img_buffer, format='PNG')
                     st.session_state.qr_image_bytes = img_buffer.getvalue()
                     st.session_state.qr_svg_bytes = None
                     st.session_state.qr_generated = True
                     st.session_state.show_generate_success = True
+                    # 미리보기 이미지와 QR 객체는 여기서 다시 설정
                     preview_image_display = img
                     preview_qr_object = qr
             else: # SVG
