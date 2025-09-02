@@ -1,87 +1,67 @@
 import streamlit as st
+import qrcode
+from datetime import datetime
+from zoneinfo import ZoneInfo
+
+# 분리된 파일에서 함수 불러오기
+from state_manager import (
+    initialize_session_state,
+    reset_all_settings,
+    clear_text_input,
+    clear_filename_callback,
+    on_qr_setting_change,
+    set_download_initiated,
+)
+
+from functions import (
+    sanitize_filename,
+    is_valid_color,
+    generate_qr_code_png,
+    generate_qr_code_svg,
+)
+
+from ui_input_and_settings import build_input_and_settings_ui
 from ui_preview_and_download import build_preview_and_download_ui
-from functions import get_message, get_error_correction_constant
+from sidebar import build_sidebar_ui
+from footer import build_footer
+
 
 # 페이지 설정
-st.set_page_config(page_title=get_message('UI_APP_TITLE'), layout="wide")
+st.set_page_config(
+    page_title="QR 코드 생성기",
+    page_icon="🔲",
+    layout="wide",
+)
 
-st.title(get_message('UI_APP_TITLE'))
-st.write(get_message('UI_APP_DESCRIPTION'))
+# 세션 상태 초기화
+initialize_session_state()
 
-# 사이드바
+# 메인 앱 헤더
+st.title("🔲 QR 코드 생성기")
+st.markdown("---")
+
+# 레이아웃 설정 (2개 컬럼)
+col1, col2 = st.columns([1.2, 1])
+
+# 각 섹션의 UI를 별도의 함수로 분리하여 호출
+with col1:
+    build_input_and_settings_ui()
+with col2:
+    build_preview_and_download_ui()
+
+# 전체 초기화 버튼
+st.markdown("---")
+st.button(
+    label="🔄 전체 초기화",
+    use_container_width=True,
+    type="secondary",
+    on_click=reset_all_settings,
+    help="모든 내용을 초기화 합니다.",
+)
+
+# 사이드바를 별도 파일에서 만든 함수로 호출
 with st.sidebar:
-    st.header(get_message('UI_OPTIONS_HEADER'))
+    build_sidebar_ui()
 
-    qr_data = st.text_area(
-        label=get_message('UI_INPUT_LABEL'),
-        value="https://www.google.com",
-        help=get_message('UI_INPUT_HELP')
-    )
-
-    st.subheader(get_message('UI_STYLE_HEADER'))
-    dot_style = st.selectbox(
-        label=get_message('UI_DOT_STYLE_LABEL'),
-        options=[
-            get_message('UI_DOT_STYLE_SQUARE'),
-            get_message('UI_DOT_STYLE_ROUNDED'),
-            get_message('UI_DOT_STYLE_CIRCLE'),
-            get_message('UI_DOT_STYLE_DIAMOND')
-        ],
-        index=0,
-    )
-    
-    fill_color = st.color_picker(
-        label=get_message('UI_FILL_COLOR_LABEL'),
-        value="#000000"
-    )
-
-    back_color = st.color_picker(
-        label=get_message('UI_BG_COLOR_LABEL'),
-        value="#FFFFFF"
-    )
-
-    st.subheader(get_message('UI_ADVANCED_HEADER'))
-    error_correction_str = st.selectbox(
-        label=get_message('UI_ERROR_CORRECTION_LABEL'),
-        options=[
-            get_message('UI_ERROR_CORRECTION_LEVEL_L'),
-            get_message('UI_ERROR_CORRECTION_LEVEL_M'),
-            get_message('UI_ERROR_CORRECTION_LEVEL_Q'),
-            get_message('UI_ERROR_CORRECTION_LEVEL_H')
-        ],
-        index=3,
-    )
-
-    box_size = st.slider(
-        label=get_message('UI_BOX_SIZE_LABEL'),
-        min_value=1,
-        max_value=20,
-        value=10,
-    )
-
-    border = st.slider(
-        label=get_message('UI_BORDER_LABEL'),
-        min_value=1,
-        max_value=10,
-        value=4,
-    )
-
-    mask_pattern = st.slider(
-        label=get_message('UI_MASK_PATTERN_LABEL'),
-        min_value=0,
-        max_value=7,
-        value=0,
-    )
-
-    selected_options = {
-        "dot_style": dot_style,
-        "fill_color": fill_color,
-        "back_color": back_color,
-        "error_correction": error_correction_str,
-        "box_size": box_size,
-        "border": border,
-        "mask_pattern": mask_pattern,
-    }
-
-# 미리보기 UI 호출
-build_preview_and_download_ui(qr_data, selected_options)
+# 하단 정보
+build_footer()
