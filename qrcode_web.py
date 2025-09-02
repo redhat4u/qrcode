@@ -139,11 +139,11 @@ def draw_custom_shape_image(qr_object, box_size, border, fill_color, back_color,
                 x = (c + border) * box_size
                 y = (r + border) * box_size
                 
-                if shape == "사각":
+                if shape == "사각" or shape == "사각형":
                     draw.rectangle([x, y, x + box_size, y + box_size], fill=fill_color)
                 elif shape == "둥근사각":
                     radius = box_size // 4 # 둥근 정도
-                    draw_rounded_rectangle(draw, [x, y, x + box_size, y + box_size], radius, fill_color)
+                    draw_rounded_rectangle(draw, [x, y, x + box_size, y + box_size], radius, fill=fill_color)
                 elif shape == "동그라미":
                     draw.ellipse([x, y, x + box_size, y + box_size], fill=fill_color)
                 elif shape == "마름모":
@@ -212,7 +212,7 @@ def reset_all_settings():
     st.session_state.bg_color_select = "white"
     st.session_state.strip_option = True
     st.session_state.file_format_select = "PNG"
-    st.session_state.pattern_shape_select = "사각형"
+    st.session_state.pattern_shape_select = "사각"
 
     st.session_state.qr_generated = False
     st.session_state.show_generate_success = False
@@ -453,7 +453,7 @@ with col2:
                 qr, int(st.session_state.box_size_input), int(st.session_state.border_input),
                 "black" if file_format_is_svg else pattern_color,
                 "white" if file_format_is_svg else bg_color,
-                "사각형" if file_format_is_svg else st.session_state.pattern_shape_select
+                "사각" if file_format_is_svg else st.session_state.pattern_shape_select
             )
             preview_qr_object = qr
     
@@ -519,12 +519,12 @@ with col2:
                     st.session_state.qr_generated = True
                     st.session_state.show_generate_success = True
                     
-                    png_img, png_qr = generate_qr_code_png(
-                        current_data, int(st.session_state.box_size_input), int(st.session_state.border_input), error_correction,
-                        int(st.session_state.mask_pattern_select), "black", "white",
+                    # [수정된 부분] SVG 미리보기를 위해 draw_custom_shape_image 함수를 사용합니다.
+                    preview_image_display = draw_custom_shape_image(
+                        qr, int(st.session_state.box_size_input), int(st.session_state.border_input),
+                        "black", "white", "사각"
                     )
-                    preview_image_display = png_img
-                    preview_qr_object = png_qr
+                    preview_qr_object = qr
 
     st.markdown("---")
     
