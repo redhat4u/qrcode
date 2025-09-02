@@ -6,25 +6,45 @@ MESSAGES = {
         "UI_LANG_SELECT_LABEL": "언어 선택",
         "UI_LANG_SELECT_OPTIONS": ["한국어", "English"],
 
-        "UI_SIDEBAR_DESCRIPTION": """
-        이 앱은 텍스트를 QR 코드로 변환해주는 웹 애플리케이션입니다. 
-        원하는 텍스트를 입력하고, 다양한 옵션을 설정하여 
-        나만의 맞춤형 QR 코드를 만들 수 있습니다.
+        "UI_SIDEBAR_HEADER_GUIDE": "📖 사용 방법",
+        "UI_SIDEBAR_GUIDE_CONTENT": """
+        1. **QR 코드 내용** 영역에 변환할 텍스트를 입력하세요
+        2. **QR 코드 설정**에서 크기와 오류 보정 레벨을 조정하세요
+        3. **패턴 모양**에서 QR 코드 점의 모양을 선택하세요 (SVG 형식은 사각형만 가능합니다)
+        4. **색상 설정**에서 패턴과 배경 색상을 선택하세요 (SVG 형식은 기본색만 가능합니다)
+        5. **파일 설정**에서 원하는 파일 형식(PNG/SVG)을 선택하고 파일명을 지정하세요
+        6. **QR 코드 생성** 버튼으로 최종 파일을 다운로드하세요
         """,
-        "UI_SIDEBAR_INFO_HEADER": "앱 정보",
-        "UI_SIDEBAR_INFO_CONTENT": """
-        - **버전:** `1.0.0`
-        - **프레임워크:** Streamlit
-        - **QR 코드 라이브러리:** `qrcode`
-        - **특징:**
-            - PNG 및 SVG 포맷 지원
-            - 다양한 색상 및 패턴 스타일 선택
-            - 오류 복원 레벨 설정
+        "UI_SIDEBAR_HEADER_TIPS": "💡 용도별 QR 코드 생성 팁",
+        "UI_SIDEBAR_TIPS_CONTENT": """
+        - **텍스트**: `QR 코드로 생성할 텍스트를 입력합니다`
+        - **웹사이트**: `https://www.example.com`
+        - **이메일**: `mailto:user@example.com`
+        - **이메일(제목,본문, 여러 수신자 포함)**: `mailto:user1@example.com,user2@example.com?subject=제목&body=메시지 내용`
+        - **전화번호**: `tel:type=CELL:+82 10-1234-5678`
+        - **SMS (번호만)**: `sms:type=CELL:+82 10-1234-5678`
+        - **SMS (메시지 포함)**: `sms:type=CELL:+82 10-1234-5678?body=메시지 내용`
+        - **WiFi**: `WIFI:T:WPA;S:네트워크명(SSID);P:비밀번호;H:false;;`
         """,
-        "UI_SIDEBAR_DEVELOPER_HEADER": "개발자 정보",
-        "UI_SIDEBAR_DEVELOPER_INFO": """
-        개발자: 홍길동
-        이메일: hong.gildong@example.com
+        "UI_SIDEBAR_HEADER_SETTINGS_GUIDE": "⚙️ 설정 가이드",
+        "UI_SIDEBAR_SETTINGS_GUIDE_CONTENT": """
+        **오류 보정 레벨:**
+        - **Low (7%)**: 손상되지 않는 환경
+        - **Medium (15%)**: 일반적인 사용
+        - **Quartile (25%)**: 약간의 손상 가능
+        - **High (30%)**: 로고 삽입, 손상이 잦은 환경
+        
+        **마스크 패턴:**
+        - 0~7 중 선택 (같은 내용이라도 번호에 따라 패턴이 달라짐)
+        
+        **패턴 모양:**
+        - 사각형, 둥근 사각, 원형, 마름모 중 선택
+        - **SVG** 파일 형식 선택 시에는 **사각형**만 지원합니다.
+        
+        **색상 입력:**
+        - **직접 입력**: 리스트에 없는 색상은 HEX 코드로 직접 입력 가능합니다.
+        - **오류 메시지**: 색상 입력 시 유효성 검사를 진행하여 입력 칸이 비어 있거나 올바른 색상 값이 아닐 경우 경고 메시지가 표시됩니다.
+        - **SVG** 파일 형식 선택 시에는 패턴:검은색, 배경:흰색만 지원합니다.
         """,
         
         "UI_HEADER_INPUT_AND_SETTINGS": "⚙️ 입력 및 설정",
@@ -105,25 +125,45 @@ MESSAGES = {
         "UI_LANG_SELECT_LABEL": "Select Language",
         "UI_LANG_SELECT_OPTIONS": ["한국어", "English"],
 
-        "UI_SIDEBAR_DESCRIPTION": """
-        This web application allows you to convert text into a QR code.
-        On the left panel, you can input your desired text and customize
-        various options to create your own unique QR code.
+        "UI_SIDEBAR_HEADER_GUIDE": "📖 How to Use",
+        "UI_SIDEBAR_GUIDE_CONTENT": """
+        1. In the **QR Code Content** area, enter the text you want to convert.
+        2. In **QR Code Settings**, adjust the size and error correction level.
+        3. In **Pattern Shape**, select the shape of the QR code dots (SVG format only supports squares).
+        4. In **Color Settings**, select the pattern and background colors (SVG format only supports default colors).
+        5. In **File Settings**, choose the desired file format (PNG/SVG) and specify a filename.
+        6. Click the **Generate QR Code** button to download the final file.
         """,
-        "UI_SIDEBAR_INFO_HEADER": "App Info",
-        "UI_SIDEBAR_INFO_CONTENT": """
-        - **Version:** `1.0.0`
-        - **Framework:** Streamlit
-        - **QR Code Library:** `qrcode`
-        - **Features:**
-            - Supports PNG and SVG formats
-            - Various color and pattern styles
-            - Error correction level settings
+        "UI_SIDEBAR_HEADER_TIPS": "💡 Tips for Creating QR Codes",
+        "UI_SIDEBAR_TIPS_CONTENT": """
+        - **Text**: `Enter text you want to generate a QR code for`
+        - **Website**: `https://www.example.com`
+        - **Email**: `mailto:user@example.com`
+        - **Email (with subject, body, multiple recipients)**: `mailto:user1@example.com,user2@example.com?subject=Subject&body=Message content`
+        - **Phone Number**: `tel:type=CELL:+82 10-1234-5678`
+        - **SMS (number only)**: `sms:type=CELL:+82 10-1234-5678`
+        - **SMS (with message)**: `sms:type=CELL:+82 10-1234-5678?body=Message content`
+        - **WiFi**: `WIFI:T:WPA;S:Network Name(SSID);P:Password;H:false;;`
         """,
-        "UI_SIDEBAR_DEVELOPER_HEADER": "Developer Info",
-        "UI_SIDEBAR_DEVELOPER_INFO": """
-        Developer: John Doe
-        Email: john.doe@example.com
+        "UI_SIDEBAR_HEADER_SETTINGS_GUIDE": "⚙️ Settings Guide",
+        "UI_SIDEBAR_SETTINGS_GUIDE_CONTENT": """
+        **Error Correction Level:**
+        - **Low (7%)**: For environments with no damage
+        - **Medium (15%)**: For general use
+        - **Quartile (25%)**: For slight damage
+        - **High (30%)**: For inserting a logo or in environments with frequent damage
+        
+        **Mask Pattern:**
+        - Select between 0-7 (the pattern changes for the same content depending on the number)
+        
+        **Pattern Shape:**
+        - Select from Square, Rounded Square, Circle, or Diamond
+        - **SVG** file format only supports **squares**.
+        
+        **Color Input:**
+        - **Direct Input**: You can directly enter HEX codes for colors not on the list.
+        - **Error Message**: When you enter a color, a validation check will show a warning if the input field is empty or if the color value is incorrect.
+        - **SVG** file format only supports black for the pattern and white for the background.
         """,
         
         "UI_HEADER_INPUT_AND_SETTINGS": "⚙️ Input & Settings",
@@ -192,7 +232,7 @@ MESSAGES = {
         "UI_INFO_QR_PATTERN_COLOR": "Pattern Color",
         "UI_INFO_QR_BG_COLOR": "Background Color",
         "UI_INFO_QR_IMAGE_SIZE_FORMULA": "(Image size depends on QR version, box size, and border thickness.)",
-        
+
         "UI_SUBHEADER_DOWNLOAD": "📥 Download QR Code",
         "UI_DOWNLOAD_LABEL": "💾 Download QR Code",
         "UI_DOWNLOAD_HELP": "Click to save the QR code.",
@@ -200,7 +240,6 @@ MESSAGES = {
         "UI_DOWNLOAD_FILENAME_LABEL": "Generated Filename",
     }
 }
-
 def get_message(key):
     # This is a placeholder function, you'll need a way to determine the current language
     # For now, let's assume 'ko' is the default.
