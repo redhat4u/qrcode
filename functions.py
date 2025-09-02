@@ -1,4 +1,6 @@
+# 이 파일은 QR 코드 생성과 관련된 핵심적인 로직 함수들을 포함합니다.
 # functions.py
+
 import qrcode
 import io
 import re
@@ -20,38 +22,7 @@ def is_valid_color(color_name):
     hex_pattern = re.compile(r'^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$')
     return hex_pattern.match(color_name)
 
-# --- 새로 추가된 코드 시작 ---
-# 원형 및 둥근 사각형 모듈을 그리는 커스텀 이미지 팩토리
-class CustomPilImage(qrcode.image.base.BaseImage):
-    def __init__(self, border, width, box_size, fill_color, back_color, module_shape='square'):
-        self.border = border
-        self.width = width
-        self.box_size = box_size
-        self.fill_color = fill_color
-        self.back_color = back_color
-        self.module_shape = module_shape
-        self.pixel_size = (self.width + self.border*2) * self.box_size
-        self.img = Image.new("RGB", (self.pixel_size, self.pixel_size), self.back_color)
-        self.draw = ImageDraw.Draw(self.img)
-
-    def drawrect(self, row, col):
-        left, top = (col + self.border) * self.box_size, (row + self.border) * self.box_size
-        right, bottom = left + self.box_size, top + self.box_size
-
-        if self.module_shape == 'circular':
-            self.draw.ellipse((left, top, right, bottom), fill=self.fill_color)
-        elif self.module_shape == 'rounded':
-            radius = int(self.box_size / 3)
-            self.draw.rounded_rectangle((left, top, right, bottom), radius=radius, fill=self.fill_color)
-        else: # 기본 사각형
-            self.draw.rectangle((left, top, right, bottom), fill=self.fill_color)
-
-    def save(self, stream, format):
-        self.img.save(stream, format)
-
-# --- 새로 추가된 코드 끝 ---
-
-# QR 코드 PNG 생성 함수
+# QR 코드 PNG 생성 함수 (패턴 스타일 추가)
 def generate_qr_code_png(
     data,
     box_size,
@@ -60,7 +31,7 @@ def generate_qr_code_png(
     mask_pattern,
     fill_color,
     back_color,
-    module_shape='square' # module_shape 인자 추가
+    dot_style,  # <-- 새로운 매개변수
 ):
     try:
         qr = qrcode.QRCode(
@@ -74,18 +45,35 @@ def generate_qr_code_png(
         qr.add_data(data, optimize=0)
         qr.make(fit=True)
         
-        # module_shape 인자를 사용하여 make_image에 커스텀 팩토리 전달
-        if module_shape != 'square':
-            img = qr.make_image(
-                image_factory=lambda **kwargs: CustomPilImage(
-                    fill_color=fill_color, back_color=back_color, module_shape=module_shape, **kwargs
-                )
-            )
-        else:
-            img = qr.make_image(fill_color=fill_color, back_color=back_color)
-            if hasattr(img, 'convert'):
-                img = img.convert('RGB')
+        img = qr.make_image(fill_color=fill_color, back_color=back_color)
+        if hasattr(img, 'convert'):
+            img = img.convert('RGB')
         
+        # QR 코드 패턴 스타일 적용
+        if dot_style == "원형" or dot_style == "둥근 원형":
+            base_size = qr.modules_count * box_size + 2 * border * box_size
+            styled_img = Image.new('RGB', (base_size, base_size), back_color)
+            
+            for r in range(qr.modules_count):
+                for c in range(qr.modules_count):
+                    if qr.modules[r][c]:
+                        dot_img = Image.new('RGBA', (box_size, box_size), (0, 0, 0, 0))
+                        draw = ImageDraw.Draw(dot_img)
+                        
+                        # 원형
+                        if dot_style == "원형":
+                            draw.ellipse((0, 0, box_size, box_size), fill=fill_color)
+                        # 둥근 원형
+                        elif dot_style == "둥근 원형":
+                            draw.rounded_rectangle((0, 0, box_size, box_size), radius=box_size/4, fill=fill_color)
+                            
+                        # 마스크를 적용한 픽셀을 최종 이미지에 붙여넣기
+                        pos_x = (c + border) * box_size
+                        pos_y = (r + border) * box_size
+                        styled_img.paste(dot_img, (pos_x, pos_y), dot_img)
+
+            img = styled_img
+
         return img, qr
     except Exception as e:
         return None, None
@@ -99,9 +87,11 @@ def generate_qr_code_svg(
     mask_pattern,
     fill_color,
     back_color,
-    module_shape='square' # module_shape 인자 추가
 ):
     try:
+        # SVG는 자체적으로 fill_color, back_color를 지원
+        factory = qrcode.image.svg.SvgPathImage
+        
         qr = qrcode.QRCode(
             version=1,
             error_correction=error_correction,
@@ -113,7 +103,7 @@ def generate_qr_code_svg(
         qr.add_data(data, optimize=0)
         qr.make(fit=True)
         
-        img_svg = qr.make_image(image_factory=qrcode.image.svg.SvgPathImage)
+        img_svg = qr.make_image(image_factory=factory)
         
         svg_buffer = io.BytesIO()
         img_svg.save(svg_buffer)
@@ -122,9 +112,7 @@ def generate_qr_code_svg(
         svg_data = svg_data.replace('fill="black"', f'fill="{fill_color}"', 1)
         svg_data = svg_data.replace('fill="white"', f'fill="{back_color}"', 1)
         
-        # SVG는 모듈 모양 변경이 더 복잡하므로, 이 부분은 현재 사각형만 지원
-        # TODO: SVG 모듈 모양 변경 로직 추가
-        
         return svg_data, qr
     except Exception as e:
         return None, None
+        
