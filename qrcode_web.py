@@ -28,11 +28,11 @@ from ui_input_and_settings import build_input_and_settings_ui
 from ui_preview_and_download import build_preview_and_download_ui
 from sidebar import build_sidebar_ui
 from footer import build_footer
-
+from messages import * # <-- 추가
 
 # 페이지 설정
 st.set_page_config(
-    page_title="QR 코드 생성기",
+    page_title=APP_TITLE, # <-- 수정
     page_icon="🔲",
     layout="wide",
 )
@@ -41,31 +41,25 @@ st.set_page_config(
 initialize_session_state()
 
 # 메인 앱 헤더
-st.title("🔲 QR 코드 생성기")
+st.title(APP_TITLE) # <-- 수정
 st.markdown("---")
 
 # 레이아웃 설정 (2개 컬럼)
-col1, col2 = st.columns([1.2, 1])
+col_left, col_right = st.columns([1, 2], gap="medium")
 
-# 각 섹션의 UI를 별도의 함수로 분리하여 호출
-with col1:
-    build_input_and_settings_ui() # <-- 함수 이름 변경
-with col2:
-    build_preview_and_download_ui()
-
-# 전체 초기화 버튼
-st.markdown("---")
-st.button(
-    label="🔄 전체 초기화",
-    use_container_width=True,
-    type="secondary",
-    on_click=reset_all_settings,
-    help="모든 내용을 초기화 합니다.",
-)
-
-# 사이드바를 별도 파일에서 만든 함수로 호출
+# 사이드바
 with st.sidebar:
     build_sidebar_ui()
+    st.markdown("---")
+    if st.button("⏪ 모든 설정 초기화", use_container_width=True, type="secondary", on_click=reset_all_settings):
+        st.session_state.show_generate_success = False
 
-# 하단 정보
+# 메인 UI
+with col_left:
+    build_input_and_settings_ui()
+
+with col_right:
+    build_preview_and_download_ui()
+    
+# 푸터
 build_footer()
