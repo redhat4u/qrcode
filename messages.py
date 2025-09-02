@@ -273,3 +273,4 @@ LANGUAGES = {
         "footer_text": "© 2024 QR Code Generator. All rights reserved. Made with Streamlit."
     }
 }
+
