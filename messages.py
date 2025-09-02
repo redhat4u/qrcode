@@ -58,7 +58,11 @@ MESSAGES_KR = {
     "border_label": "QR 코드 테두리/여백",
     "error_correction_label": "오류 보정 레벨",
     "mask_pattern_label": "마스크 패턴 선택 (0~7)",
-
+    "error_correction_options_low": "Low (7%) - 오류 보정",
+    "error_correction_options_medium": "Medium (15%) - 오류 보정",
+    "error_correction_options_quartile": "Quartile (25%) - 오류 보정",
+    "error_correction_options_high": "High (30%) - 오류 보정",
+    
     # 파일명 설정
     "subheader_filename": "📄 파일명 설정",
     "filename_input_label": "다운로드 파일명 입력 (확장자는 제외, 파일명만 입력)",
@@ -143,4 +147,4 @@ def get_message(lang_code, key, *args):
     
     msg = messages.get(key, f"Translation missing for key: {key}")
     return msg.format(*args)
-  
+    
