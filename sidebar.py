@@ -25,7 +25,7 @@ def build_sidebar_ui():
     - **이메일(제목,본문, 여러 수신자 포함)**: `mailto:user1@example.com,user2@example.com?subject=제목&body=메시지 내용`
     - **전화번호**: `tel:type=CELL:+82 10-1234-5678`
     - **SMS (번호만)**: `sms:type=CELL:+82 10-1234-5678`
-    - **SMS (메시지 포함)**: `sms:type=CELL:+82 10-1234-5678?body=메시지 내용을 입력할 수 있어요`
+    - **SMS (메시지 포함)**: `sms:type=CELL:+82 10-1234-5678?body=메시지 내용`
     - **WiFi**: `WIFI:T:WPA;S:네트워크명(SSID);P:비밀번호;H:false;;`
     """)
 
