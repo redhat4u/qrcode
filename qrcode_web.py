@@ -296,20 +296,6 @@ with col1:
         )
 
     st.markdown("---")
-    st.markdown("---")
-
-    # 패턴 모양 선택
-    pattern_shape_disabled = (file_format == "SVG")
-    st.markdown("---")
-    st.subheader("🛠️ 패턴 모양 설정")
-    st.caption("⚠️ SVG 형식은 사각만 지원합니다.")
-    pattern_shape = st.selectbox(
-        "패턴 모양 선택",
-        ("사각", "둥근사각", "동그라미", "마름모"),
-        key="pattern_shape_select",
-        on_change=on_qr_setting_change,
-        disabled=pattern_shape_disabled,
-    )
 
 
 #========================================================================================================================================================================
@@ -407,6 +393,8 @@ with col1:
             key="filename_input_key",
         )
 
+    current_filename = filename.strip()
+
     with col_filename_delete:
         st.markdown('<div style="margin-top: 28px;"></div>', unsafe_allow_html=True)
         filename_delete_disabled = not st.session_state.get("filename_input_key", "")
@@ -427,7 +415,18 @@ with col1:
         on_change=on_qr_setting_change,
     )
     
-    current_filename = filename.strip()
+    # 패턴 모양 선택
+    pattern_shape_disabled = (file_format == "SVG")
+    st.markdown("---")
+    st.subheader("🛠️ 패턴 모양 설정")
+    st.caption("⚠️ SVG 형식은 사각만 지원합니다.")
+    pattern_shape = st.selectbox(
+        "패턴 모양 선택",
+        ("사각", "둥근사각", "동그라미", "마름모"),
+        key="pattern_shape_select",
+        on_change=on_qr_setting_change,
+        disabled=pattern_shape_disabled,
+    )
 
 
 #========================================================================================================================================================================
