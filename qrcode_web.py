@@ -20,8 +20,10 @@ import hashlib
 import re
 import base64 # SVG 이미지 표시를 위해 추가
 import qrcode.image.svg # SVG 생성을 위해 추가
-import qrcode.image.styles # qrcode.image.styles 모듈 임포트
-import qrcode.image.styled # [수정] 스타일을 위한 styled 모듈 임포트
+# [수정] 패턴 모양 선택을 위해 qrcode.image.styles와 qrcode.image.styled를 import
+import qrcode.image.styles
+import qrcode.image.styled
+
 
 # 페이지 설정
 st.set_page_config(
