@@ -1,14 +1,11 @@
-# 이 파일은 앱에서 사용되는 모든 사용자 인터페이스(UI) 메시지를 정의합니다.
 # messages.py
-
 import streamlit as st
 import qrcode
 
-# 모든 언어의 메시지를 포함하는 사전
 MESSAGES = {
     'ko': {
         # 앱 전체
-        'APP_TITLE': 'QR 코드 생성기',
+        'APP_TITLE': 'QR 코드 생성기', # <-- 이 키가 추가되었는지 확인
         'FOOTER_MESSAGE': '© 2025 QR 코드 생성기 | Streamlit으로 제작 | 제작: 류종훈(redhat4u@gmail.com)',
         
         # 사이드바
@@ -104,7 +101,7 @@ MESSAGES = {
         'UI_ERROR_INVALID_PATTERN_COLOR': '⚠️ 패턴 색상 HEX 코드가 유효하지 않습니다.',
         'UI_ERROR_INVALID_BG_COLOR': '⚠️ 배경 색상 HEX 코드가 유효하지 않습니다.',
         'UI_BUTTON_GENERATE': 'QR 코드 생성',
-        'UI_BUTTON_RESET': '모두 초기화',
+        'UI_BUTTON_RESET': '모두 초기화', # <-- 이 키가 추가되었는지 확인
         'UI_SUCCESS_MESSAGE': '✅ QR 코드가 성공적으로 생성되었습니다!',
         'UI_DOWNLOAD_LABEL': '💾 QR 코드 다운로드',
         'UI_DOWNLOAD_HELP': 'PC는 "Download" 폴더, 휴대폰은 "Download" 폴더에 저장됩니다.',
@@ -114,7 +111,7 @@ MESSAGES = {
     },
     'en': {
         # 앱 전체
-        'APP_TITLE': 'QR Code Generator',
+        'APP_TITLE': 'QR Code Generator', # <-- 이 키가 추가되었는지 확인
         'FOOTER_MESSAGE': '© 2025 QR Code Generator | Built with Streamlit | By Jonghun Ryu (redhat4u@gmail.com)',
         
         # 사이드바
@@ -210,7 +207,7 @@ MESSAGES = {
         'UI_ERROR_INVALID_PATTERN_COLOR': '⚠️ Invalid pattern color HEX code.',
         'UI_ERROR_INVALID_BG_COLOR': '⚠️ Invalid background color HEX code.',
         'UI_BUTTON_GENERATE': 'Generate QR Code',
-        'UI_BUTTON_RESET': 'Reset All Settings',
+        'UI_BUTTON_RESET': 'Reset All Settings', # <-- 이 키가 추가되었는지 확인
         'UI_SUCCESS_MESSAGE': '✅ QR code has been successfully generated!',
         'UI_DOWNLOAD_LABEL': '💾 Download QR Code',
         'UI_DOWNLOAD_HELP': 'Saved to the "Download" folder on PC and mobile.',
