@@ -32,256 +32,336 @@ if 'custom_pattern_color_input_key' not in st.session_state:
     st.session_state.custom_pattern_color_input_key = 0
 if 'custom_background_color_input_key' not in st.session_state:
     st.session_state.custom_background_color_input_key = 0
-if 'language' not in st.session_state:
-    st.session_state.language = 'ko' # 기본 언어 설정
+if 'current_lang' not in st.session_state:
+    st.session_state.current_lang = 'ko'
+if 'selected_lang_name' not in st.session_state:
+    st.session_state.selected_lang_name = '한국어'
 
-# Streamlit 페이지 설정을 언어에 따라 동적으로 변경
+# 현재 언어 설정
+current_lang = st.session_state.current_lang
+
+# 페이지 설정
+# page_title과 page_icon을 메시지 파일에서 가져오도록 수정
 st.set_page_config(
-    page_title=MESSAGES[st.session_state.language]['page_title'],
-    page_icon=MESSAGES[st.session_state.language]['page_icon'],
+    page_title=MESSAGES[current_lang]['page_title'],
+    page_icon=MESSAGES[current_lang]['page_icon'],
     layout="wide",
 )
 
-# 메인 UI
-st.title(MESSAGES[st.session_state.language]['main_title'])
 
-# --- 언어 선택 드롭다운 ---
-# 언어 선택을 위한 드롭다운 메뉴를 타이틀 아래에 배치
-lang = st.selectbox(
-    MESSAGES[st.session_state.language]['language_select'],
-    options=['ko', 'en'],
-    format_func=lambda x: {'ko': '한국어', 'en': 'English'}[x],
-    key='language_selector_box'
-)
+def update_lang():
+    """언어 선택 드롭다운의 콜백 함수."""
+    # 드롭다운에서 선택된 언어 이름을 기반으로 언어 코드(ko, en)를 업데이트합니다.
+    if st.session_state.lang_select_box == '한국어':
+        st.session_state.current_lang = 'ko'
+    else:
+        st.session_state.current_lang = 'en'
+    st.session_state.selected_lang_name = st.session_state.lang_select_box
+    # 언어 변경 후 페이지를 새로고침하여 UI를 업데이트합니다.
+    st.experimental_rerun()
 
-# 선택된 언어를 세션 상태에 저장하여 전체 UI를 업데이트
-if lang != st.session_state.language:
-    st.session_state.language = lang
-    st.rerun()
 
-# 선택된 언어에 해당하는 메시지 가져오기
-messages = MESSAGES[st.session_state.language]
+# 메인 타이틀 및 언어 선택 드롭다운
+# 타이틀과 언어 선택을 같은 라인에 정렬하기 위해 컬럼을 사용합니다.
+title_col, lang_col = st.columns([0.8, 0.2])
 
-# --- 메인 섹션: 입력 및 설정 ---
-st.header(messages['input_settings_header'])
+with title_col:
+    # 타이틀을 메시지 파일에서 가져오도록 수정
+    st.title(MESSAGES[current_lang]['main_title'])
+
+with lang_col:
+    st.markdown("<div style='height: 40px;'></div>", unsafe_allow_html=True)  # 타이틀과의 간격 조정
+    # 언어 선택 드롭다운을 추가하고, 메시지 파일에서 레이블을 가져오도록 수정
+    st.selectbox(
+        label=MESSAGES[current_lang]['language_select'],
+        options=['한국어', 'English'],
+        index=['한국어', 'English'].index(st.session_state.selected_lang_name),
+        key='lang_select_box',
+        on_change=update_lang
+    )
+
+# ---
+# 섹션1: 입력 및 설정
+# 헤더를 메시지 파일에서 가져오도록 수정
+st.header(MESSAGES[current_lang]['input_settings_header'])
+st.markdown("---")
 
 # QR 코드 내용 입력
-st.subheader(messages['qr_content_header'])
-st.info(messages['qr_content_info'])
+# 헤더와 정보를 메시지 파일에서 가져오도록 수정
+st.subheader(MESSAGES[current_lang]['qr_content_header'])
+st.info(MESSAGES[current_lang]['qr_content_info'])
 
 qr_content = st.text_area(
-    label=messages['qr_input_label'],
+    # 레이블과 플레이스홀더를 메시지 파일에서 가져오도록 수정
+    label=MESSAGES[current_lang]['qr_input_label'],
     value=st.session_state.qr_input_area,
     height=200,
-    placeholder=messages['qr_input_placeholder'],
-    key="qr_content_input_area",
-    on_change=lambda: st.session_state.update(qr_input_area=st.session_state.qr_content_input_area)
+    placeholder=MESSAGES[current_lang]['qr_input_placeholder']
 )
 
-# 문자 수 계산 및 상태 표시
-char_count = len(qr_content)
-if char_count >= 2400:
-    st.warning(messages['char_count_exceeded'].format(char_count))
-elif char_count >= 2000:
-    st.warning(messages['char_count_warning'].format(char_count))
+# 문자 수 표시
+qr_content_length = len(qr_content.encode('utf-8'))
+if qr_content_length > 2000:
+    # 메시지를 메시지 파일에서 가져오도록 수정
+    st.warning(MESSAGES[current_lang]['char_count_exceeded'].format(qr_content_length))
+elif qr_content_length > 1500:
+    # 메시지를 메시지 파일에서 가져오도록 수정
+    st.warning(MESSAGES[current_lang]['char_count_warning'].format(qr_content_length))
 else:
-    st.success(messages['char_count_success'].format(char_count))
+    # 메시지를 메시지 파일에서 가져오도록 수정
+    st.success(MESSAGES[current_lang]['char_count_success'].format(qr_content_length))
 
-# QR 코드 설정
-st.subheader(messages['qr_settings_header'])
-col1, col2 = st.columns(2)
+st.session_state.qr_input_area = qr_content
 
-with col1:
-    box_size = st.slider(
-        messages['box_size_slider'],
-        min_value=5,
-        max_value=15,
-        value=10
-    )
-    border = st.slider(
-        messages['border_slider'],
-        min_value=2,
-        max_value=10,
-        value=4
-    )
-    error_correction_options = {
-        'L': messages['error_correction_L'],
-        'M': messages['error_correction_M'],
-        'Q': messages['error_correction_Q'],
-        'H': messages['error_correction_H']
-    }
-    error_correction_level = st.selectbox(
-        messages['error_correction_label'],
-        options=list(error_correction_options.keys()),
-        format_func=lambda x: error_correction_options[x]
-    )
+# ---
+# 섹션2: 미리보기 및 다운로드
+# 헤더를 메시지 파일에서 가져오도록 수정
+st.header(MESSAGES[current_lang]['preview_download_header'])
+st.markdown("---")
 
-with col2:
-    fill_color_options = {
-        'black': messages['color_black'],
-        'navy': messages['color_navy'],
-        'dark_green': messages['color_dark_green'],
-        'red': messages['color_red'],
-        'brown': messages['color_brown'],
-        'custom': messages['color_custom']
-    }
-    fill_color_select = st.selectbox(
-        messages['pattern_color_label'],
-        options=list(fill_color_options.keys()),
-        format_func=lambda x: fill_color_options[x]
-    )
-    if fill_color_select == 'custom':
-        custom_fill_color = st.text_input(
-            messages['pattern_color_custom_input'],
-            value='#000000',
-            key=f'custom_pattern_color_input_{st.session_state.custom_pattern_color_input_key}'
-        )
-        fill_color = custom_fill_color
-    else:
-        fill_color = fill_color_select
+# 레이아웃을 위한 두 개의 컬럼 생성
+preview_col, download_col = st.columns([0.7, 0.3])
 
-    back_color_options = {
-        'white': messages['color_white'],
-        'light_gray': messages['color_light_gray'],
-        'light_blue': messages['color_light_blue'],
-        'light_yellow': messages['color_light_yellow'],
-        'light_green': messages['color_light_green'],
-        'custom': messages['color_custom']
-    }
-    back_color_select = st.selectbox(
-        messages['background_color_label'],
-        options=list(back_color_options.keys()),
-        format_func=lambda x: back_color_options[x]
-    )
-    if back_color_select == 'custom':
-        custom_back_color = st.text_input(
-            messages['background_color_custom_input'],
-            value='#FFFFFF',
-            key=f'custom_background_color_input_{st.session_state.custom_background_color_input_key}'
-        )
-        back_color = custom_back_color
-    else:
-        back_color = back_color_select
-
-# 파일 형식 및 품질 선택
-file_format_options = {
-    'PNG': 'PNG',
-    'JPG': 'JPG',
-    'SVG': 'SVG'
-}
-file_format = st.radio(
-    messages['file_format_label'],
-    options=list(file_format_options.keys()),
-    horizontal=True
-)
-
-if file_format == 'JPG':
-    jpg_quality = st.slider(
-        messages['jpg_quality_slider'],
-        min_value=0,
-        max_value=100,
-        value=95
-    )
-
-# --- 미리보기 및 다운로드 섹션 ---
-st.header(messages['preview_download_header'])
-
-# QR 코드 생성 함수
-def create_qrcode():
-    if not qr_content:
-        st.warning(messages['qr_content_empty_warning'])
-        return None, None
-
-    try:
-        qr = qrcode.QRCode(
+# 미리보기 컬럼
+with preview_col:
+    # 헤더를 메시지 파일에서 가져오도록 수정
+    st.subheader(MESSAGES[current_lang]['preview_header'])
+    
+    # QR 코드 생성
+    if qr_content:
+        # QR 코드 설정
+        qr_settings = qrcode.QRCode(
             version=1,
-            error_correction=getattr(qrcode.constants, f'ERROR_CORRECT_{error_correction_level}'),
-            box_size=box_size,
-            border=border
+            error_correction=getattr(qrcode.constants, 'ERROR_CORRECT_' + st.session_state.selected_error_correction),
+            box_size=10,
+            border=st.session_state.selected_border_size
         )
-        qr.add_data(qr_content)
-        qr.make(fit=True)
+        qr_settings.add_data(qr_content)
+        qr_settings.make(fit=True)
+
+        img = qr_settings.make_image(
+            # 패턴과 배경 색상을 메시지 파일에서 가져오거나 직접 입력하도록 수정
+            image_factory=qrcode.image.svg.SvgPathImage if st.session_state.selected_file_format == 'SVG' else None,
+            fill_color=st.session_state.selected_pattern_color if not st.session_state.custom_pattern_color_input else st.session_state.custom_pattern_color_input,
+            back_color=st.session_state.selected_background_color if not st.session_state.custom_background_color_input else st.session_state.custom_background_color_input
+        )
+
+        # 이미지 표시
+        img_buffer = io.BytesIO()
+        if st.session_state.selected_file_format == 'SVG':
+            img.save(img_buffer)
+            # Streamlit이 SVG를 직접 지원하지 않으므로 base64로 인코딩하여 표시
+            b64 = base64.b64encode(img_buffer.getvalue()).decode("utf-8")
+            st.markdown(
+                f'<img src="data:image/svg+xml;base64,{b64}" alt="QR Code" style="width:100%; height:auto;">',
+                unsafe_allow_html=True
+            )
+        else:
+            img.save(img_buffer, st.session_state.selected_file_format, quality=st.session_state.jpg_quality)
+            st.image(img_buffer, use_column_width=True)
+    else:
+        # 입력 내용이 없을 때 메시지를 메시지 파일에서 가져오도록 수정
+        st.info(MESSAGES[current_lang]['no_content_message'])
+
+# 다운로드 컬럼
+with download_col:
+    # 헤더를 메시지 파일에서 가져오도록 수정
+    st.subheader(MESSAGES[current_lang]['download_header'])
+    
+    # QR 코드 생성 함수 (다운로드 버튼에 사용)
+    def generate_qr_for_download():
+        if not qr_content:
+            st.error(MESSAGES[current_lang]['empty_qr_content_error'])
+            return None, None
+        
+        qr_settings = qrcode.QRCode(
+            version=1,
+            error_correction=getattr(qrcode.constants, 'ERROR_CORRECT_' + st.session_state.selected_error_correction),
+            box_size=10,
+            border=st.session_state.selected_border_size
+        )
+        qr_settings.add_data(qr_content)
+        qr_settings.make(fit=True)
+
+        if st.session_state.selected_file_format == 'SVG':
+            img = qr_settings.make_image(
+                image_factory=qrcode.image.svg.SvgPathImage,
+                # 색상 입력을 메시지 파일에서 가져오도록 수정
+                fill_color=MESSAGES[current_lang]['default_svg_pattern_color'],
+                back_color=MESSAGES[current_lang]['default_svg_background_color']
+            )
+        else:
+            img = qr_settings.make_image(
+                # 색상 입력을 메시지 파일에서 가져오도록 수정
+                fill_color=st.session_state.selected_pattern_color if not st.session_state.custom_pattern_color_input else st.session_state.custom_pattern_color_input,
+                back_color=st.session_state.selected_background_color if not st.session_state.custom_background_color_input else st.session_state.custom_background_color_input
+            )
+
+        # 파일 이름 생성
+        timestamp = datetime.now(ZoneInfo('Asia/Seoul')).strftime("%Y%m%d_%H%M%S")
+        content_hash = hashlib.sha256(qr_content.encode('utf-8')).hexdigest()[:8]
+        file_name = f"qrcode_{content_hash}_{timestamp}.{st.session_state.selected_file_format.lower()}"
 
         img_buffer = io.BytesIO()
+        if st.session_state.selected_file_format == 'SVG':
+            img.save(img_buffer)
+        else:
+            img.save(img_buffer, st.session_state.selected_file_format, quality=st.session_state.jpg_quality)
+        
+        return img_buffer.getvalue(), file_name
 
-        if file_format == 'SVG':
-            qr_svg = qr.make_image(image_factory=qrcode.image.svg.SvgImage)
-            qr_svg.save(img_buffer)
-            img_buffer.seek(0)
-            return "image/svg+xml", img_buffer.getvalue()
-
-        img = qr.make_image(fill_color=fill_color, back_color=back_color)
-        img.save(img_buffer, format=file_format, quality=jpg_quality if file_format == 'JPG' else None)
-        img_buffer.seek(0)
-        return f"image/{file_format.lower()}", img_buffer.getvalue()
-
-    except Exception as e:
-        st.error(messages['qr_generation_error'].format(e))
-        return None, None
-
-mimetype, img_data = create_qrcode()
-
-if img_data:
-    # 미리보기
-    st.subheader(messages['preview_header'])
-    if file_format == 'SVG':
-        b64_img = base64.b64encode(img_data).decode('utf-8')
-        html_code = f'<img src="data:image/svg+xml;base64,{b64_img}" alt="QR Code" style="width:100%; height:auto;">'
-        st.markdown(html_code, unsafe_allow_html=True)
-    else:
-        st.image(img_data, caption=messages['qr_preview_caption'])
-    
     # 다운로드 버튼
-    st.subheader(messages['download_header'])
-    
-    # 파일 이름 생성
-    # 해시 값을 사용하여 고유한 파일명 생성
-    hashed_content = hashlib.sha256(qr_content.encode('utf-8')).hexdigest()[:10]
-    now_utc = datetime.now(ZoneInfo('UTC'))
-    file_name = f"qrcode_{now_utc.strftime('%Y%m%d%H%M%S')}_{hashed_content}.{file_format.lower()}"
-    
-    st.download_button(
-        label=messages['download_button_label'],
-        data=img_data,
-        file_name=file_name,
-        mime=mimetype
-    )
+    download_btn_text = MESSAGES[current_lang]['download_button_text']
+    if st.button(download_btn_text, use_container_width=True):
+        binary_data, file_name = generate_qr_for_download()
+        if binary_data:
+            st.download_button(
+                label=download_btn_text,
+                data=binary_data,
+                file_name=file_name,
+                mime=f"image/{st.session_state.selected_file_format.lower()}",
+                use_container_width=True
+            )
+            # 다운로드 버튼을 누르면 상태가 변경되므로 페이지를 새로고침하여 다운로드 버튼이 활성화되도록 합니다.
+            st.experimental_rerun()
 
+# ---
 # 사이드바
 with st.sidebar:
-    st.title(messages['sidebar_title'])
+    # 사이드바 제목을 메시지 파일에서 가져오도록 수정
+    st.header(MESSAGES[current_lang]['sidebar_header'])
+    st.markdown("---")
     
-    # 섹션 1: 도움말
-    st.subheader(messages['sidebar_help_header'])
+    # QR 코드 설정
+    # 사이드바 헤더를 메시지 파일에서 가져오도록 수정
+    st.subheader(MESSAGES[current_lang]['sidebar_qr_settings_title'])
     
-    st.markdown(messages['sidebar_help_content'])
+    # 파일 형식 선택
+    # 레이블과 옵션을 메시지 파일에서 가져오도록 수정
+    st.markdown(MESSAGES[current_lang]['file_format_title'])
+    st.session_state.selected_file_format = st.radio(
+        label="",
+        options=['PNG', 'JPG', 'SVG'],
+        index=0,
+        key='file_format_radio'
+    )
+    st.markdown(MESSAGES[current_lang]['file_format_content'], unsafe_allow_html=True)
+    
+    # JPG 품질 슬라이더 (JPG 선택 시에만 표시)
+    if st.session_state.selected_file_format == 'JPG':
+        # 레이블을 메시지 파일에서 가져오도록 수정
+        st.markdown(MESSAGES[current_lang]['jpg_quality_title'])
+        st.session_state.jpg_quality = st.slider(
+            label="",
+            min_value=0,
+            max_value=100,
+            value=95,
+            step=1,
+            key='jpg_quality_slider'
+        )
+
+    # 에러 보정 레벨
+    # 레이블과 옵션을 메시지 파일에서 가져오도록 수정
+    st.markdown(MESSAGES[current_lang]['sidebar_error_correction_title'])
+    st.session_state.selected_error_correction = st.radio(
+        label="",
+        options=['L', 'M', 'Q', 'H'],
+        index=1,
+        key='error_correction_radio'
+    )
+    st.markdown(MESSAGES[current_lang]['sidebar_error_correction_content'])
+    
+    # 마스크 패턴
+    # 레이블을 메시지 파일에서 가져오도록 수정
+    st.markdown(MESSAGES[current_lang]['sidebar_mask_pattern_title'])
+    st.slider(
+        label="",
+        min_value=0,
+        max_value=7,
+        value=0,
+        step=1,
+        key='mask_pattern_slider'
+    )
+    st.markdown(MESSAGES[current_lang]['sidebar_mask_pattern_content'])
     
     st.markdown("---")
     
-    # 섹션 2: 파일 형식
-    st.subheader(messages['sidebar_file_format_title'])
-    st.markdown(messages['sidebar_file_format_content'])
+    # 모양 설정
+    # 사이드바 헤더를 메시지 파일에서 가져오도록 수정
+    st.subheader(MESSAGES[current_lang]['sidebar_shape_settings_title'])
+    
+    # 패턴 모양
+    # 레이블과 옵션을 메시지 파일에서 가져오도록 수정
+    st.markdown(MESSAGES[current_lang]['sidebar_pattern_shape_title'])
+    st.session_state.selected_pattern_shape = st.radio(
+        label="",
+        options=['Square', 'Rounded', 'Circle', 'Diamond', 'Star', 'Cross'],
+        index=0,
+        disabled=st.session_state.selected_file_format == 'SVG',
+        key='pattern_shape_radio'
+    )
+    st.markdown(MESSAGES[current_lang]['sidebar_pattern_shape_content'])
+
+    # 패턴 간격
+    # 레이블을 메시지 파일에서 가져오도록 수정
+    st.markdown(MESSAGES[current_lang]['sidebar_gap_title'])
+    st.slider(
+        label="",
+        min_value=0.0,
+        max_value=1.0,
+        value=0.0,
+        step=0.05,
+        disabled=st.session_state.selected_pattern_shape == 'Square' or st.session_state.selected_file_format == 'SVG',
+        key='pattern_gap_slider'
+    )
+    st.markdown(MESSAGES[current_lang]['sidebar_gap_content'])
     
     st.markdown("---")
+
+    # 색상 설정
+    # 사이드바 헤더를 메시지 파일에서 가져오도록 수정
+    st.subheader(MESSAGES[current_lang]['sidebar_color_title'])
     
-    # 섹션 3: QR 코드 설정
-    st.subheader(messages['sidebar_qr_settings_title'])
+    # 패턴 색상
+    # 레이블과 옵션을 메시지 파일에서 가져오도록 수정
+    st.markdown(MESSAGES[current_lang]['pattern_color_title'])
+    st.session_state.selected_pattern_color = st.selectbox(
+        label="",
+        options=['black', 'red', 'green', 'blue', 'orange'],
+        key='pattern_color_select',
+        disabled=st.session_state.selected_file_format == 'SVG'
+    )
     
-    st.markdown(messages['sidebar_error_correction_title'])
-    st.markdown(messages['sidebar_error_correction_content'])
+    # 커스텀 패턴 색상 입력
+    # 레이블을 메시지 파일에서 가져오도록 수정
+    st.session_state.custom_pattern_color_input = st.text_input(
+        label=MESSAGES[current_lang]['custom_pattern_color_input_label'],
+        placeholder="#000000",
+        disabled=st.session_state.selected_file_format == 'SVG'
+    )
     
+    # 배경 색상
+    # 레이블과 옵션을 메시지 파일에서 가져오도록 수정
+    st.markdown(MESSAGES[current_lang]['background_color_title'])
+    st.session_state.selected_background_color = st.selectbox(
+        label="",
+        options=['white', 'yellow', 'cyan', 'magenta'],
+        key='background_color_select',
+        disabled=st.session_state.selected_file_format == 'SVG'
+    )
+    
+    # 커스텀 배경 색상 입력
+    # 레이블을 메시지 파일에서 가져오도록 수정
+    st.session_state.custom_background_color_input = st.text_input(
+        label=MESSAGES[current_lang]['custom_background_color_input_label'],
+        placeholder="#FFFFFF",
+        disabled=st.session_state.selected_file_format == 'SVG'
+    )
+    
+    st.markdown(MESSAGES[current_lang]['sidebar_color_content'])
+
+    # 하단 정보
+    # 푸터를 메시지 파일에서 가져오도록 수정
     st.markdown("---")
+    st.markdown(MESSAGES[current_lang]['footer'], unsafe_allow_html=True)
     
-    st.markdown(messages['sidebar_mask_pattern_title'])
-    st.markdown(messages['sidebar_mask_pattern_content'])
-    
-    st.markdown("---")
-    
-    st.markdown(messages['sidebar_color_title'])
-    st.markdown(messages['sidebar_color_content'])
-    
-# 하단 정보
-st.markdown(
-    messages['footer'],
-    unsafe_allow_html=True
-)
