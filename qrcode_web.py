@@ -258,6 +258,7 @@ def set_language():
     st.session_state.bg_color_select = "white"
     st.session_state.box_size_input = 20
     st.session_state.border_input = 2
+    st.session_state.mask_pattern_select = 2
     
 #[메인]====================================================================================================================================================================
 
