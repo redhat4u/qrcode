@@ -76,7 +76,7 @@ if 'strip_option' not in st.session_state:
 if 'file_format_select' not in st.session_state:
     st.session_state.file_format_select = "PNG"
 if 'pattern_shape_select' not in st.session_state: # 패턴 모양 선택 상태 추가
-    st.session_state.pattern_shape_select = "사각형"
+    st.session_state.pattern_shape_select = "사각"
 
 
 # 파일명에 특수문자 포함시 '_' 문자로 치환
