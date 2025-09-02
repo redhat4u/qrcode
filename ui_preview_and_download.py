@@ -31,15 +31,6 @@ def build_preview_and_download_ui():
 
     # 유효성 검사 및 색상값 가져오기
     # 미리보기를 위한 색상 유효성 검사
-    is_pattern_color_valid = (
-        st.session_state.pattern_color_select != "<직접 입력>"
-        or is_valid_color(st.session_state.custom_pattern_color_input_key)
-    )
-    is_bg_color_valid = (
-        st.session_state.bg_color_select != "<직접 입력>"
-        or is_valid_color(st.session_state.custom_bg_color_input_key)
-    )
-
     pattern_color_for_preview = (
         st.session_state.custom_pattern_color_input_key.strip()
         if st.session_state.pattern_color_select == "<직접 입력>"
@@ -58,8 +49,8 @@ def build_preview_and_download_ui():
     # 모든 조건이 충족될 때만 미리보기 이미지를 생성
     if (
         current_data
-        and is_pattern_color_valid
-        and is_bg_color_valid
+        and is_valid_color(pattern_color_for_preview)
+        and is_valid_color(bg_color_for_preview)
         and pattern_color_for_preview != bg_color_for_preview
     ):
         error_correction_options = {
