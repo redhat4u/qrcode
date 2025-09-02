@@ -14,6 +14,8 @@ def build_preview_and_download_ui():
     # 변수 초기화
     if 'show_generate_success' not in st.session_state:
         st.session_state.show_generate_success = False
+    if 'download_initiated' not in st.session_state:
+        st.session_state.download_initiated = False
     
     st.header("👀 미리보기 및 생성")
     
