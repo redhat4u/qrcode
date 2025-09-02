@@ -539,10 +539,10 @@ with col2:
     elif preview_image_display:
         st.success("현재 입력된 내용으로 생성될 QR 코드를 미리 표현해 보았습니다.  이 QR 코드가 맘에 드신다면, 위의 [⚡ QR 코드 생성] 버튼을 클릭하세요.")
     # [수정] 입력 내용이 있는데 미리보기가 표시되지 않는 경우의 메시지
-    elif current_data and not preview_image_display:
-        st.warning("⚠️ 선택하신 설정으로는 미리보기를 제공할 수 없습니다. (패턴과 배경색이 같거나, 색상값이 유효하지 않습니다.)")
+    #elif current_data and not preview_image_display:
+    #    st.warning("⚠️ 선택하신 설정으로는 미리보기를 제공할 수 없습니다. (패턴과 배경색이 같거나, 색상값이 유효하지 않습니다.)")
     else:
-        st.info("QR 코드 내용을 입력하면 생성될 QR 코드를 미리 보여드립니다.")
+        st.info("QR 코드 내용을 입력하면 아래에 생셩될 QR 코드가 나타납니다.")
 
     if preview_image_display:
         st.subheader("📱 QR 코드 미리보기")
