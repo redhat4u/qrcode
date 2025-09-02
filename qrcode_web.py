@@ -22,9 +22,9 @@ def build_footer_ui():
         f"""
         <style>
         .footer {{
-            font-size: 0.8rem;
+            font-size: 15px;  # 텍스트 크기 변경 (예: 1.0rem, 16px)
             text-align: center;
-            color: #808080;
+            color: #808080;      # 텍스트 색상 변경 (예: #000000, red)
             padding-top: 20px;
         }}
         </style>
@@ -80,3 +80,4 @@ with col2:
 
 # 푸터 섹션 호출
 build_footer_ui()
+
