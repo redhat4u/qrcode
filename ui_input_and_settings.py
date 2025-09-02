@@ -1,3 +1,4 @@
+# 이 파일은 QR 코드 생성에 필요한 입력 및 설정 UI를 정의합니다.
 # ui_input_and_settings.py
 
 import streamlit as st
@@ -26,7 +27,7 @@ def build_input_and_settings_ui():
         height=200,
         placeholder=get_message('UI_TEXT_AREA_PLACEHOLDER'),
         key="qr_input_area",
-        on_change=on_qr_setting_change # <-- 이 부분이 중요합니다.
+        on_change=on_qr_setting_change
     )
     
     char_count = len(qr_data) if qr_data else 0
@@ -117,6 +118,6 @@ def build_input_and_settings_ui():
         with col_filename_input:
             st.text_input(get_message('UI_TEXT_INPUT_FILENAME_LABEL'), placeholder=get_message('UI_TEXT_INPUT_FILENAME_PLACEHOLDER'), key="filename_input_key")
         with col_filename_delete:
-            st.markdown("<div style='height: 20px;'></div>", unsafe_allow_html=True) # 컬럼 정렬을 위한 공간
+            st.markdown("<div style='height: 20px;'></div>", unsafe_allow_html=True)
             st.button(get_message('UI_BUTTON_DELETE_FILENAME_LABEL'), use_container_width=True, help=get_message('UI_BUTTON_DELETE_FILENAME_HELP'), on_click=clear_filename_callback)
             
