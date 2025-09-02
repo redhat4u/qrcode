@@ -12,15 +12,16 @@ import base64 # SVG 이미지 표시를 위해 추가
 import qrcode.image.svg # SVG 생성을 위해 추가
 import math
 
-# messages.py에서 메시지 불러오기
-from messages import get_message
+# messages.py에서 메시지 관리 함수 불러오기
+from messages import get_message, get_language_options
 
-# 언어 설정 (현재는 한국어만 지원)
-LANG = 'ko'
+# 언어 선택 상태 관리
+if 'lang' not in st.session_state:
+    st.session_state.lang = 'ko'
 
 # 페이지 설정
 st.set_page_config(
-    page_title=get_message(LANG, "page_title"),
+    page_title=get_message(st.session_state.lang, "page_title"),
     page_icon="🔲",
     layout="wide",
 )
@@ -39,7 +40,7 @@ if 'box_size_input' not in st.session_state:
 if 'border_input' not in st.session_state:
     st.session_state.border_input = 2
 if 'error_correction_select' not in st.session_state:
-    st.session_state.error_correction_select = get_message(LANG, "error_correction_options_low")
+    st.session_state.error_correction_select = get_message(st.session_state.lang, "error_correction_options_low")
 if 'mask_pattern_select' not in st.session_state:
     st.session_state.mask_pattern_select = 2
 if 'pattern_color_select' not in st.session_state:
@@ -51,15 +52,22 @@ if 'strip_option' not in st.session_state:
 if 'file_format_select' not in st.session_state:
     st.session_state.file_format_select = "PNG"
 if 'pattern_shape_select' not in st.session_state:
-    st.session_state.pattern_shape_select = "사각"
+    st.session_state.pattern_shape_select = get_message(st.session_state.lang, "shape_square")
 if 'finder_pattern_shape_select' not in st.session_state:
-    st.session_state.finder_pattern_shape_select = "사각"
+    st.session_state.finder_pattern_shape_select = get_message(st.session_state.lang, "shape_square")
 if 'corner_radius_input' not in st.session_state:
     st.session_state.corner_radius_input = 25
 if 'cell_gap_input' not in st.session_state:
     st.session_state.cell_gap_input = 0
 if 'jpg_quality_input' not in st.session_state:
     st.session_state.jpg_quality_input = 70
+
+
+# 언어 선택 드롭다운 메뉴 변경 시 호출되는 콜백 함수
+def set_language_callback():
+    st.session_state.lang = st.session_state.language_selection
+    # 언어 변경 시 세션 상태 값들을 재설정
+    reset_all_settings(lang_code=st.session_state.lang)
 
 
 # 파일명에 특수문자 포함시 '_' 문자로 치환
@@ -113,9 +121,9 @@ def draw_custom_shape_image(qr_object, box_size, border, fill_color, back_color,
     def draw_shape(draw, xy, shape, fill, corner_radius):
         x1, y1, x2, y2 = xy
         effective_size = x2 - x1
-        if shape == "사각":
+        if shape == get_message(st.session_state.lang, "shape_square"):
             draw.rectangle(xy, fill=fill)
-        elif shape == "둥근사각":
+        elif shape == get_message(st.session_state.lang, "shape_rounded_square"):
             radius = int(effective_size * (corner_radius / 100))
             draw.rectangle([x1 + radius, y1, x2 - radius, y2], fill=fill)
             draw.rectangle([x1, y1 + radius, x2, y2 - radius], fill=fill)
@@ -123,11 +131,11 @@ def draw_custom_shape_image(qr_object, box_size, border, fill_color, back_color,
             draw.pieslice([x2 - radius * 2, y1, x2, y1 + radius * 2], 270, 360, fill=fill)
             draw.pieslice([x1, y2 - radius * 2, x1 + radius * 2, y2], 90, 180, fill=fill)
             draw.pieslice([x2 - radius * 2, y2 - radius * 2, x2, y2], 0, 90, fill=fill)
-        elif shape == "동그라미":
+        elif shape == get_message(st.session_state.lang, "shape_circle"):
             draw.ellipse(xy, fill=fill)
-        elif shape == "마름모":
+        elif shape == get_message(st.session_state.lang, "shape_diamond"):
             draw.polygon([(x1 + effective_size/2, y1), (x1 + effective_size, y1 + effective_size/2), (x1 + effective_size/2, y1 + effective_size), (x1, y1 + effective_size/2)], fill=fill)
-        elif shape == "별":
+        elif shape == get_message(st.session_state.lang, "shape_star"):
             x_center = (x1 + x2) / 2
             y_center = (y1 + y2) / 2
             radius_outer = (x2 - x1) / 2
@@ -143,7 +151,7 @@ def draw_custom_shape_image(qr_object, box_size, border, fill_color, back_color,
                 y_inner = y_center + radius_inner * math.sin(angle_inner)
                 points.append((x_inner, y_inner))
             draw.polygon(points, fill=fill)
-        elif shape == "십자가":
+        elif shape == get_message(st.session_state.lang, "shape_cross"):
             x_center = (x1 + x2) / 2
             y_center = (y1 + y2) / 2
             cross_width = (x2 - x1) * 0.3
@@ -171,7 +179,7 @@ def draw_custom_shape_image(qr_object, box_size, border, fill_color, back_color,
                 # 간격을 적용한 새로운 좌표 계산
                 current_shape = finder_pattern_shape if is_finder_pattern else pattern_shape
                 
-                if current_shape != "사각":
+                if current_shape != get_message(st.session_state.lang, "shape_square"):
                     new_x = x + gap_pixels // 2
                     new_y = y + gap_pixels // 2
                     new_x_end = x + box_size - (gap_pixels - gap_pixels // 2)
@@ -222,7 +230,7 @@ def clear_filename_callback():
     st.session_state.filename_input_key = ""
 
 # 전체 초기화 콜백 함수
-def reset_all_settings():
+def reset_all_settings(lang_code):
     st.session_state.qr_input_area = ""
     st.session_state.custom_pattern_color_input_key = ""
     st.session_state.custom_bg_color_input_key = ""
@@ -230,14 +238,14 @@ def reset_all_settings():
     
     st.session_state.box_size_input = 20
     st.session_state.border_input = 2
-    st.session_state.error_correction_select = get_message(LANG, "error_correction_options_low")
+    st.session_state.error_correction_select = get_message(lang_code, "error_correction_options_low")
     st.session_state.mask_pattern_select = 2
     st.session_state.pattern_color_select = "black"
     st.session_state.bg_color_select = "white"
     st.session_state.strip_option = True
     st.session_state.file_format_select = "PNG"
-    st.session_state.pattern_shape_select = "사각"
-    st.session_state.finder_pattern_shape_select = "사각"
+    st.session_state.pattern_shape_select = get_message(lang_code, "shape_square")
+    st.session_state.finder_pattern_shape_select = get_message(lang_code, "shape_square")
     st.session_state.corner_radius_input = 25
     st.session_state.cell_gap_input = 0
     st.session_state.jpg_quality_input = 70
@@ -246,23 +254,38 @@ def reset_all_settings():
 #[메인]====================================================================================================================================================================
 
 
-st.title(get_message(LANG, "main_title"))
-st.markdown(get_message(LANG, "separator"))
+st.title(get_message(st.session_state.lang, "main_title"))
+
+# 언어 선택 드롭다운
+lang_options = get_language_options()
+lang_labels = list(lang_options.values())
+lang_codes = list(lang_options.keys())
+current_lang_index = lang_codes.index(st.session_state.lang)
+
+st.selectbox(
+    label=get_message(st.session_state.lang, "language_select_label"),
+    options=lang_labels,
+    index=current_lang_index,
+    key="language_selection",
+    on_change=set_language_callback
+)
+
+st.markdown(get_message(st.session_state.lang, "separator"))
 
 # 레이아웃 설정 (2개 컬럼)
 col1, col2 = st.columns([1.2, 1])
 
 with col1:
-    st.header(get_message(LANG, "header_settings"))
+    st.header(get_message(st.session_state.lang, "header_settings"))
 
     # QR 코드 입력창
-    st.subheader(get_message(LANG, "subheader_content"))
-    st.info(get_message(LANG, "info_max_chars"))
+    st.subheader(get_message(st.session_state.lang, "subheader_content"))
+    st.info(get_message(st.session_state.lang, "info_max_chars"))
 
     qr_data = st.text_area(
-        get_message(LANG, "text_area_label"),
+        get_message(st.session_state.lang, "text_area_label"),
         height=200,
-        placeholder=get_message(LANG, "text_area_placeholder"),
+        placeholder=get_message(st.session_state.lang, "text_area_placeholder"),
         key="qr_input_area",
     )
 
@@ -270,20 +293,20 @@ with col1:
     char_count = len(qr_data) if qr_data else 0
     if char_count > 0:
         if char_count > 2900:
-            st.error(get_message(LANG, "char_count_exceeded_error", char_count))
+            st.error(get_message(st.session_state.lang, "char_count_exceeded_error", char_count))
         elif char_count > 2400:
-            st.warning(get_message(LANG, "char_count_warning", char_count))
+            st.warning(get_message(st.session_state.lang, "char_count_warning", char_count))
         else:
-            st.success(get_message(LANG, "char_count_success", char_count))
+            st.success(get_message(st.session_state.lang, "char_count_success", char_count))
     else:
-        st.caption(get_message(LANG, "char_count_caption"))
+        st.caption(get_message(st.session_state.lang, "char_count_caption"))
 
     # 공백/줄바꿈 제거 옵션
     strip_option = st.checkbox(
-        get_message(LANG, "strip_option_label"),
+        get_message(st.session_state.lang, "strip_option_label"),
         value=st.session_state.strip_option,
         key="strip_option",
-        help=get_message(LANG, "strip_option_help")
+        help=get_message(st.session_state.lang, "strip_option_help")
     )
 
     # 입력 내용 삭제 버튼
@@ -291,20 +314,20 @@ with col1:
     with col_clear2:
         delete_btn_disabled = (char_count == 0)
         st.button(
-            get_message(LANG, "delete_content_button"),
-            help=get_message(LANG, "delete_content_help"),
+            get_message(st.session_state.lang, "delete_content_button"),
+            help=get_message(st.session_state.lang, "delete_content_help"),
             use_container_width=True,
             type="secondary",
             disabled=delete_btn_disabled,
             on_click=clear_text_input,
         )
 
-    st.markdown(get_message(LANG, "separator"))
+    st.markdown(get_message(st.session_state.lang, "separator"))
     
     # 파일 형식 설정
-    st.subheader(get_message(LANG, "subheader_file_format"))
+    st.subheader(get_message(st.session_state.lang, "subheader_file_format"))
     file_format = st.selectbox(
-        get_message(LANG, "file_format_label"),
+        get_message(st.session_state.lang, "file_format_label"),
         ("PNG", "JPG", "SVG"),
         index=0 if st.session_state.file_format_select == "PNG" else (1 if st.session_state.file_format_select == "JPG" else 2),
         key="file_format_select",
@@ -312,32 +335,32 @@ with col1:
     
     # JPG 품질 설정 슬라이더 (JPG 선택 시에만 표시)
     if file_format == "JPG":
-        st.caption(get_message(LANG, "jpg_info_caption"))
+        st.caption(get_message(st.session_state.lang, "jpg_info_caption"))
         jpg_quality = st.slider(
-            get_message(LANG, "jpg_quality_label"),
+            get_message(st.session_state.lang, "jpg_quality_label"),
             min_value=1,
             max_value=100,
             value=st.session_state.jpg_quality_input,
             key="jpg_quality_input",
-            help=get_message(LANG, "jpg_quality_help")
+            help=get_message(st.session_state.lang, "jpg_quality_help")
         )
     else:
         jpg_quality = 70
     
     # 패턴 모양 설정
-    st.markdown(get_message(LANG, "separator"))
-    st.subheader(get_message(LANG, "subheader_pattern_shape"))
+    st.markdown(get_message(st.session_state.lang, "separator"))
+    st.subheader(get_message(st.session_state.lang, "subheader_pattern_shape"))
     pattern_shape_disabled = (file_format == "SVG")
-    st.caption(get_message(LANG, "svg_shape_warning"))
+    st.caption(get_message(st.session_state.lang, "svg_shape_warning"))
     
     # 두 개의 패턴 모양 선택 옵션 추가
     col_pattern_shape, col_finder_shape = st.columns(2)
     
-    pattern_options = ("사각", "둥근사각", "동그라미", "마름모", "별", "십자가")
+    pattern_options = (get_message(st.session_state.lang, "shape_square"), get_message(st.session_state.lang, "shape_rounded_square"), get_message(st.session_state.lang, "shape_circle"), get_message(st.session_state.lang, "shape_diamond"), get_message(st.session_state.lang, "shape_star"), get_message(st.session_state.lang, "shape_cross"))
     
     with col_pattern_shape:
         pattern_shape = st.selectbox(
-            get_message(LANG, "pattern_shape_label"),
+            get_message(st.session_state.lang, "pattern_shape_label"),
             pattern_options,
             key="pattern_shape_select",
             disabled=pattern_shape_disabled,
@@ -345,22 +368,22 @@ with col1:
 
     with col_finder_shape:
         finder_pattern_shape = st.selectbox(
-            get_message(LANG, "finder_pattern_shape_label"),
+            get_message(st.session_state.lang, "finder_pattern_shape_label"),
             pattern_options,
             key="finder_pattern_shape_select",
             disabled=pattern_shape_disabled,
         )
 
     # 둥근사각 전용 슬라이더
-    if pattern_shape == "둥근사각" or finder_pattern_shape == "둥근사각":
+    if pattern_shape == get_message(st.session_state.lang, "shape_rounded_square") or finder_pattern_shape == get_message(st.session_state.lang, "shape_rounded_square"):
         corner_radius_disabled = (file_format == "SVG")
-        st.caption(get_message(LANG, "svg_no_rounded_corners_warning"))
+        st.caption(get_message(st.session_state.lang, "svg_no_rounded_corners_warning"))
         corner_radius = st.slider(
-            get_message(LANG, "rounded_corners_radius_label"), 
+            get_message(st.session_state.lang, "rounded_corners_radius_label"), 
             min_value=0, 
             max_value=50, 
             value=st.session_state.corner_radius_input,
-            help=get_message(LANG, "rounded_corners_radius_help"),
+            help=get_message(st.session_state.lang, "rounded_corners_radius_help"),
             key="corner_radius_input",
             disabled=corner_radius_disabled
         )
@@ -368,14 +391,14 @@ with col1:
         corner_radius = 0
         
     # 패턴 간격 슬라이더 (사각 제외)
-    cell_gap_disabled = (pattern_shape == "사각") or (finder_pattern_shape == "사각") or (file_format == "SVG")
-    st.caption(get_message(LANG, "no_gap_warning"))
+    cell_gap_disabled = (pattern_shape == get_message(st.session_state.lang, "shape_square")) or (finder_pattern_shape == get_message(st.session_state.lang, "shape_square")) or (file_format == "SVG")
+    st.caption(get_message(st.session_state.lang, "no_gap_warning"))
     cell_gap = st.slider(
-        get_message(LANG, "cell_gap_label"),
+        get_message(st.session_state.lang, "cell_gap_label"),
         min_value=0,
         max_value=40,
         value=st.session_state.cell_gap_input,
-        help=get_message(LANG, "cell_gap_help"),
+        help=get_message(st.session_state.lang, "cell_gap_help"),
         disabled=cell_gap_disabled,
         key="cell_gap_input",
     )
@@ -383,16 +406,16 @@ with col1:
 #========================================================================================================================================================================
 
     # 색상 설정 (순서 변경)
-    st.markdown(get_message(LANG, "separator"))
-    st.subheader(get_message(LANG, "subheader_color_settings"))
+    st.markdown(get_message(st.session_state.lang, "separator"))
+    st.subheader(get_message(st.session_state.lang, "subheader_color_settings"))
     
     file_format_is_svg = (st.session_state.file_format_select == "SVG")
     
     if file_format_is_svg:
-        st.warning(get_message(LANG, "svg_color_warning"))
+        st.warning(get_message(st.session_state.lang, "svg_color_warning"))
 
     colors = [
-        get_message(LANG, "direct_input_color_option"), "black", "white", "gray", "lightgray", "dimgray",
+        get_message(st.session_state.lang, "direct_input_color_option"), "black", "white", "gray", "lightgray", "dimgray",
         "red", "green", "blue", "yellow", "cyan", "magenta", "maroon",
         "purple", "navy", "lime", "olive", "teal", "aqua", "fuchsia",
         "silver", "gold", "orange", "orangered", "crimson", "indigo",
@@ -400,73 +423,73 @@ with col1:
     col1_3, col1_4 = st.columns(2)
     with col1_3:
         pattern_color_choice = st.selectbox(
-            get_message(LANG, "pattern_color_label"), colors, 
+            get_message(st.session_state.lang, "pattern_color_label"), colors, 
             key="pattern_color_select", 
             disabled=file_format_is_svg
         )
     with col1_4:
         bg_color_choice = st.selectbox(
-            get_message(LANG, "bg_color_label"), colors, 
+            get_message(st.session_state.lang, "bg_color_label"), colors, 
             key="bg_color_select", 
             disabled=file_format_is_svg
         )
 
-    st.markdown(get_message(LANG, "hex_code_info"))
-    st.caption(get_message(LANG, "hex_code_caption"))
+    st.markdown(get_message(st.session_state.lang, "hex_code_info"))
+    st.caption(get_message(st.session_state.lang, "hex_code_caption"))
     col1_5, col1_6 = st.columns(2)
     with col1_5:
         st.text_input(
-            get_message(LANG, "pattern_hex_input_label"),
-            placeholder=get_message(LANG, "hex_input_placeholder"),
-            disabled=(pattern_color_choice != get_message(LANG, "direct_input_color_option")) or file_format_is_svg,
+            get_message(st.session_state.lang, "pattern_hex_input_label"),
+            placeholder=get_message(st.session_state.lang, "hex_input_placeholder"),
+            disabled=(pattern_color_choice != get_message(st.session_state.lang, "direct_input_color_option")) or file_format_is_svg,
             key="custom_pattern_color_input_key",
         )
     with col1_6:
         st.text_input(
-            get_message(LANG, "bg_hex_input_label"),
-            placeholder=get_message(LANG, "bg_hex_input_placeholder"),
-            disabled=(bg_color_choice != get_message(LANG, "direct_input_color_option")) or file_format_is_svg,
+            get_message(st.session_state.lang, "bg_hex_input_label"),
+            placeholder=get_message(st.session_state.lang, "bg_hex_input_placeholder"),
+            disabled=(bg_color_choice != get_message(st.session_state.lang, "direct_input_color_option")) or file_format_is_svg,
             key="custom_bg_color_input_key",
         )
     
-    pattern_color = st.session_state.get('custom_pattern_color_input_key', '').strip() if pattern_color_choice == get_message(LANG, "direct_input_color_option") else pattern_color_choice
-    bg_color = st.session_state.get('custom_bg_color_input_key', '').strip() if bg_color_choice == get_message(LANG, "direct_input_color_option") else bg_color_choice
+    pattern_color = st.session_state.get('custom_pattern_color_input_key', '').strip() if pattern_color_choice == get_message(st.session_state.lang, "direct_input_color_option") else pattern_color_choice
+    bg_color = st.session_state.get('custom_bg_color_input_key', '').strip() if bg_color_choice == get_message(st.session_state.lang, "direct_input_color_option") else bg_color_choice
 
 #========================================================================================================================================================================
 
     # QR 코드 설정 (순서 변경)
-    st.markdown(get_message(LANG, "separator"))
-    st.subheader(get_message(LANG, "subheader_qr_settings"))
+    st.markdown(get_message(st.session_state.lang, "separator"))
+    st.subheader(get_message(st.session_state.lang, "subheader_qr_settings"))
 
     col1_1, col1_2 = st.columns(2)
     with col1_1:
-        box_size = st.number_input(get_message(LANG, "box_size_label"), min_value=1, max_value=100, key="box_size_input")
-        border = st.number_input(get_message(LANG, "border_label"), min_value=0, max_value=10, key="border_input")
+        box_size = st.number_input(get_message(st.session_state.lang, "box_size_label"), min_value=1, max_value=100, key="box_size_input")
+        border = st.number_input(get_message(st.session_state.lang, "border_label"), min_value=0, max_value=10, key="border_input")
 
     with col1_2:
         error_correction_options = {
-            get_message(LANG, "error_correction_options_low"): qrcode.constants.ERROR_CORRECT_L,
-            get_message(LANG, "error_correction_options_medium"): qrcode.constants.ERROR_CORRECT_M,
-            get_message(LANG, "error_correction_options_quartile"): qrcode.constants.ERROR_CORRECT_Q,
-            get_message(LANG, "error_correction_options_high"): qrcode.constants.ERROR_CORRECT_H,
+            get_message(st.session_state.lang, "error_correction_options_low"): qrcode.constants.ERROR_CORRECT_L,
+            get_message(st.session_state.lang, "error_correction_options_medium"): qrcode.constants.ERROR_CORRECT_M,
+            get_message(st.session_state.lang, "error_correction_options_quartile"): qrcode.constants.ERROR_CORRECT_Q,
+            get_message(st.session_state.lang, "error_correction_options_high"): qrcode.constants.ERROR_CORRECT_H,
         }
-        error_correction_choice = st.selectbox(get_message(LANG, "error_correction_label"), list(error_correction_options.keys()), key="error_correction_select")
+        error_correction_choice = st.selectbox(get_message(st.session_state.lang, "error_correction_label"), list(error_correction_options.keys()), key="error_correction_select")
         error_correction = error_correction_options[error_correction_choice]
-        mask_pattern = st.selectbox(get_message(LANG, "mask_pattern_label"), options=list(range(8)), key="mask_pattern_select")
+        mask_pattern = st.selectbox(get_message(st.session_state.lang, "mask_pattern_label"), options=list(range(8)), key="mask_pattern_select")
 
 
 #========================================================================================================================================================================
 
     # 파일명 설정
-    st.markdown(get_message(LANG, "separator"))
-    st.subheader(get_message(LANG, "subheader_filename"))
+    st.markdown(get_message(st.session_state.lang, "separator"))
+    st.subheader(get_message(st.session_state.lang, "subheader_filename"))
     
     col_filename_input, col_filename_delete = st.columns([3, 1.1])
 
     with col_filename_input:
         filename = st.text_input(
-            get_message(LANG, "filename_input_label"),
-            placeholder=get_message(LANG, "filename_placeholder"),
+            get_message(st.session_state.lang, "filename_input_label"),
+            placeholder=get_message(st.session_state.lang, "filename_placeholder"),
             key="filename_input_key",
         )
 
@@ -476,8 +499,8 @@ with col1:
         st.markdown('<div style="margin-top: 28px;"></div>', unsafe_allow_html=True)
         filename_delete_disabled = not st.session_state.get("filename_input_key", "")
         st.button(
-            get_message(LANG, "delete_filename_button"),
-            help=get_message(LANG, "delete_filename_help"),
+            get_message(st.session_state.lang, "delete_filename_button"),
+            help=get_message(st.session_state.lang, "delete_filename_help"),
             use_container_width=True,
             type="secondary",
             disabled=filename_delete_disabled,
@@ -488,12 +511,12 @@ with col1:
 #========================================================================================================================================================================
 
 with col2:
-    st.header(get_message(LANG, "header_preview_download"))
+    st.header(get_message(st.session_state.lang, "header_preview_download"))
     
     current_data = qr_data.strip() if st.session_state.strip_option else qr_data
     
-    is_pattern_color_valid_preview = (pattern_color_choice != get_message(LANG, "direct_input_color_option")) or (pattern_color_choice == get_message(LANG, "direct_input_color_option") and pattern_color and is_valid_color(pattern_color))
-    is_bg_color_valid_preview = (bg_color_choice != get_message(LANG, "direct_input_color_option")) or (bg_color_choice == get_message(LANG, "direct_input_color_option") and bg_color and is_valid_color(bg_color))
+    is_pattern_color_valid_preview = (pattern_color_choice != get_message(st.session_state.lang, "direct_input_color_option")) or (pattern_color_choice == get_message(st.session_state.lang, "direct_input_color_option") and pattern_color and is_valid_color(pattern_color))
+    is_bg_color_valid_preview = (bg_color_choice != get_message(st.session_state.lang, "direct_input_color_option")) or (bg_color_choice == get_message(st.session_state.lang, "direct_input_color_option") and bg_color and is_valid_color(bg_color))
     is_colors_same_preview = (is_pattern_color_valid_preview and is_bg_color_valid_preview and pattern_color and bg_color and pattern_color == bg_color)
     
     preview_image_display = None
@@ -548,150 +571,150 @@ with col2:
                     # SVG 미리보기를 위한 이미지 생성
                     preview_image_display = draw_custom_shape_image(
                         qr, int(st.session_state.box_size_input), int(st.session_state.border_input),
-                        "black", "white", "사각",
+                        "black", "white", get_message(st.session_state.lang, "shape_square"),
                         st.session_state.corner_radius_input,
                         st.session_state.cell_gap_input,
-                        "사각",
+                        get_message(st.session_state.lang, "shape_square"),
                     )
         except Exception as e:
             st.error(f"오류가 발생했습니다: {str(e)}")
 
-    st.markdown(get_message(LANG, "separator"))
+    st.markdown(get_message(st.session_state.lang, "separator"))
     
     if preview_image_display:
-        st.success(get_message(LANG, "success_message"))
-        st.subheader(get_message(LANG, "subheader_preview"))
+        st.success(get_message(st.session_state.lang, "success_message"))
+        st.subheader(get_message(st.session_state.lang, "subheader_preview"))
         col_left, col_center, col_right = st.columns([1, 2, 1])
         with col_center:
-            st.image(preview_image_display, caption=get_message(LANG, "preview_caption"), width=380)
+            st.image(preview_image_display, caption=get_message(st.session_state.lang, "preview_caption"), width=380)
         
         if preview_qr_object:
-            st.info(get_message(LANG, "qr_info_title") + "\n" +
-                    get_message(LANG, "qr_version").format(preview_qr_object.version) + "\n" +
+            st.info(get_message(st.session_state.lang, "qr_info_title") + "\n" +
+                    get_message(st.session_state.lang, "qr_version").format(preview_qr_object.version) + "\n" +
                     "** **" + "\n" +
-                    get_message(LANG, "qr_cells").format(preview_qr_object.modules_count) + "\n" +
-                    get_message(LANG, "qr_border_cells").format(2 * int(st.session_state.border_input)) + "\n" +
-                    get_message(LANG, "qr_box_size").format(int(st.session_state.box_size_input)) + "\n" +
-                    get_message(LANG, "qr_image_size").format((preview_qr_object.modules_count + 2 * int(st.session_state.border_input)) * int(st.session_state.box_size_input), (preview_qr_object.modules_count + 2 * int(st.session_state.border_input)) * int(st.session_state.box_size_input)) + "\n" +
+                    get_message(st.session_state.lang, "qr_cells").format(preview_qr_object.modules_count) + "\n" +
+                    get_message(st.session_state.lang, "qr_border_cells").format(2 * int(st.session_state.border_input)) + "\n" +
+                    get_message(st.session_state.lang, "qr_box_size").format(int(st.session_state.box_size_input)) + "\n" +
+                    get_message(st.session_state.lang, "qr_image_size").format((preview_qr_object.modules_count + 2 * int(st.session_state.border_input)) * int(st.session_state.box_size_input), (preview_qr_object.modules_count + 2 * int(st.session_state.border_input)) * int(st.session_state.box_size_input)) + "\n" +
                     "** **" + "\n" +
-                    get_message(LANG, "qr_calc_method") + "\n" +
+                    get_message(st.session_state.lang, "qr_calc_method") + "\n" +
                     "** **" + "\n" +
-                    get_message(LANG, "qr_pattern_color").format("black" if file_format == "SVG" else pattern_color) + "\n" +
-                    get_message(LANG, "qr_bg_color").format("white" if file_format == "SVG" else bg_color) + "\n")
+                    get_message(st.session_state.lang, "qr_pattern_color").format("black" if file_format == "SVG" else pattern_color) + "\n" +
+                    get_message(st.session_state.lang, "qr_bg_color").format("white" if file_format == "SVG" else bg_color) + "\n")
 
         # 다운로드 섹션의 위치를 미리보기 아래로 이동
-        st.markdown(get_message(LANG, "separator"))
-        st.subheader(get_message(LANG, "subheader_download"))
+        st.markdown(get_message(st.session_state.lang, "separator"))
+        st.subheader(get_message(st.session_state.lang, "subheader_download"))
         now = datetime.now(ZoneInfo("Asia/Seoul"))
         final_filename = sanitize_filename(st.session_state.filename_input_key.strip() if st.session_state.filename_input_key.strip() else now.strftime("QR_%Y-%m-%d_%H-%M-%S"))
         download_filename = f"{final_filename}{download_extension}"
 
         st.download_button(
-            label=get_message(LANG, "download_button_label"),
+            label=get_message(st.session_state.lang, "download_button_label"),
             data=download_data,
             file_name=download_filename,
             mime=download_mime,
             use_container_width=True,
-            help=get_message(LANG, "download_button_help")
+            help=get_message(st.session_state.lang, "download_button_help")
         )
         
         st.markdown(
             f'<p style="font-size:18px;">'
-            f'<span style="color:darkorange; font-weight:bold;">{get_message(LANG, "download_filename_display")} </span> '
+            f'<span style="color:darkorange; font-weight:bold;">{get_message(st.session_state.lang, "download_filename_display")} </span> '
             f'<span style="color:dodgerblue;"> {download_filename}</span>'
             f'</p>',
             unsafe_allow_html=True,
         )
 
     elif current_data:
-        st.warning(get_message(LANG, "download_error_warning"))
+        st.warning(get_message(st.session_state.lang, "download_error_warning"))
         
         if file_format != "SVG":
-            if pattern_color_choice == get_message(LANG, "direct_input_color_option") and not pattern_color:
-                st.warning(get_message(LANG, "hex_input_missing_warning").format("패턴 색"))
-            if bg_color_choice == get_message(LANG, "direct_input_color_option") and not bg_color:
-                st.warning(get_message(LANG, "hex_input_missing_warning").format("배경 색"))
-            if pattern_color_choice == get_message(LANG, "direct_input_color_option") and pattern_color and not is_valid_color(pattern_color):
-                st.warning(get_message(LANG, "hex_input_invalid_warning").format("패턴 색"))
-            if bg_color_choice == get_message(LANG, "direct_input_color_option") and bg_color and not is_valid_color(bg_color):
-                st.warning(get_message(LANG, "hex_input_invalid_warning").format("배경 색"))
+            if pattern_color_choice == get_message(st.session_state.lang, "direct_input_color_option") and not pattern_color:
+                st.warning(get_message(st.session_state.lang, "hex_input_missing_warning").format(get_message(st.session_state.lang, "pattern_color_label")))
+            if bg_color_choice == get_message(st.session_state.lang, "direct_input_color_option") and not bg_color:
+                st.warning(get_message(st.session_state.lang, "hex_input_missing_warning").format(get_message(st.session_state.lang, "bg_color_label")))
+            if pattern_color_choice == get_message(st.session_state.lang, "direct_input_color_option") and pattern_color and not is_valid_color(pattern_color):
+                st.warning(get_message(st.session_state.lang, "hex_input_invalid_warning").format(get_message(st.session_state.lang, "pattern_color_label")))
+            if bg_color_choice == get_message(st.session_state.lang, "direct_input_color_option") and bg_color and not is_valid_color(bg_color):
+                st.warning(get_message(st.session_state.lang, "hex_input_invalid_warning").format(get_message(st.session_state.lang, "bg_color_label")))
             if is_colors_same_preview:
-                st.warning(get_message(LANG, "same_color_warning"))
+                st.warning(get_message(st.session_state.lang, "same_color_warning"))
     else:
-        st.info(get_message(LANG, "no_content_info"))
+        st.info(get_message(st.session_state.lang, "no_content_info"))
 
 
-st.markdown(get_message(LANG, "separator"))
+st.markdown(get_message(st.session_state.lang, "separator"))
 
 st.button(
-    label=get_message(LANG, "reset_button_label"), 
+    label=get_message(st.session_state.lang, "reset_button_label"), 
     use_container_width=True,
     type="secondary",
-    on_click=reset_all_settings,
-    help=get_message(LANG, "reset_button_help"),
+    on_click=lambda: reset_all_settings(st.session_state.lang),
+    help=get_message(st.session_state.lang, "reset_button_help"),
 )
 
 with st.sidebar:
-    st.header(get_message(LANG, "sidebar_guide_title"))
-    st.markdown(get_message(LANG, "sidebar_guide_1"))
-    st.markdown(get_message(LANG, "sidebar_guide_2"))
-    st.markdown(get_message(LANG, "sidebar_guide_3"))
-    st.markdown(get_message(LANG, "sidebar_guide_4"))
-    st.markdown(get_message(LANG, "sidebar_guide_5"))
-    st.markdown(get_message(LANG, "sidebar_guide_6"))
+    st.header(get_message(st.session_state.lang, "sidebar_guide_title"))
+    st.markdown(get_message(st.session_state.lang, "sidebar_guide_1"))
+    st.markdown(get_message(st.session_state.lang, "sidebar_guide_2"))
+    st.markdown(get_message(st.session_state.lang, "sidebar_guide_3"))
+    st.markdown(get_message(st.session_state.lang, "sidebar_guide_4"))
+    st.markdown(get_message(st.session_state.lang, "sidebar_guide_5"))
+    st.markdown(get_message(st.session_state.lang, "sidebar_guide_6"))
 
-    st.markdown(get_message(LANG, "separator"))
+    st.markdown(get_message(st.session_state.lang, "separator"))
 
-    st.header(get_message(LANG, "sidebar_tips_title"))
-    st.markdown(get_message(LANG, "tip_text"))
-    st.markdown(get_message(LANG, "tip_website"))
-    st.markdown(get_message(LANG, "tip_email"))
-    st.markdown(get_message(LANG, "tip_email_full"))
-    st.markdown(get_message(LANG, "tip_phone"))
-    st.markdown(get_message(LANG, "tip_sms"))
-    st.markdown(get_message(LANG, "tip_sms_full"))
-    st.markdown(get_message(LANG, "tip_wifi"))
+    st.header(get_message(st.session_state.lang, "sidebar_tips_title"))
+    st.markdown(get_message(st.session_state.lang, "tip_text"))
+    st.markdown(get_message(st.session_state.lang, "tip_website"))
+    st.markdown(get_message(st.session_state.lang, "tip_email"))
+    st.markdown(get_message(st.session_state.lang, "tip_email_full"))
+    st.markdown(get_message(st.session_state.lang, "tip_phone"))
+    st.markdown(get_message(st.session_state.lang, "tip_sms"))
+    st.markdown(get_message(st.session_state.lang, "tip_sms_full"))
+    st.markdown(get_message(st.session_state.lang, "tip_wifi"))
 
-    st.markdown(get_message(LANG, "separator"))
+    st.markdown(get_message(st.session_state.lang, "separator"))
 
-    st.header(get_message(LANG, "sidebar_settings_title"))
-    st.markdown(get_message(LANG, "sidebar_file_format_title"))
-    st.markdown(get_message(LANG, "sidebar_png_desc"))
-    st.markdown(get_message(LANG, "sidebar_jpg_desc"))
-    st.markdown(get_message(LANG, "sidebar_svg_desc"))
+    st.header(get_message(st.session_state.lang, "sidebar_settings_title"))
+    st.markdown(get_message(st.session_state.lang, "sidebar_file_format_title"))
+    st.markdown(get_message(st.session_state.lang, "sidebar_png_desc"))
+    st.markdown(get_message(st.session_state.lang, "sidebar_jpg_desc"))
+    st.markdown(get_message(st.session_state.lang, "sidebar_svg_desc"))
 
-    st.markdown(get_message(LANG, "separator"))
+    st.markdown(get_message(st.session_state.lang, "separator"))
 
-    st.markdown(get_message(LANG, "sidebar_pattern_shape_title"))
-    st.markdown(get_message(LANG, "sidebar_pattern_shape_desc"))
-    st.markdown(get_message(LANG, "sidebar_pattern_shape_warning"))
+    st.markdown(get_message(st.session_state.lang, "sidebar_pattern_shape_title"))
+    st.markdown(get_message(st.session_state.lang, "sidebar_pattern_shape_desc"))
+    st.markdown(get_message(st.session_state.lang, "sidebar_pattern_shape_warning"))
     
-    st.markdown(get_message(LANG, "sidebar_cell_gap_title"))
-    st.markdown(get_message(LANG, "sidebar_cell_gap_desc_1"))
-    st.markdown(get_message(LANG, "sidebar_cell_gap_desc_2"))
+    st.markdown(get_message(st.session_state.lang, "sidebar_cell_gap_title"))
+    st.markdown(get_message(st.session_state.lang, "sidebar_cell_gap_desc_1"))
+    st.markdown(get_message(st.session_state.lang, "sidebar_cell_gap_desc_2"))
 
-    st.markdown(get_message(LANG, "separator"))
+    st.markdown(get_message(st.session_state.lang, "separator"))
 
-    st.markdown(get_message(LANG, "sidebar_color_input_title"))
-    st.markdown(get_message(LANG, "sidebar_color_input_desc_1"))
-    st.markdown(get_message(LANG, "sidebar_color_input_desc_2"))
-    st.markdown(get_message(LANG, "sidebar_color_input_desc_3"))
+    st.markdown(get_message(st.session_state.lang, "sidebar_color_input_title"))
+    st.markdown(get_message(st.session_state.lang, "sidebar_color_input_desc_1"))
+    st.markdown(get_message(st.session_state.lang, "sidebar_color_input_desc_2"))
+    st.markdown(get_message(st.session_state.lang, "sidebar_color_input_desc_3"))
 
-    st.markdown(get_message(LANG, "separator"))
+    st.markdown(get_message(st.session_state.lang, "separator"))
     
-    st.markdown(get_message(LANG, "sidebar_qr_settings_title"))
-    st.markdown(get_message(LANG, "sidebar_error_correction_title"))
-    st.markdown(get_message(LANG, "sidebar_error_correction_low"))
-    st.markdown(get_message(LANG, "sidebar_error_correction_medium"))
-    st.markdown(get_message(LANG, "sidebar_error_correction_quartile"))
-    st.markdown(get_message(LANG, "sidebar_error_correction_high"))
+    st.markdown(get_message(st.session_state.lang, "sidebar_qr_settings_title"))
+    st.markdown(get_message(st.session_state.lang, "sidebar_error_correction_title"))
+    st.markdown(get_message(st.session_state.lang, "sidebar_error_correction_low"))
+    st.markdown(get_message(st.session_state.lang, "sidebar_error_correction_medium"))
+    st.markdown(get_message(st.session_state.lang, "sidebar_error_correction_quartile"))
+    st.markdown(get_message(st.session_state.lang, "sidebar_error_correction_high"))
 
-    st.markdown(get_message(LANG, "sidebar_mask_pattern_title"))
-    st.markdown(get_message(LANG, "sidebar_mask_pattern_desc"))
+    st.markdown(get_message(st.session_state.lang, "sidebar_mask_pattern_title"))
+    st.markdown(get_message(st.session_state.lang, "sidebar_mask_pattern_desc"))
 
 # 하단 정보
-st.markdown(get_message(LANG, "separator"))
+st.markdown(get_message(st.session_state.lang, "separator"))
 st.markdown(
-    f'<p style="text-align: center; color: mediumslateblue; font-size: 15px;">{get_message(LANG, "footer_info")}</p>',
+    f'<p style="text-align: center; color: mediumslateblue; font-size: 15px;">{get_message(st.session_state.lang, "footer_info")}</p>',
     unsafe_allow_html=True
 )
