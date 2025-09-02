@@ -11,6 +11,10 @@ from state_manager import set_download_initiated
 
 def build_preview_and_download_ui():
     """미리보기 및 다운로드 섹션을 빌드합니다."""
+    # 변수 초기화
+    if 'show_generate_success' not in st.session_state:
+        st.session_state.show_generate_success = False
+    
     st.header("👀 미리보기 및 생성")
     
     qr_data = st.session_state.qr_input_area
@@ -36,7 +40,6 @@ def build_preview_and_download_ui():
     }
     error_correction = error_correction_options[st.session_state.error_correction_select]
 
-    # QR 코드 미리보기 생성 로직
     preview_image_display = None
     preview_qr_object = None
     
@@ -172,13 +175,11 @@ def build_preview_and_download_ui():
     else:
         st.info("QR 코드 내용을 입력하면 생성될 QR 코드를 미리 보여드립니다.")
 
-    # 미리보기와 QR 정보 표시를 하나로 묶었습니다.
     if preview_image_display and preview_qr_object:
         st.subheader("📱 QR 코드 미리보기")
         col_left, col_center, col_right = st.columns([1, 2, 1])
         with col_center:
-            # width 매개변수를 제거하여 box_size에 따라 크기가 조절되도록 합니다.
-            st.image(preview_image_display, caption="생성된 QR 코드")
+            st.image(preview_image_display, caption="생성된 QR 코드", width=380)
         
         st.info(f"""
         **QR 코드 정보**
