@@ -6,7 +6,7 @@ import io
 import streamlit as st
 from messages import get_message
 from qrcode.image.styles.colormasks import SolidFillColorMask
-from qrcode.image.styles.moduledrawers import Rounded, Circle, GappedSquare, Square
+from qrcode.image.styles.moduledrawers import Rounded, Circle, GappedSquare
 
 def get_error_correction_constant(level_str):
     """
