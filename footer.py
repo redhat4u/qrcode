@@ -2,11 +2,13 @@
 # footer.py
 
 import streamlit as st
+from messages import * # <-- 추가
 
 def build_footer():
     """앱 하단 정보를 빌드합니다."""
     st.markdown("---")
     st.markdown(
-        '<p style="text-align: center; color: #e9967a; font-size: 15px;">© 2025 QR 코드 생성기 | Streamlit으로 제작 | 제작: 류종훈(redhat4u@gmail.com)</p>',
+        f'<p style="text-align: center; color: hotpink; font-size: 15px;">{FOOTER_TEXT}</p>', # <-- 수정
         unsafe_allow_html=True
     )
+    
