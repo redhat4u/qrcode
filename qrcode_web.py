@@ -62,6 +62,8 @@ if 'corner_radius_input' not in st.session_state:
     st.session_state.corner_radius_input = 25
 if 'cell_gap_input' not in st.session_state:
     st.session_state.cell_gap_input = 0
+if 'jpg_quality_input' not in st.session_state:
+    st.session_state.jpg_quality_input = 90
 
 
 # 파일명에 특수문자 포함시 '_' 문자로 치환
@@ -242,6 +244,7 @@ def reset_all_settings():
     st.session_state.finder_pattern_shape_select = "사각"
     st.session_state.corner_radius_input = 25
     st.session_state.cell_gap_input = 0
+    st.session_state.jpg_quality_input = 90
 
 
 #[메인]====================================================================================================================================================================
@@ -310,6 +313,20 @@ with col1:
         index=0 if st.session_state.file_format_select == "PNG" else (1 if st.session_state.file_format_select == "JPG" else 2),
         key="file_format_select",
     )
+    
+    # JPG 품질 설정 슬라이더 (JPG 선택 시에만 표시)
+    if file_format == "JPG":
+        st.caption("ℹ️ JPG는 압축률에 따라 이미지 품질이 달라집니다.")
+        jpg_quality = st.slider(
+            "JPG 품질 (압축률)",
+            min_value=1,
+            max_value=95,
+            value=st.session_state.jpg_quality_input,
+            key="jpg_quality_input",
+            help="높은 품질(95)은 파일 크기가 크고 선명하며, 낮은 품질(1)은 파일 크기가 작고 화질이 저하됩니다."
+        )
+    else:
+        jpg_quality = 90
     
     # 패턴 모양 설정
     st.markdown("---")
@@ -519,7 +536,7 @@ with col2:
                     elif file_format == "JPG":
                         # JPG는 투명도를 지원하지 않아, RGB 모드로 변환
                         rgb_image = preview_image_display.convert('RGB')
-                        rgb_image.save(img_buffer, format='JPEG')
+                        rgb_image.save(img_buffer, format='JPEG', quality=jpg_quality)
                         download_mime = "image/jpeg"
                         download_extension = ".jpg"
                         
@@ -658,6 +675,14 @@ with st.sidebar:
     st.markdown("""
     - 0~7 중 선택 (같은 내용이라도 번호에 따라 패턴이 달라짐)
     """)
+    
+    st.markdown("**파일 형식:**")
+    st.markdown("""
+    - **PNG**: 무손실 압축으로 품질 저하가 없으며, 투명 배경을 지원합니다.
+    - **JPG**: 손실 압축으로 파일 크기가 작고, 사진에 주로 사용됩니다. 품질 설정 슬라이더로 압축률을 조절할 수 있습니다.
+    - **SVG**: 벡터 형식으로 해상도에 영향을 받지 않아 확대해도 깨지지 않습니다.
+    """)
+    st.markdown("---")
 
     st.markdown("**패턴 모양:**")
     st.markdown("""
