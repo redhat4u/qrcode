@@ -49,7 +49,6 @@ def build_preview_and_download_ui():
     # 모든 조건이 충족될 때만 미리보기 이미지를 생성
     if (
         current_data
-        and not file_format_is_svg
         and is_valid_color(pattern_color_for_preview)
         and is_valid_color(bg_color_for_preview)
         and pattern_color_for_preview != bg_color_for_preview
