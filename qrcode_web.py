@@ -60,6 +60,8 @@ if 'pattern_shape_select' not in st.session_state:
     st.session_state.pattern_shape_select = "사각"
 if 'corner_radius_input' not in st.session_state:
     st.session_state.corner_radius_input = 25
+if 'cell_gap_input' not in st.session_state:
+    st.session_state.cell_gap_input = 0
 
 
 # 파일명에 특수문자 포함시 '_' 문자로 치환
@@ -98,13 +100,17 @@ def get_qr_data_object(data, box_size, border, error_correction, mask_pattern):
 
 
 # 사용자 정의 모양으로 QR 코드 이미지 생성 함수 (PNG)
-def draw_custom_shape_image(qr_object, box_size, border, fill_color, back_color, shape, corner_radius):
+def draw_custom_shape_image(qr_object, box_size, border, fill_color, back_color, shape, corner_radius, cell_gap):
     if not qr_object:
         return None
 
     img_size = (qr_object.modules_count + 2 * border) * box_size
     img = Image.new('RGB', (img_size, img_size), back_color)
     draw = ImageDraw.Draw(img)
+    
+    # 간격 계산
+    gap_pixels = int(box_size * (cell_gap / 100))
+    effective_box_size = box_size - gap_pixels
 
     def draw_rounded_rectangle(draw, xy, radius, fill):
         x1, y1, x2, y2 = xy
@@ -137,9 +143,9 @@ def draw_custom_shape_image(qr_object, box_size, border, fill_color, back_color,
         draw.polygon(points, fill=fill)
 
     # 십자가 모양을 그리는 로직
-    def draw_cross(draw, xy, fill):
+    def draw_cross(draw, xy, fill, cross_width_ratio):
         x1, y1, x2, y2 = xy
-        cross_width = box_size * 0.3 # 십자가 팔의 두께
+        cross_width = (x2 - x1) * cross_width_ratio # 십자가 팔의 두께
         x_center = (x1 + x2) / 2
         y_center = (y1 + y2) / 2
         
@@ -154,20 +160,32 @@ def draw_custom_shape_image(qr_object, box_size, border, fill_color, back_color,
                 x = (c + border) * box_size
                 y = (r + border) * box_size
                 
+                # 간격을 적용한 새로운 좌표 계산
+                if shape != "사각":
+                    new_x = x + gap_pixels // 2
+                    new_y = y + gap_pixels // 2
+                    new_x_end = x + box_size - (gap_pixels - gap_pixels // 2)
+                    new_y_end = y + box_size - (gap_pixels - gap_pixels // 2)
+                    draw_coords = [new_x, new_y, new_x_end, new_y_end]
+                else:
+                    draw_coords = [x, y, x + box_size, y + box_size]
+
+                
                 if shape == "사각" or shape == "사각형":
-                    draw.rectangle([x, y, x + box_size, y + box_size], fill=fill_color)
+                    draw.rectangle(draw_coords, fill=fill_color)
                 elif shape == "둥근사각":
                     # 슬라이더 값에 따라 라운딩 반경 계산
-                    radius = int(box_size * (corner_radius / 100))
-                    draw_rounded_rectangle(draw, [x, y, x + box_size, y + box_size], radius, fill=fill_color)
+                    radius = int(effective_box_size * (corner_radius / 100))
+                    draw_rounded_rectangle(draw, draw_coords, radius, fill=fill_color)
                 elif shape == "동그라미":
-                    draw.ellipse([x, y, x + box_size, y + box_size], fill=fill_color)
+                    draw.ellipse(draw_coords, fill=fill_color)
                 elif shape == "마름모":
-                    draw.polygon([(x + box_size/2, y), (x + box_size, y + box_size/2), (x + box_size/2, y + box_size), (x, y + box_size/2)], fill=fill_color)
+                    x1, y1, x2, y2 = draw_coords
+                    draw.polygon([(x1 + effective_box_size/2, y1), (x1 + effective_box_size, y1 + effective_box_size/2), (x1 + effective_box_size/2, y1 + effective_box_size), (x1, y1 + effective_box_size/2)], fill=fill_color)
                 elif shape == "별":
-                    draw_star(draw, [x, y, x + box_size, y + box_size], fill_color)
+                    draw_star(draw, draw_coords, fill_color)
                 elif shape == "십자가":
-                    draw_cross(draw, [x, y, x + box_size, y + box_size], fill_color)
+                    draw_cross(draw, draw_coords, fill_color, 0.3)
 
     return img
 
@@ -225,6 +243,7 @@ def reset_all_settings():
     st.session_state.file_format_select = "PNG"
     st.session_state.pattern_shape_select = "사각"
     st.session_state.corner_radius_input = 25
+    st.session_state.cell_gap_input = 0
 
 
 #[메인]====================================================================================================================================================================
@@ -317,6 +336,19 @@ with col1:
         )
     else:
         corner_radius = 0
+        
+    # 패턴 간격 슬라이더 (사각 제외)
+    cell_gap_disabled = (pattern_shape == "사각") or (file_format == "SVG")
+    st.caption("⚠️ '사각' 패턴과 'SVG' 형식은 간격 조절을 지원하지 않습니다.")
+    cell_gap = st.slider(
+        "패턴 간격 (%)",
+        min_value=0,
+        max_value=40,
+        value=st.session_state.cell_gap_input,
+        help="각 패턴 사이의 간격을 조절합니다. 0%는 간격 없음.",
+        disabled=cell_gap_disabled,
+        key="cell_gap_input",
+    )
 
 
 #========================================================================================================================================================================
@@ -459,7 +491,8 @@ with col2:
                     "black" if file_format == "SVG" else pattern_color,
                     "white" if file_format == "SVG" else bg_color,
                     "사각" if file_format == "SVG" else st.session_state.pattern_shape_select,
-                    st.session_state.corner_radius_input
+                    st.session_state.corner_radius_input,
+                    st.session_state.cell_gap_input
                 )
 
                 if file_format == "PNG":
@@ -604,6 +637,12 @@ with st.sidebar:
     - **직접 입력**: 리스트에 없는 색상은 HEX 코드로 직접 입력 가능합니다.
     - **오류 메시지**: 색상 입력 시 유효성 검사를 진행하여 입력 칸이 비어 있거나 올바른 색상 값이 아닐 경우 경고 메시지가 표시됩니다.
     - **SVG** 파일 형식 선택 시에는 패턴:검은색, 배경:흰색만 지원합니다.
+    """)
+    
+    st.markdown("**패턴 간격:**")
+    st.markdown("""
+    - **사각 패턴**과 **SVG 파일**에서는 지원되지 않습니다.
+    - 슬라이더로 조절하며, 값이 높을수록 패턴의 크기가 작아져 간격이 넓어집니다.
     """)
 
 # 하단 정보
