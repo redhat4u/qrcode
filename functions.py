@@ -58,38 +58,24 @@ def generate_qr_code_png(
         qr.add_data(data, optimize=0)
         qr.make(fit=True)
 
-        # [수정] 색상을 16진수 문자열로 변환하여 안정성을 높입니다.
-        # ImageColor.getrgb는 유효한 색상 문자열을 RGB 튜플로 변환합니다.
-        # 이후 RGB 튜플을 올바른 16진수 문자열로 변환합니다.
-        try:
-            fill_color_rgb = ImageColor.getrgb(fill_color)
-            fill_color_hex = f'#{fill_color_rgb[0]:02x}{fill_color_rgb[1]:02x}{fill_color_rgb[2]:02x}'
-        except ValueError:
-            fill_color_hex = fill_color
-            
-        try:
-            back_color_rgb = ImageColor.getrgb(back_color)
-            back_color_hex = f'#{back_color_rgb[0]:02x}{back_color_rgb[1]:02x}{back_color_rgb[2]:02x}'
-        except ValueError:
-            back_color_hex = back_color
-
-        # [수정] 모듈 모양 선택에 따라 다른 Drawer를 사용하도록 로직 변경
+        # [수정] PNG 패턴/색상 문제를 해결하기 위해 fill_color와 back_color 문자열을 직접 전달합니다.
+        # StyledPilImage는 색상 이름과 16진수 코드를 모두 올바르게 처리합니다.
         if module_shape == "둥근 사각형 (Rounded)":
             img = qr.make_image(
                 image_factory=StyledPilImage,
                 module_drawer=RoundedModuleDrawer(),
-                fill_color=fill_color_hex,
-                back_color=back_color_hex
+                fill_color=fill_color,
+                back_color=back_color
             )
         elif module_shape == "원형 (Circle)":
             img = qr.make_image(
                 image_factory=StyledPilImage,
                 module_drawer=CircleModuleDrawer(),
-                fill_color=fill_color_hex,
-                back_color=back_color_hex
+                fill_color=fill_color,
+                back_color=back_color
             )
         else: # "기본 사각형 (Square)" 또는 기본값
-            img = qr.make_image(fill_color=fill_color_hex, back_color=back_color_hex)
+            img = qr.make_image(fill_color=fill_color, back_color=back_color)
 
         if hasattr(img, 'convert'):
             img = img.convert('RGB')
