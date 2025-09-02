@@ -45,18 +45,21 @@ st.title(APP_TITLE)
 st.markdown("---")
 
 # 레이아웃 설정 (2개 컬럼)
-col_left, col_right = st.columns([1, 1], gap="medium") # <-- 이 부분을 [1, 1]로 수정했습니다.
+col_left, col_right = st.columns([1, 1], gap="medium") 
 
 # 사이드바
 with st.sidebar:
     build_sidebar_ui()
     st.markdown("---")
-    if st.button("⏪ 모든 설정 초기화", use_container_width=True, type="secondary", on_click=reset_all_settings):
-        st.session_state.show_generate_success = False
+# 이전 턴에서 여기에 있던 초기화 버튼 코드를 아래로 이동했습니다.
 
 # 메인 UI
 with col_left:
     build_input_and_settings_ui()
+    # ⏪ 모든 설정 초기화 버튼을 이곳으로 다시 이동
+    st.markdown("---")
+    if st.button("⏪ 모든 설정 초기화", use_container_width=True, type="secondary", on_click=reset_all_settings):
+        st.session_state.show_generate_success = False
 
 with col_right:
     build_preview_and_download_ui()
