@@ -245,21 +245,25 @@ def reset_all_settings():
     
 # 언어 변경 콜백 함수
 def set_language():
-    st.session_state.lang = st.session_state.lang_select
-
+    # 선택된 언어 이름을 언어 코드로 변환
+    lang_map = {"한국어": "ko", "English": "en"}
+    st.session_state.lang = lang_map.get(st.session_state.lang_select, "ko")
+    # 언어가 바뀌면 사이드바의 기본값도 바뀌어야 하므로 세션 초기화
+    st.session_state.error_correction_select = messages[st.session_state.lang]['error_correction_low_select']
+    st.session_state.pattern_shape_select = messages[st.session_state.lang]['pattern_shape_square']
+    st.session_state.finder_pattern_shape_select = messages[st.session_state.lang]['finder_pattern_shape_select']
+    
 #[메인]====================================================================================================================================================================
 
 # 언어 선택 드롭다운
 lang_options = {"한국어": "ko", "English": "en"}
-lang_selected = st.selectbox(
-    lang_messages['language_select_label'],
+lang_selected_name = st.selectbox(
+    "Select Language" if st.session_state.lang == "en" else "언어 선택",
     options=list(lang_options.keys()),
-    format_func=lambda x: x,
     on_change=set_language,
     key="lang_select",
     index=list(lang_options.values()).index(st.session_state.lang)
 )
-
 
 st.title(lang_messages['title'])
 st.markdown("---")
