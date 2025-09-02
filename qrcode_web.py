@@ -22,19 +22,20 @@ st.set_page_config(
     layout="wide",
 )
 
-# 세션 상태 초기화
-if 'lang' not in st.session_state:
-    st.session_state.lang = 'ko'
-
 def initialize_session_state():
-    """세션 상태의 모든 변수를 초기화합니다."""
+    """세션 상태의 모든 변수를 초기화하거나 기본값을 설정합니다."""
     # 언어 선택 드롭다운에 쓰이는 정보 불러오기
     lang_codes = get_language_codes()
 
-    # 언어 선택 상태 관리
+    # 언어 선택 상태 관리 (가장 먼저 초기화)
     if 'lang' not in st.session_state or st.session_state.lang not in lang_codes:
         st.session_state.lang = 'ko'
 
+    # 언어에 종속되지 않는 옵션 키 목록
+    pattern_options_keys = list(get_pattern_options(st.session_state.lang).keys())
+    error_correction_keys = list(get_error_correction_options(st.session_state.lang).keys())
+
+    # 세션 상태 변수 초기화
     if 'qr_input_area' not in st.session_state:
         st.session_state.qr_input_area = ""
     if 'custom_pattern_color_input_key' not in st.session_state:
@@ -47,8 +48,15 @@ def initialize_session_state():
         st.session_state.box_size_input = 20
     if 'border_input' not in st.session_state:
         st.session_state.border_input = 2
-    if 'error_correction_select' not in st.session_state:
-        st.session_state.error_correction_select = 'low' # 키 값으로 저장
+
+    # 언어 변경 시 충돌 방지를 위한 유효성 검사 및 초기화
+    if 'error_correction_select' not in st.session_state or st.session_state.error_correction_select not in error_correction_keys:
+        st.session_state.error_correction_select = 'low'
+    if 'pattern_shape_select' not in st.session_state or st.session_state.pattern_shape_select not in pattern_options_keys:
+        st.session_state.pattern_shape_select = 'square'
+    if 'finder_pattern_shape_select' not in st.session_state or st.session_state.finder_pattern_shape_select not in pattern_options_keys:
+        st.session_state.finder_pattern_shape_select = 'square'
+
     if 'mask_pattern_select' not in st.session_state:
         st.session_state.mask_pattern_select = 2
     if 'pattern_color_select' not in st.session_state:
@@ -59,10 +67,6 @@ def initialize_session_state():
         st.session_state.strip_option = True
     if 'file_format_select' not in st.session_state:
         st.session_state.file_format_select = "PNG"
-    if 'pattern_shape_select' not in st.session_state:
-        st.session_state.pattern_shape_select = 'square' # 키 값으로 저장
-    if 'finder_pattern_shape_select' not in st.session_state:
-        st.session_state.finder_pattern_shape_select = 'square' # 키 값으로 저장
     if 'corner_radius_input' not in st.session_state:
         st.session_state.corner_radius_input = 25
     if 'cell_gap_input' not in st.session_state:
@@ -370,7 +374,12 @@ with col1:
     pattern_options_keys = list(pattern_options_map.keys())
 
     with col_pattern_shape:
-        pattern_shape_index = pattern_options_keys.index(st.session_state.pattern_shape_select) if st.session_state.pattern_shape_select in pattern_options_keys else 0
+        # 안전한 인덱스 계산
+        try:
+            pattern_shape_index = pattern_options_keys.index(st.session_state.pattern_shape_select)
+        except ValueError:
+            pattern_shape_index = 0
+            
         st.session_state.pattern_shape_select = st.selectbox(
             get_message(st.session_state.lang, "pattern_shape_label"),
             options=pattern_options_keys,
@@ -381,7 +390,12 @@ with col1:
         )
     
     with col_finder_shape:
-        finder_pattern_shape_index = pattern_options_keys.index(st.session_state.finder_pattern_shape_select) if st.session_state.finder_pattern_shape_select in pattern_options_keys else 0
+        # 안전한 인덱스 계산
+        try:
+            finder_pattern_shape_index = pattern_options_keys.index(st.session_state.finder_pattern_shape_select)
+        except ValueError:
+            finder_pattern_shape_index = 0
+            
         st.session_state.finder_pattern_shape_select = st.selectbox(
             get_message(st.session_state.lang, "finder_pattern_shape_label"),
             options=pattern_options_keys,
