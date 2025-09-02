@@ -234,7 +234,7 @@ def on_qr_setting_change():
     st.session_state.show_generate_success = False
     st.session_state.qr_image_bytes = None
     st.session_state.qr_svg_bytes = None
-    st.session_state.generate_button_clicked = False
+    # st.session_state.generate_button_clicked = False # 이 줄은 삭제 또는 주석 처리
     st.session_state.error_message = None
 
 
@@ -254,12 +254,12 @@ with col1:
     st.subheader("📝 QR 코드 내용")
     st.info("최대 입력 가능한 문자는 종류에 따라 약 2,400~2,900자 정도입니다.")
 
-    # on_change=on_qr_setting_change를 제거하여 실시간 미리보기 활성화
     qr_data = st.text_area(
         "QR 코드로 생성할 내용을 입력해 주세요",
         height=200,
         placeholder="이 곳에 QR 코드를 생성할 내용을 입력해 주세요.\n복사/붙여넣기를 사용할 수 있습니다.",
         key="qr_input_area",
+        on_change=on_qr_setting_change # on_change 추가
     )
 
     # 문자 수 표시
@@ -479,7 +479,7 @@ with col2:
             if qr:
                 preview_image_display = draw_custom_shape_image(qr, int(st.session_state.box_size_input), int(st.session_state.border_input), pattern_color, bg_color, st.session_state.pattern_shape_select)
                 preview_qr_object = qr
-    
+
     generate_btn = st.button("⚡ QR 코드 생성", use_container_width=True,)
     
     if generate_btn:
@@ -601,7 +601,7 @@ with col2:
     if st.session_state.get('qr_generated', False) and (st.session_state.get('qr_image_bytes') is not None or st.session_state.get('qr_svg_bytes') is not None):
 
         st.markdown("---")
- 
+
         st.subheader("📥 다운로드")
         now = datetime.now(ZoneInfo("Asia/Seoul"))
         current_filename = filename.strip()
