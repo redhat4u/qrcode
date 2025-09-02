@@ -634,12 +634,12 @@ st.button(
 with st.sidebar:
     st.header(msgs["sidebar_title_usage"])
     st.markdown(f"""
-    1. {msgs["sidebar_usage_1"]}
-    2. {msgs["sidebar_usage_2"]}
-    3. {msgs["sidebar_usage_3"]}
-    4. {msgs["sidebar_usage_4"]}
-    5. {msgs["sidebar_usage_5"]}
-    6. {msgs["sidebar_usage_6"]}
+    - {msgs["sidebar_usage_1"]}
+    - {msgs["sidebar_usage_2"]}
+    - {msgs["sidebar_usage_3"]}
+    - {msgs["sidebar_usage_4"]}
+    - {msgs["sidebar_usage_5"]}
+    - {msgs["sidebar_usage_6"]}
     """)
 
     st.markdown(msgs["main_separator"])
