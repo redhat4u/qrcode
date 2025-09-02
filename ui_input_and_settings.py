@@ -1,4 +1,3 @@
-# 이 파일은 QR 코드 생성에 필요한 입력 및 설정 UI를 정의합니다.
 # ui_input_and_settings.py
 
 import streamlit as st
@@ -10,8 +9,7 @@ from functions import (
 from state_manager import (
     clear_text_input,
     clear_filename_callback,
-    on_qr_setting_change,
-    on_file_format_change,
+    generate_and_store_qr,
 )
 from messages import get_message
 
@@ -27,7 +25,7 @@ def build_input_and_settings_ui():
         height=200,
         placeholder=get_message('UI_TEXT_AREA_PLACEHOLDER'),
         key="qr_input_area",
-        on_change=on_qr_setting_change
+        on_change=generate_and_store_qr
     )
     
     char_count = len(qr_data) if qr_data else 0
@@ -45,7 +43,7 @@ def build_input_and_settings_ui():
     with col_1:
         st.button(get_message('UI_BUTTON_DELETE_TEXT_LABEL'), use_container_width=True, help=get_message('UI_BUTTON_DELETE_TEXT_HELP'), on_click=clear_text_input)
     with col_2:
-        st.checkbox(get_message('UI_CHECKBOX_STRIP_TEXT'), value=True, key='strip_option', on_change=on_qr_setting_change)
+        st.checkbox(get_message('UI_CHECKBOX_STRIP_TEXT'), value=True, key='strip_option', on_change=generate_and_store_qr)
 
     st.markdown("---")
 
@@ -61,7 +59,7 @@ def build_input_and_settings_ui():
             get_message('UI_DOT_STYLE_DIAMOND'),
         ],
         key="dot_style_select",
-        on_change=on_qr_setting_change,
+        on_change=generate_and_store_qr,
         disabled=file_format_is_svg
     )
 
@@ -71,18 +69,18 @@ def build_input_and_settings_ui():
     st.subheader(get_message('UI_SUBHEADER_QR_SETTINGS'))
     col3, col4, col5 = st.columns([1, 1, 1])
     with col3:
-        st.number_input(get_message('UI_BOX_SIZE_LABEL'), min_value=1, max_value=50, value=20, key='box_size_input', on_change=on_qr_setting_change)
+        st.number_input(get_message('UI_BOX_SIZE_LABEL'), min_value=1, max_value=50, value=20, key='box_size_input', on_change=generate_and_store_qr)
     with col4:
-        st.number_input(get_message('UI_BORDER_LABEL'), min_value=1, max_value=10, value=2, key='border_input', on_change=on_qr_setting_change)
+        st.number_input(get_message('UI_BORDER_LABEL'), min_value=1, max_value=10, value=2, key='border_input', on_change=generate_and_store_qr)
     with col5:
         st.selectbox(get_message('UI_ERROR_CORRECTION_LABEL'), options=[
             get_message('UI_ERROR_CORRECTION_LEVEL_L'),
             get_message('UI_ERROR_CORRECTION_LEVEL_M'),
             get_message('UI_ERROR_CORRECTION_LEVEL_Q'),
             get_message('UI_ERROR_CORRECTION_LEVEL_H'),
-        ], key='error_correction_select', on_change=on_qr_setting_change)
+        ], key='error_correction_select', on_change=generate_and_store_qr)
     
-    st.selectbox(get_message('UI_MASK_PATTERN_LABEL'), options=list(range(8)), key='mask_pattern_select', on_change=on_qr_setting_change)
+    st.selectbox(get_message('UI_MASK_PATTERN_LABEL'), options=list(range(8)), key='mask_pattern_select', on_change=generate_and_store_qr)
     
     st.markdown("---")
 
@@ -94,17 +92,17 @@ def build_input_and_settings_ui():
     color_options = ["black", "white", "red", "blue", "green", "hotpink", get_message('UI_COLOR_OPTION_DIRECT_INPUT')]
     col_1_1, col_1_2 = st.columns([1, 1])
     with col_1_1:
-        st.selectbox(get_message('UI_SELECTBOX_PATTERN_COLOR_LABEL'), options=color_options, key='pattern_color_select', on_change=on_qr_setting_change, disabled=file_format_is_svg)
+        st.selectbox(get_message('UI_SELECTBOX_PATTERN_COLOR_LABEL'), options=color_options, key='pattern_color_select', on_change=generate_and_store_qr, disabled=file_format_is_svg)
     with col_1_2:
-        st.selectbox(get_message('UI_SELECTBOX_BG_COLOR_LABEL'), options=color_options, key='bg_color_select', on_change=on_qr_setting_change, disabled=file_format_is_svg)
+        st.selectbox(get_message('UI_SELECTBOX_BG_COLOR_LABEL'), options=color_options, key='bg_color_select', on_change=generate_and_store_qr, disabled=file_format_is_svg)
 
     st.info(get_message('UI_COLOR_INPUT_HELP'))
     st.caption(get_message('UI_COLOR_INPUT_CAPTION'))
     col1_5, col1_6 = st.columns(2)
     with col1_5:
-        st.text_input(get_message('UI_TEXT_INPUT_PATTERN_COLOR_LABEL'), placeholder=get_message('UI_TEXT_INPUT_PATTERN_COLOR_PLACEHOLDER'), disabled=(st.session_state.pattern_color_select != get_message('UI_COLOR_OPTION_DIRECT_INPUT')) or file_format_is_svg, key="custom_pattern_color_input_key", on_change=on_qr_setting_change)
+        st.text_input(get_message('UI_TEXT_INPUT_PATTERN_COLOR_LABEL'), placeholder=get_message('UI_TEXT_INPUT_PATTERN_COLOR_PLACEHOLDER'), disabled=(st.session_state.pattern_color_select != get_message('UI_COLOR_OPTION_DIRECT_INPUT')) or file_format_is_svg, key="custom_pattern_color_input_key", on_change=generate_and_store_qr)
     with col1_6:
-        st.text_input(get_message('UI_TEXT_INPUT_BG_COLOR_LABEL'), placeholder=get_message('UI_TEXT_INPUT_BG_COLOR_PLACEHOLDER'), disabled=(st.session_state.bg_color_select != get_message('UI_COLOR_OPTION_DIRECT_INPUT')) or file_format_is_svg, key="custom_bg_color_input_key", on_change=on_qr_setting_change)
+        st.text_input(get_message('UI_TEXT_INPUT_BG_COLOR_LABEL'), placeholder=get_message('UI_TEXT_INPUT_BG_COLOR_PLACEHOLDER'), disabled=(st.session_state.bg_color_select != get_message('UI_COLOR_OPTION_DIRECT_INPUT')) or file_format_is_svg, key="custom_bg_color_input_key", on_change=generate_and_store_qr)
 
     st.markdown("---")
     
@@ -112,7 +110,7 @@ def build_input_and_settings_ui():
     st.subheader(get_message('UI_SUBHEADER_FILE_SETTINGS'))
     col_file_format, col_file_name = st.columns([1, 3])
     with col_file_format:
-        st.radio(get_message('UI_RADIO_FILE_FORMAT'), options=[get_message('UI_FILE_FORMAT_PNG'), get_message('UI_FILE_FORMAT_SVG')], key="file_format_select", on_change=on_file_format_change)
+        st.radio(get_message('UI_RADIO_FILE_FORMAT'), options=[get_message('UI_FILE_FORMAT_PNG'), get_message('UI_FILE_FORMAT_SVG')], key="file_format_select", on_change=generate_and_store_qr)
     with col_file_name:
         col_filename_input, col_filename_delete = st.columns([3, 1.1])
         with col_filename_input:
