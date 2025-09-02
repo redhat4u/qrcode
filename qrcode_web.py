@@ -16,19 +16,17 @@ from state_manager import (
     on_qr_setting_change,
     set_download_initiated,
 )
-
 from functions import (
     sanitize_filename,
     is_valid_color,
     generate_qr_code_png,
     generate_qr_code_svg,
 )
-
 from ui_input_and_settings import build_input_and_settings_ui
 from ui_preview_and_download import build_preview_and_download_ui
 from sidebar import build_sidebar_ui
 from footer import build_footer
-from messages import APP_TITLE # <-- 추가
+from messages import * # <-- messages.py의 모든 변수를 가져오도록 수정
 
 # 페이지 설정
 st.set_page_config(
@@ -41,7 +39,7 @@ st.set_page_config(
 initialize_session_state()
 
 # 메인 앱 헤더
-st.title("🔲 QR 코드 생성기")
+st.title(APP_MAIN_HEADER)
 st.markdown("---")
 
 # 레이아웃 설정 (2개 컬럼)
@@ -56,11 +54,11 @@ with col2:
 # 전체 초기화 버튼
 st.markdown("---")
 st.button(
-    label="🔄 전체 초기화",
+    label=APP_RESET_BUTTON_LABEL,
     use_container_width=True,
     type="secondary",
     on_click=reset_all_settings,
-    help="모든 내용을 초기화 합니다.",
+    help=APP_RESET_BUTTON_HELP,
 )
 
 # 사이드바를 별도 파일에서 만든 함수로 호출
