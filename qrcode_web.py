@@ -301,7 +301,7 @@ with col1:
 
     # QR 코드 설정
     st.markdown("---")
-    st.subheader("🔲 QR 코드 설정")
+    st.subheader("🔨 QR 코드 설정")
 
     col1_1, col1_2 = st.columns(2)
     with col1_1:
