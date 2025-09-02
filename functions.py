@@ -56,25 +56,34 @@ def generate_qr_code_png(
         qr.add_data(data, optimize=0)
         qr.make(fit=True)
         
-        # [수정] 모든 패턴 모양에 대해 drawer를 명시적으로 설정
+        # [수정] 패턴 모양에 따라 drawer 설정, 사각형일 때는 drawer=None 사용
         drawer = None
-        if module_shape == "사각형 (Square)":
-            drawer = SquareModuleDrawer()
-        elif module_shape == "둥근 사각형 (Rounded)":
+        if module_shape == "둥근 사각형 (Rounded)":
             drawer = RoundedModuleDrawer()
         elif module_shape == "원형 (Circle)":
             drawer = CircleModuleDrawer()
-        else:
-            # 기본값으로 사각형 설정
-            drawer = SquareModuleDrawer()
+        # 사각형이거나 기본값일 때는 drawer=None (기본 사각형)
         
-        # [수정] 모든 경우에 StyledPilImage와 drawer를 사용하여 색상이 확실히 적용되도록 함
-        img = qr.make_image(
-            image_factory=StyledPilImage,
-            module_drawer=drawer,
-            fill_color=fill_color,
-            back_color=back_color
-        )
+        print(f"DEBUG - module_shape: {module_shape}")
+        print(f"DEBUG - drawer: {drawer}")
+        print(f"DEBUG - fill_color: {fill_color}")
+        print(f"DEBUG - back_color: {back_color}")
+        
+        # [수정] 모든 경우에 StyledPilImage를 사용하되, drawer는 필요할 때만 전달
+        if drawer is not None:
+            img = qr.make_image(
+                image_factory=StyledPilImage,
+                module_drawer=drawer,
+                fill_color=fill_color,
+                back_color=back_color
+            )
+        else:
+            # 사각형 패턴일 때는 기본 StyledPilImage만 사용
+            img = qr.make_image(
+                image_factory=StyledPilImage,
+                fill_color=fill_color,
+                back_color=back_color
+            )
         
         if hasattr(img, 'convert'):
             img = img.convert('RGB')
@@ -128,3 +137,4 @@ def generate_qr_code_svg(
     except Exception as e:
         print(f"SVG QR 코드 생성 오류: {e}")
         return None, None
+        
