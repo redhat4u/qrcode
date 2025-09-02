@@ -1,5 +1,7 @@
 # messages.py
 
+import qrcode
+
 def get_messages(lang):
     """지정된 언어에 대한 모든 메시지를 반환합니다."""
     
@@ -122,7 +124,7 @@ def get_messages(lang):
         "tip_wifi": "📶 **와이파이**: `WIFI:T:WPA;S:MyNetwork;P:MyPassword;H:false;`",
         "sidebar_settings_title": "세부 설정 설명",
         "sidebar_file_format_title": "### 파일 형식",
-        "sidebar_png_desc": "- **PNG**: 무손실 압축으로 품질 저하가 없고, 투명 배경을 지원합니다.",
+        "sidebar_png_desc": "- **PNG**: 무손실 압축으로 품질 저하가 없으며, 투명 배경을 지원합니다.",
         "sidebar_jpg_desc": "- **JPG**: 손실 압축으로 파일 크기가 작습니다. 사진에 주로 사용됩니다.",
         "sidebar_svg_desc": "- **SVG**: 벡터 형식으로 해상도에 영향을 받지 않아 확대해도 깨지지 않습니다. '사각' 패턴과 '검은색/흰색'만 지원합니다.",
         "sidebar_pattern_shape_title": "### 패턴 모양",
@@ -313,9 +315,38 @@ def get_language_labels():
     """언어 라벨 리스트를 반환합니다."""
     return [d['label'] for d in get_language_options().values()]
 
-def get_message(lang_code, message_key):
-    """지정된 언어의 특정 메시지를 반환합니다."""
-    lang_options = get_language_options()
-    messages = lang_options.get(lang_code, {}).get('messages', {})
-    return messages.get(message_key, "Message not found")
+def get_pattern_options(lang_code):
+    """패턴 모양 selectbox에 사용되는 옵션을 반환합니다."""
+    messages = get_messages(lang_code)
+    return {
+        'square': messages['shape_square'],
+        'rounded_square': messages['shape_rounded_square'],
+        'circle': messages['shape_circle'],
+        'diamond': messages['shape_diamond'],
+        'star': messages['shape_star'],
+        'cross': messages['shape_cross'],
+    }
     
+def get_error_correction_options(lang_code):
+    """오류 복원 selectbox에 사용되는 옵션을 반환합니다."""
+    messages = get_messages(lang_code)
+    return {
+        'low': {'label': messages['error_correction_options_low'], 'value': qrcode.constants.ERROR_CORRECT_L},
+        'medium': {'label': messages['error_correction_options_medium'], 'value': qrcode.constants.ERROR_CORRECT_M},
+        'quartile': {'label': messages['error_correction_options_quartile'], 'value': qrcode.constants.ERROR_CORRECT_Q},
+        'high': {'label': messages['error_correction_options_high'], 'value': qrcode.constants.ERROR_CORRECT_H},
+    }
+
+def get_message(lang_code, message_key, *args):
+    """지정된 언어의 특정 메시지를 반환합니다."""
+    messages = get_messages(lang_code)
+    message_template = messages.get(message_key, f"Message not found for '{message_key}'")
+    
+    try:
+        if args:
+            return message_template.format(*args)
+        else:
+            return message_template
+    except IndexError:
+        return f"Formatting error for '{message_key}'"
+        
