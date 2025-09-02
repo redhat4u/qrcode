@@ -4,21 +4,21 @@ import qrcode
 import qrcode.image.svg
 import io
 import streamlit as st
-import re
 from messages import get_message
 from qrcode.image.styles.colormasks import SolidFillColorMask
+from qrcode.image.styles.moduledrawers import Rounded, Circle, GappedSquare, Square
 
-def get_error_correction(level):
+def get_error_correction_constant(level_str):
     """
-    사용자가 선택한 오류 보정 레벨에 해당하는 QR 코드 상수를 반환합니다.
+    사용자가 선택한 오류 보정 레벨 문자열에 해당하는 QR 코드 상수를 반환합니다.
     """
-    if level == get_message('UI_ERROR_CORRECTION_LEVEL_L'):
+    if level_str == get_message('UI_ERROR_CORRECTION_LEVEL_L'):
         return qrcode.constants.ERROR_CORRECT_L
-    elif level == get_message('UI_ERROR_CORRECTION_LEVEL_M'):
+    elif level_str == get_message('UI_ERROR_CORRECTION_LEVEL_M'):
         return qrcode.constants.ERROR_CORRECT_M
-    elif level == get_message('UI_ERROR_CORRECTION_LEVEL_Q'):
+    elif level_str == get_message('UI_ERROR_CORRECTION_LEVEL_Q'):
         return qrcode.constants.ERROR_CORRECT_Q
-    elif level == get_message('UI_ERROR_CORRECTION_LEVEL_H'):
+    elif level_str == get_message('UI_ERROR_CORRECTION_LEVEL_H'):
         return qrcode.constants.ERROR_CORRECT_H
     else:
         # 기본값은 H로 설정
