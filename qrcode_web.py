@@ -14,7 +14,28 @@ from state_manager import (
 from ui_input_and_settings import build_input_and_settings_ui
 from ui_preview_and_download import build_preview_and_download_ui
 
-# 페이지 설정
+# --- Streamlit Functions ---
+def build_footer_ui():
+    """앱의 푸터 섹션을 빌드합니다."""
+    st.markdown("---")
+    st.markdown(
+        """
+        <style>
+        .footer {
+            font-size: 0.8rem;
+            text-align: center;
+            color: #808080;
+            padding-top: 20px;
+        }
+        </style>
+        <div class="footer">
+            <p>개발자: [여기에 개발자 이름 또는 이메일] | 버전 1.0.0</p>
+        </div>
+        """, 
+        unsafe_allow_html=True
+    )
+
+# --- Main Page Configuration ---
 st.set_page_config(
     page_title=get_message("APP_TITLE"),
     page_icon="✍️",
@@ -56,4 +77,6 @@ with col1:
 with col2:
     # 미리보기 및 다운로드 섹션
     build_preview_and_download_ui()
-    
+
+# 푸터 섹션 호출
+build_footer_ui()
