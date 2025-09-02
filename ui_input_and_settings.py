@@ -17,7 +17,6 @@ from messages import *
 
 def build_input_and_settings_ui():
     """입력 및 설정 섹션을 빌드합니다."""
-    # file_format_is_svg 변수 선언 위치를 상단으로 이동
     file_format_is_svg = (st.session_state.file_format_select == UI_FILE_FORMAT_SVG)
 
     st.header(UI_HEADER_INPUT_AND_SETTINGS)
@@ -120,7 +119,7 @@ def build_input_and_settings_ui():
     # 새로운 패턴 스타일 선택 드롭다운 메뉴 추가
     st.markdown("---")
     st.subheader(UI_SUBHEADER_DOT_STYLE)
-    st.selectbox(UI_LABEL_DOT_STYLE, options=[UI_DOT_STYLE_SQUARE, UI_DOT_STYLE_CIRCLE, UI_DOT_STYLE_ROUNDED], key="dot_style_select", on_change=on_qr_setting_change, disabled=file_format_is_svg)
+    st.selectbox(UI_LABEL_DOT_STYLE, options=[UI_DOT_STYLE_SQUARE, UI_DOT_STYLE_CIRCLE, UI_DOT_STYLE_ROUNDED, UI_DOT_STYLE_RHOMBUS], key="dot_style_select", on_change=on_qr_setting_change, disabled=file_format_is_svg)
 
     st.markdown("---")
     st.subheader(UI_SUBHEADER_FILE)
