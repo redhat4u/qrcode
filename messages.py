@@ -86,10 +86,10 @@ LANGUAGES = {
         "error_general": "예상치 못한 오류가 발생했습니다: {error}",
         "language_select_label": "언어",
 
-        # 사이드바 내용 - 사용자님 제공
+        # 사이드바 내용
         "sidebar_title_usage": "📖 사용 방법",
         "sidebar_usage_1": "1. **QR 코드 내용** 영역에 변환할 텍스트를 입력하세요",
-        "sidebar_usage_2": "2. **파일 형식**과 **패턴 모양**을 선택하세요",
+        "sidebar_usage_2": "2. **파일 형식**과 **패턴 모양**을 선택하세요 (SVG 형식은 사각 패턴만 가능합니다)",
         "sidebar_usage_3": "3. **색상 설정**에서 패턴과 배경 색상을 선택하세요 (SVG 형식은 기본색만 가능합니다)",
         "sidebar_usage_4": "4. **QR 코드 설정**에서 크기와 오류 보정 레벨을 조정하세요",
         "sidebar_usage_5": "5. **파일명 설정**에서 파일명을 지정하세요",
