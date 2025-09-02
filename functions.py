@@ -58,21 +58,27 @@ def generate_qr_code_png(
         qr.add_data(data, optimize=0)
         qr.make(fit=True)
 
-        # [수정] PNG 패턴/색상 문제를 해결하기 위해 fill_color와 back_color 문자열을 직접 전달합니다.
-        # StyledPilImage는 색상 이름과 16진수 코드를 모두 올바르게 처리합니다.
+        # [수정] PNG 패턴/색상 문제를 해결하기 위해 색상 문자열을 RGB 튜플로 변환
+        # StyledPilImage는 색상 이름과 16진수 코드를 모두 올바르게 처리하지만,
+        # RGB 튜플로 변환하여 전달하면 더 안정적으로 작동합니다.
+        
+        # 색상 문자열을 RGB 튜플로 변환
+        final_fill_color = ImageColor.getrgb(fill_color)
+        final_back_color = ImageColor.getrgb(back_color)
+
         if module_shape == "둥근 사각형 (Rounded)":
             img = qr.make_image(
                 image_factory=StyledPilImage,
                 module_drawer=RoundedModuleDrawer(),
-                fill_color=fill_color,
-                back_color=back_color
+                fill_color=final_fill_color,
+                back_color=final_back_color
             )
         elif module_shape == "원형 (Circle)":
             img = qr.make_image(
                 image_factory=StyledPilImage,
                 module_drawer=CircleModuleDrawer(),
-                fill_color=fill_color,
-                back_color=back_color
+                fill_color=final_fill_color,
+                back_color=final_back_color
             )
         else: # "기본 사각형 (Square)" 또는 기본값
             img = qr.make_image(fill_color=fill_color, back_color=back_color)
