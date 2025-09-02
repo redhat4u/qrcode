@@ -5,7 +5,18 @@
 import streamlit as st
 import qrcode
 import hashlib
-from messages import *
+from messages import get_message # get_message 함수만 가져옵니다.
+
+# 기본값 상수 정의
+UI_DEFAULT_BOX_SIZE = 20
+UI_DEFAULT_BORDER = 2
+UI_DEFAULT_ERROR_CORRECTION = "Low (7%) - 오류 보정"
+UI_DEFAULT_MASK_PATTERN = 2
+UI_DEFAULT_PATTERN_COLOR = "black"
+UI_DEFAULT_BG_COLOR = "white"
+UI_DEFAULT_STRIP_OPTION = True
+UI_FILE_FORMAT_PNG = "PNG"
+UI_DEFAULT_DOT_STYLE = "사각형"
 
 def initialize_session_state():
     """세션 상태를 초기화합니다."""
