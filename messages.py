@@ -96,7 +96,7 @@ MESSAGES = {
         6. 모든 설정이 유효하면 **자동으로 미리보기와 다운로드 버튼이 표시됩니다**
         """,
         "sidebar_header_tips": "💡 용도별 QR 코드 생성 팁",
-        "tips_text": "QR 코드로 생성할 텍스트를 입력합니다",
+        "tips_text": "텍스트: QR 코드로 생성할 텍스트를 입력합니다",
         "tips_website": "https://www.example.com",
         "tips_email": "mailto:user@example.com",
         "tips_email_body": "mailto:user1@example.com,user2@example.com?subject=제목&body=메시지 내용",
@@ -228,7 +228,7 @@ MESSAGES = {
         6. If all settings are valid, the **preview and download button will be displayed automatically**.
         """,
         "sidebar_header_tips": "💡 QR Code Generation Tips by Use Case",
-        "tips_text": "Enter the text to be converted into a QR code",
+        "tips_text": "Text: Enter the text to be converted into a QR code",
         "tips_website": "https://www.example.com",
         "tips_email": "mailto:user@example.com",
         "tips_email_body": "mailto:user1@example.com,user2@example.com?subject=Title&body=Message Content",
