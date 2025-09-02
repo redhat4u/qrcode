@@ -125,7 +125,7 @@ def build_input_and_settings_ui():
         with col_filename_delete:
             is_filename_input_empty = st.session_state.filename_input_key == ""
             # height 값을 18px로 조정하여 버튼을 위로 올립니다.
-            st.markdown("<div style='height: 18px;'></div>", unsafe_allow_html=True) 
+            st.markdown("<div style='height: 28px;'></div>", unsafe_allow_html=True) 
             st.button(
                 get_message('UI_BUTTON_DELETE_FILENAME_LABEL'),
                 use_container_width=True,
