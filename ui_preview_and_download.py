@@ -61,6 +61,12 @@ def build_preview_and_download_ui():
         }
         error_correction = error_correction_options[st.session_state.error_correction_select]
 
+        # [수정] SVG 선택 시 미리보기 패턴을 강제로 사각형으로 변경
+        if file_format_is_svg:
+            preview_module_shape = "기본 사각형 (Square)"
+        else:
+            preview_module_shape = st.session_state.module_shape_select
+
         img, qr = generate_qr_code_png(
             current_data,
             int(st.session_state.box_size_input),
@@ -69,7 +75,7 @@ def build_preview_and_download_ui():
             int(st.session_state.mask_pattern_select),
             pattern_color_for_preview,
             bg_color_for_preview,
-            st.session_state.module_shape_select,
+            preview_module_shape, # 수정된 미리보기 모듈 모양 사용
         )
         if img and qr:
             preview_image_display = img
@@ -150,8 +156,8 @@ def build_preview_and_download_ui():
                     int(st.session_state.border_input),
                     st.session_state.error_correction_select,
                     int(st.session_state.mask_pattern_select),
-                    "black",
-                    "white",
+                    final_pattern_color,
+                    final_bg_color,
                 )
                 if svg_data and qr:
                     st.session_state.qr_svg_bytes = svg_data.encode("utf-8")
@@ -183,7 +189,7 @@ def build_preview_and_download_ui():
             unsafe_allow_html=True,
         )
     elif file_format_is_svg:
-        st.info("💡 아래 미리보기는 PNG 형식입니다. [⚡ QR 코드 생성] 버튼을 클릭하면 SVG 파일이 생성됩니다.")
+        st.info("💡 아래 미리보기는 SVG 형식의 한계로 인해 기본 사각형 패턴만 표시됩니다. [⚡ QR 코드 생성] 버튼을 클릭하면 SVG 파일이 생성됩니다.")
     elif pattern_color_for_preview == bg_color_for_preview and is_valid_color(pattern_color_for_preview) and is_valid_color(bg_color_for_preview):
         st.warning("⚠️ 미리보기를 위해 패턴과 배경 색상을 다르게 설정해 주세요.")
     elif preview_image_display:
