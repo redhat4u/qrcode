@@ -6,26 +6,50 @@ import io
 import re
 from PIL import Image, ImageDraw
 import qrcode.image.svg
-import streamlit as st 
+import streamlit as st
 
 def get_message(key):
     """
     이 함수는 UI에 사용되는 텍스트 메시지를 관리합니다.
     """
     messages = {
-        'UI_ERROR_CORRECTION_LEVEL_L': 'L (7% 보정)',
-        'UI_ERROR_CORRECTION_LEVEL_M': 'M (15% 보정)',
-        'UI_ERROR_CORRECTION_LEVEL_Q': 'Q (25% 보정)',
-        'UI_ERROR_CORRECTION_LEVEL_H': 'H (30% 보정)',
-        'UI_DOT_STYLE_SQUARE': '사각형',
-        'UI_DOT_STYLE_ROUNDED': '둥근 사각',
-        'UI_DOT_STYLE_CIRCLE': '원형',
-        'UI_DOT_STYLE_DIAMOND': '마름모',
+        # App
+        "UI_APP_TITLE": "QR 코드 생성기",
+        "UI_APP_DESCRIPTION": "원하는 텍스트나 URL을 QR 코드로 생성하고, 다양한 스타일로 꾸며보세요.",
+        # Side Bar
+        "UI_OPTIONS_HEADER": "옵션",
+        "UI_INPUT_LABEL": "QR 코드로 만들 텍스트/URL",
+        "UI_INPUT_HELP": "여기에 텍스트나 URL을 입력하세요. 100자까지 지원됩니다.",
+        "UI_STYLE_HEADER": "스타일",
+        "UI_DOT_STYLE_LABEL": "점 스타일",
+        "UI_DOT_STYLE_SQUARE": "사각형",
+        "UI_DOT_STYLE_ROUNDED": "둥근 사각",
+        "UI_DOT_STYLE_CIRCLE": "원형",
+        "UI_DOT_STYLE_DIAMOND": "마름모",
+        "UI_FILL_COLOR_LABEL": "패턴 색상",
+        "UI_BG_COLOR_LABEL": "배경 색상",
+        "UI_ADVANCED_HEADER": "고급 옵션",
+        "UI_ERROR_CORRECTION_LABEL": "오류 보정 레벨",
+        "UI_ERROR_CORRECTION_LEVEL_L": "L (7% 보정)",
+        "UI_ERROR_CORRECTION_LEVEL_M": "M (15% 보정)",
+        "UI_ERROR_CORRECTION_LEVEL_Q": "Q (25% 보정)",
+        "UI_ERROR_CORRECTION_LEVEL_H": "H (30% 보정)",
+        "UI_BOX_SIZE_LABEL": "상자 크기",
+        "UI_BORDER_LABEL": "테두리 너비",
+        "UI_MASK_PATTERN_LABEL": "마스크 패턴 (고정)",
+        # Main Content
+        "UI_PREVIEW_SECTION_TITLE": "미리보기 및 다운로드",
+        "UI_INFO_ENTER_TEXT": "QR 코드를 생성하려면 왼쪽에 텍스트나 URL을 입력하세요.",
         "UI_ERROR_INVALID_COLOR_FORMAT": "유효한 16진수 색상 코드를 입력해주세요. 예: #000000 또는 #FFF",
         "UI_WARNING_SAME_COLOR": "패턴 색상과 배경 색상이 동일합니다. QR 코드를 인식할 수 없게 됩니다.",
         "UI_PREVIEW_IMAGE_CAPTION": "QR 코드 미리보기",
         "UI_DOWNLOAD_PNG_BUTTON": "PNG 다운로드",
         "UI_DOWNLOAD_SVG_BUTTON": "SVG 다운로드",
+        "UI_INFO_QR_VERSION": "QR 버전",
+        "UI_INFO_QR_CELL_COUNT": "셀 개수",
+        "UI_INFO_QR_IMAGE_SIZE_REFERENCE": "예상 이미지 크기",
+        "UI_INFO_QR_PATTERN_COLOR": "패턴 색상",
+        "UI_INFO_QR_BG_COLOR": "배경 색상",
     }
     return messages.get(key, key)
 
@@ -98,7 +122,6 @@ def generate_qr_code_png(
                         elif dot_style == get_message('UI_DOT_STYLE_CIRCLE'):
                             draw.ellipse((0, 0, box_size, box_size), fill=fill_color)
                             
-                        # --- 💡 다이아몬드(마름모) 모양 추가 ---
                         elif dot_style == get_message('UI_DOT_STYLE_DIAMOND'):
                             points = [
                                 (box_size/2, 0),         # 상단 꼭짓점
@@ -107,7 +130,6 @@ def generate_qr_code_png(
                                 (0, box_size/2)          # 좌측 꼭짓점
                             ]
                             draw.polygon(points, fill=fill_color)
-                        # ------------------------------------
                             
                         pos_x = (c + border) * box_size
                         pos_y = (r + border) * box_size
@@ -121,6 +143,7 @@ def generate_qr_code_png(
 
         return img, qr
     except Exception as e:
+        st.error(f"QR 코드 생성 중 오류가 발생했습니다: {e}")
         return None, None
 
 # QR 코드 SVG 생성 함수
@@ -134,7 +157,6 @@ def generate_qr_code_svg(
     back_color,
 ):
     try:
-        # SVG는 자체적으로 fill_color, back_color를 지원
         factory = qrcode.image.svg.SvgPathImage
         
         qr = qrcode.QRCode(
@@ -159,4 +181,27 @@ def generate_qr_code_svg(
         
         return svg_data, qr
     except Exception as e:
+        st.error(f"QR 코드 생성 중 오류가 발생했습니다: {e}")
         return None, None
+
+def get_qr_info(qr_version, qr_size, border, pattern_color, bg_color):
+    """QR 코드의 상세 정보를 딕셔너리로 반환합니다."""
+    # QR 코드 버전 정보
+    if qr_version <= 0:
+        version_text = "자동 생성 (Auto)"
+    else:
+        version_text = f"버전 {qr_version}"
+        
+    # 셀 개수
+    cells_per_side = 21 + (qr_version - 1) * 4 if qr_version > 0 else "자동 계산"
+    
+    # 이미지 크기
+    image_size = (cells_per_side + border * 2) * qr_size if isinstance(cells_per_side, int) else "자동 계산"
+    
+    return {
+        get_message('UI_INFO_QR_VERSION'): version_text,
+        get_message('UI_INFO_QR_CELL_COUNT'): cells_per_side,
+        get_message('UI_INFO_QR_IMAGE_SIZE_REFERENCE'): f"{image_size}px x {image_size}px" if isinstance(image_size, int) else image_size,
+        get_message('UI_INFO_QR_PATTERN_COLOR'): pattern_color,
+        get_message('UI_INFO_QR_BG_COLOR'): bg_color,
+    }
