@@ -6,7 +6,7 @@ import qrcode
 import io
 from datetime import datetime
 from zoneinfo import ZoneInfo
-from functions import generate_qr_code_png, generate_qr_code_svg, is_valid_color, sanitize_filename
+from functions import create_qr_code, get_qr_info, is_valid_hex_color
 from state_manager import set_download_initiated, reset_all_settings
 from messages import get_message
 
