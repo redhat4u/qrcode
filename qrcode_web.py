@@ -25,7 +25,7 @@ import qrcode.image.svg # SVG 생성을 위해 추가
 # 페이지 설정
 st.set_page_config(
     page_title="QR 코드 생성기",
-    page_icon="🔲",
+    page_icon="🔲",
     layout="wide",
 )
 
