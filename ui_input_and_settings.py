@@ -41,7 +41,6 @@ def build_input_and_settings_ui():
     
     col_1, col_2 = st.columns([1, 1])
     with col_1:
-        # 입력창이 비어있으면 버튼 비활성화
         is_qr_input_empty = st.session_state.qr_input_area == ""
         st.button(
             get_message('UI_BUTTON_DELETE_TEXT_LABEL'),
@@ -125,7 +124,8 @@ def build_input_and_settings_ui():
             st.text_input(get_message('UI_TEXT_INPUT_FILENAME_LABEL'), placeholder=get_message('UI_TEXT_INPUT_FILENAME_PLACEHOLDER'), key="filename_input_key")
         with col_filename_delete:
             is_filename_input_empty = st.session_state.filename_input_key == ""
-            # 이전에 추가했던 빈 div를 제거합니다.
+            # 이전에 추가했던 빈 div를 다시 추가합니다.
+            st.markdown("<div style='height: 20px;'></div>", unsafe_allow_html=True) 
             st.button(
                 get_message('UI_BUTTON_DELETE_FILENAME_LABEL'),
                 use_container_width=True,
