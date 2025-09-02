@@ -71,10 +71,9 @@ def clear_text_input():
     st.session_state.show_generate_success = False
 
 def clear_filename_callback():
-    """Clears the filename input."""
+    """파일명을 지웁니다. QR 코드 상태는 유지합니다."""
     st.session_state.filename_input_key = ""
-    st.session_state.qr_generated = False
-
+    
 def set_download_initiated():
     """Sets a flag when the download button is clicked."""
     st.session_state.download_initiated = True
