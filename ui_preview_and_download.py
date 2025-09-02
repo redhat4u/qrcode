@@ -37,10 +37,11 @@ def build_preview_and_download_ui():
     }
     error_correction = error_correction_options[st.session_state.error_correction_select]
     
-    # 미리보기 이미지 생성 (버튼 클릭 여부와 관계없이 실행)
+    # 미리보기 이미지 생성 및 표시 로직
     if current_data:
         if not file_format_is_svg and (not is_pattern_color_valid or not is_bg_color_valid or is_colors_same):
-            st.session_state.qr_generated = False
+            st.error("색상 설정이 유효하지 않습니다. 미리보기를 표시할 수 없습니다.")
+            st.caption(UI_CAPTION_QR_PREVIEW_ERROR)
         else:
             if st.session_state.file_format_select == UI_FILE_FORMAT_PNG:
                 img, qr = generate_qr_code_png(
@@ -54,9 +55,10 @@ def build_preview_and_download_ui():
                     img_buffer = io.BytesIO()
                     img.save(img_buffer, format='PNG')
                     st.session_state.qr_image_bytes = img_buffer.getvalue()
-                    st.session_state.qr_generated = True
+                    st.markdown("---")
+                    st.image(st.session_state.qr_image_bytes, use_container_width=True)
                 else:
-                    st.session_state.qr_generated = False
+                    st.error("이미지 생성에 실패했습니다.")
             elif st.session_state.file_format_select == UI_FILE_FORMAT_SVG:
                 img_svg, qr = generate_qr_code_svg(
                     current_data, int(st.session_state.box_size_input), int(st.session_state.border_input), error_correction,
@@ -66,12 +68,13 @@ def build_preview_and_download_ui():
                 )
                 if img_svg:
                     st.session_state.qr_svg_bytes = img_svg
-                    st.session_state.qr_generated = True
+                    st.markdown("---")
+                    st.image(st.session_state.qr_svg_bytes, use_container_width=True)
                 else:
-                    st.session_state.qr_generated = False
+                    st.error("이미지 생성에 실패했습니다.")
     else:
-        st.session_state.qr_generated = False
-    
+        st.caption(UI_CAPTION_QR_DATA_EMPTY)
+
     st.markdown("---")
 
     # QR 코드 생성 버튼
@@ -109,21 +112,13 @@ def build_preview_and_download_ui():
             st.session_state.error_message = None
             st.session_state.show_generate_success = True
             
-    # 미리보기 및 다운로드
-    st.markdown("---")
-    
+    # 버튼 클릭 성공 시에만 다운로드 관련 UI 표시
     if st.session_state.generate_button_clicked:
         if st.session_state.error_message:
             st.error(st.session_state.error_message)
             st.caption(UI_CAPTION_QR_PREVIEW_ERROR)
-        elif st.session_state.show_generate_success and st.session_state.qr_generated:
+        elif st.session_state.show_generate_success and current_data:
             st.success(UI_SUCCESS_MESSAGE)
-            st.markdown(
-                f'<div style="text-align: center; border: 1px solid #ddd; padding: 10px; margin-bottom: 20px;">'
-                f'{st.image(st.session_state.qr_image_bytes, use_container_width=True) if st.session_state.file_format_select == UI_FILE_FORMAT_PNG else st.image(st.session_state.qr_svg_bytes, use_container_width=True)}'
-                f'</div>',
-                unsafe_allow_html=True
-            )
             final_filename = st.session_state.filename_input_key.strip()
             if not final_filename:
                 korean_tz = ZoneInfo("Asia/Seoul")
