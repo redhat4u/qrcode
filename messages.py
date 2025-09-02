@@ -1,10 +1,10 @@
-# This file manages UI text messages by language.
+# 이 파일은 UI 텍스트 메시지를 언어별로 관리합니다.
 # messages.py
 
 import streamlit as st
 import qrcode
 
-# Language-specific message dictionary
+# 언어별 메시지 딕셔너리
 MESSAGES = {
     'ko': {
         # UI_main.py
@@ -160,6 +160,7 @@ MESSAGES = {
 
 def get_current_language():
     """Returns the currently selected language."""
+    # `streamlit.session_state`가 초기화되기 전에는 기본값 사용
     if 'language_select' not in st.session_state:
         return 'ko'
     
@@ -170,7 +171,7 @@ def get_current_language():
         return 'en'
 
 def get_message(key):
-    """Returns the message for the given key in the current language."""
+    """지정된 키에 해당하는 현재 언어의 메시지를 반환합니다."""
     lang = get_current_language()
     return MESSAGES[lang].get(key, key)
     
