@@ -1,28 +1,17 @@
+# state_manager.py
 # 이 파일은 st.session_state 상태를 관리하고,
 # 사용자 상호 작용에 따라 호출되는 콜백 함수들을 정의합니다.
-# state_manager.py
 
 import streamlit as st
 import qrcode
 import hashlib
-from messages import get_message # get_message 함수만 가져옵니다.
-
-# 기본값 상수 정의
-UI_DEFAULT_BOX_SIZE = 20
-UI_DEFAULT_BORDER = 2
-UI_DEFAULT_ERROR_CORRECTION = "Low (7%) - 오류 보정"
-UI_DEFAULT_MASK_PATTERN = 2
-UI_DEFAULT_PATTERN_COLOR = "black"
-UI_DEFAULT_BG_COLOR = "white"
-UI_DEFAULT_STRIP_OPTION = True
-UI_FILE_FORMAT_PNG = "PNG"
-UI_DEFAULT_DOT_STYLE = "사각형"
 
 def initialize_session_state():
     """세션 상태를 초기화합니다."""
+    # 언어 선택 초기화
     if 'current_lang' not in st.session_state:
-        st.session_state.current_lang = 'ko' # 기본 언어는 한국어
-
+        st.session_state.current_lang = 'ko'
+        
     if 'download_initiated' not in st.session_state:
         st.session_state.download_initiated = False
     if 'show_generate_success' not in st.session_state:
@@ -46,39 +35,32 @@ def initialize_session_state():
     if 'filename_input_key' not in st.session_state:
         st.session_state.filename_input_key = ""
     if 'box_size_input' not in st.session_state:
-        st.session_state.box_size_input = UI_DEFAULT_BOX_SIZE
+        st.session_state.box_size_input = 20
     if 'border_input' not in st.session_state:
-        st.session_state.border_input = UI_DEFAULT_BORDER
+        st.session_state.border_input = 2
     if 'error_correction_select' not in st.session_state:
-        st.session_state.error_correction_select = UI_DEFAULT_ERROR_CORRECTION
+        st.session_state.error_correction_select = "Low (7%) - 오류 보정"
     if 'mask_pattern_select' not in st.session_state:
-        st.session_state.mask_pattern_select = UI_DEFAULT_MASK_PATTERN
+        st.session_state.mask_pattern_select = 2
     if 'pattern_color_select' not in st.session_state:
-        st.session_state.pattern_color_select = UI_DEFAULT_PATTERN_COLOR
+        st.session_state.pattern_color_select = "black"
     if 'bg_color_select' not in st.session_state:
-        st.session_state.bg_color_select = UI_DEFAULT_BG_COLOR
+        st.session_state.bg_color_select = "white"
     if 'strip_option' not in st.session_state:
-        st.session_state.strip_option = UI_DEFAULT_STRIP_OPTION
+        st.session_state.strip_option = True
     if 'file_format_select' not in st.session_state:
-        st.session_state.file_format_select = UI_FILE_FORMAT_PNG
+        st.session_state.file_format_select = "PNG"
     if 'dot_style_select' not in st.session_state:
-        st.session_state.dot_style_select = UI_DEFAULT_DOT_STYLE
+        st.session_state.dot_style_select = "사각형"
 
 def set_download_initiated():
-    """다운로드 버튼 클릭 상태를 True로 설정하는 콜백 함수입니다."""
+    """다운로드 버튼 클릭 시 상태를 업데이트합니다."""
     st.session_state.download_initiated = True
-
+    
 def clear_text_input():
-    """입력 내용 초기화 콜백 함수입니다."""
+    """텍스트 입력 필드를 초기화하는 콜백 함수입니다."""
     st.session_state.qr_input_area = ""
-    # 입력 내용 삭제 시 다운로드 및 생성 상태도 초기화
-    st.session_state.download_initiated = False
-    st.session_state.show_generate_success = False
-    st.session_state.qr_generated = False
-    st.session_state.qr_image_bytes = None
-    st.session_state.qr_svg_bytes = None
-    st.session_state.error_message = None
-
+    
 def clear_filename_callback():
     """파일명 초기화 콜백 함수입니다."""
     st.session_state.filename_input_key = ""
@@ -89,15 +71,15 @@ def reset_all_settings():
     st.session_state.custom_pattern_color_input_key = ""
     st.session_state.custom_bg_color_input_key = ""
     st.session_state.filename_input_key = ""
-    st.session_state.box_size_input = UI_DEFAULT_BOX_SIZE
-    st.session_state.border_input = UI_DEFAULT_BORDER
-    st.session_state.error_correction_select = UI_DEFAULT_ERROR_CORRECTION
-    st.session_state.mask_pattern_select = UI_DEFAULT_MASK_PATTERN
-    st.session_state.pattern_color_select = UI_DEFAULT_PATTERN_COLOR
-    st.session_state.bg_color_select = UI_DEFAULT_BG_COLOR
-    st.session_state.strip_option = UI_DEFAULT_STRIP_OPTION
-    st.session_state.file_format_select = UI_FILE_FORMAT_PNG
-    st.session_state.dot_style_select = UI_DEFAULT_DOT_STYLE
+    st.session_state.box_size_input = 20
+    st.session_state.border_input = 2
+    st.session_state.error_correction_select = "Low (7%) - 오류 보정"
+    st.session_state.mask_pattern_select = 2
+    st.session_state.pattern_color_select = "black"
+    st.session_state.bg_color_select = "white"
+    st.session_state.strip_option = True
+    st.session_state.file_format_select = "PNG"
+    st.session_state.dot_style_select = "사각형"
     st.session_state.qr_generated = False
     st.session_state.show_generate_success = False
     st.session_state.qr_image_bytes = None
@@ -116,18 +98,5 @@ def on_qr_setting_change():
 
 def on_file_format_change():
     """파일 형식 변경 시 상태를 초기화합니다."""
-    st.session_state.qr_generated = False
-    st.session_state.show_generate_success = False
-    st.session_state.qr_image_bytes = None
-    st.session_state.qr_svg_bytes = None
-    st.session_state.generate_button_clicked = False
-    st.session_state.error_message = None
-
-def set_lang_ko():
-    """언어를 한국어로 변경하는 콜백 함수입니다."""
-    st.session_state.current_lang = 'ko'
-
-def set_lang_en():
-    """언어를 영어로 변경하는 콜백 함수입니다."""
-    st.session_state.current_lang = 'en'
+    on_qr_setting_change()
     
