@@ -19,13 +19,6 @@ from messages import get_message, get_language_options
 if 'lang' not in st.session_state:
     st.session_state.lang = 'ko'
 
-# 페이지 설정
-st.set_page_config(
-    page_title=get_message(st.session_state.lang, "page_title"),
-    page_icon="🔲",
-    layout="wide",
-)
-
 # 세션 상태 초기화
 if 'qr_input_area' not in st.session_state:
     st.session_state.qr_input_area = ""
@@ -40,7 +33,7 @@ if 'box_size_input' not in st.session_state:
 if 'border_input' not in st.session_state:
     st.session_state.border_input = 2
 if 'error_correction_select' not in st.session_state:
-    st.session_state.error_correction_select = get_message(st.session_state.lang, "error_correction_options_low")
+    st.session_state.error_correction_select = 'Low'
 if 'mask_pattern_select' not in st.session_state:
     st.session_state.mask_pattern_select = 2
 if 'pattern_color_select' not in st.session_state:
@@ -52,9 +45,9 @@ if 'strip_option' not in st.session_state:
 if 'file_format_select' not in st.session_state:
     st.session_state.file_format_select = "PNG"
 if 'pattern_shape_select' not in st.session_state:
-    st.session_state.pattern_shape_select = get_message(st.session_state.lang, "shape_square")
+    st.session_state.pattern_shape_select = 'Square'
 if 'finder_pattern_shape_select' not in st.session_state:
-    st.session_state.finder_pattern_shape_select = get_message(st.session_state.lang, "shape_square")
+    st.session_state.finder_pattern_shape_select = 'Square'
 if 'corner_radius_input' not in st.session_state:
     st.session_state.corner_radius_input = 25
 if 'cell_gap_input' not in st.session_state:
@@ -67,7 +60,7 @@ if 'jpg_quality_input' not in st.session_state:
 def set_language_callback():
     st.session_state.lang = st.session_state.language_selection
     # 언어 변경 시 세션 상태 값들을 재설정
-    reset_all_settings(lang_code=st.session_state.lang)
+    reset_all_settings(st.session_state.lang)
 
 
 # 파일명에 특수문자 포함시 '_' 문자로 치환
@@ -238,14 +231,21 @@ def reset_all_settings(lang_code):
     
     st.session_state.box_size_input = 20
     st.session_state.border_input = 2
-    st.session_state.error_correction_select = get_message(lang_code, "error_correction_options_low")
+    # 언어에 따라 초기화되는 텍스트 값을 변경
+    if lang_code == 'ko':
+        st.session_state.error_correction_select = 'Low'
+        st.session_state.pattern_shape_select = 'Square'
+        st.session_state.finder_pattern_shape_select = 'Square'
+    elif lang_code == 'en':
+        st.session_state.error_correction_select = 'Low'
+        st.session_state.pattern_shape_select = 'Square'
+        st.session_state.finder_pattern_shape_select = 'Square'
+    
     st.session_state.mask_pattern_select = 2
     st.session_state.pattern_color_select = "black"
     st.session_state.bg_color_select = "white"
     st.session_state.strip_option = True
     st.session_state.file_format_select = "PNG"
-    st.session_state.pattern_shape_select = get_message(lang_code, "shape_square")
-    st.session_state.finder_pattern_shape_select = get_message(lang_code, "shape_square")
     st.session_state.corner_radius_input = 25
     st.session_state.cell_gap_input = 0
     st.session_state.jpg_quality_input = 70
@@ -264,7 +264,8 @@ current_lang_index = lang_codes.index(st.session_state.lang)
 
 st.selectbox(
     label=get_message(st.session_state.lang, "language_select_label"),
-    options=lang_labels,
+    options=lang_codes, # 값으로 코드(ko, en)를 사용
+    format_func=lambda code: lang_options[code]['label'], # 라벨은 사용자에게 보여지는 텍스트
     index=current_lang_index,
     key="language_selection",
     on_change=set_language_callback
@@ -357,25 +358,29 @@ with col1:
     col_pattern_shape, col_finder_shape = st.columns(2)
     
     pattern_options = (get_message(st.session_state.lang, "shape_square"), get_message(st.session_state.lang, "shape_rounded_square"), get_message(st.session_state.lang, "shape_circle"), get_message(st.session_state.lang, "shape_diamond"), get_message(st.session_state.lang, "shape_star"), get_message(st.session_state.lang, "shape_cross"))
-    
+
     with col_pattern_shape:
-        pattern_shape = st.selectbox(
+        pattern_shape_index = pattern_options.index(get_message(st.session_state.lang, 'shape_square'))
+        st.session_state.pattern_shape_select = st.selectbox(
             get_message(st.session_state.lang, "pattern_shape_label"),
             pattern_options,
             key="pattern_shape_select",
             disabled=pattern_shape_disabled,
+            index=pattern_shape_index
         )
-
+    
     with col_finder_shape:
-        finder_pattern_shape = st.selectbox(
+        finder_pattern_shape_index = pattern_options.index(get_message(st.session_state.lang, 'shape_square'))
+        st.session_state.finder_pattern_shape_select = st.selectbox(
             get_message(st.session_state.lang, "finder_pattern_shape_label"),
             pattern_options,
             key="finder_pattern_shape_select",
             disabled=pattern_shape_disabled,
+            index=finder_pattern_shape_index
         )
 
     # 둥근사각 전용 슬라이더
-    if pattern_shape == get_message(st.session_state.lang, "shape_rounded_square") or finder_pattern_shape == get_message(st.session_state.lang, "shape_rounded_square"):
+    if st.session_state.pattern_shape_select == get_message(st.session_state.lang, "shape_rounded_square") or st.session_state.finder_pattern_shape_select == get_message(st.session_state.lang, "shape_rounded_square"):
         corner_radius_disabled = (file_format == "SVG")
         st.caption(get_message(st.session_state.lang, "svg_no_rounded_corners_warning"))
         corner_radius = st.slider(
@@ -391,7 +396,7 @@ with col1:
         corner_radius = 0
         
     # 패턴 간격 슬라이더 (사각 제외)
-    cell_gap_disabled = (pattern_shape == get_message(st.session_state.lang, "shape_square")) or (finder_pattern_shape == get_message(st.session_state.lang, "shape_square")) or (file_format == "SVG")
+    cell_gap_disabled = (st.session_state.pattern_shape_select == get_message(st.session_state.lang, "shape_square")) or (st.session_state.finder_pattern_shape_select == get_message(st.session_state.lang, "shape_square")) or (file_format == "SVG")
     st.caption(get_message(st.session_state.lang, "no_gap_warning"))
     cell_gap = st.slider(
         get_message(st.session_state.lang, "cell_gap_label"),
@@ -422,16 +427,20 @@ with col1:
     ]
     col1_3, col1_4 = st.columns(2)
     with col1_3:
-        pattern_color_choice = st.selectbox(
-            get_message(st.session_state.lang, "pattern_color_label"), colors, 
+        pattern_color_choice_index = colors.index(st.session_state.pattern_color_select) if st.session_state.pattern_color_select in colors else 0
+        st.session_state.pattern_color_select = st.selectbox(
+            get_message(st.session_state.lang, "pattern_color_label"), colors,
             key="pattern_color_select", 
-            disabled=file_format_is_svg
+            disabled=file_format_is_svg,
+            index=pattern_color_choice_index
         )
     with col1_4:
-        bg_color_choice = st.selectbox(
+        bg_color_choice_index = colors.index(st.session_state.bg_color_select) if st.session_state.bg_color_select in colors else 0
+        st.session_state.bg_color_select = st.selectbox(
             get_message(st.session_state.lang, "bg_color_label"), colors, 
             key="bg_color_select", 
-            disabled=file_format_is_svg
+            disabled=file_format_is_svg,
+            index=bg_color_choice_index
         )
 
     st.markdown(get_message(st.session_state.lang, "hex_code_info"))
@@ -441,19 +450,19 @@ with col1:
         st.text_input(
             get_message(st.session_state.lang, "pattern_hex_input_label"),
             placeholder=get_message(st.session_state.lang, "hex_input_placeholder"),
-            disabled=(pattern_color_choice != get_message(st.session_state.lang, "direct_input_color_option")) or file_format_is_svg,
+            disabled=(st.session_state.pattern_color_select != get_message(st.session_state.lang, "direct_input_color_option")) or file_format_is_svg,
             key="custom_pattern_color_input_key",
         )
     with col1_6:
         st.text_input(
             get_message(st.session_state.lang, "bg_hex_input_label"),
             placeholder=get_message(st.session_state.lang, "bg_hex_input_placeholder"),
-            disabled=(bg_color_choice != get_message(st.session_state.lang, "direct_input_color_option")) or file_format_is_svg,
+            disabled=(st.session_state.bg_color_select != get_message(st.session_state.lang, "direct_input_color_option")) or file_format_is_svg,
             key="custom_bg_color_input_key",
         )
     
-    pattern_color = st.session_state.get('custom_pattern_color_input_key', '').strip() if pattern_color_choice == get_message(st.session_state.lang, "direct_input_color_option") else pattern_color_choice
-    bg_color = st.session_state.get('custom_bg_color_input_key', '').strip() if bg_color_choice == get_message(st.session_state.lang, "direct_input_color_option") else bg_color_choice
+    pattern_color = st.session_state.get('custom_pattern_color_input_key', '').strip() if st.session_state.pattern_color_select == get_message(st.session_state.lang, "direct_input_color_option") else st.session_state.pattern_color_select
+    bg_color = st.session_state.get('custom_bg_color_input_key', '').strip() if st.session_state.bg_color_select == get_message(st.session_state.lang, "direct_input_color_option") else st.session_state.bg_color_select
 
 #========================================================================================================================================================================
 
@@ -468,13 +477,23 @@ with col1:
 
     with col1_2:
         error_correction_options = {
-            get_message(st.session_state.lang, "error_correction_options_low"): qrcode.constants.ERROR_CORRECT_L,
-            get_message(st.session_state.lang, "error_correction_options_medium"): qrcode.constants.ERROR_CORRECT_M,
-            get_message(st.session_state.lang, "error_correction_options_quartile"): qrcode.constants.ERROR_CORRECT_Q,
-            get_message(st.session_state.lang, "error_correction_options_high"): qrcode.constants.ERROR_CORRECT_H,
+            'Low': qrcode.constants.ERROR_CORRECT_L,
+            'Medium': qrcode.constants.ERROR_CORRECT_M,
+            'Quartile': qrcode.constants.ERROR_CORRECT_Q,
+            'High': qrcode.constants.ERROR_CORRECT_H,
         }
-        error_correction_choice = st.selectbox(get_message(st.session_state.lang, "error_correction_label"), list(error_correction_options.keys()), key="error_correction_select")
-        error_correction = error_correction_options[error_correction_choice]
+        error_correction_labels = [get_message(st.session_state.lang, f"error_correction_options_{key.lower()}") for key in error_correction_options.keys()]
+        
+        error_correction_choice = st.selectbox(
+            get_message(st.session_state.lang, "error_correction_label"), 
+            error_correction_labels,
+            key="error_correction_select",
+            index=error_correction_labels.index(get_message(st.session_state.lang, f"error_correction_options_{st.session_state.error_correction_select.lower()}"))
+        )
+        # 선택된 라벨에서 실제 코드로 변환
+        selected_key = next(key for key, label in zip(error_correction_options.keys(), error_correction_labels) if label == error_correction_choice)
+        error_correction = error_correction_options[selected_key]
+        
         mask_pattern = st.selectbox(get_message(st.session_state.lang, "mask_pattern_label"), options=list(range(8)), key="mask_pattern_select")
 
 
@@ -515,8 +534,8 @@ with col2:
     
     current_data = qr_data.strip() if st.session_state.strip_option else qr_data
     
-    is_pattern_color_valid_preview = (pattern_color_choice != get_message(st.session_state.lang, "direct_input_color_option")) or (pattern_color_choice == get_message(st.session_state.lang, "direct_input_color_option") and pattern_color and is_valid_color(pattern_color))
-    is_bg_color_valid_preview = (bg_color_choice != get_message(st.session_state.lang, "direct_input_color_option")) or (bg_color_choice == get_message(st.session_state.lang, "direct_input_color_option") and bg_color and is_valid_color(bg_color))
+    is_pattern_color_valid_preview = (st.session_state.pattern_color_select != get_message(st.session_state.lang, "direct_input_color_option")) or (st.session_state.pattern_color_select == get_message(st.session_state.lang, "direct_input_color_option") and pattern_color and is_valid_color(pattern_color))
+    is_bg_color_valid_preview = (st.session_state.bg_color_select != get_message(st.session_state.lang, "direct_input_color_option")) or (st.session_state.bg_color_select == get_message(st.session_state.lang, "direct_input_color_option") and bg_color and is_valid_color(bg_color))
     is_colors_same_preview = (is_pattern_color_valid_preview and is_bg_color_valid_preview and pattern_color and bg_color and pattern_color == bg_color)
     
     preview_image_display = None
@@ -630,13 +649,13 @@ with col2:
         st.warning(get_message(st.session_state.lang, "download_error_warning"))
         
         if file_format != "SVG":
-            if pattern_color_choice == get_message(st.session_state.lang, "direct_input_color_option") and not pattern_color:
+            if st.session_state.pattern_color_select == get_message(st.session_state.lang, "direct_input_color_option") and not pattern_color:
                 st.warning(get_message(st.session_state.lang, "hex_input_missing_warning").format(get_message(st.session_state.lang, "pattern_color_label")))
-            if bg_color_choice == get_message(st.session_state.lang, "direct_input_color_option") and not bg_color:
+            if st.session_state.bg_color_select == get_message(st.session_state.lang, "direct_input_color_option") and not bg_color:
                 st.warning(get_message(st.session_state.lang, "hex_input_missing_warning").format(get_message(st.session_state.lang, "bg_color_label")))
-            if pattern_color_choice == get_message(st.session_state.lang, "direct_input_color_option") and pattern_color and not is_valid_color(pattern_color):
+            if st.session_state.pattern_color_select == get_message(st.session_state.lang, "direct_input_color_option") and pattern_color and not is_valid_color(pattern_color):
                 st.warning(get_message(st.session_state.lang, "hex_input_invalid_warning").format(get_message(st.session_state.lang, "pattern_color_label")))
-            if bg_color_choice == get_message(st.session_state.lang, "direct_input_color_option") and bg_color and not is_valid_color(bg_color):
+            if st.session_state.bg_color_select == get_message(st.session_state.lang, "direct_input_color_option") and bg_color and not is_valid_color(bg_color):
                 st.warning(get_message(st.session_state.lang, "hex_input_invalid_warning").format(get_message(st.session_state.lang, "bg_color_label")))
             if is_colors_same_preview:
                 st.warning(get_message(st.session_state.lang, "same_color_warning"))
