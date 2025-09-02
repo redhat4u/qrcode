@@ -29,18 +29,29 @@ def build_preview_and_download_ui():
 
     file_format_is_svg = st.session_state.file_format_select == "SVG"
 
-    # 유효성 검사 및 색상값 가져오기
-    # 미리보기를 위한 색상 유효성 검사
-    pattern_color_for_preview = (
-        st.session_state.custom_pattern_color_input_key.strip()
-        if st.session_state.pattern_color_select == "<직접 입력>"
-        else st.session_state.pattern_color_select
-    )
-    bg_color_for_preview = (
-        st.session_state.custom_bg_color_input_key.strip()
-        if st.session_state.bg_color_select == "<직접 입력>"
-        else st.session_state.bg_color_select
-    )
+    # [수정] 미리보기를 위해 PNG와 SVG의 색상 및 패턴 로직을 명확히 분리
+    preview_module_shape = ""
+    preview_pattern_color = ""
+    preview_bg_color = ""
+
+    if file_format_is_svg:
+        # SVG는 둥근 패턴을 지원하지 않으므로 미리보기와 생성 모두 기본값으로 고정
+        preview_module_shape = "기본 사각형 (Square)"
+        preview_pattern_color = "black"
+        preview_bg_color = "white"
+    else:
+        # PNG 미리보기를 위한 색상 유효성 검사 및 값 가져오기
+        preview_pattern_color = (
+            st.session_state.custom_pattern_color_input_key.strip()
+            if st.session_state.pattern_color_select == "<직접 입력>"
+            else st.session_state.pattern_color_select
+        )
+        preview_bg_color = (
+            st.session_state.custom_bg_color_input_key.strip()
+            if st.session_state.bg_color_select == "<직접 입력>"
+            else st.session_state.bg_color_select
+        )
+        preview_module_shape = st.session_state.module_shape_select
     
     # 미리보기 이미지 생성
     preview_image_display = None
@@ -49,9 +60,9 @@ def build_preview_and_download_ui():
     # 모든 조건이 충족될 때만 미리보기 이미지를 생성
     if (
         current_data
-        and is_valid_color(pattern_color_for_preview)
-        and is_valid_color(bg_color_for_preview)
-        and pattern_color_for_preview != bg_color_for_preview
+        and is_valid_color(preview_pattern_color)
+        and is_valid_color(preview_bg_color)
+        and preview_pattern_color != preview_bg_color
     ):
         error_correction_options = {
             "Low (7%) - 오류 보정": qrcode.constants.ERROR_CORRECT_L,
@@ -61,25 +72,15 @@ def build_preview_and_download_ui():
         }
         error_correction = error_correction_options[st.session_state.error_correction_select]
 
-        # [수정] SVG 선택 시 미리보기 패턴과 색상을 강제로 기본값으로 변경
-        if file_format_is_svg:
-            preview_module_shape = "기본 사각형 (Square)"
-            preview_pattern_color = "black"
-            preview_bg_color = "white"
-        else:
-            preview_module_shape = st.session_state.module_shape_select
-            preview_pattern_color = pattern_color_for_preview
-            preview_bg_color = bg_color_for_preview
-
         img, qr = generate_qr_code_png(
             current_data,
             int(st.session_state.box_size_input),
             int(st.session_state.border_input),
             error_correction,
             int(st.session_state.mask_pattern_select),
-            preview_pattern_color, # 수정된 미리보기 패턴 색상 사용
-            preview_bg_color, # 수정된 미리보기 배경 색상 사용
-            preview_module_shape, # 수정된 미리보기 모듈 모양 사용
+            preview_pattern_color,
+            preview_bg_color,
+            preview_module_shape,
         )
         if img and qr:
             preview_image_display = img
@@ -154,7 +155,7 @@ def build_preview_and_download_ui():
                     st.session_state.qr_generated = True
                     st.session_state.show_generate_success = True
             else:  # SVG
-                # [수정] SVG 다운로드 시에도 색상을 기본값으로 통일
+                # SVG 다운로드 시에도 색상을 기본값으로 통일
                 svg_data, qr = generate_qr_code_svg(
                     current_data,
                     int(st.session_state.box_size_input),
@@ -195,7 +196,7 @@ def build_preview_and_download_ui():
         )
     elif file_format_is_svg:
         st.info("💡 아래 미리보기는 SVG 형식의 한계로 인해 기본 사각형 패턴만 표시됩니다. [⚡ QR 코드 생성] 버튼을 클릭하면 SVG 파일이 생성됩니다.")
-    elif pattern_color_for_preview == bg_color_for_preview and is_valid_color(pattern_color_for_preview) and is_valid_color(bg_color_for_preview):
+    elif preview_pattern_color == preview_bg_color and is_valid_color(preview_pattern_color) and is_valid_color(preview_bg_color):
         st.warning("⚠️ 미리보기를 위해 패턴과 배경 색상을 다르게 설정해 주세요.")
     elif preview_image_display:
         st.markdown(
@@ -232,8 +233,8 @@ def build_preview_and_download_ui():
             - QR 버전: {preview_qr_object.version}
             - 가로/세로 각 cell 개수: {preview_qr_object.modules_count}개
             - 이미지 크기 (참고): {(preview_qr_object.modules_count + 2 * int(st.session_state.border_input)) * int(st.session_state.box_size_input)} x {(preview_qr_object.modules_count + 2 * int(st.session_state.border_input)) * int(st.session_state.box_size_input)} px
-            - 패턴 색상: {"black" if file_format_is_svg else pattern_color_for_preview}
-            - 배경 색상: {"white" if file_format_is_svg else bg_color_for_preview}
+            - 패턴 색상: {"black" if file_format_is_svg else preview_pattern_color}
+            - 배경 색상: {"white" if file_format_is_svg else preview_bg_color}
             - 이미지 크기 = (각 cell 개수 + 좌/우 여백 총 개수) × 1개의 사각 cell 크기
             """
             )
