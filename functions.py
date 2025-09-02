@@ -50,7 +50,7 @@ def generate_qr_code_png(
     mask_pattern,
     fill_color,
     back_color,
-    pattern_shape,  # 새로운 파라미터 추가
+    pattern_shape,
 ):
     try:
         qr = qrcode.QRCode(
@@ -93,7 +93,7 @@ def generate_qr_code_svg(
     mask_pattern,
     fill_color,
     back_color,
-    pattern_shape,  # 새로운 파라미터 추가
+    pattern_shape,
 ):
     try:
         qr = qrcode.QRCode(
@@ -121,7 +121,7 @@ def generate_qr_code_svg(
         img_svg.save(svg_buffer)
         svg_data = svg_buffer.getvalue().decode('utf-8')
         
-        # SVG 색상 변경 (SVGPathImage의 경우 필요)
+        # SVG 색상 변경 (SVGPathImage의 경우만 필요)
         if pattern_shape == "Square":
             svg_data = svg_data.replace('fill="black"', f'fill="{fill_color}"', 1)
             svg_data = svg_data.replace('fill="white"', f'fill="{back_color}"', 1)
@@ -129,4 +129,3 @@ def generate_qr_code_svg(
         return svg_data, qr
     except Exception as e:
         return None, None
-        
