@@ -59,13 +59,17 @@ def generate_qr_code_png(
         qr.make(fit=True)
 
         # [수정] 색상을 16진수 문자열로 변환하여 안정성을 높입니다.
+        # ImageColor.getrgb는 유효한 색상 문자열을 RGB 튜플로 변환합니다.
+        # 이후 RGB 튜플을 올바른 16진수 문자열로 변환합니다.
         try:
-            fill_color_hex = '#' + ''.join(f'{c:02x}' for c in ImageColor.getrgb(fill_color))
+            fill_color_rgb = ImageColor.getrgb(fill_color)
+            fill_color_hex = f'#{fill_color_rgb[0]:02x}{fill_color_rgb[1]:02x}{fill_color_rgb[2]:02x}'
         except ValueError:
             fill_color_hex = fill_color
             
         try:
-            back_color_hex = '#' + ''.join(f'{c:02x}' for c in ImageColor.getrgb(back_color))
+            back_color_rgb = ImageColor.getrgb(back_color)
+            back_color_hex = f'#{back_color_rgb[0]:02x}{back_color_rgb[1]:02x}{back_color_rgb[2]:02x}'
         except ValueError:
             back_color_hex = back_color
 
@@ -105,9 +109,18 @@ def generate_qr_code_svg(
     back_color,
 ):
     try:
+        # [추가] 오류 보정 문자열을 QR 코드 상수로 변환
+        error_correction_options = {
+            "Low (7%) - 오류 보정": qrcode.constants.ERROR_CORRECT_L,
+            "Medium (15%) - 오류 보정": qrcode.constants.ERROR_CORRECT_M,
+            "Quartile (25%) - 오류 보정": qrcode.constants.ERROR_CORRECT_Q,
+            "High (30%) - 오류 보정": qrcode.constants.ERROR_CORRECT_H,
+        }
+        final_error_correction = error_correction_options.get(error_correction, qrcode.constants.ERROR_CORRECT_L)
+
         qr = qrcode.QRCode(
             version=1,
-            error_correction=error_correction,
+            error_correction=final_error_correction, # 수정된 변수 사용
             box_size=box_size,
             border=border,
             mask_pattern=mask_pattern,
