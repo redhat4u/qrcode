@@ -151,18 +151,6 @@ def draw_custom_shape_image(qr_object, box_size, border, fill_color, back_color,
                     draw.polygon([(x + box_size/2, y), (x + box_size, y + box_size/2), (x + box_size/2, y + box_size), (x, y + box_size/2)], fill=fill_color)
     return img
 
-# 추가된 함수: PNG 생성 로직을 캡슐화
-def generate_qr_code_png(data, box_size, border, error_correction, mask_pattern, fill_color, back_color, shape):
-    try:
-        qr = get_qr_data_object(data, box_size, border, error_correction, mask_pattern)
-        if not qr:
-            return None, None
-        img = draw_custom_shape_image(qr, box_size, border, fill_color, back_color, shape)
-        return img, qr
-    except Exception as e:
-        st.error(f"QR 코드 PNG 생성 오류: {str(e)}")
-        return None, None
-
 
 # QR 코드 SVG 생성 함수
 def generate_qr_code_svg(data, box_size, border, error_correction, mask_pattern, fill_color, back_color):
@@ -266,12 +254,12 @@ with col1:
     st.subheader("📝 QR 코드 내용")
     st.info("최대 입력 가능한 문자는 종류에 따라 약 2,400~2,900자 정도입니다.")
 
+    # on_change=on_qr_setting_change를 제거하여 실시간 미리보기 활성화
     qr_data = st.text_area(
         "QR 코드로 생성할 내용을 입력해 주세요",
         height=200,
         placeholder="이 곳에 QR 코드를 생성할 내용을 입력해 주세요.\n복사/붙여넣기를 사용할 수 있습니다.",
         key="qr_input_area",
-        on_change=on_qr_setting_change
     )
 
     # 문자 수 표시
@@ -455,20 +443,30 @@ with col2:
     preview_image_display = None
     preview_qr_object = None
 
-    # 수정된 미리보기 로직: 데이터가 있을 때 항상 미리보기를 생성하도록 변경
+    # 수정된 미리보기 로직: 데이터가 있을 때만 미리보기를 생성하도록 변경
     if current_data:
         if file_format_is_svg:
             # SVG 미리보기는 항상 PNG로 생성
-            preview_image_display, preview_qr_object = generate_qr_code_png(
+            qr = get_qr_data_object(
                 current_data, int(st.session_state.box_size_input), int(st.session_state.border_input), error_correction,
-                int(st.session_state.mask_pattern_select), "black", "white", "사각형"
+                int(st.session_state.mask_pattern_select)
             )
+            if qr:
+                preview_image_display = draw_custom_shape_image(
+                    qr, int(st.session_state.box_size_input), int(st.session_state.border_input), "black", "white", "사각형"
+                )
+                preview_qr_object = qr
         elif is_pattern_color_valid_preview and is_bg_color_valid_preview and not is_colors_same_preview:
             # PNG 미리보기
-            preview_image_display, preview_qr_object = generate_qr_code_png(
+            qr = get_qr_data_object(
                 current_data, int(st.session_state.box_size_input), int(st.session_state.border_input), error_correction,
-                int(st.session_state.mask_pattern_select), pattern_color, bg_color, st.session_state.pattern_shape_select
+                int(st.session_state.mask_pattern_select)
             )
+            if qr:
+                preview_image_display = draw_custom_shape_image(
+                    qr, int(st.session_state.box_size_input), int(st.session_state.border_input), pattern_color, bg_color, st.session_state.pattern_shape_select
+                )
+                preview_qr_object = qr
         else:
             # 유효성 검사 실패 시 경고 메시지 표시
             if not file_format_is_svg:
@@ -483,6 +481,7 @@ with col2:
                 if is_colors_same_preview:
                     st.warning("⚠️ 패턴과 배경은 같은 색을 사용할 수 없습니다.")
 
+    
     generate_btn = st.button("⚡ QR 코드 생성", use_container_width=True,)
     
     if generate_btn:
@@ -516,19 +515,24 @@ with col2:
         else:
             st.session_state.error_message = None
             if file_format == "PNG":
-                img, qr = generate_qr_code_png(
+                qr = get_qr_data_object(
                     current_data, int(st.session_state.box_size_input), int(st.session_state.border_input), error_correction,
-                    int(st.session_state.mask_pattern_select), final_pattern_color, final_bg_color, st.session_state.pattern_shape_select
+                    int(st.session_state.mask_pattern_select)
                 )
-                if img:
-                    img_buffer = io.BytesIO()
-                    img.save(img_buffer, format='PNG')
-                    st.session_state.qr_image_bytes = img_buffer.getvalue()
-                    st.session_state.qr_svg_bytes = None
-                    st.session_state.qr_generated = True
-                    st.session_state.show_generate_success = True
-                    preview_image_display = img
-                    preview_qr_object = qr
+                if qr:
+                    img = draw_custom_shape_image(
+                        qr, int(st.session_state.box_size_input), int(st.session_state.border_input),
+                        final_pattern_color, final_bg_color, st.session_state.pattern_shape_select
+                    )
+                    if img:
+                        img_buffer = io.BytesIO()
+                        img.save(img_buffer, format='PNG')
+                        st.session_state.qr_image_bytes = img_buffer.getvalue()
+                        st.session_state.qr_svg_bytes = None
+                        st.session_state.qr_generated = True
+                        st.session_state.show_generate_success = True
+                        preview_image_display = img
+                        preview_qr_object = qr
             else: # SVG
                 svg_data, qr = generate_qr_code_svg(
                     current_data, int(st.session_state.box_size_input), int(st.session_state.border_input), error_correction,
@@ -541,12 +545,15 @@ with col2:
                     st.session_state.show_generate_success = True
                     
                     # SVG 다운로드 시 PNG 미리보기 재구성
-                    png_img, png_qr = generate_qr_code_png(
+                    qr_for_preview = get_qr_data_object(
                         current_data, int(st.session_state.box_size_input), int(st.session_state.border_input), error_correction,
-                        int(st.session_state.mask_pattern_select), "black", "white", "사각형"
+                        int(st.session_state.mask_pattern_select)
                     )
-                    preview_image_display = png_img
-                    preview_qr_object = png_qr
+                    if qr_for_preview:
+                        preview_image_display = draw_custom_shape_image(
+                            qr_for_preview, int(st.session_state.box_size_input), int(st.session_state.border_input), "black", "white", "사각형"
+                        )
+                        preview_qr_object = qr_for_preview
 
     st.markdown("---")
     
