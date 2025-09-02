@@ -30,60 +30,38 @@ def build_preview_and_download_ui():
     file_format_is_svg = st.session_state.file_format_select == "SVG"
 
     # 유효성 검사 및 색상값 가져오기
-    is_pattern_color_valid_preview = (
-        st.session_state.pattern_color_select != "<직접 입력>"
-    ) or (
-        st.session_state.pattern_color_select == "<직접 입력>"
-        and st.session_state.custom_pattern_color_input_key
-        and is_valid_color(st.session_state.custom_pattern_color_input_key)
-    )
-    is_bg_color_valid_preview = (st.session_state.bg_color_select != "<직접 입력>") or (
-        st.session_state.bg_color_select == "<직접 입력>"
-        and st.session_state.custom_bg_color_input_key
-        and is_valid_color(st.session_state.custom_bg_color_input_key)
-    )
-
-    pattern_color = (
+    # 미리보기를 위한 색상 유효성 검사
+    pattern_color_for_preview = (
         st.session_state.custom_pattern_color_input_key.strip()
         if st.session_state.pattern_color_select == "<직접 입력>"
         else st.session_state.pattern_color_select
     )
-    bg_color = (
+    bg_color_for_preview = (
         st.session_state.custom_bg_color_input_key.strip()
         if st.session_state.bg_color_select == "<직접 입력>"
         else st.session_state.bg_color_select
     )
     
-    is_colors_same_preview = (
-        is_pattern_color_valid_preview
-        and is_bg_color_valid_preview
-        and pattern_color
-        and bg_color
-        and pattern_color == bg_color
-    )
-
-    error_correction_options = {
-        "Low (7%) - 오류 보정": qrcode.constants.ERROR_CORRECT_L,
-        "Medium (15%) - 오류 보정": qrcode.constants.ERROR_CORRECT_M,
-        "Quartile (25%) - 오류 보정": qrcode.constants.ERROR_CORRECT_Q,
-        "High (30%) - 오류 보정": qrcode.constants.ERROR_CORRECT_H,
-    }
-    error_correction = error_correction_options[st.session_state.error_correction_select]
-
-    # 미리보기 이미지 생성 (버튼 클릭과 무관하게 항상 실행)
+    # 미리보기 이미지 생성
     preview_image_display = None
     preview_qr_object = None
 
-    # PNG 미리보기를 SVG 형식에서도 표시
-    if current_data and not is_colors_same_preview:
+    # 모든 조건이 충족될 때만 미리보기 이미지를 생성
+    if (
+        current_data
+        and not file_format_is_svg
+        and is_valid_color(pattern_color_for_preview)
+        and is_valid_color(bg_color_for_preview)
+        and pattern_color_for_preview != bg_color_for_preview
+    ):
         img, qr = generate_qr_code_png(
             current_data,
             int(st.session_state.box_size_input),
             int(st.session_state.border_input),
-            error_correction,
+            st.session_state.error_correction_select,
             int(st.session_state.mask_pattern_select),
-            pattern_color,
-            bg_color,
+            pattern_color_for_preview,
+            bg_color_for_preview,
             st.session_state.module_shape_select,
         )
         if img and qr:
@@ -133,6 +111,14 @@ def build_preview_and_download_ui():
         else:
             st.session_state.error_message = None
             if st.session_state.file_format_select == "PNG":
+                error_correction_options = {
+                    "Low (7%) - 오류 보정": qrcode.constants.ERROR_CORRECT_L,
+                    "Medium (15%) - 오류 보정": qrcode.constants.ERROR_CORRECT_M,
+                    "Quartile (25%) - 오류 보정": qrcode.constants.ERROR_CORRECT_Q,
+                    "High (30%) - 오류 보정": qrcode.constants.ERROR_CORRECT_H,
+                }
+                error_correction = error_correction_options[st.session_state.error_correction_select]
+
                 img, qr = generate_qr_code_png(
                     current_data,
                     int(st.session_state.box_size_input),
@@ -155,7 +141,7 @@ def build_preview_and_download_ui():
                     current_data,
                     int(st.session_state.box_size_input),
                     int(st.session_state.border_input),
-                    error_correction,
+                    st.session_state.error_correction_select,
                     int(st.session_state.mask_pattern_select),
                     "black",
                     "white",
@@ -189,30 +175,29 @@ def build_preview_and_download_ui():
             """,
             unsafe_allow_html=True,
         )
-    elif is_colors_same_preview:
+    elif file_format_is_svg:
+        st.info("💡 아래 미리보기는 PNG 형식입니다. [⚡ QR 코드 생성] 버튼을 클릭하면 SVG 파일이 생성됩니다.")
+    elif pattern_color_for_preview == bg_color_for_preview and is_valid_color(pattern_color_for_preview) and is_valid_color(bg_color_for_preview):
         st.warning("⚠️ 미리보기를 위해 패턴과 배경 색상을 다르게 설정해 주세요.")
     elif preview_image_display:
-        if file_format_is_svg:
-            st.info("💡 아래 미리보기는 PNG 형식입니다. [⚡ QR 코드 생성] 버튼을 클릭하면 SVG 파일이 생성됩니다.")
-        else:
-            st.markdown(
-                """
-                <div style='
-                    background-color: #0c4145;
-                    color: #dffde9;
-                    padding: 1rem;
-                    border-radius: 0.5rem;
-                    border: 1px solid #1a5e31;
-                    font-size: 1rem;
-                    margin-bottom: 1rem;
-                    word-break: keep-all;
-                '>
-                    ✅ 현재 입력된 내용으로 QR 코드를 미리 표현해 보았습니다.<br>
-                    아래의 QR 코드가 맘에 드시면, 위의 [⚡ QR 코드 생성] 버튼을 클릭하세요.
-                </div>
-                """,
-                unsafe_allow_html=True,
-            )
+        st.markdown(
+            """
+            <div style='
+                background-color: #0c4145;
+                color: #dffde9;
+                padding: 1rem;
+                border-radius: 0.5rem;
+                border: 1px solid #1a5e31;
+                font-size: 1rem;
+                margin-bottom: 1rem;
+                word-break: keep-all;
+            '>
+                ✅ 현재 입력된 내용으로 QR 코드를 미리 표현해 보았습니다.<br>
+                아래의 QR 코드가 맘에 드시면, 위의 [⚡ QR 코드 생성] 버튼을 클릭하세요.
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
     else:
         st.info("QR 코드 내용을 입력하면 생성될 QR 코드를 미리 보여드립니다.")
 
@@ -229,8 +214,8 @@ def build_preview_and_download_ui():
             - QR 버전: {preview_qr_object.version}
             - 가로/세로 각 cell 개수: {preview_qr_object.modules_count}개
             - 이미지 크기 (참고): {(preview_qr_object.modules_count + 2 * int(st.session_state.border_input)) * int(st.session_state.box_size_input)} x {(preview_qr_object.modules_count + 2 * int(st.session_state.border_input)) * int(st.session_state.box_size_input)} px
-            - 패턴 색상: {"black" if file_format_is_svg else pattern_color}
-            - 배경 색상: {"white" if file_format_is_svg else bg_color}
+            - 패턴 색상: {"black" if file_format_is_svg else pattern_color_for_preview}
+            - 배경 색상: {"white" if file_format_is_svg else bg_color_for_preview}
             - 이미지 크기 = (각 cell 개수 + 좌/우 여백 총 개수) × 1개의 사각 cell 크기
             """
             )
