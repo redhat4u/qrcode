@@ -8,6 +8,7 @@ from datetime import datetime
 from zoneinfo import ZoneInfo
 from functions import generate_qr_code_png, generate_qr_code_svg, is_valid_color, sanitize_filename
 from state_manager import set_download_initiated, reset_all_settings
+from messages import get_message  # messages.py에서 get_message 함수를 가져옵니다.
 
 def build_preview_and_download_ui():
     """미리보기 및 다운로드 섹션을 빌드합니다."""
@@ -17,7 +18,7 @@ def build_preview_and_download_ui():
     if 'download_initiated' not in st.session_state:
         st.session_state.download_initiated = False
     
-    st.header("👀 미리보기 및 생성")
+    st.header(get_message('UI_HEADER_PREVIEW_AND_GENERATE'))
     
     qr_data = st.session_state.qr_input_area
     if st.session_state.strip_option:
@@ -25,20 +26,20 @@ def build_preview_and_download_ui():
     else:
         current_data = qr_data
     
-    file_format_is_svg = (st.session_state.file_format_select == "SVG")
+    file_format_is_svg = (st.session_state.file_format_select == get_message('UI_FILE_FORMAT_SVG'))
     
-    is_pattern_color_valid_preview = (st.session_state.pattern_color_select != "<직접 입력>") or (st.session_state.pattern_color_select == "<직접 입력>" and st.session_state.custom_pattern_color_input_key and is_valid_color(st.session_state.custom_pattern_color_input_key))
-    is_bg_color_valid_preview = (st.session_state.bg_color_select != "<직접 입력>") or (st.session_state.bg_color_select == "<직접 입력>" and st.session_state.custom_bg_color_input_key and is_valid_color(st.session_state.custom_bg_color_input_key))
+    is_pattern_color_valid_preview = (st.session_state.pattern_color_select != get_message('UI_COLOR_OPTION_DIRECT_INPUT')) or (st.session_state.pattern_color_select == get_message('UI_COLOR_OPTION_DIRECT_INPUT') and st.session_state.custom_pattern_color_input_key and is_valid_color(st.session_state.custom_pattern_color_input_key))
+    is_bg_color_valid_preview = (st.session_state.bg_color_select != get_message('UI_COLOR_OPTION_DIRECT_INPUT')) or (st.session_state.bg_color_select == get_message('UI_COLOR_OPTION_DIRECT_INPUT') and st.session_state.custom_bg_color_input_key and is_valid_color(st.session_state.custom_bg_color_input_key))
     
-    pattern_color = st.session_state.custom_pattern_color_input_key.strip() if st.session_state.pattern_color_select == "<직접 입력>" else st.session_state.pattern_color_select
-    bg_color = st.session_state.custom_bg_color_input_key.strip() if st.session_state.bg_color_select == "<직접 입력>" else st.session_state.bg_color_select
+    pattern_color = st.session_state.custom_pattern_color_input_key.strip() if st.session_state.pattern_color_select == get_message('UI_COLOR_OPTION_DIRECT_INPUT') else st.session_state.pattern_color_select
+    bg_color = st.session_state.custom_bg_color_input_key.strip() if st.session_state.bg_color_select == get_message('UI_COLOR_OPTION_DIRECT_INPUT') else st.session_state.bg_color_select
     is_colors_same_preview = (is_pattern_color_valid_preview and is_bg_color_valid_preview and pattern_color and bg_color and pattern_color == bg_color)
     
     error_correction_options = {
-        "Low (7%) - 오류 보정": qrcode.constants.ERROR_CORRECT_L,
-        "Medium (15%) - 오류 보정": qrcode.constants.ERROR_CORRECT_M,
-        "Quartile (25%) - 오류 보정": qrcode.constants.ERROR_CORRECT_Q,
-        "High (30%) - 오류 보정": qrcode.constants.ERROR_CORRECT_H,
+        get_message('UI_ERROR_CORRECTION_LEVEL_L'): qrcode.constants.ERROR_CORRECT_L,
+        get_message('UI_ERROR_CORRECTION_LEVEL_M'): qrcode.constants.ERROR_CORRECT_M,
+        get_message('UI_ERROR_CORRECTION_LEVEL_Q'): qrcode.constants.ERROR_CORRECT_Q,
+        get_message('UI_ERROR_CORRECTION_LEVEL_H'): qrcode.constants.ERROR_CORRECT_H,
     }
     error_correction = error_correction_options[st.session_state.error_correction_select]
 
@@ -67,39 +68,39 @@ def build_preview_and_download_ui():
                 preview_image_display = st.session_state.qr_image_bytes
                 preview_qr_object = qr
 
-    generate_btn = st.button("⚡ QR 코드 생성", use_container_width=True)
+    generate_btn = st.button(get_message('UI_BUTTON_GENERATE_QR'), use_container_width=True)
     
     if generate_btn:
         st.session_state.generate_button_clicked = True
         st.session_state.error_message = None
         
         errors = []
-        final_pattern_color = st.session_state.custom_pattern_color_input_key.strip() if st.session_state.pattern_color_select == "<직접 입력>" else st.session_state.pattern_color_select
-        final_bg_color = st.session_state.custom_bg_color_input_key.strip() if st.session_state.bg_color_select == "<직접 입력>" else st.session_state.bg_color_select
+        final_pattern_color = st.session_state.custom_pattern_color_input_key.strip() if st.session_state.pattern_color_select == get_message('UI_COLOR_OPTION_DIRECT_INPUT') else st.session_state.pattern_color_select
+        final_bg_color = st.session_state.custom_bg_color_input_key.strip() if st.session_state.bg_color_select == get_message('UI_COLOR_OPTION_DIRECT_INPUT') else st.session_state.bg_color_select
         
         if not current_data:
-            errors.append("⚠️ 생성할 QR 코드 내용을 입력해 주세요.")
+            errors.append(get_message('UI_ERROR_QR_DATA_MISSING'))
         
         if not file_format_is_svg:
-            if st.session_state.pattern_color_select == "<직접 입력>" and not final_pattern_color:
-                errors.append("⚠️ 패턴 색의 HEX 값을 입력해 주세요.")
-            elif st.session_state.pattern_color_select == "<직접 입력>" and not is_valid_color(final_pattern_color):
-                errors.append("⚠️ 패턴 색으로 입력한 HEX 값은 올바른 색상 값이 아닙니다. 다시 확인해주세요.")
+            if st.session_state.pattern_color_select == get_message('UI_COLOR_OPTION_DIRECT_INPUT') and not final_pattern_color:
+                errors.append(get_message('UI_ERROR_PATTERN_COLOR_HEX_MISSING'))
+            elif st.session_state.pattern_color_select == get_message('UI_COLOR_OPTION_DIRECT_INPUT') and not is_valid_color(final_pattern_color):
+                errors.append(get_message('UI_ERROR_INVALID_PATTERN_COLOR'))
             
-            if st.session_state.bg_color_select == "<직접 입력>" and not final_bg_color:
-                errors.append("⚠️ 배경 색의 HEX 값을 입력해 주세요.")
-            elif st.session_state.bg_color_select == "<직접 입력>" and not is_valid_color(final_bg_color):
-                errors.append("⚠️ 배경 색으로 입력한 HEX 값은 올바른 색상 값이 아닙니다. 다시 확인해주세요.")
+            if st.session_state.bg_color_select == get_message('UI_COLOR_OPTION_DIRECT_INPUT') and not final_bg_color:
+                errors.append(get_message('UI_ERROR_BG_COLOR_HEX_MISSING'))
+            elif st.session_state.bg_color_select == get_message('UI_COLOR_OPTION_DIRECT_INPUT') and not is_valid_color(final_bg_color):
+                errors.append(get_message('UI_ERROR_INVALID_BG_COLOR'))
                 
             if final_pattern_color and final_bg_color and final_pattern_color == final_bg_color:
-                errors.append("⚠️ 패턴과 배경은 같은 색을 사용할 수 없습니다.")
+                errors.append(get_message('UI_ERROR_SAME_COLOR'))
 
         if errors:
             st.session_state.error_message = errors[0]
             st.session_state.show_generate_success = False
         else:
             st.session_state.error_message = None
-            if st.session_state.file_format_select == "PNG":
+            if st.session_state.file_format_select == get_message('UI_FILE_FORMAT_PNG'):
                 img, qr = generate_qr_code_png(
                     current_data, int(st.session_state.box_size_input), int(st.session_state.border_input), error_correction,
                     int(st.session_state.mask_pattern_select), final_pattern_color, final_bg_color,
@@ -146,15 +147,15 @@ def build_preview_and_download_ui():
              """,
              unsafe_allow_html=True,
          )
-    elif st.session_state.pattern_color_select == "<직접 입력>" and not st.session_state.custom_pattern_color_input_key:
-        st.warning("⚠️ 패턴 색을 입력해 주세요.")
-    elif st.session_state.bg_color_select == "<직접 입력>" and not st.session_state.custom_bg_color_input_key:
-        st.warning("⚠️ 배경 색을 입력해 주세요.")
-    elif (st.session_state.pattern_color_select == "<직접 입력>" and not is_valid_color(st.session_state.custom_pattern_color_input_key)) or \
-         (st.session_state.bg_color_select == "<직접 입력>" and not is_valid_color(st.session_state.custom_bg_color_input_key)):
-        st.warning("⚠️ 올바른 색상값이 아닙니다. 다시 확인해 주세요.")
+    elif st.session_state.pattern_color_select == get_message('UI_COLOR_OPTION_DIRECT_INPUT') and not st.session_state.custom_pattern_color_input_key:
+        st.warning(get_message('UI_WARNING_PATTERN_COLOR_INPUT'))
+    elif st.session_state.bg_color_select == get_message('UI_COLOR_OPTION_DIRECT_INPUT') and not st.session_state.custom_bg_color_input_key:
+        st.warning(get_message('UI_WARNING_BG_COLOR_INPUT'))
+    elif (st.session_state.pattern_color_select == get_message('UI_COLOR_OPTION_DIRECT_INPUT') and not is_valid_color(st.session_state.custom_pattern_color_input_key)) or \
+         (st.session_state.bg_color_select == get_message('UI_COLOR_OPTION_DIRECT_INPUT') and not is_valid_color(st.session_state.custom_bg_color_input_key)):
+        st.warning(get_message('UI_WARNING_INVALID_COLOR_HEX'))
     elif is_colors_same_preview:
-        st.warning("⚠️ 패턴과 배경은 같은 색을 사용할 수 없습니다. 다른 색을 선택해 주세요.")
+        st.warning(get_message('UI_WARNING_SAME_COLOR'))
     elif preview_image_display:
          st.markdown(
              """
@@ -175,27 +176,27 @@ def build_preview_and_download_ui():
              unsafe_allow_html=True,
          )
     else:
-        st.info("QR 코드 내용을 입력하면 생성될 QR 코드를 미리 보여드립니다.")
+        st.info(get_message('UI_INFO_QR_GENERATION_GUIDE'))
 
     if preview_image_display and preview_qr_object:
-        st.subheader("📱 QR 코드 미리보기")
+        st.subheader(get_message('UI_SUBHEADER_QR_PREVIEW'))
         col_left, col_center, col_right = st.columns([1, 2, 1])
         with col_center:
-            st.image(preview_image_display, caption="생성된 QR 코드", width=380)
+            st.image(preview_image_display, caption=get_message('UI_PREVIEW_IMAGE_CAPTION'), width=380)
         
         st.info(f"""
-        **QR 코드 정보**
-        - QR 버전: {preview_qr_object.version}
-        - 가로/세로 각 cell 개수: {preview_qr_object.modules_count}개
-        - 이미지 크기 (참고): {(preview_qr_object.modules_count + 2 * int(st.session_state.border_input)) * int(st.session_state.box_size_input)} x {(preview_qr_object.modules_count + 2 * int(st.session_state.border_input)) * int(st.session_state.box_size_input)} px
-        - 패턴 색상: {"black" if file_format_is_svg else pattern_color}
-        - 배경 색상: {"white" if file_format_is_svg else bg_color}
-        - 이미지 크기 = (각 cell 개수 + 좌/우 여백 총 개수) × 1개의 사각 cell 크기
+        **{get_message('UI_INFO_QR_CODE_INFO_TITLE')}**
+        - {get_message('UI_INFO_QR_VERSION')}: {preview_qr_object.version}
+        - {get_message('UI_INFO_QR_CELL_COUNT')}: {preview_qr_object.modules_count}개
+        - {get_message('UI_INFO_QR_IMAGE_SIZE_REFERENCE')}: {(preview_qr_object.modules_count + 2 * int(st.session_state.border_input)) * int(st.session_state.box_size_input)} x {(preview_qr_object.modules_count + 2 * int(st.session_state.border_input)) * int(st.session_state.box_size_input)} px
+        - {get_message('UI_INFO_QR_PATTERN_COLOR')}: {"black" if file_format_is_svg else pattern_color}
+        - {get_message('UI_INFO_QR_BG_COLOR')}: {"white" if file_format_is_svg else bg_color}
+        - {get_message('UI_INFO_QR_IMAGE_SIZE_FORMULA')}
         """)
     
     if st.session_state.get('qr_generated', False) and (st.session_state.get('qr_image_bytes') is not None or st.session_state.get('qr_svg_bytes') is not None):
         st.markdown("---")
-        st.subheader("📥 다운로드")
+        st.subheader(get_message('UI_SUBHEADER_DOWNLOAD'))
 
         col_generate, col_reset = st.columns([1, 1])
         
@@ -208,7 +209,7 @@ def build_preview_and_download_ui():
             download_mime = ""
             download_extension = ""
 
-            if st.session_state.file_format_select == "PNG":
+            if st.session_state.file_format_select == get_message('UI_FILE_FORMAT_PNG'):
                 download_data = st.session_state.qr_image_bytes
                 download_mime = "image/png"
                 download_extension = ".png"
@@ -220,22 +221,22 @@ def build_preview_and_download_ui():
             download_filename = f"{sanitize_filename(final_filename)}{download_extension}"
             
             st.download_button(
-                label="💾 QR 코드 다운로드",
+                label=get_message('UI_DOWNLOAD_LABEL'),
                 data=download_data,
                 file_name=download_filename,
                 mime=download_mime,
                 use_container_width=True,
-                help="PC는 'Download' 폴더, 휴대폰은 'Download' 폴더에 저장됩니다.",
+                help=get_message('UI_DOWNLOAD_HELP'),
                 on_click=set_download_initiated,
             )
             
         with col_reset:
-            st.button("🔄 설정 초기화", use_container_width=True, type="secondary", on_click=reset_all_settings)
+            st.button(get_message('UI_BUTTON_RESET'), use_container_width=True, type="secondary", on_click=reset_all_settings)
 
 
         st.markdown(
             f'<p style="font-size:18px;">'
-            f'<span style="color:darkorange; font-weight:bold;">📄 다운로드 파일명: </span> '
+            f'<span style="color:darkorange; font-weight:bold;">📄 {get_message("UI_DOWNLOAD_FILENAME_LABEL")}: </span> '
             f'<span style="color:dodgerblue;"> {download_filename}</span>'
             f'</p>',
             unsafe_allow_html=True,
