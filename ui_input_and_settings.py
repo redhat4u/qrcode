@@ -16,7 +16,7 @@ from state_manager import (
 def build_input_and_settings_ui():
     """입력 및 설정 섹션을 빌드합니다."""
     st.header("⚙️ 입력 및 설정")
-
+    
     # QR 코드 내용 입력
     st.subheader("📝 QR 코드 내용")
     st.info("최대 입력 가능한 문자는 종류에 따라 약 2,400~2,900자 정도입니다.")
@@ -27,7 +27,7 @@ def build_input_and_settings_ui():
         key="qr_input_area",
         on_change=on_qr_setting_change
     )
-
+    
     char_count = len(qr_data) if qr_data else 0
     if char_count > 0:
         if char_count > 2900:
@@ -38,7 +38,7 @@ def build_input_and_settings_ui():
             st.success(f"✅ 현재 입력된 총 문자 수: **{char_count}**")
     else:
         st.caption("현재 입력된 총 문자 수: 0")
-
+        
     col_clear1, col_clear2, col_clear3 = st.columns([1, 1, 1])
     with col_clear2:
         delete_btn_disabled = (char_count == 0)
@@ -60,23 +60,9 @@ def build_input_and_settings_ui():
 
     st.markdown("---")
     st.markdown("---")
-
+    
     # QR 코드 설정
     st.subheader("🛠️ QR 코드 설정")
-
-    # [추가] 패턴 모양 선택 UI
-    file_format_is_svg = (st.session_state.file_format_select == "SVG")
-    st.selectbox(
-        "패턴 모양 선택",
-        ("기본 사각형 (Square)", "둥근 사각형 (Rounded)", "원형 (Circle)"),
-        key="module_shape_select",
-        on_change=on_qr_setting_change,
-        disabled=file_format_is_svg,
-        help="PNG 형식에서만 패턴 모양을 변경할 수 있습니다."
-    )
-    if file_format_is_svg:
-        st.caption("패턴 모양 변경은 PNG 형식에서만 가능합니다.")
-
     col1_1, col1_2 = st.columns(2)
     with col1_1:
         st.number_input("QR 코드 1개의 사각 cell 크기 (px)", min_value=1, max_value=100, key="box_size_input", on_change=on_qr_setting_change)
@@ -90,12 +76,12 @@ def build_input_and_settings_ui():
         }
         st.selectbox("오류 보정 레벨", list(error_correction_options.keys()), key="error_correction_select", on_change=on_qr_setting_change)
         st.selectbox("마스크 패턴 선택 (0~7)", options=list(range(8)), key="mask_pattern_select", on_change=on_qr_setting_change)
-
+        
     st.markdown("---")
-    st.subheader("🎨 색상 설정") # [수정] 제목을 아이콘으로 변경
-    # file_format_is_svg 변수는 위에서 이미 정의됨
+    st.subheader("🛠️ 색상 설정")
+    file_format_is_svg = (st.session_state.file_format_select == "SVG")
     if file_format_is_svg:
-        st.warning("⚠️ SVG 형식에서는 색상 및 패턴 모양을 변경할 수 없습니다. 다양한 스타일을 원한다면 'PNG' 형식을 선택하세요.")
+        st.warning("⚠️ SVG 파일은 벡터 형식이므로 원하는 색상을 선택할 수 없습니다. 다양한 색상을 원한다면 'PNG' 형식을 선택하세요.")
 
     colors = [
         "<직접 입력>", "black", "white", "gray", "lightgray", "dimgray",
@@ -116,9 +102,14 @@ def build_input_and_settings_ui():
         st.text_input("패턴 색상 HEX 값", placeholder="예: #000000", disabled=(st.session_state.pattern_color_select != "<직접 입력>") or file_format_is_svg, key="custom_pattern_color_input_key", on_change=on_qr_setting_change)
     with col1_6:
         st.text_input("배경 색상 HEX 값", placeholder="예: #FFFFFF", disabled=(st.session_state.bg_color_select != "<직접 입력>") or file_format_is_svg, key="custom_bg_color_input_key", on_change=on_qr_setting_change)
+        
+    # 새로운 패턴 스타일 선택 드롭다운 메뉴 추가
+    st.markdown("---")
+    st.subheader("🛠️ 패턴 모양")
+    st.selectbox("패턴 모양 선택", options=["사각형", "원형", "둥근 원형"], key="dot_style_select", on_change=on_qr_setting_change, disabled=file_format_is_svg)
 
     st.markdown("---")
-    st.subheader("💾 파일 설정") # [수정] 제목을 아이콘으로 변경
+    st.subheader("🛠️ 파일 설정")
     col_filename_input, col_filename_delete = st.columns([3, 1.1])
     with col_filename_input:
         st.text_input("다운로드 파일명 입력 (확장자는 제외, 파일명만 입력)", placeholder="이 곳에 파일명을 입력해 주세요 (비어있으면 자동 생성됨)", key="filename_input_key")
