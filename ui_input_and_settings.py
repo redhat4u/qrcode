@@ -1,4 +1,3 @@
-# 이 파일은 QR 코드 생성에 필요한 입력 및 설정 UI를 정의합니다.
 # ui_input_and_settings.py
 
 import streamlit as st
@@ -17,12 +16,6 @@ from messages import get_message
 
 def build_input_and_settings_ui():
     """입력 및 설정 섹션을 빌드합니다."""
-    # 하드코딩된 값으로 유지해야 하는 파일 형식 변수
-    FILE_FORMAT_PNG_RAW = "PNG"
-    FILE_FORMAT_SVG_RAW = "SVG"
-
-    file_format_is_svg = (st.session_state.file_format_select == FILE_FORMAT_SVG_RAW)
-    
     st.header(get_message('UI_HEADER_INPUT_AND_SETTINGS'))
     
     # QR 코드 내용 입력
@@ -33,7 +26,7 @@ def build_input_and_settings_ui():
         height=200,
         placeholder=get_message('UI_TEXT_AREA_PLACEHOLDER'),
         key="qr_input_area",
-        on_change=on_qr_setting_change
+        on_change=on_qr_setting_change # <-- 이 콜백 함수가 누락되어 있을 수 있습니다.
     )
     
     char_count = len(qr_data) if qr_data else 0
@@ -46,69 +39,65 @@ def build_input_and_settings_ui():
             st.success(get_message('UI_TEXT_CHAR_COUNT_OK').format(char_count=char_count))
     else:
         st.caption(get_message('UI_CAPTION_CHAR_COUNT_ZERO'))
-        
-    col_clear1, col_clear2, col_clear3 = st.columns([1, 1, 1])
-    with col_clear2:
-        delete_btn_disabled = (char_count == 0)
-        st.button(
-            get_message('UI_BUTTON_DELETE_TEXT_LABEL'),
-            help=get_message('UI_BUTTON_DELETE_TEXT_HELP'),
-            use_container_width=True,
-            type="secondary",
-            disabled=delete_btn_disabled,
-            on_click=clear_text_input,
-        )
+    
+    col_1, col_2 = st.columns([1, 1])
+    with col_1:
+        st.button(get_message('UI_BUTTON_DELETE_TEXT_LABEL'), use_container_width=True, help=get_message('UI_BUTTON_DELETE_TEXT_HELP'), on_click=clear_text_input)
+    with col_2:
+        st.checkbox(get_message('UI_CHECKBOX_STRIP_TEXT'), value=True, key='strip_option', on_change=on_qr_setting_change)
 
-    st.checkbox(
-        get_message('UI_CHECKBOX_STRIP_TEXT'),
-        value=st.session_state.strip_option,
-        key="strip_option",
-        on_change=on_qr_setting_change
+    st.markdown("---")
+
+    # QR 패턴 모양 설정
+    st.subheader(get_message('UI_SUBHEADER_DOT_STYLE'))
+    file_format_is_svg = (st.session_state.file_format_select == get_message('UI_FILE_FORMAT_SVG'))
+    st.selectbox(
+        get_message('UI_SELECTBOX_DOT_STYLE_LABEL'),
+        options=[
+            get_message('UI_DOT_STYLE_SQUARE'),
+            get_message('UI_DOT_STYLE_CIRCLE'),
+            get_message('UI_DOT_STYLE_ROUNDED'),
+            get_message('UI_DOT_STYLE_DIAMOND'),
+        ],
+        key="dot_style_select",
+        on_change=on_qr_setting_change,
+        disabled=file_format_is_svg
     )
 
     st.markdown("---")
     
-    # 패턴 설정
-    st.subheader(get_message('UI_SUBHEADER_DOT_STYLE'))
-    st.selectbox(get_message('UI_SELECTBOX_DOT_STYLE_LABEL'), options=[get_message('UI_DOT_STYLE_SQUARE'), get_message('UI_DOT_STYLE_CIRCLE'), get_message('UI_DOT_STYLE_ROUNDED'), get_message('UI_DOT_STYLE_DIAMOND')], key="dot_style_select", on_change=on_qr_setting_change, disabled=file_format_is_svg)
-
     # QR 코드 설정
-    st.markdown("---")
     st.subheader(get_message('UI_SUBHEADER_QR_SETTINGS'))
-    col1_1, col1_2 = st.columns(2)
-    with col1_1:
-        st.number_input(get_message('UI_BOX_SIZE_LABEL'), min_value=1, max_value=100, key="box_size_input", on_change=on_qr_setting_change)
-        st.number_input(get_message('UI_BORDER_LABEL'), min_value=0, max_value=10, key="border_input", on_change=on_qr_setting_change)
-    with col1_2:
-        # 이 부분은 변경 없음. messages.py의 ENUM에 해당하는 값은 직접 참조해야 함
-        error_correction_options = {
-            get_message('UI_ERROR_CORRECTION_LEVEL_L'): qrcode.constants.ERROR_CORRECT_L,
-            get_message('UI_ERROR_CORRECTION_LEVEL_M'): qrcode.constants.ERROR_CORRECT_M,
-            get_message('UI_ERROR_CORRECTION_LEVEL_Q'): qrcode.constants.ERROR_CORRECT_Q,
-            get_message('UI_ERROR_CORRECTION_LEVEL_H'): qrcode.constants.ERROR_CORRECT_H,
-        }
-        st.selectbox(get_message('UI_ERROR_CORRECTION_LABEL'), list(error_correction_options.keys()), key="error_correction_select", on_change=on_qr_setting_change)
-        st.selectbox(get_message('UI_MASK_PATTERN_LABEL'), options=list(range(8)), key="mask_pattern_select", on_change=on_qr_setting_change)
-
-    # 색상 설정
+    col3, col4, col5 = st.columns([1, 1, 1])
+    with col3:
+        st.number_input(get_message('UI_BOX_SIZE_LABEL'), min_value=1, max_value=50, value=20, key='box_size_input', on_change=on_qr_setting_change)
+    with col4:
+        st.number_input(get_message('UI_BORDER_LABEL'), min_value=1, max_value=10, value=2, key='border_input', on_change=on_qr_setting_change)
+    with col5:
+        st.selectbox(get_message('UI_ERROR_CORRECTION_LABEL'), options=[
+            get_message('UI_ERROR_CORRECTION_LEVEL_L'),
+            get_message('UI_ERROR_CORRECTION_LEVEL_M'),
+            get_message('UI_ERROR_CORRECTION_LEVEL_Q'),
+            get_message('UI_ERROR_CORRECTION_LEVEL_H'),
+        ], key='error_correction_select', on_change=on_qr_setting_change)
+    
+    st.selectbox(get_message('UI_MASK_PATTERN_LABEL'), options=list(range(8)), key='mask_pattern_select', on_change=on_qr_setting_change)
+    
     st.markdown("---")
+
+    # QR 코드 색상 설정
     st.subheader(get_message('UI_SUBHEADER_COLOR_SETTINGS'))
     if file_format_is_svg:
         st.warning(get_message('UI_WARNING_SVG_COLOR'))
+    
+    color_options = ["black", "white", "red", "blue", "green", "hotpink", get_message('UI_COLOR_OPTION_DIRECT_INPUT')]
+    col_1_1, col_1_2 = st.columns([1, 1])
+    with col_1_1:
+        st.selectbox(get_message('UI_SELECTBOX_PATTERN_COLOR_LABEL'), options=color_options, key='pattern_color_select', on_change=on_qr_setting_change, disabled=file_format_is_svg)
+    with col_1_2:
+        st.selectbox(get_message('UI_SELECTBOX_BG_COLOR_LABEL'), options=color_options, key='bg_color_select', on_change=on_qr_setting_change, disabled=file_format_is_svg)
 
-    colors = [
-        get_message('UI_COLOR_OPTION_DIRECT_INPUT'), "black", "white", "gray", "lightgray", "dimgray",
-        "red", "green", "blue", "yellow", "cyan", "magenta", "maroon",
-        "purple", "navy", "lime", "olive", "teal", "aqua", "fuchsia",
-        "silver", "gold", "orange", "orangered", "crimson", "indigo",
-    ]
-    col1_3, col1_4 = st.columns(2)
-    with col1_3:
-        st.selectbox(get_message('UI_SELECTBOX_PATTERN_COLOR_LABEL'), colors, key="pattern_color_select", on_change=on_qr_setting_change, disabled=file_format_is_svg)
-    with col1_4:
-        st.selectbox(get_message('UI_SELECTBOX_BG_COLOR_LABEL'), colors, key="bg_color_select", on_change=on_qr_setting_change, disabled=file_format_is_svg)
-
-    st.markdown(get_message('UI_COLOR_INPUT_HELP'))
+    st.info(get_message('UI_COLOR_INPUT_HELP'))
     st.caption(get_message('UI_COLOR_INPUT_CAPTION'))
     col1_5, col1_6 = st.columns(2)
     with col1_5:
@@ -116,23 +105,18 @@ def build_input_and_settings_ui():
     with col1_6:
         st.text_input(get_message('UI_TEXT_INPUT_BG_COLOR_LABEL'), placeholder=get_message('UI_TEXT_INPUT_BG_COLOR_PLACEHOLDER'), disabled=(st.session_state.bg_color_select != get_message('UI_COLOR_OPTION_DIRECT_INPUT')) or file_format_is_svg, key="custom_bg_color_input_key", on_change=on_qr_setting_change)
 
-    # 파일명 설정
     st.markdown("---")
-    st.subheader(get_message('UI_SUBHEADER_FILE_SETTINGS'))
-    col_filename_input, col_filename_delete = st.columns([3, 1.1])
-    with col_filename_input:
-        st.text_input(get_message('UI_TEXT_INPUT_FILENAME_LABEL'), placeholder=get_message('UI_TEXT_INPUT_FILENAME_PLACEHOLDER'), key="filename_input_key")
-    with col_filename_delete:
-        st.markdown('<div style="margin-top: 28px;"></div>', unsafe_allow_html=True)
-        filename_delete_disabled = not st.session_state.get("filename_input_key", "")
-        st.button(get_message('UI_BUTTON_DELETE_FILENAME_LABEL'), help=get_message('UI_BUTTON_DELETE_FILENAME_HELP'), use_container_width=True, type="secondary", disabled=filename_delete_disabled, on_click=clear_filename_callback)
-
-    # 파일 형식 설정
-    st.radio(
-        get_message('UI_RADIO_FILE_FORMAT'),
-        (FILE_FORMAT_PNG_RAW, FILE_FORMAT_SVG_RAW), # <-- 이 부분을 하드코딩된 값으로 유지
-        index=0 if st.session_state.file_format_select == FILE_FORMAT_PNG_RAW else 1, # <-- 이 부분을 수정했습니다.
-        key="file_format_select",
-        on_change=on_file_format_change,
-    )
     
+    # 파일 형식 및 다운로드 설정
+    st.subheader(get_message('UI_SUBHEADER_FILE_SETTINGS'))
+    col_file_format, col_file_name = st.columns([1, 3])
+    with col_file_format:
+        st.radio(get_message('UI_RADIO_FILE_FORMAT'), options=[get_message('UI_FILE_FORMAT_PNG'), get_message('UI_FILE_FORMAT_SVG')], key="file_format_select", on_change=on_file_format_change)
+    with col_file_name:
+        col_filename_input, col_filename_delete = st.columns([3, 1.1])
+        with col_filename_input:
+            st.text_input(get_message('UI_TEXT_INPUT_FILENAME_LABEL'), placeholder=get_message('UI_TEXT_INPUT_FILENAME_PLACEHOLDER'), key="filename_input_key")
+        with col_filename_delete:
+            st.markdown("<div style='height: 20px;'></div>", unsafe_allow_html=True) # 컬럼 정렬을 위한 공간
+            st.button(get_message('UI_BUTTON_DELETE_FILENAME_LABEL'), use_container_width=True, help=get_message('UI_BUTTON_DELETE_FILENAME_HELP'), on_click=clear_filename_callback)
+            
