@@ -1,5 +1,4 @@
 # ui_preview_and_download.py
-
 import streamlit as st
 import qrcode
 import io
@@ -22,14 +21,14 @@ def build_preview_and_download_ui():
     qr_data = st.session_state.qr_input_area
     current_data = qr_data.strip() if st.session_state.strip_option else qr_data
     file_format_is_svg = st.session_state.file_format_select == "SVG"
-
-    # 색상 선택
+    
+    # 미리보기 색상 및 모듈 모양 변수 설정 (PNG와 SVG 로직 분리)
     if file_format_is_svg:
         # SVG는 색상/패턴 고정
         preview_module_shape = "기본 사각형 (Square)"
         preview_pattern_color = "black"
         preview_bg_color = "white"
-    else:
+    else: # PNG인 경우
         preview_pattern_color = (
             st.session_state.custom_pattern_color_input_key.strip()
             if st.session_state.pattern_color_select == "<직접 입력>"
@@ -102,6 +101,7 @@ def build_preview_and_download_ui():
         if not current_data:
             errors.append("⚠️ 생성할 QR 코드 내용을 입력해 주세요.")
 
+        # PNG의 경우에만 색상 검증
         if not file_format_is_svg:
             if st.session_state.pattern_color_select == "<직접 입력>" and not final_pattern_color:
                 errors.append("⚠️ 패턴 색의 HEX 값을 입력해 주세요.")
@@ -147,8 +147,8 @@ def build_preview_and_download_ui():
                     int(st.session_state.border_input),
                     error_correction,  # 통일된 상수 사용
                     int(st.session_state.mask_pattern_select),
-                    "black",  # SVG 색상 고정
-                    "white",
+                    "black", # 원래대로 하드코딩된 색상으로 변경
+                    "white", # 원래대로 하드코딩된 색상으로 변경
                 )
                 if svg_data and qr:
                     st.session_state.qr_svg_bytes = svg_data.encode("utf-8")
