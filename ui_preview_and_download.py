@@ -16,17 +16,17 @@ def build_preview_and_download_ui():
     qr_data = st.session_state.qr_input_area
     
     if st.session_state.qr_generated:
-        # QR 코드 이미지를 중앙에 정렬하고 크기를 380px로 고정
+        # QR 코드 이미지를 중앙에 정렬
         col_left, col_center, col_right = st.columns([1, 1, 1])
         
         with col_center:
             # QR 코드 이미지 표시
             if st.session_state.file_format_select == get_message('UI_FILE_FORMAT_SVG'):
                 if st.session_state.qr_svg_bytes:
-                    st.image(st.session_state.qr_svg_bytes, width=380, use_container_width=False)
+                    st.image(st.session_state.qr_svg_bytes)
             else:
                 if st.session_state.qr_image_bytes:
-                    st.image(st.session_state.qr_image_bytes, width=600, use_container_width=False)
+                    st.image(st.session_state.qr_image_bytes)
                     
         st.success(get_message('UI_SUCCESS_MESSAGE'))
 
