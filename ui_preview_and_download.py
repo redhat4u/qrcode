@@ -37,11 +37,46 @@ def build_preview_and_download_ui():
     }
     error_correction = error_correction_options[st.session_state.error_correction_select]
     
+    # 미리보기 이미지 생성 (버튼 클릭 여부와 관계없이 실행)
+    if current_data:
+        if not file_format_is_svg and (not is_pattern_color_valid or not is_bg_color_valid or is_colors_same):
+            st.session_state.qr_generated = False
+        else:
+            if st.session_state.file_format_select == UI_FILE_FORMAT_PNG:
+                img, qr = generate_qr_code_png(
+                    current_data, int(st.session_state.box_size_input), int(st.session_state.border_input), error_correction,
+                    int(st.session_state.mask_pattern_select),
+                    "black" if file_format_is_svg else pattern_color,
+                    "white" if file_format_is_svg else bg_color,
+                    st.session_state.dot_style_select
+                )
+                if img:
+                    img_buffer = io.BytesIO()
+                    img.save(img_buffer, format='PNG')
+                    st.session_state.qr_image_bytes = img_buffer.getvalue()
+                    st.session_state.qr_generated = True
+                else:
+                    st.session_state.qr_generated = False
+            elif st.session_state.file_format_select == UI_FILE_FORMAT_SVG:
+                img_svg, qr = generate_qr_code_svg(
+                    current_data, int(st.session_state.box_size_input), int(st.session_state.border_input), error_correction,
+                    int(st.session_state.mask_pattern_select),
+                    "black",
+                    "white"
+                )
+                if img_svg:
+                    st.session_state.qr_svg_bytes = img_svg
+                    st.session_state.qr_generated = True
+                else:
+                    st.session_state.qr_generated = False
+    else:
+        st.session_state.qr_generated = False
+    
     st.markdown("---")
 
     # QR 코드 생성 버튼
     generate_btn = st.button(UI_BUTTON_GENERATE, use_container_width=True)
-    
+
     if generate_btn:
         st.session_state.generate_button_clicked = True
         st.session_state.error_message = None
@@ -73,36 +108,7 @@ def build_preview_and_download_ui():
         else:
             st.session_state.error_message = None
             st.session_state.show_generate_success = True
-            if st.session_state.file_format_select == UI_FILE_FORMAT_PNG:
-                img, qr = generate_qr_code_png(
-                    current_data, int(st.session_state.box_size_input), int(st.session_state.border_input), error_correction,
-                    int(st.session_state.mask_pattern_select),
-                    final_pattern_color,
-                    final_bg_color,
-                    st.session_state.dot_style_select
-                )
-                if img and qr:
-                    img_buffer = io.BytesIO()
-                    img.save(img_buffer, format='PNG')
-                    st.session_state.qr_image_bytes = img_buffer.getvalue()
-                    st.session_state.qr_generated = True
-                else:
-                    st.session_state.error_message = "알 수 없는 오류가 발생했습니다. 잠시 후 다시 시도해주세요."
-                    st.session_state.show_generate_success = False
-            elif st.session_state.file_format_select == UI_FILE_FORMAT_SVG:
-                img_svg, qr = generate_qr_code_svg(
-                    current_data, int(st.session_state.box_size_input), int(st.session_state.border_input), error_correction,
-                    int(st.session_state.mask_pattern_select),
-                    "black",
-                    "white"
-                )
-                if img_svg and qr:
-                    st.session_state.qr_svg_bytes = img_svg
-                    st.session_state.qr_generated = True
-                else:
-                    st.session_state.error_message = "알 수 없는 오류가 발생했습니다. 잠시 후 다시 시도해주세요."
-                    st.session_state.show_generate_success = False
-    
+            
     # 미리보기 및 다운로드
     st.markdown("---")
     
@@ -110,7 +116,7 @@ def build_preview_and_download_ui():
         if st.session_state.error_message:
             st.error(st.session_state.error_message)
             st.caption(UI_CAPTION_QR_PREVIEW_ERROR)
-        elif st.session_state.show_generate_success and current_data:
+        elif st.session_state.show_generate_success and st.session_state.qr_generated:
             st.success(UI_SUCCESS_MESSAGE)
             st.markdown(
                 f'<div style="text-align: center; border: 1px solid #ddd; padding: 10px; margin-bottom: 20px;">'
