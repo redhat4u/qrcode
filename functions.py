@@ -17,13 +17,23 @@ def sanitize_filename(name: str) -> str:
         name = name.replace(ch, "_")
     return name.strip()
 
-# 유효한 색상인지 확인하는 함수 (16진수 값만 유효)
+# [수정] 유효한 색상인지 확인하는 함수 (16진수 및 일반 색상 이름 모두 유효)
 def is_valid_color(color_name):
     if not color_name:
         return False
-    color_name = color_name.strip()
+    color_name = color_name.strip().lower()
+    
+    # 1. 16진수 패턴 확인
     hex_pattern = re.compile(r'^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$')
-    return hex_pattern.match(color_name)
+    if hex_pattern.match(color_name):
+        return True
+    
+    # 2. 일반적인 색상 이름 확인 (PIL 라이브러리가 지원하는 색상 이름 일부)
+    try:
+        Image.new("RGB", (1, 1), color_name)
+        return True
+    except ValueError:
+        return False
 
 # QR 코드 PNG 생성 함수
 def generate_qr_code_png(
