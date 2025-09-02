@@ -436,51 +436,49 @@ with col2:
     
     current_data = qr_data.strip() if st.session_state.strip_option else qr_data
     
-    is_pattern_color_valid_preview = (pattern_color_choice != "<직접 입력>") or (pattern_color_choice == "<직접 입력>" and pattern_color and is_valid_color(pattern_color))
-    is_bg_color_valid_preview = (bg_color_choice != "<직접 입력>") or (bg_color_choice == "<직접 입력>" and bg_color and is_valid_color(bg_color))
-    is_colors_same_preview = (is_pattern_color_valid_preview and is_bg_color_valid_preview and pattern_color and bg_color and pattern_color == bg_color)
-    
     preview_image_display = None
     preview_qr_object = None
-
-    # 수정된 미리보기 로직: 데이터가 있을 때만 미리보기를 생성하도록 변경
+    
+    # 미리보기 이미지 생성에 필요한 모든 유효성 검사
+    can_generate_preview = False
+    
+    # QR 내용이 있어야 미리보기를 시도
     if current_data:
         if file_format_is_svg:
+            # SVG는 색상 유효성 검사가 필요 없으므로 바로 True
+            can_generate_preview = True
+        else:
+            # PNG는 색상 유효성 및 패턴/배경색이 동일한지 검사 필요
+            is_pattern_color_valid = (pattern_color_choice != "<직접 입력>") or (is_valid_color(pattern_color))
+            is_bg_color_valid = (bg_color_choice != "<직접 입력>") or (is_valid_color(bg_color))
+            is_colors_same = (pattern_color and bg_color and pattern_color == bg_color)
+            
+            if is_pattern_color_valid and is_bg_color_valid and not is_colors_same:
+                can_generate_preview = True
+            
+            # 미리보기 생성 불가능 시 경고 메시지 표시
+            if not can_generate_preview:
+                if not is_pattern_color_valid:
+                    st.warning("⚠️ 패턴 색의 HEX 값이 유효하지 않습니다. 미리보기를 위해 유효한 색상 값이 필요합니다.")
+                if not is_bg_color_valid:
+                    st.warning("⚠️ 배경 색의 HEX 값이 유효하지 않습니다. 미리보기를 위해 유효한 색상 값이 필요합니다.")
+                if is_colors_same:
+                    st.warning("⚠️ 패턴과 배경은 같은 색을 사용할 수 없습니다. 미리보기를 위해 다른 색을 선택해주세요.")
+
+    # 유효성 검사를 통과한 경우에만 미리보기 이미지 생성
+    if can_generate_preview:
+        if file_format_is_svg:
             # SVG 미리보기는 항상 PNG로 생성
-            qr = get_qr_data_object(
-                current_data, int(st.session_state.box_size_input), int(st.session_state.border_input), error_correction,
-                int(st.session_state.mask_pattern_select)
-            )
+            qr = get_qr_data_object(current_data, int(st.session_state.box_size_input), int(st.session_state.border_input), error_correction, int(st.session_state.mask_pattern_select))
             if qr:
-                preview_image_display = draw_custom_shape_image(
-                    qr, int(st.session_state.box_size_input), int(st.session_state.border_input), "black", "white", "사각형"
-                )
-                preview_qr_object = qr
-        elif is_pattern_color_valid_preview and is_bg_color_valid_preview and not is_colors_same_preview:
-            # PNG 미리보기
-            qr = get_qr_data_object(
-                current_data, int(st.session_state.box_size_input), int(st.session_state.border_input), error_correction,
-                int(st.session_state.mask_pattern_select)
-            )
-            if qr:
-                preview_image_display = draw_custom_shape_image(
-                    qr, int(st.session_state.box_size_input), int(st.session_state.border_input), pattern_color, bg_color, st.session_state.pattern_shape_select
-                )
+                preview_image_display = draw_custom_shape_image(qr, int(st.session_state.box_size_input), int(st.session_state.border_input), "black", "white", "사각형")
                 preview_qr_object = qr
         else:
-            # 유효성 검사 실패 시 경고 메시지 표시
-            if not file_format_is_svg:
-                if pattern_color_choice == "<직접 입력>" and not pattern_color:
-                    st.warning("⚠️ 패턴 색의 HEX 값을 입력해 주세요. 미리보기를 위해 유효한 색상 값이 필요합니다.")
-                if bg_color_choice == "<직접 입력>" and not bg_color:
-                    st.warning("⚠️ 배경 색의 HEX 값을 입력해 주세요. 미리보기를 위해 유효한 색상 값이 필요합니다.")
-                if pattern_color_choice == "<직접 입력>" and pattern_color and not is_valid_color(pattern_color):
-                    st.warning("⚠️ 패턴 색으로 입력한 HEX 값은 올바른 색상 값이 아닙니다. 다시 확인해주세요.")
-                if bg_color_choice == "<직접 입력>" and bg_color and not is_valid_color(bg_color):
-                    st.warning("⚠️ 배경 색으로 입력한 HEX 값은 올바른 색상 값이 아닙니다. 다시 확인해주세요.")
-                if is_colors_same_preview:
-                    st.warning("⚠️ 패턴과 배경은 같은 색을 사용할 수 없습니다.")
-
+            # PNG 미리보기
+            qr = get_qr_data_object(current_data, int(st.session_state.box_size_input), int(st.session_state.border_input), error_correction, int(st.session_state.mask_pattern_select))
+            if qr:
+                preview_image_display = draw_custom_shape_image(qr, int(st.session_state.box_size_input), int(st.session_state.border_input), pattern_color, bg_color, st.session_state.pattern_shape_select)
+                preview_qr_object = qr
     
     generate_btn = st.button("⚡ QR 코드 생성", use_container_width=True,)
     
@@ -597,7 +595,7 @@ with col2:
                     st.warning("⚠️ 패턴 색으로 입력한 HEX 값은 올바른 색상 값이 아닙니다. 다시 확인해주세요.")
                 if bg_color_choice == "<직접 입력>" and bg_color and not is_valid_color(bg_color):
                     st.warning("⚠️ 배경 색으로 입력한 HEX 값은 올바른 색상 값이 아닙니다. 다시 확인해주세요.")
-                if is_colors_same_preview:
+                if is_colors_same:
                     st.warning("⚠️ 패턴과 배경은 같은 색을 사용할 수 없습니다.")
 
     if st.session_state.get('qr_generated', False) and (st.session_state.get('qr_image_bytes') is not None or st.session_state.get('qr_svg_bytes') is not None):
