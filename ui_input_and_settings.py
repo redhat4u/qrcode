@@ -3,11 +3,10 @@
 
 import streamlit as st
 import qrcode
-# Import `functions` from the parent directory
-import sys
-import os
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-from functions import sanitize_filename, is_valid_color
+from functions import (
+    sanitize_filename,
+    is_valid_color,
+)
 from state_manager import (
     clear_text_input,
     clear_filename_callback,
