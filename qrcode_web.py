@@ -24,18 +24,23 @@ st.set_page_config(
 # 세션 상태 초기화 (최상단에서 호출)
 initialize_session_state_with_language()
 
+# 사이드바
+with st.sidebar:
+    st.header(get_message("APP_TITLE"))
+    
+    # 언어 선택 드롭다운
+    st.selectbox(
+        get_message('UI_LANG_SELECT_LABEL'),
+        options=get_message('UI_LANG_SELECT_OPTIONS'),
+        key='language_select',
+        on_change=reset_all_settings
+    )
+    
+    st.info("Version 1.0.0")
+
 # 메인 UI
 st.title(get_message("APP_TITLE"))
-
-# 언어 선택 드롭다운을 메인 화면에 표시
-st.selectbox(
-    get_message('UI_LANG_SELECT_LABEL'),
-    options=get_message('UI_LANG_SELECT_OPTIONS'),
-    key='language_select',
-    on_change=reset_all_settings
-)
 st.markdown("---")
-
 
 # 메인 화면을 2개의 열로 나누어 설정 부분과 미리보기를 5:5로 배치합니다.
 col1, col2 = st.columns([1, 1], gap="large")
