@@ -301,7 +301,7 @@ with col1:
 
     # QR 코드 설정
     st.markdown("---")
-    st.subheader("🛠️ QR 코드 설정")
+    st.subheader("🔲 QR 코드 설정")
 
     col1_1, col1_2 = st.columns(2)
     with col1_1:
@@ -324,7 +324,7 @@ with col1:
 
     # 색상 설정
     st.markdown("---")
-    st.subheader("🛠️ 색상 설정")
+    st.subheader("🎨 색상 설정")
     
     file_format_is_svg = (st.session_state.file_format_select == "SVG")
     
@@ -381,7 +381,7 @@ with col1:
 
     # 파일 설정
     st.markdown("---")
-    st.subheader("🛠️ 파일 설정")
+    st.subheader("💾 파일 설정")
     
     col_filename_input, col_filename_delete = st.columns([3, 1.1])
 
@@ -417,7 +417,7 @@ with col1:
     # 패턴 모양 선택
     pattern_shape_disabled = (file_format == "SVG")
     st.markdown("---")
-    st.subheader("🛠️ 패턴 모양 설정")
+    st.subheader("🖼️ 패턴 모양 설정")
     st.caption("⚠️ SVG 형식은 사각만 지원합니다.")
     pattern_shape = st.selectbox(
         "패턴 모양 선택",
