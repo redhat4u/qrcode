@@ -31,7 +31,7 @@ def generate_qr_code_png(
     mask_pattern,
     fill_color,
     back_color,
-    dot_style,  # <-- 새로운 매개변수
+    dot_style,
 ):
     try:
         qr = qrcode.QRCode(
@@ -45,12 +45,8 @@ def generate_qr_code_png(
         qr.add_data(data, optimize=0)
         qr.make(fit=True)
         
-        img = qr.make_image(fill_color=fill_color, back_color=back_color)
-        if hasattr(img, 'convert'):
-            img = img.convert('RGB')
-        
-        # QR 코드 패턴 스타일 적용
-        if dot_style == "원형" or dot_style == "둥근 원형":
+        # QR 코드 패턴 스타일 적용 (기존 코드와 동일)
+        if dot_style != "사각형":
             base_size = qr.modules_count * box_size + 2 * border * box_size
             styled_img = Image.new('RGB', (base_size, base_size), back_color)
             
@@ -60,19 +56,30 @@ def generate_qr_code_png(
                         dot_img = Image.new('RGBA', (box_size, box_size), (0, 0, 0, 0))
                         draw = ImageDraw.Draw(dot_img)
                         
-                        # 원형
                         if dot_style == "원형":
                             draw.ellipse((0, 0, box_size, box_size), fill=fill_color)
-                        # 둥근 원형
                         elif dot_style == "둥근 원형":
                             draw.rounded_rectangle((0, 0, box_size, box_size), radius=box_size/4, fill=fill_color)
+                        # --- 💡 다이아몬드(마름모) 모양 추가 ---
+                        elif dot_style == "마름모":
+                            points = [
+                                (box_size/2, 0),        # 상단 꼭짓점
+                                (box_size, box_size/2),   # 우측 꼭짓점
+                                (box_size/2, box_size),   # 하단 꼭짓점
+                                (0, box_size/2)         # 좌측 꼭짓점
+                            ]
+                            draw.polygon(points, fill=fill_color)
+                        # ------------------------------------
                             
-                        # 마스크를 적용한 픽셀을 최종 이미지에 붙여넣기
                         pos_x = (c + border) * box_size
                         pos_y = (r + border) * box_size
                         styled_img.paste(dot_img, (pos_x, pos_y), dot_img)
 
             img = styled_img
+        else: # 사각형 패턴인 경우
+            img = qr.make_image(fill_color=fill_color, back_color=back_color)
+            if hasattr(img, 'convert'):
+                img = img.convert('RGB')
 
         return img, qr
     except Exception as e:
