@@ -4,7 +4,7 @@
 import qrcode
 import io
 import re
-from PIL import Image
+from PIL import Image, ImageColor
 import qrcode.image.svg
 # [추가] 모듈 모양 변경을 위한 클래스 임포트
 from qrcode.image.styledpil import StyledPilImage
@@ -58,23 +58,27 @@ def generate_qr_code_png(
         qr.add_data(data, optimize=0)
         qr.make(fit=True)
 
+        # [추가] PIL이 모든 색상 입력을 올바르게 처리하도록 RGB 튜플로 변환
+        fill_color_rgb = ImageColor.getrgb(fill_color)
+        back_color_rgb = ImageColor.getrgb(back_color)
+
         # [수정] 모듈 모양 선택에 따라 다른 Drawer를 사용하도록 로직 변경
         if module_shape == "둥근 사각형 (Rounded)":
             img = qr.make_image(
                 image_factory=StyledPilImage,
                 module_drawer=RoundedModuleDrawer(),
-                fill_color=fill_color,
-                back_color=back_color
+                fill_color=fill_color_rgb,
+                back_color=back_color_rgb
             )
         elif module_shape == "원형 (Circle)":
             img = qr.make_image(
                 image_factory=StyledPilImage,
                 module_drawer=CircleModuleDrawer(),
-                fill_color=fill_color,
-                back_color=back_color
+                fill_color=fill_color_rgb,
+                back_color=back_color_rgb
             )
         else: # "기본 사각형 (Square)" 또는 기본값
-            img = qr.make_image(fill_color=fill_color, back_color=back_color)
+            img = qr.make_image(fill_color=fill_color_rgb, back_color=back_color_rgb)
 
         if hasattr(img, 'convert'):
             img = img.convert('RGB')
