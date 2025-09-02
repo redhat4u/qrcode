@@ -241,6 +241,27 @@ with col1:
 
     st.markdown("---")
 
+    # 파일 형식 설정 (패턴 모양 설정보다 먼저 와야 함)
+    st.subheader("💾 파일 형식 선택")
+    file_format = st.radio(
+        "파일 형식 선택",
+        ("PNG", "SVG"),
+        index=0 if st.session_state.file_format_select == "PNG" else 1,
+        key="file_format_select",
+    )
+    
+    # 패턴 모양 설정
+    st.markdown("---")
+    st.subheader("🖼️ 패턴 모양 설정")
+    pattern_shape_disabled = (file_format == "SVG")
+    st.caption("⚠️ SVG 형식은 사각만 지원합니다.")
+    pattern_shape = st.selectbox(
+        "패턴 모양 선택",
+        ("사각", "둥근사각", "동그라미", "마름모"),
+        key="pattern_shape_select",
+        disabled=pattern_shape_disabled,
+    )
+
 
 #========================================================================================================================================================================
 
@@ -320,9 +341,9 @@ with col1:
 
 #========================================================================================================================================================================
 
-    # 파일 설정
+    # 파일명 설정 (파일 형식 선택 아래에 위치)
     st.markdown("---")
-    st.subheader("💾 파일 설정")
+    st.subheader("📄 파일명 설정")
     
     col_filename_input, col_filename_delete = st.columns([3, 1.1])
 
@@ -347,25 +368,6 @@ with col1:
             on_click=clear_filename_callback,
         )
 
-    file_format = st.radio(
-        "파일 형식 선택",
-        ("PNG", "SVG"),
-        index=0 if st.session_state.file_format_select == "PNG" else 1,
-        key="file_format_select",
-    )
-    
-    # 패턴 모양 선택
-    pattern_shape_disabled = (file_format == "SVG")
-    st.markdown("---")
-    st.subheader("🖼️ 패턴 모양 설정")
-    st.caption("⚠️ SVG 형식은 사각만 지원합니다.")
-    pattern_shape = st.selectbox(
-        "패턴 모양 선택",
-        ("사각", "둥근사각", "동그라미", "마름모"),
-        key="pattern_shape_select",
-        disabled=pattern_shape_disabled,
-    )
-
 
 #========================================================================================================================================================================
 
@@ -381,7 +383,7 @@ with col2:
     preview_image_display = None
     preview_qr_object = None
     
-    can_generate_preview = current_data and (file_format_is_svg or (is_pattern_color_valid_preview and is_bg_color_valid_preview and not is_colors_same_preview))
+    can_generate_preview = current_data and (file_format == "SVG" or (is_pattern_color_valid_preview and is_bg_color_valid_preview and not is_colors_same_preview))
 
     download_data = None
     download_mime = ""
@@ -398,9 +400,9 @@ with col2:
 
                 preview_image_display = draw_custom_shape_image(
                     qr, int(st.session_state.box_size_input), int(st.session_state.border_input),
-                    "black" if file_format_is_svg else pattern_color,
-                    "white" if file_format_is_svg else bg_color,
-                    "사각" if file_format_is_svg else st.session_state.pattern_shape_select
+                    "black" if file_format == "SVG" else pattern_color,
+                    "white" if file_format == "SVG" else bg_color,
+                    "사각" if file_format == "SVG" else st.session_state.pattern_shape_select
                 )
 
                 if file_format == "PNG":
@@ -435,8 +437,8 @@ with col2:
             - QR 버전: {preview_qr_object.version}
             - 가로/세로 각 cell 개수: {preview_qr_object.modules_count}개
             - 이미지 크기 (참고): {(preview_qr_object.modules_count + 2 * int(st.session_state.border_input)) * int(st.session_state.box_size_input)} x {(preview_qr_object.modules_count + 2 * int(st.session_state.border_input)) * int(st.session_state.box_size_input)} px
-            - 패턴 색상: {"black" if file_format_is_svg else pattern_color}
-            - 배경 색상: {"white" if file_format_is_svg else bg_color}
+            - 패턴 색상: {"black" if file_format == "SVG" else pattern_color}
+            - 배경 색상: {"white" if file_format == "SVG" else bg_color}
             - 이미지 크기 = (각 cell 개수 + 좌/우 여백 총 개수) × 1개의 사각 cell 크기
             """)
 
@@ -467,7 +469,7 @@ with col2:
     elif current_data:
         st.warning("⚠️ 선택하신 설정으로는 QR 코드를 생성할 수 없습니다. 아래의 경고 메시지를 확인해주세요.")
         
-        if not file_format_is_svg:
+        if file_format != "SVG":
             if pattern_color_choice == "<직접 입력>" and not pattern_color:
                 st.warning("⚠️ 패턴 색의 HEX 값을 입력해 주세요. QR 코드를 생성할 수 없습니다.")
             if bg_color_choice == "<직접 입력>" and not bg_color:
