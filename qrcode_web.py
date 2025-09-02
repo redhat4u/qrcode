@@ -13,55 +13,71 @@ import qrcode.image.svg # SVG 생성을 위해 추가
 import math
 
 # messages.py에서 메시지 관리 함수 불러오기
-from messages import get_message, get_language_options
+from messages import get_message, get_language_options, get_language_codes, get_language_labels
 
-# 언어 선택 상태 관리
+# 페이지 설정
+st.set_page_config(
+    page_title=get_message(st.session_state.lang, "page_title") if 'lang' in st.session_state else "QR 코드 생성기",
+    page_icon="🔲",
+    layout="wide",
+)
+
+# 세션 상태 초기화
 if 'lang' not in st.session_state:
     st.session_state.lang = 'ko'
 
-# 세션 상태 초기화
-if 'qr_input_area' not in st.session_state:
-    st.session_state.qr_input_area = ""
-if 'custom_pattern_color_input_key' not in st.session_state:
-    st.session_state.custom_pattern_color_input_key = ""
-if 'custom_bg_color_input_key' not in st.session_state:
-    st.session_state.custom_bg_color_input_key = ""
-if 'filename_input_key' not in st.session_state:
-    st.session_state.filename_input_key = ""
-if 'box_size_input' not in st.session_state:
-    st.session_state.box_size_input = 20
-if 'border_input' not in st.session_state:
-    st.session_state.border_input = 2
-if 'error_correction_select' not in st.session_state:
-    st.session_state.error_correction_select = 'Low'
-if 'mask_pattern_select' not in st.session_state:
-    st.session_state.mask_pattern_select = 2
-if 'pattern_color_select' not in st.session_state:
-    st.session_state.pattern_color_select = "black"
-if 'bg_color_select' not in st.session_state:
-    st.session_state.bg_color_select = "white"
-if 'strip_option' not in st.session_state:
-    st.session_state.strip_option = True
-if 'file_format_select' not in st.session_state:
-    st.session_state.file_format_select = "PNG"
-if 'pattern_shape_select' not in st.session_state:
-    st.session_state.pattern_shape_select = 'Square'
-if 'finder_pattern_shape_select' not in st.session_state:
-    st.session_state.finder_pattern_shape_select = 'Square'
-if 'corner_radius_input' not in st.session_state:
-    st.session_state.corner_radius_input = 25
-if 'cell_gap_input' not in st.session_state:
-    st.session_state.cell_gap_input = 0
-if 'jpg_quality_input' not in st.session_state:
-    st.session_state.jpg_quality_input = 70
+def initialize_session_state():
+    """세션 상태의 모든 변수를 초기화합니다."""
+    # 언어 선택 드롭다운에 쓰이는 정보 불러오기
+    lang_options = get_language_options()
+    lang_codes = list(lang_options.keys())
 
+    # 언어 선택 상태 관리
+    if 'lang' not in st.session_state or st.session_state.lang not in lang_codes:
+        st.session_state.lang = 'ko'
+
+    if 'qr_input_area' not in st.session_state:
+        st.session_state.qr_input_area = ""
+    if 'custom_pattern_color_input_key' not in st.session_state:
+        st.session_state.custom_pattern_color_input_key = ""
+    if 'custom_bg_color_input_key' not in st.session_state:
+        st.session_state.custom_bg_color_input_key = ""
+    if 'filename_input_key' not in st.session_state:
+        st.session_state.filename_input_key = ""
+    if 'box_size_input' not in st.session_state:
+        st.session_state.box_size_input = 20
+    if 'border_input' not in st.session_state:
+        st.session_state.border_input = 2
+    if 'error_correction_select' not in st.session_state:
+        st.session_state.error_correction_select = 'Low'
+    if 'mask_pattern_select' not in st.session_state:
+        st.session_state.mask_pattern_select = 2
+    if 'pattern_color_select' not in st.session_state:
+        st.session_state.pattern_color_select = "black"
+    if 'bg_color_select' not in st.session_state:
+        st.session_state.bg_color_select = "white"
+    if 'strip_option' not in st.session_state:
+        st.session_state.strip_option = True
+    if 'file_format_select' not in st.session_state:
+        st.session_state.file_format_select = "PNG"
+    if 'pattern_shape_select' not in st.session_state:
+        st.session_state.pattern_shape_select = 'Square'
+    if 'finder_pattern_shape_select' not in st.session_state:
+        st.session_state.finder_pattern_shape_select = 'Square'
+    if 'corner_radius_input' not in st.session_state:
+        st.session_state.corner_radius_input = 25
+    if 'cell_gap_input' not in st.session_state:
+        st.session_state.cell_gap_input = 0
+    if 'jpg_quality_input' not in st.session_state:
+        st.session_state.jpg_quality_input = 70
+
+initialize_session_state()
 
 # 언어 선택 드롭다운 메뉴 변경 시 호출되는 콜백 함수
 def set_language_callback():
     st.session_state.lang = st.session_state.language_selection
     # 언어 변경 시 세션 상태 값들을 재설정
     reset_all_settings(st.session_state.lang)
-
 
 # 파일명에 특수문자 포함시 '_' 문자로 치환
 def sanitize_filename(name: str) -> str:
@@ -257,9 +273,9 @@ def reset_all_settings(lang_code):
 st.title(get_message(st.session_state.lang, "main_title"))
 
 # 언어 선택 드롭다운
+lang_codes = get_language_codes()
+lang_labels = get_language_labels()
 lang_options = get_language_options()
-lang_labels = list(lang_options.values())
-lang_codes = list(lang_options.keys())
 current_lang_index = lang_codes.index(st.session_state.lang)
 
 st.selectbox(
@@ -360,7 +376,7 @@ with col1:
     pattern_options = (get_message(st.session_state.lang, "shape_square"), get_message(st.session_state.lang, "shape_rounded_square"), get_message(st.session_state.lang, "shape_circle"), get_message(st.session_state.lang, "shape_diamond"), get_message(st.session_state.lang, "shape_star"), get_message(st.session_state.lang, "shape_cross"))
 
     with col_pattern_shape:
-        pattern_shape_index = pattern_options.index(get_message(st.session_state.lang, 'shape_square'))
+        pattern_shape_index = pattern_options.index(st.session_state.pattern_shape_select) if st.session_state.pattern_shape_select in pattern_options else 0
         st.session_state.pattern_shape_select = st.selectbox(
             get_message(st.session_state.lang, "pattern_shape_label"),
             pattern_options,
@@ -370,7 +386,7 @@ with col1:
         )
     
     with col_finder_shape:
-        finder_pattern_shape_index = pattern_options.index(get_message(st.session_state.lang, 'shape_square'))
+        finder_pattern_shape_index = pattern_options.index(st.session_state.finder_pattern_shape_select) if st.session_state.finder_pattern_shape_select in pattern_options else 0
         st.session_state.finder_pattern_shape_select = st.selectbox(
             get_message(st.session_state.lang, "finder_pattern_shape_label"),
             pattern_options,
@@ -484,11 +500,14 @@ with col1:
         }
         error_correction_labels = [get_message(st.session_state.lang, f"error_correction_options_{key.lower()}") for key in error_correction_options.keys()]
         
+        # 선택된 값의 인덱스를 안전하게 가져오기
+        selected_index = error_correction_labels.index(get_message(st.session_state.lang, f"error_correction_options_{st.session_state.error_correction_select.lower()}")) if get_message(st.session_state.lang, f"error_correction_options_{st.session_state.error_correction_select.lower()}") in error_correction_labels else 0
+
         error_correction_choice = st.selectbox(
             get_message(st.session_state.lang, "error_correction_label"), 
             error_correction_labels,
             key="error_correction_select",
-            index=error_correction_labels.index(get_message(st.session_state.lang, f"error_correction_options_{st.session_state.error_correction_select.lower()}"))
+            index=selected_index
         )
         # 선택된 라벨에서 실제 코드로 변환
         selected_key = next(key for key, label in zip(error_correction_options.keys(), error_correction_labels) if label == error_correction_choice)
