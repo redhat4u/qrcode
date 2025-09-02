@@ -248,10 +248,6 @@ def set_language():
     # 선택된 언어 이름을 언어 코드로 변환
     lang_map = {"한국어": "ko", "English": "en"}
     st.session_state.lang = lang_map.get(st.session_state.lang_select, "ko")
-    # 언어가 바뀌면 사이드바의 기본값도 바뀌어야 하므로 세션 초기화
-    st.session_state.error_correction_select = messages[st.session_state.lang]['error_correction_low_select']
-    st.session_state.pattern_shape_select = messages[st.session_state.lang]['pattern_shape_square']
-    st.session_state.finder_pattern_shape_select = messages[st.session_state.lang]['finder_pattern_shape_select']
     
 #[메인]====================================================================================================================================================================
 
