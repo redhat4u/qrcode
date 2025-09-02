@@ -3,7 +3,7 @@
 
 import streamlit as st
 import qrcode
-from messages import get_message, get_current_language
+from messages import get_message
 from state_manager import (
     initialize_session_state_with_language,
     on_qr_setting_change,
