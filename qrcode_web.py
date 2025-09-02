@@ -25,6 +25,7 @@ def build_footer_ui():
             font-size: 15px;
             text-align: center;
             color: #808080;
+            font-weight: bold;
             padding-top: 20px;
         }}
         .full-width-footer {{
@@ -87,5 +88,6 @@ with col2:
 
 # 푸터 섹션 호출
 build_footer_ui()
+
 
 
