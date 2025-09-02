@@ -306,8 +306,8 @@ with col1:
     st.subheader("💾 파일 형식 선택")
     file_format = st.selectbox(
         "파일 형식",
-        ("PNG", "SVG"),
-        index=0 if st.session_state.file_format_select == "PNG" else 1,
+        ("PNG", "JPG", "SVG"),
+        index=0 if st.session_state.file_format_select == "PNG" else (1 if st.session_state.file_format_select == "JPG" else 2),
         key="file_format_select",
     )
     
@@ -493,6 +493,7 @@ with col2:
     download_data = None
     download_mime = ""
     download_extension = ""
+    save_format = ""
 
     if can_generate_preview:
         try:
@@ -502,7 +503,7 @@ with col2:
             )
             if qr:
                 preview_qr_object = qr
-                if file_format == "PNG":
+                if file_format in ["PNG", "JPG"]:
                     preview_image_display = draw_custom_shape_image(
                         qr, int(st.session_state.box_size_input), int(st.session_state.border_input),
                         pattern_color, bg_color, st.session_state.pattern_shape_select,
@@ -511,10 +512,19 @@ with col2:
                         st.session_state.finder_pattern_shape_select
                     )
                     img_buffer = io.BytesIO()
-                    preview_image_display.save(img_buffer, format='PNG')
+                    if file_format == "PNG":
+                        preview_image_display.save(img_buffer, format='PNG')
+                        download_mime = "image/png"
+                        download_extension = ".png"
+                    elif file_format == "JPG":
+                        # JPG는 투명도를 지원하지 않아, RGB 모드로 변환
+                        rgb_image = preview_image_display.convert('RGB')
+                        rgb_image.save(img_buffer, format='JPEG')
+                        download_mime = "image/jpeg"
+                        download_extension = ".jpg"
+                        
                     download_data = img_buffer.getvalue()
-                    download_mime = "image/png"
-                    download_extension = ".png"
+
                 else: # SVG
                     svg_data, _ = generate_qr_code_svg(
                         current_data, int(st.session_state.box_size_input), int(st.session_state.border_input), error_correction,
