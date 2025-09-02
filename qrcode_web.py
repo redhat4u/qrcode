@@ -624,11 +624,18 @@ with st.sidebar:
     - 0~7 중 선택 (같은 내용이라도 번호에 따라 패턴이 달라짐)
     """)
 
-    st.markdown("**패턴 모양:**")
-    st.markdown("""
-    - 사각형, 둥근 사각, 원형, 마름모 중 선택
-    - **SVG** 파일 형식 선택 시에는 **사각형**만 지원합니다.
-    """)
+   st.markdown("**패턴 모양:**")
+   st.markdown("""
+   - 사각형, 둥근 사각, 원형, 마름모 중 선택
+   - **SVG** 파일 형식 선택 시에는 **사각형**만 지원합니다.
+   """)
+   pattern_shape = st.selectbox(
+       "패턴 모양 선택",
+       ("사각형", "둥근 사각", "원형", "마름모"),
+       key="pattern_shape_select",
+       on_change=on_qr_setting_change
+    )
+
 
     st.markdown("**색상 입력:**")
     st.markdown("""
