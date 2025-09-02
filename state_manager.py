@@ -46,9 +46,8 @@ def initialize_session_state():
         st.session_state.strip_option = True
     if 'file_format_select' not in st.session_state:
         st.session_state.file_format_select = "PNG"
-    # [추가] 패턴 모양 선택을 위한 세션 상태 초기화
-    if 'module_shape_select' not in st.session_state:
-        st.session_state.module_shape_select = "기본 사각형 (Square)"
+    if 'dot_style_select' not in st.session_state:
+        st.session_state.dot_style_select = "사각형"
 
 def clear_text_input():
     """QR 내용만 초기화하는 콜백 함수입니다 (파일명은 유지)."""
@@ -76,14 +75,13 @@ def reset_all_settings():
     st.session_state.bg_color_select = "white"
     st.session_state.strip_option = True
     st.session_state.file_format_select = "PNG"
+    st.session_state.dot_style_select = "사각형"  # <-- 초기화 로직에 추가
     st.session_state.qr_generated = False
     st.session_state.show_generate_success = False
     st.session_state.qr_image_bytes = None
     st.session_state.qr_svg_bytes = None
     st.session_state.generate_button_clicked = False
     st.session_state.error_message = None
-    # [추가] 패턴 모양도 초기화
-    st.session_state.module_shape_select = "기본 사각형 (Square)"
 
 def on_qr_setting_change():
     """QR 코드 설정값 변경 시 다운로드 관련 상태를 초기화합니다."""
@@ -97,3 +95,4 @@ def on_qr_setting_change():
 def set_download_initiated():
     """다운로드 버튼 클릭 시 호출되는 콜백 함수입니다."""
     st.session_state.download_initiated = True
+    
