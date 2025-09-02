@@ -19,19 +19,19 @@ def build_footer_ui():
     """앱의 푸터 섹션을 빌드합니다."""
     st.markdown("---")
     st.markdown(
-        """
+        f"""
         <style>
-        .footer {
+        .footer {{
             font-size: 0.8rem;
             text-align: center;
             color: #808080;
             padding-top: 20px;
-        }
+        }}
         </style>
         <div class="footer">
-            <p>개발자: [여기에 개발자 이름 또는 이메일] | 버전 1.0.0</p>
+            {get_message("UI_FOOTER")}
         </div>
-        """, 
+        """,
         unsafe_allow_html=True
     )
 
