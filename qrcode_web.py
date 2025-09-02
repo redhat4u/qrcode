@@ -18,21 +18,24 @@ from zoneinfo import ZoneInfo
 from PIL import Image, ImageDraw
 import hashlib
 import re
-import base64 # SVG 이미지 표시를 위해 추가
-import qrcode.image.svg # SVG 생성을 위해 추가
+import base64  # SVG 이미지 표시를 위해 추가
+import qrcode.image.svg  # SVG 생성을 위해 추가
 import math
-import messages # 메시지 파일 추가
+import messages  # messages.py 파일을 임포트합니다.
+
+# 언어 선택
+lang_options = list(messages.LANGUAGES.keys())
+selected_lang = st.sidebar.selectbox("언어", lang_options)
+MESSAGES = messages.LANGUAGES[selected_lang]
 
 # 페이지 설정
 st.set_page_config(
-    page_title=messages.LANGUAGES["한국어"]["page_title"],
-    page_icon=messages.LANGUAGES["한국어"]["page_icon"],
+    page_title=MESSAGES["page_title"],
+    page_icon=MESSAGES["page_icon"],
     layout="wide",
 )
 
 # 세션 상태 초기화
-if 'lang' not in st.session_state:
-    st.session_state.lang = "한국어"
 if 'qr_input_area' not in st.session_state:
     st.session_state.qr_input_area = ""
 if 'custom_pattern_color_input_key' not in st.session_state:
@@ -41,673 +44,508 @@ if 'custom_bg_color_input_key' not in st.session_state:
     st.session_state.custom_bg_color_input_key = ""
 if 'filename_input_key' not in st.session_state:
     st.session_state.filename_input_key = ""
-if 'box_size_input' not in st.session_state:
-    st.session_state.box_size_input = 20
-if 'border_input' not in st.session_state:
-    st.session_state.border_input = 2
-if 'error_correction_select' not in st.session_state:
-    st.session_state.error_correction_select = "Low (7%)"
-if 'mask_pattern_select' not in st.session_state:
-    st.session_state.mask_pattern_select = 2
-if 'pattern_color_select' not in st.session_state:
-    st.session_state.pattern_color_select = "black"
-if 'bg_color_select' not in st.session_state:
-    st.session_state.bg_color_select = "white"
-if 'strip_option' not in st.session_state:
-    st.session_state.strip_option = True
-if 'file_format_select' not in st.session_state:
-    st.session_state.file_format_select = "PNG"
-if 'pattern_shape_select' not in st.session_state:
-    st.session_state.pattern_shape_select = "사각"
-if 'finder_pattern_shape_select' not in st.session_state:
-    st.session_state.finder_pattern_shape_select = "사각"
-if 'corner_radius_input' not in st.session_state:
-    st.session_state.corner_radius_input = 25
-if 'cell_gap_input' not in st.session_state:
-    st.session_state.cell_gap_input = 0
-if 'jpg_quality_input' not in st.session_state:
-    st.session_state.jpg_quality_input = 70
+if 'box_size' not in st.session_state:
+    st.session_state.box_size = 10
+if 'border_size' not in st.session_state:
+    st.session_state.border_size = 4
+if 'qr_error_correction' not in st.session_state:
+    st.session_state.qr_error_correction = "M"
+if 'mask_pattern' not in st.session_state:
+    st.session_state.mask_pattern = 0
+if 'pattern_color' not in st.session_state:
+    st.session_state.pattern_color = "#000000"
+if 'bg_color' not in st.session_state:
+    st.session_state.bg_color = "#FFFFFF"
+if 'filename' not in st.session_state:
+    st.session_state.filename = ""
+if 'jpg_quality' not in st.session_state:
+    st.session_state.jpg_quality = 90
+if 'pattern_shape_selected' not in st.session_state:
+    st.session_state.pattern_shape_selected = MESSAGES["pattern_shape_options"][0]
+if 'finder_shape_selected' not in st.session_state:
+    st.session_state.finder_shape_selected = MESSAGES["pattern_shape_options"][0]
+if 'corner_radius' not in st.session_state:
+    st.session_state.corner_radius = 0
+if 'cell_gap' not in st.session_state:
+    st.session_state.cell_gap = 0
+if 'file_format_selected' not in st.session_state:
+    st.session_state.file_format_selected = "PNG"
 
-# 현재 언어 메시지 로드
-msgs = messages.LANGUAGES[st.session_state.lang]
 
-# 파일명에 특수문자 포함시 '_' 문자로 치환
-def sanitize_filename(name: str) -> str:
-    invalid_chars = '\\/:*?"<>|[]'
-    for ch in invalid_chars:
-        name = name.replace(ch, "_")
-    return name.strip()
+# 헬퍼 함수
+def get_qr_image(data, format, **kwargs):
+    if format == "SVG":
+        return get_svg_image(data, **kwargs)
+    else:
+        return get_pil_image(data, **kwargs)
 
-# 유효한 색상인지 확인하는 함수
-def is_valid_color(color_name):
-    if not color_name:
-        return False
-    color_name = color_name.strip()
-    hex_pattern = re.compile(r'^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$')
-    return hex_pattern.match(color_name)
-
-# QR 코드 데이터 생성
-def get_qr_data_object(data, box_size, border, error_correction, mask_pattern):
-    try:
-        qr = qrcode.QRCode(
-            version=1,
-            error_correction=error_correction,
-            box_size=box_size,
-            border=border,
-            mask_pattern=mask_pattern,
-        )
-        qr.add_data(data, optimize=0)
-        qr.make(fit=True)
-        return qr
-    except Exception as e:
-        st.error(msgs["error_gen_data"].format(error=str(e)))
-        return None
-
-# 사용자 정의 모양으로 QR 코드 이미지 생성 함수 (PNG)
-def draw_custom_shape_image(qr_object, box_size, border, fill_color, back_color, pattern_shape, corner_radius, cell_gap, finder_pattern_shape):
-    if not qr_object:
-        return None
-
-    img_size = (qr_object.modules_count + 2 * border) * box_size
-    img = Image.new('RGB', (img_size, img_size), back_color)
-    draw = ImageDraw.Draw(img)
+def get_pil_image(data, box_size, border, error_correction, mask_pattern,
+                  pattern_color, bg_color,
+                  pattern_shape, finder_shape, corner_radius, cell_gap):
     
-    # 간격 계산
-    gap_pixels = int(box_size * (cell_gap / 100))
-    
-    def draw_shape(draw, xy, shape, fill, corner_radius):
-        x1, y1, x2, y2 = xy
-        effective_size = x2 - x1
-        if shape == "사각" or shape == "Square":
-            draw.rectangle(xy, fill=fill)
-        elif shape == "둥근사각" or shape == "Rounded Square":
-            radius = int(effective_size * (corner_radius / 100))
-            draw.rectangle([x1 + radius, y1, x2 - radius, y2], fill=fill)
-            draw.rectangle([x1, y1 + radius, x2, y2 - radius], fill=fill)
-            draw.pieslice([x1, y1, x1 + radius * 2, y1 + radius * 2], 180, 270, fill=fill)
-            draw.pieslice([x2 - radius * 2, y1, x2, y1 + radius * 2], 270, 360, fill=fill)
-            draw.pieslice([x1, y2 - radius * 2, x1 + radius * 2, y2], 90, 180, fill=fill)
-            draw.pieslice([x2 - radius * 2, y2 - radius * 2, x2, y2], 0, 90, fill=fill)
-        elif shape == "동그라미" or shape == "Circle":
-            draw.ellipse(xy, fill=fill)
-        elif shape == "마름모" or shape == "Diamond":
-            draw.polygon([(x1 + effective_size/2, y1), (x1 + effective_size, y1 + effective_size/2), (x1 + effective_size/2, y1 + effective_size), (x1, y1 + effective_size/2)], fill=fill)
-        elif shape == "별" or shape == "Star":
-            x_center = (x1 + x2) / 2
-            y_center = (y1 + y2) / 2
-            radius_outer = (x2 - x1) / 2
-            radius_inner = radius_outer * 0.4
-            points = []
-            for i in range(5):
-                angle_outer = math.radians(i * 72 + 54)
-                x_outer = x_center + radius_outer * math.cos(angle_outer)
-                y_outer = y_center + radius_outer * math.sin(angle_outer)
-                points.append((x_outer, y_outer))
-                angle_inner = math.radians(i * 72 + 90)
-                x_inner = x_center + radius_inner * math.cos(angle_inner)
-                y_inner = y_center + radius_inner * math.sin(angle_inner)
-                points.append((x_inner, y_inner))
-            draw.polygon(points, fill=fill)
-        elif shape == "십자가" or shape == "Cross":
-            x_center = (x1 + x2) / 2
-            y_center = (y1 + y2) / 2
-            cross_width = (x2 - x1) * 0.3
-            draw.rectangle([x1, y_center - cross_width/2, x2, y_center + cross_width/2], fill=fill)
-            draw.rectangle([x_center - cross_width/2, y1, x_center + cross_width/2, y2], fill=fill)
-    
-    for r in range(qr_object.modules_count):
-        for c in range(qr_object.modules_count):
-            is_finder_pattern = False
-            if (r < 7 and c < 7) or (r >= qr_object.modules_count - 7 and c < 7) or (r < 7 and c >= qr_object.modules_count - 7):
-                is_finder_pattern = True
-            
-            if qr_object.modules[r][c]:
-                x = (c + border) * box_size
-                y = (r + border) * box_size
-                
-                current_shape = finder_pattern_shape if is_finder_pattern else pattern_shape
-                
-                if current_shape != msgs["pattern_shape_options"][0]: # '사각'이 아닌 경우
-                    new_x = x + gap_pixels // 2
-                    new_y = y + gap_pixels // 2
-                    new_x_end = x + box_size - (gap_pixels - gap_pixels // 2)
-                    new_y_end = y + box_size - (gap_pixels - gap_pixels // 2)
-                    draw_coords = [new_x, new_y, new_x_end, new_y_end]
-                else:
-                    draw_coords = [x, y, x + box_size, y + box_size]
+    qr = qrcode.QRCode(
+        version=None,
+        error_correction=error_correction,
+        box_size=box_size,
+        border=border,
+        mask_pattern=mask_pattern
+    )
+    qr.add_data(data)
+    qr.make(fit=True)
 
-                draw_shape(draw, draw_coords, current_shape, fill_color, corner_radius)
-
+    img = qr.make_image(
+        fill_color=pattern_color,
+        back_color=bg_color,
+        pattern_shape=pattern_shape,
+        finder_shape=finder_shape,
+        corner_radius=corner_radius,
+        cell_gap=cell_gap
+    )
     return img
 
-# QR 코드 SVG 생성 함수
-def generate_qr_code_svg(data, box_size, border, error_correction, mask_pattern, fill_color, back_color):
-    try:
-        qr = qrcode.QRCode(
-            version=1,
-            error_correction=error_correction,
-            box_size=box_size,
-            border=border,
-            mask_pattern=mask_pattern,
-        )
-        qr.add_data(data, optimize=0)
-        qr.make(fit=True)
-        
-        img_svg = qr.make_image(image_factory=qrcode.image.svg.SvgPathImage)
-        
-        svg_buffer = io.BytesIO()
-        img_svg.save(svg_buffer)
-        svg_data = svg_buffer.getvalue().decode('utf-8')
-        
-        svg_data = svg_data.replace('fill="black"', f'fill="{fill_color}"', 1) 
-        svg_data = svg_data.replace('fill="white"', f'fill="{back_color}"', 1)
-        
-        return svg_data, qr
-    except Exception as e:
-        st.error(msgs["error_gen_svg"].format(error=str(e)))
-        return None, None
+def get_svg_image(data, box_size, border, error_correction, mask_pattern,
+                  pattern_color, bg_color,
+                  pattern_shape, finder_shape, corner_radius, cell_gap):
 
-# QR 내용만 초기화하는 콜백 함수 (파일명은 유지)
-def clear_text_input():
-    st.session_state.qr_input_area = ""
+    # SVG는 오직 사각형 패턴만 지원
+    if pattern_shape != MESSAGES["pattern_shape_options"][0] or finder_shape != MESSAGES["pattern_shape_options"][0]:
+        st.warning(MESSAGES["pattern_shape_warning"])
 
-# 파일명 초기화 콜백 함수
-def clear_filename_callback():
-    st.session_state.filename_input_key = ""
+    if pattern_color != "#000000" or bg_color != "#FFFFFF":
+        st.warning(MESSAGES["svg_color_warning"])
 
-# 전체 초기화 콜백 함수
-def reset_all_settings():
+    factory = qrcode.image.svg.SvgImage
+    qr = qrcode.QRCode(
+        version=None,
+        error_correction=error_correction,
+        box_size=box_size,
+        border=border,
+        mask_pattern=mask_pattern,
+        image_factory=factory
+    )
+    qr.add_data(data)
+    qr.make(fit=True)
+
+    svg_img = qr.make_image(
+        fill_color="#000000",
+        back_color="#FFFFFF"
+    )
+    return svg_img.to_string(encoding='utf-8')
+
+
+def get_image_as_byte_stream(img, format, quality=90):
+    buf = io.BytesIO()
+    if format == "PNG":
+        img.save(buf, format="PNG")
+    elif format == "JPG":
+        img.save(buf, format="JPEG", quality=quality)
+    elif format == "SVG":
+        buf = io.BytesIO(img)
+    return buf.getvalue()
+
+def generate_filename(data, file_format):
+    hash_object = hashlib.sha256(data.encode('utf-8'))
+    hex_digest = hash_object.hexdigest()[:8]
+    now = datetime.now(ZoneInfo("Asia/Seoul")).strftime("%Y%m%d_%H%M%S")
+    return f"qrcode_{now}_{hex_digest}.{file_format.lower()}"
+
+def is_valid_hex_color(hex_string):
+    if re.match(r'^#(?:[0-9a-fA-F]{3}){1,2}$', hex_string):
+        return True
+    return False
+
+# 메인 UI
+st.title(MESSAGES["main_title"])
+st.markdown(MESSAGES["main_separator"])
+
+# 전체 초기화 버튼
+if st.button(MESSAGES["reset_button_label"], help=MESSAGES["reset_button_help"]):
     st.session_state.qr_input_area = ""
     st.session_state.custom_pattern_color_input_key = ""
     st.session_state.custom_bg_color_input_key = ""
     st.session_state.filename_input_key = ""
-    
-    st.session_state.box_size_input = 20
-    st.session_state.border_input = 2
-    st.session_state.error_correction_select = "Low (7%)"
-    st.session_state.mask_pattern_select = 2
-    st.session_state.pattern_color_select = "black"
-    st.session_state.bg_color_select = "white"
-    st.session_state.strip_option = True
-    st.session_state.file_format_select = "PNG"
-    st.session_state.pattern_shape_select = "사각"
-    st.session_state.finder_pattern_shape_select = "사각"
-    st.session_state.corner_radius_input = 25
-    st.session_state.cell_gap_input = 0
-    st.session_state.jpg_quality_input = 70
+    st.session_state.box_size = 10
+    st.session_state.border_size = 4
+    st.session_state.qr_error_correction = "M"
+    st.session_state.mask_pattern = 0
+    st.session_state.pattern_color = "#000000"
+    st.session_state.bg_color = "#FFFFFF"
+    st.session_state.filename = ""
+    st.session_state.jpg_quality = 90
+    st.session_state.pattern_shape_selected = MESSAGES["pattern_shape_options"][0]
+    st.session_state.finder_shape_selected = MESSAGES["pattern_shape_options"][0]
+    st.session_state.corner_radius = 0
+    st.session_state.cell_gap = 0
+    st.session_state.file_format_selected = "PNG"
+    st.rerun()
 
+st.header(MESSAGES["input_and_settings_header"])
+st.markdown(MESSAGES["main_separator"])
 
-#[메인]====================================================================================================================================================================
-
-st.title(msgs["main_title"])
-st.markdown(msgs["main_separator"])
-
-# 언어 선택
-lang_options = list(messages.LANGUAGES.keys())
-st.selectbox(
-    msgs["language_select_label"],
-    lang_options,
-    index=lang_options.index(st.session_state.lang),
-    key='lang'
-)
-
-# 레이아웃 설정 (2개 컬럼)
-col1, col2 = st.columns([1.2, 1])
+# 입력 및 설정 섹션
+col1, col2 = st.columns(2)
 
 with col1:
-    st.header(msgs["input_and_settings_header"])
-
-    # QR 코드 입력창
-    st.subheader(msgs["content_subheader"])
-    st.info(msgs["content_info"])
-
-    qr_data = st.text_area(
-        msgs["content_subheader"],
-        height=200,
-        placeholder=msgs["content_placeholder"],
-        key="qr_input_area",
-    )
-
-    # 문자 수 표시
-    char_count = len(qr_data) if qr_data else 0
-    if char_count > 0:
-        if char_count > 2900:
-            st.error(msgs["char_count_warning_2"].format(char_count=char_count))
-        elif char_count > 2400:
-            st.warning(msgs["char_count_warning_1"].format(char_count=char_count))
-        else:
-            st.success(msgs["char_count_success"].format(char_count=char_count))
-    else:
-        st.caption(msgs["char_count_caption"])
-
-    # 공백/줄바꿈 제거 옵션
-    strip_option = st.checkbox(
-        msgs["strip_checkbox_label"],
-        value=st.session_state.strip_option,
-        key="strip_option",
-        help=msgs["strip_checkbox_help"]
-    )
-
-    # 입력 내용 삭제 버튼
-    col_clear1, col_clear2, col_clear3 = st.columns([1, 1, 1])
-    with col_clear2:
-        delete_btn_disabled = (char_count == 0)
-        st.button(
-            msgs["delete_button_label"],
-            help=msgs["delete_button_help"],
-            use_container_width=True,
-            type="secondary",
-            disabled=delete_btn_disabled,
-            on_click=clear_text_input,
-        )
-
-    st.markdown(msgs["main_separator"])
+    st.subheader(MESSAGES["content_subheader"])
+    st.info(MESSAGES["content_info"])
     
-    # 파일 형식 설정
-    st.subheader(msgs["file_format_subheader"])
+    # QR 코드 내용 입력
+    qr_content = st.text_area(
+        label=MESSAGES["content_subheader"],
+        value=st.session_state.qr_input_area,
+        placeholder=MESSAGES["content_placeholder"],
+        height=150,
+        key="qr_input_area_key"
+    )
+
+    # 입력 내용 지우기
+    if st.button(MESSAGES["delete_button_label"], help=MESSAGES["delete_button_help"]):
+        st.session_state.qr_input_area = ""
+        st.rerun()
+
+    char_count = len(qr_content)
+    if char_count > 200:
+        st.warning(MESSAGES["char_count_warning_2"].format(char_count=char_count))
+    elif char_count > 50:
+        st.warning(MESSAGES["char_count_warning_1"].format(char_count=char_count))
+    else:
+        st.success(MESSAGES["char_count_success"].format(char_count=char_count))
+    
+    st.caption(MESSAGES["char_count_caption"])
+
+    st.checkbox(
+        label=MESSAGES["strip_checkbox_label"],
+        help=MESSAGES["strip_checkbox_help"],
+        value=False,
+        key="strip_content"
+    )
+
+    if st.session_state.strip_content:
+        qr_content = qr_content.strip()
+
+    st.markdown(MESSAGES["main_separator"])
+
+    st.subheader(MESSAGES["file_format_subheader"])
     file_format = st.selectbox(
-        msgs["file_format_selectbox"],
+        MESSAGES["file_format_selectbox"],
         ("PNG", "JPG", "SVG"),
-        index=0 if st.session_state.file_format_select == "PNG" else (1 if st.session_state.file_format_select == "JPG" else 2),
-        key="file_format_select",
+        key="file_format_selected"
     )
-    
-    # JPG 품질 설정 슬라이더 (JPG 선택 시에만 표시)
+
     if file_format == "JPG":
-        st.caption(msgs["jpg_caption"])
-        jpg_quality = st.slider(
-            msgs["jpg_slider_label"],
-            min_value=1,
-            max_value=100,
-            value=st.session_state.jpg_quality_input,
-            key="jpg_quality_input",
-            help=msgs["jpg_slider_help"]
-        )
-    else:
-        jpg_quality = 70
-    
-    # 패턴 모양 설정
-    st.markdown(msgs["main_separator"])
-    st.subheader(msgs["pattern_shape_subheader"])
-    pattern_shape_disabled = (file_format == "SVG")
-    st.caption(msgs["pattern_shape_warning"])
-    
-    # 두 개의 패턴 모양 선택 옵션 추가
-    col_pattern_shape, col_finder_shape = st.columns(2)
-    
-    with col_pattern_shape:
-        pattern_shape = st.selectbox(
-            msgs["pattern_shape_selectbox_label"],
-            msgs["pattern_shape_options"],
-            key="pattern_shape_select",
-            disabled=pattern_shape_disabled,
+        st.caption(MESSAGES["jpg_caption"])
+        st.session_state.jpg_quality = st.slider(
+            MESSAGES["jpg_slider_label"], 1, 100, st.session_state.jpg_quality,
+            help=MESSAGES["jpg_slider_help"]
         )
 
-    with col_finder_shape:
-        finder_pattern_shape = st.selectbox(
-            msgs["finder_shape_selectbox_label"],
-            msgs["pattern_shape_options"],
-            key="finder_pattern_shape_select",
-            disabled=pattern_shape_disabled,
-        )
+    st.markdown(MESSAGES["main_separator"])
 
-    # 둥근사각 전용 슬라이더
-    if pattern_shape == msgs["pattern_shape_options"][1] or finder_pattern_shape == msgs["pattern_shape_options"][1]:
-        corner_radius_disabled = (file_format == "SVG")
-        st.caption(msgs["corner_radius_warning"])
-        corner_radius = st.slider(
-            msgs["corner_radius_slider_label"], 
-            min_value=0, 
-            max_value=50, 
-            value=st.session_state.corner_radius_input,
-            help=msgs["corner_radius_slider_help"],
-            key="corner_radius_input",
-            disabled=corner_radius_disabled
+    st.subheader(MESSAGES["pattern_shape_subheader"])
+    
+    pattern_shape_options = MESSAGES["pattern_shape_options"]
+    
+    if file_format == "SVG":
+        st.warning(MESSAGES["pattern_shape_warning"])
+        st.session_state.pattern_shape_selected = st.selectbox(
+            MESSAGES["pattern_shape_selectbox_label"],
+            [pattern_shape_options[0]],
+            key="pattern_shape_selected_key"
+        )
+        st.session_state.finder_shape_selected = st.selectbox(
+            MESSAGES["finder_shape_selectbox_label"],
+            [pattern_shape_options[0]],
+            key="finder_shape_selected_key"
         )
     else:
-        corner_radius = 0
+        st.session_state.pattern_shape_selected = st.selectbox(
+            MESSAGES["pattern_shape_selectbox_label"],
+            pattern_shape_options,
+            key="pattern_shape_selected_key"
+        )
+        st.session_state.finder_shape_selected = st.selectbox(
+            MESSAGES["finder_shape_selectbox_label"],
+            pattern_shape_options,
+            key="finder_shape_selected_key"
+        )
+
+    if st.session_state.pattern_shape_selected == pattern_shape_options[1]: # 둥근 사각
+        st.caption(MESSAGES["corner_radius_warning"])
+        st.session_state.corner_radius = st.slider(
+            MESSAGES["corner_radius_slider_label"], 0, 50, st.session_state.corner_radius,
+            help=MESSAGES["corner_radius_slider_help"]
+        )
+    else:
+        st.session_state.corner_radius = 0
+
+    if st.session_state.pattern_shape_selected != pattern_shape_options[0] and file_format != "SVG":
+        st.caption(MESSAGES["cell_gap_warning"])
+        st.session_state.cell_gap = st.slider(
+            MESSAGES["cell_gap_slider_label"], 0, 40, st.session_state.cell_gap,
+            help=MESSAGES["cell_gap_slider_help"]
+        )
+    else:
+        st.session_state.cell_gap = 0
         
-    # 패턴 간격 슬라이더 (사각 제외)
-    cell_gap_disabled = (pattern_shape == msgs["pattern_shape_options"][0]) or (finder_pattern_shape == msgs["pattern_shape_options"][0]) or (file_format == "SVG")
-    st.caption(msgs["cell_gap_warning"])
-    cell_gap = st.slider(
-        msgs["cell_gap_slider_label"],
-        min_value=0,
-        max_value=40,
-        value=st.session_state.cell_gap_input,
-        help=msgs["cell_gap_slider_help"],
-        disabled=cell_gap_disabled,
-        key="cell_gap_input",
+
+    st.markdown(MESSAGES["main_separator"])
+
+    st.subheader(MESSAGES["color_subheader"])
+    if file_format == "SVG":
+        st.warning(MESSAGES["svg_color_warning"])
+    
+    color_options = ["Black", "White", "Blue", "Red", "Green", "Yellow", "Cyan", "Magenta"]
+    pattern_color_default = "Black" if st.session_state.pattern_color == "#000000" else MESSAGES["color_options_custom"]
+    bg_color_default = "White" if st.session_state.bg_color == "#FFFFFF" else MESSAGES["color_options_custom"]
+    
+    pattern_color_selected = st.selectbox(
+        MESSAGES["pattern_color_selectbox_label"],
+        color_options + [MESSAGES["color_options_custom"]],
+        index=color_options.index(pattern_color_default) if pattern_color_default in color_options else len(color_options),
+        key="pattern_color_key"
     )
-    
-#========================================================================================================================================================================
+    bg_color_selected = st.selectbox(
+        MESSAGES["bg_color_selectbox_label"],
+        color_options + [MESSAGES["color_options_custom"]],
+        index=color_options.index(bg_color_default) if bg_color_default in color_options else len(color_options),
+        key="bg_color_key"
+    )
 
-    # 색상 설정
-    st.markdown(msgs["main_separator"])
-    st.subheader(msgs["color_subheader"])
-    
-    file_format_is_svg = (st.session_state.file_format_select == "SVG")
-    
-    if file_format_is_svg:
-        st.warning(msgs["svg_color_warning"])
-
-    colors = [
-        msgs["color_options_custom"], "black", "white", "gray", "lightgray", "dimgray",
-        "red", "green", "blue", "yellow", "cyan", "magenta", "maroon",
-        "purple", "navy", "lime", "olive", "teal", "aqua", "fuchsia",
-        "silver", "gold", "orange", "orangered", "crimson", "indigo",
-    ]
-    col1_3, col1_4 = st.columns(2)
-    with col1_3:
-        pattern_color_choice = st.selectbox(
-            msgs["pattern_color_selectbox_label"], colors, 
-            key="pattern_color_select", 
-            disabled=file_format_is_svg
+    if pattern_color_selected == MESSAGES["color_options_custom"]:
+        st.caption(MESSAGES["hex_info_1"])
+        st.caption(MESSAGES["hex_info_2"])
+        st.session_state.pattern_color = st.text_input(
+            MESSAGES["pattern_color_input_label"], value=st.session_state.pattern_color,
+            placeholder=MESSAGES["pattern_color_input_placeholder"],
+            key="custom_pattern_color_input_key"
         )
-    with col1_4:
-        bg_color_choice = st.selectbox(
-            msgs["bg_color_selectbox_label"], colors, 
-            key="bg_color_select", 
-            disabled=file_format_is_svg
-        )
-
-    st.markdown(msgs["hex_info_1"])
-    st.caption(msgs["hex_info_2"])
-    col1_5, col1_6 = st.columns(2)
-    with col1_5:
-        st.text_input(
-            msgs["pattern_color_input_label"],
-            placeholder=msgs["pattern_color_input_placeholder"],
-            disabled=(pattern_color_choice != msgs["color_options_custom"]) or file_format_is_svg,
-            key="custom_pattern_color_input_key",
-        )
-    with col1_6:
-        st.text_input(
-            msgs["bg_color_input_label"],
-            placeholder=msgs["bg_color_input_placeholder"],
-            disabled=(bg_color_choice != msgs["color_options_custom"]) or file_format_is_svg,
-            key="custom_bg_color_input_key",
-        )
-    
-    pattern_color = st.session_state.get('custom_pattern_color_input_key', '').strip() if pattern_color_choice == msgs["color_options_custom"] else pattern_color_choice
-    bg_color = st.session_state.get('custom_bg_color_input_key', '').strip() if bg_color_choice == msgs["color_options_custom"] else bg_color_choice
-
-#========================================================================================================================================================================
-
-    # QR 코드 설정
-    st.markdown(msgs["main_separator"])
-    st.subheader(msgs["qr_settings_subheader"])
-
-    col1_1, col1_2 = st.columns(2)
-    with col1_1:
-        box_size = st.number_input(msgs["box_size_label"], min_value=1, max_value=100, key="box_size_input")
-        border = st.number_input(msgs["border_label"], min_value=0, max_value=10, key="border_input")
-
-    with col1_2:
-        error_correction_options = {
-            "Low (7%)": qrcode.constants.ERROR_CORRECT_L,
-            "Medium (15%)": qrcode.constants.ERROR_CORRECT_M,
-            "Quartile (25%)": qrcode.constants.ERROR_CORRECT_Q,
-            "High (30%)": qrcode.constants.ERROR_CORRECT_H,
-        }
-        error_correction_choice = st.selectbox(msgs["error_correction_label"], list(error_correction_options.keys()), key="error_correction_select")
-        error_correction = error_correction_options[error_correction_choice]
-        mask_pattern = st.selectbox(msgs["mask_pattern_label"], options=list(range(8)), key="mask_pattern_select")
-
-
-#========================================================================================================================================================================
-
-    # 파일명 설정
-    st.markdown(msgs["main_separator"])
-    st.subheader(msgs["filename_subheader"])
-    
-    col_filename_input, col_filename_delete = st.columns([3, 1.1])
-
-    with col_filename_input:
-        filename = st.text_input(
-            msgs["filename_input_label"],
-            placeholder=msgs["filename_input_placeholder"],
-            key="filename_input_key",
-        )
-
-    current_filename = filename.strip()
-
-    with col_filename_delete:
-        st.markdown('<div style="margin-top: 28px;"></div>', unsafe_allow_html=True)
-        filename_delete_disabled = not st.session_state.get("filename_input_key", "")
-        st.button(
-            msgs["filename_delete_button_label"],
-            help=msgs["filename_delete_button_help"],
-            use_container_width=True,
-            type="secondary",
-            disabled=filename_delete_disabled,
-            on_click=clear_filename_callback,
-        )
-
-
-#========================================================================================================================================================================
-
-with col2:
-    st.header(msgs["preview_and_download_header"])
-    
-    current_data = qr_data.strip() if st.session_state.strip_option else qr_data
-    
-    is_pattern_color_valid_preview = (st.session_state.pattern_color_select != msgs["color_options_custom"]) or (st.session_state.pattern_color_select == msgs["color_options_custom"] and pattern_color and is_valid_color(pattern_color))
-    is_bg_color_valid_preview = (st.session_state.bg_color_select != msgs["color_options_custom"]) or (st.session_state.bg_color_select == msgs["color_options_custom"] and bg_color and is_valid_color(bg_color))
-    is_colors_same_preview = (is_pattern_color_valid_preview and is_bg_color_valid_preview and pattern_color and bg_color and pattern_color == bg_color)
-    
-    preview_image_display = None
-    preview_qr_object = None
-    
-    can_generate_preview = current_data and (st.session_state.file_format_select == "SVG" or (is_pattern_color_valid_preview and is_bg_color_valid_preview and not is_colors_same_preview))
-
-    download_data = None
-    download_mime = ""
-    download_extension = ""
-    save_format = ""
-
-    if can_generate_preview:
-        try:
-            qr = get_qr_data_object(
-                current_data, int(st.session_state.box_size_input), int(st.session_state.border_input),
-                messages.LANGUAGES[st.session_state.lang]["error_correction_options"][st.session_state.error_correction_select],
-                int(st.session_state.mask_pattern_select)
-            )
-            if qr:
-                preview_qr_object = qr
-                if st.session_state.file_format_select in ["PNG", "JPG"]:
-                    preview_image_display = draw_custom_shape_image(
-                        qr, int(st.session_state.box_size_input), int(st.session_state.border_input),
-                        pattern_color, bg_color, st.session_state.pattern_shape_select,
-                        st.session_state.corner_radius_input,
-                        st.session_state.cell_gap_input,
-                        st.session_state.finder_pattern_shape_select
-                    )
-                    img_buffer = io.BytesIO()
-                    if st.session_state.file_format_select == "PNG":
-                        preview_image_display.save(img_buffer, format='PNG')
-                        download_mime = "image/png"
-                        download_extension = ".png"
-                    elif st.session_state.file_format_select == "JPG":
-                        rgb_image = preview_image_display.convert('RGB')
-                        rgb_image.save(img_buffer, format='JPEG', quality=st.session_state.jpg_quality_input)
-                        download_mime = "image/jpeg"
-                        download_extension = ".jpg"
-                        
-                    download_data = img_buffer.getvalue()
-
-                else: # SVG
-                    svg_data, _ = generate_qr_code_svg(
-                        current_data, int(st.session_state.box_size_input), int(st.session_state.border_input),
-                        messages.LANGUAGES[st.session_state.lang]["error_correction_options"][st.session_state.error_correction_select],
-                        int(st.session_state.mask_pattern_select), "black", "white"
-                    )
-                    download_data = svg_data.encode('utf-8')
-                    download_mime = "image/svg+xml"
-                    download_extension = ".svg"
-                    
-                    preview_image_display = draw_custom_shape_image(
-                        qr, int(st.session_state.box_size_input), int(st.session_state.border_input),
-                        "black", "white", msgs["pattern_shape_options"][0], # '사각'
-                        st.session_state.corner_radius_input,
-                        st.session_state.cell_gap_input,
-                        msgs["pattern_shape_options"][0], # '사각'
-                    )
-        except Exception as e:
-            st.error(msgs["error_general"].format(error=str(e)))
-
-    st.markdown(msgs["main_separator"])
-    
-    if preview_image_display:
-        st.success(msgs["preview_success_message"])
-        st.subheader(msgs["preview_subheader"])
-        col_left, col_center, col_right = st.columns([1, 2, 1])
-        with col_center:
-            st.image(preview_image_display, caption=msgs["preview_image_caption"], width=380)
-        
-        if preview_qr_object:
-            st.info(f"""
-            {msgs["qr_info_title"]}
-            - {msgs["qr_info_version"].format(version=preview_qr_object.version)}
-            ** **
-            - {msgs["qr_info_cells"].format(count=preview_qr_object.modules_count)}
-            - {msgs["qr_info_border"].format(count=2 * int(st.session_state.border_input))}
-            - {msgs["qr_info_cell_size"].format(size=int(st.session_state.box_size_input))}
-            - {msgs["qr_info_image_size"].format(size=(preview_qr_object.modules_count + 2 * int(st.session_state.border_input)) * int(st.session_state.box_size_input))}
-            ** **
-            - **{msgs["qr_info_calculation"]}**
-            ** **
-            - {msgs["qr_info_pattern_color"].format(color="black" if st.session_state.file_format_select == "SVG" else pattern_color)}
-            - {msgs["qr_info_bg_color"].format(color="white" if st.session_state.file_format_select == "SVG" else bg_color)}
-            """)
-
-        st.markdown(msgs["main_separator"])
-        st.subheader(msgs["download_subheader"])
-        now = datetime.now(ZoneInfo("Asia/Seoul"))
-        final_filename = sanitize_filename(st.session_state.filename_input_key.strip() if st.session_state.filename_input_key.strip() else now.strftime("QR_%Y-%m-%d_%H-%M-%S"))
-        download_filename = f"{final_filename}{download_extension}"
-
-        st.download_button(
-            label=msgs["download_button_label"],
-            data=download_data,
-            file_name=download_filename,
-            mime=download_mime,
-            use_container_width=True,
-            help=msgs["download_button_help"]
-        )
-        
-        st.markdown(
-            f'<p style="font-size:18px;">'
-            f'<span style="color:darkorange; font-weight:bold;">{msgs["download_filename_label"]} </span> '
-            f'<span style="color:dodgerblue;"> {msgs["download_filename_value"].format(filename=download_filename)}</span>'
-            f'</p>',
-            unsafe_allow_html=True,
-        )
-
-    elif current_data:
-        st.warning(msgs["warning_cannot_generate"])
-        
-        if st.session_state.file_format_select != "SVG":
-            if st.session_state.pattern_color_select == msgs["color_options_custom"] and not pattern_color:
-                st.warning(msgs["warning_pattern_hex_empty"])
-            if st.session_state.bg_color_select == msgs["color_options_custom"] and not bg_color:
-                st.warning(msgs["warning_bg_hex_empty"])
-            if st.session_state.pattern_color_select == msgs["color_options_custom"] and pattern_color and not is_valid_color(pattern_color):
-                st.warning(msgs["warning_pattern_hex_invalid"])
-            if st.session_state.bg_color_select == msgs["color_options_custom"] and bg_color and not is_valid_color(bg_color):
-                st.warning(msgs["warning_bg_hex_invalid"])
-            if is_colors_same_preview:
-                st.warning(msgs["warning_same_color"])
     else:
-        st.info(msgs["info_initial"])
-
-st.markdown(msgs["main_separator"])
-
-st.button(
-    label=msgs["reset_button_label"], 
-    use_container_width=True,
-    type="secondary",
-    on_click=reset_all_settings,
-    help=msgs["reset_button_help"],
-)
-
-with st.sidebar:
-    st.header(msgs["sidebar_title_usage"])
-    st.markdown(f"""
-    - {msgs["sidebar_usage_1"]}
-    - {msgs["sidebar_usage_2"]}
-    - {msgs["sidebar_usage_3"]}
-    - {msgs["sidebar_usage_4"]}
-    - {msgs["sidebar_usage_5"]}
-    - {msgs["sidebar_usage_6"]}
-    """)
-
-    st.markdown(msgs["main_separator"])
-
-    st.header(msgs["sidebar_title_tips"])
-    st.markdown(f"""
-    - {msgs["sidebar_tip_text"]}
-    - {msgs["sidebar_tip_website"]}
-    - {msgs["sidebar_tip_email"]}
-    - {msgs["sidebar_tip_email_full"]}
-    - {msgs["sidebar_tip_tel"]}
-    - {msgs["sidebar_tip_sms"]}
-    - {msgs["sidebar_tip_sms_full"]}
-    - {msgs["sidebar_tip_wifi"]}
-    """)
-
-    st.markdown(msgs["main_separator"])
-
-    st.header(msgs["sidebar_title_guide"])
-    st.markdown(msgs["sidebar_guide_file_format"])
-    st.markdown(f"""
-    - {msgs["sidebar_guide_png"]}
-    - {msgs["sidebar_guide_jpg"]}
-    - {msgs["sidebar_guide_svg"]}
-    """)
-
-    st.markdown(msgs["main_separator"])
-
-    st.markdown(msgs["sidebar_guide_pattern_shape"])
-    st.markdown(f"""
-    - {msgs["sidebar_guide_pattern_shape_desc_1"]}
-    - {msgs["sidebar_guide_pattern_shape_desc_2"]}
-    """)
+        color_hex_map = {
+            "Black": "#000000", "White": "#FFFFFF", "Blue": "#0000FF", "Red": "#FF0000",
+            "Green": "#008000", "Yellow": "#FFFF00", "Cyan": "#00FFFF", "Magenta": "#FF00FF"
+        }
+        st.session_state.pattern_color = color_hex_map[pattern_color_selected]
     
-    st.markdown(msgs["sidebar_guide_cell_gap"])
-    st.markdown(f"""
-    - {msgs["sidebar_guide_cell_gap_desc_1"]}
-    - {msgs["sidebar_guide_cell_gap_desc_2"]}
-    """)
+    if bg_color_selected == MESSAGES["color_options_custom"]:
+        st.session_state.bg_color = st.text_input(
+            MESSAGES["bg_color_input_label"], value=st.session_state.bg_color,
+            placeholder=MESSAGES["bg_color_input_placeholder"],
+            key="custom_bg_color_input_key"
+        )
+    else:
+        color_hex_map = {
+            "Black": "#000000", "White": "#FFFFFF", "Blue": "#0000FF", "Red": "#FF0000",
+            "Green": "#008000", "Yellow": "#FFFF00", "Cyan": "#00FFFF", "Magenta": "#FF00FF"
+        }
+        st.session_state.bg_color = color_hex_map[bg_color_selected]
 
-    st.markdown(msgs["main_separator"])
+    st.markdown(MESSAGES["main_separator"])
 
-    st.markdown(msgs["sidebar_guide_color"])
-    st.markdown(f"""
-    - {msgs["sidebar_guide_color_desc_1"]}
-    - {msgs["sidebar_guide_color_desc_2"]}
-    - {msgs["sidebar_guide_color_desc_3"]}
-    """)
+    st.subheader(MESSAGES["qr_settings_subheader"])
+    st.session_state.box_size = st.slider(MESSAGES["box_size_label"], 1, 20, st.session_state.box_size)
+    st.session_state.border_size = st.slider(MESSAGES["border_label"], 1, 10, st.session_state.border_size)
 
-    st.markdown(msgs["main_separator"])
-    
-    st.markdown(msgs["sidebar_guide_qr_settings"])
-    st.markdown(msgs["sidebar_guide_error_correction"])
-    st.markdown(f"""
-    - {msgs["sidebar_guide_ec_L"]}
-    - {msgs["sidebar_guide_ec_M"]}
-    - {msgs["sidebar_guide_ec_Q"]}
-    - {msgs["sidebar_guide_ec_H"]}
-    """)
+    error_correction_options = {
+        "L (7%)": qrcode.constants.ERROR_CORRECT_L,
+        "M (15%)": qrcode.constants.ERROR_CORRECT_M,
+        "Q (25%)": qrcode.constants.ERROR_CORRECT_Q,
+        "H (30%)": qrcode.constants.ERROR_CORRECT_H,
+    }
+    st.session_state.qr_error_correction = st.selectbox(
+        MESSAGES["error_correction_label"],
+        list(error_correction_options.keys()),
+        index=list(error_correction_options.keys()).index(st.session_state.qr_error_correction),
+        help=f"{MESSAGES['sidebar_guide_ec_L']}\n{MESSAGES['sidebar_guide_ec_M']}\n{MESSAGES['sidebar_guide_ec_Q']}\n{MESSAGES['sidebar_guide_ec_H']}"
+    )
 
-    st.markdown(msgs["sidebar_guide_mask_pattern"])
-    st.markdown(f"""
-    - {msgs["sidebar_guide_mask_pattern_desc"]}
-    """)
+    st.session_state.mask_pattern = st.slider(MESSAGES["mask_pattern_label"], 0, 7, st.session_state.mask_pattern)
 
-# 하단 정보
-st.markdown(msgs["main_separator"])
-st.markdown(
-    f'<p style="text-align: center; color: mediumslateblue; font-size: 15px;">{msgs["footer_text"]}</p>',
-    unsafe_allow_html=True
-)
+    st.markdown(MESSAGES["main_separator"])
+
+    st.subheader(MESSAGES["filename_subheader"])
+    st.session_state.filename = st.text_input(
+        MESSAGES["filename_input_label"],
+        value=st.session_state.filename,
+        placeholder=MESSAGES["filename_input_placeholder"],
+        key="filename_input_key"
+    )
+    if st.button(MESSAGES["filename_delete_button_label"], help=MESSAGES["filename_delete_button_help"]):
+        st.session_state.filename = ""
+        st.rerun()
+
+    # QR 코드 생성 로직 및 미리보기
+    if not qr_content:
+        with col2:
+            st.info(MESSAGES["info_initial"])
+    else:
+        is_valid = True
+        if not is_valid_hex_color(st.session_state.pattern_color):
+            st.warning(MESSAGES["warning_pattern_hex_invalid"])
+            is_valid = False
+        if not is_valid_hex_color(st.session_state.bg_color):
+            st.warning(MESSAGES["warning_bg_hex_invalid"])
+            is_valid = False
+        if st.session_state.pattern_color == st.session_state.bg_color:
+            st.warning(MESSAGES["warning_same_color"])
+            is_valid = False
+
+        if not is_valid:
+            with col2:
+                st.warning(MESSAGES["warning_cannot_generate"])
+        else:
+            try:
+                # QR 코드 데이터 생성
+                version = qrcode.util.get_version(qr_content, error_correction_options[st.session_state.qr_error_correction])
+                cells_count = version * 4 + 17
+                border_cells = st.session_state.border_size
+                img_size = (cells_count + 2 * border_cells) * st.session_state.box_size
+
+                # QR 코드 이미지 생성
+                if file_format == "SVG":
+                    img_data = get_qr_image(
+                        data=qr_content,
+                        format=file_format,
+                        box_size=st.session_state.box_size,
+                        border=st.session_state.border_size,
+                        error_correction=error_correction_options[st.session_state.qr_error_correction],
+                        mask_pattern=st.session_state.mask_pattern,
+                        pattern_color=st.session_state.pattern_color,
+                        bg_color=st.session_state.bg_color,
+                        pattern_shape=st.session_state.pattern_shape_selected,
+                        finder_shape=st.session_state.finder_shape_selected,
+                        corner_radius=st.session_state.corner_radius,
+                        cell_gap=st.session_state.cell_gap
+                    )
+                else:
+                    img = get_qr_image(
+                        data=qr_content,
+                        format=file_format,
+                        box_size=st.session_state.box_size,
+                        border=st.session_state.border_size,
+                        error_correction=error_correction_options[st.session_state.qr_error_correction],
+                        mask_pattern=st.session_state.mask_pattern,
+                        pattern_color=st.session_state.pattern_color,
+                        bg_color=st.session_state.bg_color,
+                        pattern_shape=st.session_state.pattern_shape_selected,
+                        finder_shape=st.session_state.finder_shape_selected,
+                        corner_radius=st.session_state.corner_radius,
+                        cell_gap=st.session_state.cell_gap
+                    )
+                
+                with col2:
+                    st.header(MESSAGES["preview_and_download_header"])
+                    st.success(MESSAGES["preview_success_message"])
+                    st.markdown(MESSAGES["main_separator"])
+                    st.subheader(MESSAGES["preview_subheader"])
+
+                    if file_format == "SVG":
+                        b64 = base64.b64encode(img_data).decode("utf-8")
+                        html_code = f'<img src="data:image/svg+xml;base64,{b64}" width="100%">'
+                        st.markdown(html_code, unsafe_allow_html=True)
+                        st.caption(MESSAGES["preview_image_caption"])
+                    else:
+                        st.image(img, caption=MESSAGES["preview_image_caption"], use_column_width=True)
+
+                    # QR 코드 정보 표시
+                    st.subheader(MESSAGES["qr_info_title"])
+                    info_col1, info_col2 = st.columns(2)
+                    with info_col1:
+                        st.markdown(MESSAGES["qr_info_version"].format(version=version))
+                        st.markdown(MESSAGES["qr_info_cells"].format(count=cells_count))
+                        st.markdown(MESSAGES["qr_info_border"].format(count=border_cells))
+                    with info_col2:
+                        st.markdown(MESSAGES["qr_info_cell_size"].format(size=st.session_state.box_size))
+                        st.markdown(MESSAGES["qr_info_image_size"].format(size=img_size))
+                        st.markdown(MESSAGES["qr_info_calculation"])
+
+                    st.markdown(MESSAGES["qr_info_pattern_color"].format(color=st.session_state.pattern_color))
+                    st.markdown(MESSAGES["qr_info_bg_color"].format(color=st.session_state.bg_color))
+                    
+                    st.markdown(MESSAGES["main_separator"])
+
+                    st.subheader(MESSAGES["download_subheader"])
+                    
+                    # 파일명 자동 생성
+                    filename_to_use = st.session_state.filename or generate_filename(qr_content, file_format)
+                    st.markdown(MESSAGES["download_filename_label"] + " " + MESSAGES["download_filename_value"].format(filename=filename_to_use))
+
+                    if file_format == "SVG":
+                        st.download_button(
+                            label=MESSAGES["download_button_label"],
+                            data=img_data,
+                            file_name=filename_to_use,
+                            mime="image/svg+xml",
+                            help=MESSAGES["download_button_help"]
+                        )
+                    else:
+                        img_bytes = get_image_as_byte_stream(img, file_format, st.session_state.jpg_quality)
+                        st.download_button(
+                            label=MESSAGES["download_button_label"],
+                            data=img_bytes,
+                            file_name=filename_to_use,
+                            mime=f"image/{file_format.lower()}",
+                            help=MESSAGES["download_button_help"]
+                        )
+            except Exception as e:
+                with col2:
+                    st.error(MESSAGES["error_general"].format(error=e))
+
+# 사이드바
+st.sidebar.title(MESSAGES["sidebar_title_usage"])
+st.sidebar.markdown(MESSAGES["sidebar_usage_1"])
+st.sidebar.markdown(MESSAGES["sidebar_usage_2"])
+st.sidebar.markdown(MESSAGES["sidebar_usage_3"])
+st.sidebar.markdown(MESSAGES["sidebar_usage_4"])
+st.sidebar.markdown(MESSAGES["sidebar_usage_5"])
+st.sidebar.markdown(MESSAGES["sidebar_usage_6"])
+st.sidebar.markdown("---")
+
+st.sidebar.title(MESSAGES["sidebar_title_tips"])
+st.sidebar.markdown(MESSAGES["sidebar_tip_text"])
+st.sidebar.markdown(MESSAGES["sidebar_tip_website"])
+st.sidebar.markdown(MESSAGES["sidebar_tip_email"])
+st.sidebar.markdown(MESSAGES["sidebar_tip_email_full"])
+st.sidebar.markdown(MESSAGES["sidebar_tip_tel"])
+st.sidebar.markdown(MESSAGES["sidebar_tip_sms"])
+st.sidebar.markdown(MESSAGES["sidebar_tip_sms_full"])
+st.sidebar.markdown(MESSAGES["sidebar_tip_wifi"])
+st.sidebar.markdown("---")
+
+st.sidebar.title(MESSAGES["sidebar_title_guide"])
+
+st.sidebar.markdown(MESSAGES["sidebar_guide_file_format"])
+st.sidebar.markdown(MESSAGES["sidebar_guide_png"])
+st.sidebar.markdown(MESSAGES["sidebar_guide_jpg"])
+st.sidebar.markdown(MESSAGES["sidebar_guide_svg"])
+
+st.sidebar.markdown(MESSAGES["main_separator"])
+st.sidebar.markdown(MESSAGES["sidebar_guide_pattern_shape"])
+st.sidebar.markdown(MESSAGES["sidebar_guide_pattern_shape_desc_1"])
+st.sidebar.markdown(MESSAGES["sidebar_guide_pattern_shape_desc_2"])
+
+st.sidebar.markdown(MESSAGES["main_separator"])
+st.sidebar.markdown(MESSAGES["sidebar_guide_cell_gap"])
+st.sidebar.markdown(MESSAGES["sidebar_guide_cell_gap_desc_1"])
+st.sidebar.markdown(MESSAGES["sidebar_guide_cell_gap_desc_2"])
+
+st.sidebar.markdown(MESSAGES["main_separator"])
+st.sidebar.markdown(MESSAGES["sidebar_guide_color"])
+st.sidebar.markdown(MESSAGES["sidebar_guide_color_desc_1"])
+st.sidebar.markdown(MESSAGES["sidebar_guide_color_desc_2"])
+st.sidebar.markdown(MESSAGES["sidebar_guide_color_desc_3"])
+
+st.sidebar.markdown(MESSAGES["main_separator"])
+st.sidebar.markdown(MESSAGES["sidebar_guide_qr_settings"])
+st.sidebar.markdown(MESSAGES["sidebar_guide_error_correction"])
+st.sidebar.markdown(MESSAGES["sidebar_guide_ec_L"])
+st.sidebar.markdown(MESSAGES["sidebar_guide_ec_M"])
+st.sidebar.markdown(MESSAGES["sidebar_guide_ec_Q"])
+st.sidebar.markdown(MESSAGES["sidebar_guide_ec_H"])
+
+st.sidebar.markdown(MESSAGES["main_separator"])
+st.sidebar.markdown(MESSAGES["sidebar_guide_mask_pattern"])
+st.sidebar.markdown(MESSAGES["sidebar_guide_mask_pattern_desc"])
+
+# 푸터
+st.sidebar.markdown("---")
+st.sidebar.markdown(f'<div style="text-align: center; color: gray;">{MESSAGES["footer_text"]}</div>', unsafe_allow_html=True)
