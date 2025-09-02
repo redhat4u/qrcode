@@ -64,8 +64,7 @@ def build_sidebar_ui():
     st.markdown("---")
 
     st.header("⚙️ 설정 가이드")
-    
-    st.markdown("**오류 보정 레벨:**")
+        st.markdown("**오류 보정 레벨:**")
     st.markdown("""
     - **Low (7%)**: 손상되지 않는 환경
     - **Medium (15%)**: 일반적인 사용
