@@ -15,7 +15,7 @@ import qrcode
 import io
 from datetime import datetime
 from zoneinfo import ZoneInfo
-from PIL import Image
+from PIL import Image, ImageDraw
 import hashlib
 import re
 import base64 # SVG 이미지 표시를 위해 추가
@@ -50,9 +50,7 @@ if 'generate_button_clicked' not in st.session_state: # 새로 추가된 상태 
 if 'error_message' not in st.session_state:
     st.session_state.error_message = None
 
-
 # 각 입력창에 대한 세션 상태 초기화 (필수)
-# None 대신 빈 문자열로 초기화하여 AttributeError 방지
 if 'qr_input_area' not in st.session_state:
     st.session_state.qr_input_area = ""
 if 'custom_pattern_color_input_key' not in st.session_state:
@@ -73,10 +71,12 @@ if 'pattern_color_select' not in st.session_state:
     st.session_state.pattern_color_select = "black"
 if 'bg_color_select' not in st.session_state:
     st.session_state.bg_color_select = "white"
-if 'strip_option' not in st.session_state:  # 상태 변수 이름 통일
+if 'strip_option' not in st.session_state:
     st.session_state.strip_option = True
-if 'file_format_select' not in st.session_state: # 파일 형식 선택 상태 추가
+if 'file_format_select' not in st.session_state:
     st.session_state.file_format_select = "PNG"
+if 'pattern_shape_select' not in st.session_state: # 패턴 모양 선택 상태 추가
+    st.session_state.pattern_shape_select = "사각형"
 
 
 # 파일명에 특수문자 포함시 '_' 문자로 치환
@@ -96,8 +96,8 @@ def is_valid_color(color_name):
     return hex_pattern.match(color_name)
 
 
-# QR 코드 생성 함수 (업데이트된 qrcode 라이브러리 문법 적용)
-def generate_qr_code_png(data, box_size, border, error_correction, mask_pattern, fill_color, back_color):
+# QR 코드 데이터 생성
+def get_qr_data_object(data, box_size, border, error_correction, mask_pattern):
     try:
         qr = qrcode.QRCode(
             version=1,
@@ -108,16 +108,48 @@ def generate_qr_code_png(data, box_size, border, error_correction, mask_pattern,
         )
         qr.add_data(data, optimize=0)
         qr.make(fit=True)
-        
-        img = qr.make_image(fill_color=fill_color, back_color=back_color)
-
-        if hasattr(img, 'convert'):
-            img = img.convert('RGB')
-        
-        return img, qr
+        return qr
     except Exception as e:
-        st.error(f"QR 코드 생성 오류: {str(e)}")
-        return None, None
+        st.error(f"QR 코드 데이터 생성 오류: {str(e)}")
+        return None
+
+
+# 사용자 정의 모양으로 QR 코드 이미지 생성 함수 (PNG)
+def draw_custom_shape_image(qr_object, box_size, border, fill_color, back_color, shape):
+    if not qr_object:
+        return None
+
+    img_size = (qr_object.modules_count + 2 * border) * box_size
+    img = Image.new('RGB', (img_size, img_size), back_color)
+    draw = ImageDraw.Draw(img)
+
+    # 둥근 사각형을 위한 함수 (직접 구현)
+    def draw_rounded_rectangle(draw, xy, radius, fill):
+        x1, y1, x2, y2 = xy
+        draw.rectangle([x1 + radius, y1, x2 - radius, y2], fill=fill)
+        draw.rectangle([x1, y1 + radius, x2, y2 - radius], fill=fill)
+        draw.pieslice([x1, y1, x1 + radius * 2, y1 + radius * 2], 180, 270, fill=fill)
+        draw.pieslice([x2 - radius * 2, y1, x2, y1 + radius * 2], 270, 360, fill=fill)
+        draw.pieslice([x1, y2 - radius * 2, x1 + radius * 2, y2], 90, 180, fill=fill)
+        draw.pieslice([x2 - radius * 2, y2 - radius * 2, x2, y2], 0, 90, fill=fill)
+
+    for r in range(qr_object.modules_count):
+        for c in range(qr_object.modules_count):
+            if qr_object.modules[r][c]:
+                x = (c + border) * box_size
+                y = (r + border) * box_size
+                
+                if shape == "사각형":
+                    draw.rectangle([x, y, x + box_size, y + box_size], fill=fill_color)
+                elif shape == "원형":
+                    draw.ellipse([x, y, x + box_size, y + box_size], fill=fill_color)
+                elif shape == "마름모":
+                    draw.polygon([(x + box_size/2, y), (x + box_size, y + box_size/2), (x + box_size/2, y + box_size), (x, y + box_size/2)], fill=fill_color)
+                elif shape == "둥근 사각":
+                    radius = box_size // 4 # 둥근 정도
+                    draw_rounded_rectangle(draw, [x, y, x + box_size, y + box_size], radius, fill_color)
+
+    return img
 
 
 # QR 코드 SVG 생성 함수
@@ -140,7 +172,6 @@ def generate_qr_code_svg(data, box_size, border, error_correction, mask_pattern,
         svg_data = svg_buffer.getvalue().decode('utf-8')
         
         # 'fill="black"' 문자열 전체를 찾아 원하는 색상값으로 교체
-        # replace() 메서드를 사용하여 `fill=` 부분을 포함하여 교체
         svg_data = svg_data.replace('fill="black"', f'fill="{fill_color}"', 1) 
         
         # 'fill="white"' 문자열 전체를 찾아 원하는 색상값으로 교체
@@ -158,7 +189,7 @@ def clear_text_input():
     st.session_state.qr_generated = False
     st.session_state.show_generate_success = False
     st.session_state.last_qr_params_hash = ""
-    st.session_state.generate_button_clicked = False # 상태 초기화
+    st.session_state.generate_button_clicked = False
     st.session_state.error_message = None
 
 
@@ -181,7 +212,8 @@ def reset_all_settings():
     st.session_state.pattern_color_select = "black"
     st.session_state.bg_color_select = "white"
     st.session_state.strip_option = True
-    st.session_state.file_format_select = "PNG" # 파일 형식도 초기화
+    st.session_state.file_format_select = "PNG"
+    st.session_state.pattern_shape_select = "사각형"
 
     st.session_state.qr_generated = False
     st.session_state.show_generate_success = False
@@ -202,7 +234,7 @@ def on_qr_setting_change():
     st.session_state.show_generate_success = False
     st.session_state.qr_image_bytes = None
     st.session_state.qr_svg_bytes = None
-    st.session_state.generate_button_clicked = False # 설정 변경 시 버튼 클릭 상태 초기화
+    st.session_state.generate_button_clicked = False
     st.session_state.error_message = None
 
 
@@ -259,7 +291,7 @@ with col1:
         "마지막 입력문자 이후 모든 공백/줄바꿈 제거",
         value=st.session_state.strip_option,
         key="strip_option",
-        on_change=on_qr_setting_change # 설정 변경 시 초기화
+        on_change=on_qr_setting_change
     )
 
     st.markdown("---")
@@ -287,12 +319,11 @@ with col1:
     st.markdown("---")
     st.subheader("🛠️ 색상 설정")
     
-    # [수정] 파일 형식에 따라 색상 설정을 활성화/비활성화
     file_format_is_svg = (st.session_state.file_format_select == "SVG")
+    
     if file_format_is_svg:
         st.warning("⚠️ SVG 파일은 벡터 형식이므로 원하는 색상을 선택할 수 없습니다. 다양한 색상을 원한다면 'PNG' 형식을 선택하세요.")
 
-    # 색상 선택 옵션을 확장 (약 20개 이상)
     colors = [
         "<직접 입력>", "black", "white", "gray", "lightgray", "dimgray",
         "red", "green", "blue", "yellow", "cyan", "magenta", "maroon",
@@ -335,19 +366,16 @@ with col1:
             on_change=on_qr_setting_change
         )
     
-    # 이 변수들은 미리보기 용도로만 사용됩니다.
     pattern_color = st.session_state.get('custom_pattern_color_input_key', '').strip() if pattern_color_choice == "<직접 입력>" else pattern_color_choice
     bg_color = st.session_state.get('custom_bg_color_input_key', '').strip() if bg_color_choice == "<직접 입력>" else bg_color_choice
     
     st.markdown("---")
 
     st.subheader("🛠️ 파일 설정")
-
-    # 파일명 입력창과 삭제 버튼을 위한 컬럼
+    
     col_filename_input, col_filename_delete = st.columns([3, 1.1])
 
     with col_filename_input:
-        # 파일명 입력 시에는 다운로드 초기화가 발생하지 않도록 on_change 콜백 제거
         filename = st.text_input(
             "다운로드 파일명 입력 (확장자는 제외, 파일명만 입력)",
             placeholder="이 곳에 파일명을 입력해 주세요 (비어있으면 자동 생성됨)",
@@ -366,13 +394,25 @@ with col1:
             on_click=clear_filename_callback,
         )
 
-    # 파일 형식 선택 라디오 버튼
     file_format = st.radio(
         "파일 형식 선택",
         ("PNG", "SVG"),
-        index=0 if st.session_state.file_format_select == "PNG" else 1, # 세션 상태에 따라 초기값 설정
+        index=0 if st.session_state.file_format_select == "PNG" else 1,
         key="file_format_select",
-        on_change=on_qr_setting_change, # 파일 형식 변경시 초기화
+        on_change=on_qr_setting_change,
+    )
+    
+    # [추가] 패턴 모양 선택 로직
+    pattern_shape_disabled = (file_format == "SVG")
+    st.markdown("---")
+    st.subheader("🛠️ 패턴 모양 설정")
+    st.caption("⚠️ SVG 형식은 사각형만 지원합니다.")
+    pattern_shape = st.selectbox(
+        "패턴 모양 선택",
+        ("사각형", "둥근 사각", "원형", "마름모"),
+        key="pattern_shape_select",
+        on_change=on_qr_setting_change,
+        disabled=pattern_shape_disabled,
     )
 
     current_filename = filename.strip()
@@ -382,35 +422,34 @@ with col2:
     
     current_data = qr_data.strip() if st.session_state.strip_option else qr_data
     
-    # 미리보기를 위한 유효성 검사
     is_pattern_color_valid_preview = (pattern_color_choice != "<직접 입력>") or (pattern_color_choice == "<직접 입력>" and pattern_color and is_valid_color(pattern_color))
     is_bg_color_valid_preview = (bg_color_choice != "<직접 입력>") or (bg_color_choice == "<직접 입력>" and bg_color and is_valid_color(bg_color))
     is_colors_same_preview = (is_pattern_color_valid_preview and is_bg_color_valid_preview and pattern_color and bg_color and pattern_color == bg_color)
     
-    # 미리보기 이미지와 정보 생성 로직을 PNG로 통일
-    preview_image_display = None # Streamlit에 표시할 최종 이미지 (PNG)
-    preview_qr_object = None # QR 코드 정보 추출을 위한 qr 객체
+    preview_image_display = None
+    preview_qr_object = None
 
     if current_data and (file_format_is_svg or (is_pattern_color_valid_preview and is_bg_color_valid_preview and not is_colors_same_preview)):
-        img, qr = generate_qr_code_png(
+        qr = get_qr_data_object(
             current_data, int(st.session_state.box_size_input), int(st.session_state.border_input), error_correction,
-            int(st.session_state.mask_pattern_select), 
-            "black" if file_format_is_svg else pattern_color, # SVG일 경우 검정으로 고정
-            "white" if file_format_is_svg else bg_color,      # SVG일 경우 하양으로 고정
+            int(st.session_state.mask_pattern_select)
         )
-        if img and qr:
-            preview_image_display = img
+        if qr:
+            # 미리보기는 항상 PNG로 생성 (SVG 색상 고정)
+            preview_image_display = draw_custom_shape_image(
+                qr, int(st.session_state.box_size_input), int(st.session_state.border_input),
+                "black" if file_format_is_svg else pattern_color,
+                "white" if file_format_is_svg else bg_color,
+                "사각형" if file_format_is_svg else st.session_state.pattern_shape_select
+            )
             preview_qr_object = qr
     
-    # QR 코드 생성 버튼
     generate_btn = st.button("⚡ QR 코드 생성", use_container_width=True,)
     
-    # [수정] 생성 버튼 클릭 시 최종 유효성 검사 로직
     if generate_btn:
         st.session_state.generate_button_clicked = True
-        st.session_state.error_message = None # 버튼 클릭 시 기존 오류 메시지 초기화
+        st.session_state.error_message = None
         
-        # 유효성 검사 로직을 하나의 리스트로 통합
         errors = []
         final_pattern_color = st.session_state.custom_pattern_color_input_key.strip() if st.session_state.pattern_color_select == "<직접 입력>" else st.session_state.pattern_color_select
         final_bg_color = st.session_state.custom_bg_color_input_key.strip() if st.session_state.bg_color_select == "<직접 입력>" else st.session_state.bg_color_select
@@ -433,28 +472,30 @@ with col2:
                 errors.append("⚠️ 패턴과 배경은 같은 색을 사용할 수 없습니다.")
 
         if errors:
-            # 오류 메시지를 세션 상태에 저장하여 다른 곳에서 참조 가능하게 함
-            st.session_state.error_message = errors[0] # 첫 번째 오류 메시지만 표시
+            st.session_state.error_message = errors[0]
             st.session_state.show_generate_success = False
         else:
             st.session_state.error_message = None
-            # [수정] 모든 유효성 검사를 통과했을 때만 QR 코드 생성 및 저장
             if file_format == "PNG":
-                img, qr = generate_qr_code_png(
+                qr = get_qr_data_object(
                     current_data, int(st.session_state.box_size_input), int(st.session_state.border_input), error_correction,
-                    int(st.session_state.mask_pattern_select), final_pattern_color, final_bg_color,
+                    int(st.session_state.mask_pattern_select)
                 )
-                if img and qr:
-                    img_buffer = io.BytesIO()
-                    img.save(img_buffer, format='PNG')
-                    st.session_state.qr_image_bytes = img_buffer.getvalue()
-                    st.session_state.qr_svg_bytes = None
-                    st.session_state.qr_generated = True
-                    st.session_state.show_generate_success = True
-                    preview_image_display = img
-                    preview_qr_object = qr
+                if qr:
+                    img = draw_custom_shape_image(
+                        qr, int(st.session_state.box_size_input), int(st.session_state.border_input),
+                        final_pattern_color, final_bg_color, st.session_state.pattern_shape_select
+                    )
+                    if img:
+                        img_buffer = io.BytesIO()
+                        img.save(img_buffer, format='PNG')
+                        st.session_state.qr_image_bytes = img_buffer.getvalue()
+                        st.session_state.qr_svg_bytes = None
+                        st.session_state.qr_generated = True
+                        st.session_state.show_generate_success = True
+                        preview_image_display = img
+                        preview_qr_object = qr
             else: # SVG
-                # SVG 생성 함수는 색상 인자를 무시하므로 검정색과 흰색을 넘겨줌
                 svg_data, qr = generate_qr_code_svg(
                     current_data, int(st.session_state.box_size_input), int(st.session_state.border_input), error_correction,
                     int(st.session_state.mask_pattern_select), "black", "white",
@@ -464,7 +505,7 @@ with col2:
                     st.session_state.qr_image_bytes = None
                     st.session_state.qr_generated = True
                     st.session_state.show_generate_success = True
-                    # 미리보기용 PNG도 별도로 생성
+                    
                     png_img, png_qr = generate_qr_code_png(
                         current_data, int(st.session_state.box_size_input), int(st.session_state.border_input), error_correction,
                         int(st.session_state.mask_pattern_select), "black", "white",
@@ -474,7 +515,6 @@ with col2:
 
     st.markdown("---")
     
-    # [수정] 메시지 표시 로직 통합
     if st.session_state.error_message:
         st.error(st.session_state.error_message)
     elif st.session_state.show_generate_success:
@@ -484,7 +524,6 @@ with col2:
     else:
         st.info("QR 코드 내용을 입력하면 생성될 QR 코드를 미리 보여드립니다.")
 
-    # 미리보기 이미지 및 정보는 항상 표시
     if preview_image_display:
         st.subheader("📱 QR 코드 미리보기")
         col_left, col_center, col_right = st.columns([1, 2, 1])
@@ -502,9 +541,7 @@ with col2:
             - 이미지 크기 = (각 cell 개수 + 좌/우 여백 총 개수) × 1개의 사각 cell 크기
             """)
     else:
-        # 오류 메시지 표시 로직
         if not current_data:
-            # 이 부분은 위의 st.info로 대체되므로 중복 제거
             pass
         else:
             if not file_format_is_svg:
@@ -519,7 +556,6 @@ with col2:
                 if is_colors_same_preview:
                     st.warning("⚠️ 패턴과 배경은 같은 색을 사용할 수 없습니다.")
 
-    # 다운로드 섹션
     if st.session_state.get('qr_generated', False) and (st.session_state.get('qr_image_bytes') is not None or st.session_state.get('qr_svg_bytes') is not None):
 
         st.markdown("---")
@@ -541,7 +577,7 @@ with col2:
             download_data = st.session_state.qr_image_bytes
             download_mime = "image/png"
             download_extension = ".png"
-        else: # SVG
+        else:
             download_data = st.session_state.qr_svg_bytes
             download_mime = "image/svg+xml"
             download_extension = ".svg"
@@ -572,7 +608,6 @@ with col2:
 
 st.markdown("---")
 
-# 전체 초기화 버튼
 st.button(
     label="🔄 전체 초기화", 
     use_container_width=True,
@@ -581,8 +616,6 @@ st.button(
     help="모든 내용을 초기화 합니다.",
 )
 
-
-# 사이드바
 with st.sidebar:
     st.header("📖 사용 방법")
     st.markdown("""
@@ -624,11 +657,11 @@ with st.sidebar:
     - 0~7 중 선택 (같은 내용이라도 번호에 따라 패턴이 달라짐)
     """)
 
-   st.markdown("**패턴 모양:**")
-   st.markdown("""
-   - 사각, 둥근사각, 동그라미, 마름모 중 선택
-   - **SVG** 파일 형식 선택 시에는 **사각**만 지원합니다.
-   """)
+    st.markdown("**패턴 모양:**")
+    st.markdown("""
+    - 사각, 둥근사각, 동그라미, 마름모 중 선택
+    - **SVG** 파일 형식 선택 시에는 **사각**만 지원합니다.
+    """)
 
     st.markdown("**색상 입력:**")
     st.markdown("""
@@ -643,4 +676,3 @@ st.markdown(
     '<p style="text-align: center; color: hotpink; font-size: 15px;">© 2025 QR 코드 생성기  |  Streamlit으로 제작  |  제작: 류종훈(redhat4u@gmail.com)</p>',
     unsafe_allow_html=True
 )
-# 최신버전(25/09/03-01:43)..
