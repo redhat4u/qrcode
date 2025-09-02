@@ -5,7 +5,7 @@
 import streamlit as st
 import qrcode
 import hashlib
-from messages import * # <-- 추가
+from messages import *
 
 def initialize_session_state():
     """세션 상태를 초기화합니다."""
@@ -57,6 +57,13 @@ def set_download_initiated():
 def clear_text_input():
     """입력 내용 초기화 콜백 함수입니다."""
     st.session_state.qr_input_area = ""
+    # 입력 내용 삭제 시 다운로드 및 생성 상태도 초기화
+    st.session_state.download_initiated = False
+    st.session_state.show_generate_success = False
+    st.session_state.qr_generated = False
+    st.session_state.qr_image_bytes = None
+    st.session_state.qr_svg_bytes = None
+    st.session_state.error_message = None
 
 def clear_filename_callback():
     """파일명 초기화 콜백 함수입니다."""
