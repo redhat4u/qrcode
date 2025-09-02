@@ -33,7 +33,6 @@ initialize_session_state()
 
 def on_lang_change_callback():
     """언어 변경 시 호출되는 콜백 함수입니다."""
-    # 언어 선택 드롭다운에서 선택된 값으로 세션 상태를 업데이트
     lang_options = [get_message('LANG_KO'), get_message('LANG_EN')]
     selected_lang = st.session_state.lang_select_box
     
@@ -52,28 +51,24 @@ st.set_page_config(
     layout="wide",
 )
 
-# 메인 앱 헤더 및 언어 선택
-col_title, col_lang = st.columns([2, 1])
+# 메인 앱 헤더
+st.title("🔲 " + get_message('APP_TITLE'))
 
-with col_title:
-    st.title("🔲 " + get_message('APP_TITLE'))
-    st.markdown("---")
-
-with col_lang:
-    st.markdown("<div style='height: 25px;'></div>", unsafe_allow_html=True) # 제목과 높이를 맞추기 위한 여백
-    lang_options = [get_message('LANG_KO'), get_message('LANG_EN')]
-    if st.session_state.current_lang == 'ko':
-        default_index = 0
-    else:
-        default_index = 1
-        
-    st.selectbox(
-        get_message('SELECTBOX_LANG_LABEL'),
-        options=lang_options,
-        index=default_index,
-        key='lang_select_box',
-        on_change=on_lang_change_callback
-    )
+# 언어 선택 드롭다운 메뉴
+lang_options = [get_message('LANG_KO'), get_message('LANG_EN')]
+if st.session_state.current_lang == 'ko':
+    default_index = 0
+else:
+    default_index = 1
+    
+st.selectbox(
+    get_message('SELECTBOX_LANG_LABEL'),
+    options=lang_options,
+    index=default_index,
+    key='lang_select_box',
+    on_change=on_lang_change_callback
+)
+st.markdown("---")
 
 # 레이아웃 설정 (2개 컬럼)
 col_input, col_preview = st.columns([1.5, 1])
