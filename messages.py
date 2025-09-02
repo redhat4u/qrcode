@@ -94,7 +94,7 @@ MESSAGES = {
 
         "UI_HEADER_PREVIEW_AND_GENERATE": "✨ 미리보기 & 생성",
         "UI_BUTTON_GENERATE_QR": "⚡ QR 코드 생성",
-        "UI_ERROR_QR_DATA_MISSING": "⚠️ QR 코드로 만들 내용이 없습니다.",
+        "UI_ERROR_QR_DATA_MISSING": "⚠️ QR 코드로 만들 내용을 입력해주세요.",
         "UI_ERROR_PATTERN_COLOR_HEX_MISSING": "⚠️ 패턴 색상 16진수 값을 입력해주세요.",
         "UI_ERROR_INVALID_PATTERN_COLOR": "⚠️ 패턴 색상 16진수 값이 올바르지 않습니다.",
         "UI_ERROR_BG_COLOR_HEX_MISSING": "⚠️ 배경 색상 16진수 값을 입력해주세요.",
