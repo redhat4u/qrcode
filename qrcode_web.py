@@ -27,7 +27,18 @@ initialize_session_state_with_language()
 # 사이드바
 with st.sidebar:
     st.header(get_message("APP_TITLE"))
-    st.info("Version 1.0.0")
+    
+    st.markdown(get_message("UI_SIDEBAR_DESCRIPTION"))
+    
+    st.markdown("---")
+    
+    st.subheader(get_message("UI_SIDEBAR_INFO_HEADER"))
+    st.markdown(get_message("UI_SIDEBAR_INFO_CONTENT"))
+    
+    st.markdown("---")
+    
+    st.subheader(get_message("UI_SIDEBAR_DEVELOPER_HEADER"))
+    st.markdown(get_message("UI_SIDEBAR_DEVELOPER_INFO"))
 
 # 메인 UI
 st.title(get_message("APP_TITLE"))
