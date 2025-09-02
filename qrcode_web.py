@@ -256,6 +256,8 @@ def set_language():
     st.session_state.finder_pattern_shape_select = messages[st.session_state.lang]['pattern_shape_square']
     st.session_state.pattern_color_select = "black"
     st.session_state.bg_color_select = "white"
+    st.session_state.box_size_input = 20
+    st.session_state.border_input = 2
     
 #[메인]====================================================================================================================================================================
 
