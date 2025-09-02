@@ -393,7 +393,7 @@ with col1:
     file_format_is_svg = (st.session_state.file_format_select == "SVG")
     
     if file_format_is_svg:
-        st.warning("⚠️ SVG 파일은 벡터 형식이므로 원하는 색상을 선택할 수 없습니다. 다양한 색상을 원한다면 'PNG' 형식을 선택하세요.")
+        st.warning("⚠️ SVG 파일은 벡터 형식으로 현재는 다양한 색상과 패턴을 지원하지 않습니다. 여러가지 스타일을 원한다면 'PNG' 또는 'JPG' 형식을 선택하세요.")
 
     colors = [
         "<직접 입력>", "black", "white", "gray", "lightgray", "dimgray",
