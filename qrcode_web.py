@@ -576,7 +576,8 @@ with col2:
             - 가로/세로 각 한줄의 cell 개수: {preview_qr_object.modules_count}개
             - **1개의 사각 cell 크기: {int(st.session_state.box_size_input)}px**
             - 좌/우 여백 총 개수: {2 * int(st.session_state.border_input)}개
-            - 이미지 크기 (참고): {(preview_qr_object.modules_count + 2 * int(st.session_state.border_input)) * int(st.session_state.box_size_input)} x {(preview_qr_object.modules_count + 2 * int(st.session_state.border_input)) * int(st.session_state.box_size_input)} px
+            - 이미지 크기 (계산 방법 아래 참고): {(preview_qr_object.modules_count + 2 * int(st.session_state.border_input)) * int(st.session_state.box_size_input)} x {(preview_qr_object.modules_count + 2 * int(st.session_state.border_input)) * int(st.session_state.box_size_input)} px
+            -
             - 패턴 색상: {"black" if file_format == "SVG" else pattern_color}
             - 배경 색상: {"white" if file_format == "SVG" else bg_color}
             - 이미지 크기 계산 = (각 cell 개수 + 좌/우 여백 총 개수) × 1개의 사각 cell 크기
