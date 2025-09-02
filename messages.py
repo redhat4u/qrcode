@@ -91,3 +91,16 @@ UI_INFO_ENTER_QR_DATA = "QR 코드 내용을 입력하면 생성될 QR 코드를
 UI_TEXT_CHAR_COUNT_OVER = "⚠️ 현재 입력된 총 문자 수: **{char_count}** (권장 최대 문자 수 초과)"
 UI_TEXT_CHAR_COUNT_NEAR = "⚠️ 현재 입력된 총 문자 수: **{char_count}** (권장 문자 수에 근접)"
 UI_TEXT_CHAR_COUNT_OK = "✅ 현재 입력된 총 문자 수: **{char_count}**"
+
+# =========================================================
+# state_manager.py
+# =========================================================
+UI_DEFAULT_BOX_SIZE = 20
+UI_DEFAULT_BORDER = 2
+UI_DEFAULT_ERROR_CORRECTION = "Low (7%) - 오류 보정"
+UI_DEFAULT_MASK_PATTERN = 2
+UI_DEFAULT_PATTERN_COLOR = "black"
+UI_DEFAULT_BG_COLOR = "white"
+UI_DEFAULT_STRIP_OPTION = True
+UI_DEFAULT_DOT_STYLE = "사각형"
+UI_FILE_FORMAT_PNG = "PNG"
