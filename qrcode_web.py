@@ -253,7 +253,7 @@ def set_language():
     # 언어 변경 시 기본값 재설정
     st.session_state.error_correction_select = messages[st.session_state.lang]['error_correction_low_select']
     st.session_state.pattern_shape_select = messages[st.session_state.lang]['pattern_shape_square']
-    st.session_state.finder_pattern_shape_select = messages[st.session_state.lang]['finder_pattern_select_label']
+    st.session_state.finder_pattern_shape_select = messages[st.session_state.lang]['pattern_shape_square']
     st.session_state.pattern_color_select = "black"
     st.session_state.bg_color_select = "white"
     
