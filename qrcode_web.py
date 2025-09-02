@@ -22,14 +22,21 @@ def build_footer_ui():
         f"""
         <style>
         .footer {{
-            font-size: 15px;  # 텍스트 크기 변경 (예: 1.0rem, 16px)
+            font-size: 15px;
             text-align: center;
-            color: #808080;      # 텍스트 색상 변경 (예: #000000, red)
+            color: #808080;
             padding-top: 20px;
         }}
+        .full-width-footer {{
+            width: 100%;
+            display: flex;
+            justify-content: center;
+        }}
         </style>
-        <div class="footer">
-            {get_message("UI_FOOTER")}
+        <div class="full-width-footer">
+            <div class="footer">
+                {get_message("UI_FOOTER")}
+            </div>
         </div>
         """,
         unsafe_allow_html=True
@@ -80,4 +87,5 @@ with col2:
 
 # 푸터 섹션 호출
 build_footer_ui()
+
 
