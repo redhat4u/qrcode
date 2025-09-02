@@ -200,3 +200,13 @@ MESSAGES = {
         "UI_DOWNLOAD_FILENAME_LABEL": "Generated Filename",
     }
 }
+
+def get_message(key):
+    # This is a placeholder function, you'll need a way to determine the current language
+    # For now, let's assume 'ko' is the default.
+    return MESSAGES.get("ko").get(key, "Message not found")
+
+def get_current_language():
+    # This function is not used in the final version but kept for consistency
+    return "ko"
+    
