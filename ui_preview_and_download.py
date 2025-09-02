@@ -40,12 +40,16 @@ def build_preview_and_download_ui():
     preview_qr_object = None
     
     if current_data and (file_format_is_svg or (is_pattern_color_valid_preview and is_bg_color_valid_preview and not is_colors_same_preview)):
+        
+        # SVG 미리보기일 경우 패턴 모양을 사각형으로 강제 설정
+        preview_dot_style = "사각형" if file_format_is_svg else st.session_state.dot_style_select
+        
         img, qr = generate_qr_code_png(
             current_data, int(st.session_state.box_size_input), int(st.session_state.border_input), error_correction,
             int(st.session_state.mask_pattern_select),
             "black" if file_format_is_svg else pattern_color,
             "white" if file_format_is_svg else bg_color,
-            st.session_state.dot_style_select # <-- dot_style 매개변수 추가
+            preview_dot_style # <-- preview_dot_style 사용
         )
         if img and qr:
             preview_image_display = img
