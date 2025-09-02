@@ -592,18 +592,18 @@ with col2:
             st.image(preview_image_display, caption=lang_messages['preview_subheader'], width=380)
         
         if preview_qr_object:
-            st.info(lang_messages['qr_info_header'] + f"""
-            - {lang_messages['qr_version'].format(version=preview_qr_object.version)}
-            ** **
-            - {lang_messages['qr_modules_count'].format(modules_count=preview_qr_object.modules_count)}
-            - {lang_messages['qr_border_count'].format(border_count=2 * int(st.session_state.border_input))}
-            - {lang_messages['qr_box_size'].format(box_size=int(st.session_state.box_size_input))}
-            - {lang_messages['qr_image_size'].format(width=(preview_qr_object.modules_count + 2 * int(st.session_state.border_input)) * int(st.session_state.box_size_input), height=(preview_qr_object.modules_count + 2 * int(st.session_state.border_input)) * int(st.session_state.box_size_input))}
-            ** **
-            - {lang_messages['qr_size_formula']}
-            ** **
-            - {lang_messages['qr_pattern_color'].format(color='black' if file_format == 'SVG' else pattern_color)}
-            - {lang_messages['qr_bg_color'].format(color='white' if file_format == 'SVG' else bg_color)}
+            st.markdown(f"**{lang_messages['qr_info_header']}**")
+            st.markdown(f"""
+- {lang_messages['qr_version'].format(version=preview_qr_object.version)}
+- {lang_messages['qr_modules_count'].format(modules_count=preview_qr_object.modules_count)}
+- {lang_messages['qr_border_count'].format(border_count=2 * int(st.session_state.border_input))}
+- {lang_messages['qr_box_size'].format(box_size=int(st.session_state.box_size_input))}
+- {lang_messages['qr_image_size'].format(width=(preview_qr_object.modules_count + 2 * int(st.session_state.border_input)) * int(st.session_state.box_size_input), height=(preview_qr_object.modules_count + 2 * int(st.session_state.border_input)) * int(st.session_state.box_size_input))}
+---
+- {lang_messages['qr_size_formula']}
+---
+- {lang_messages['qr_pattern_color'].format(color='black' if file_format == 'SVG' else pattern_color)}
+- {lang_messages['qr_bg_color'].format(color='white' if file_format == 'SVG' else bg_color)}
             """)
 
         # 다운로드 섹션의 위치를 미리보기 아래로 이동
