@@ -224,14 +224,14 @@ def reset_all_settings():
     
     st.session_state.box_size_input = 20
     st.session_state.border_input = 2
-    st.session_state.error_correction_select = msgs["error_correction_options"]["Low (7%)"]
+    st.session_state.error_correction_select = "Low (7%)"
     st.session_state.mask_pattern_select = 2
     st.session_state.pattern_color_select = "black"
     st.session_state.bg_color_select = "white"
     st.session_state.strip_option = True
     st.session_state.file_format_select = "PNG"
-    st.session_state.pattern_shape_select = msgs["pattern_shape_options"][0]
-    st.session_state.finder_pattern_shape_select = msgs["pattern_shape_options"][0]
+    st.session_state.pattern_shape_select = "사각"
+    st.session_state.finder_pattern_shape_select = "사각"
     st.session_state.corner_radius_input = 25
     st.session_state.cell_gap_input = 0
     st.session_state.jpg_quality_input = 70
@@ -243,7 +243,12 @@ st.title(msgs["main_title"])
 st.markdown(msgs["main_separator"])
 
 # 언어 선택
-st.selectbox(msgs["language_select_label"], list(messages.LANGUAGES.keys()), key='lang')
+st.selectbox(
+    msgs["language_select_label"],
+    list(messages.LANGUAGES.keys()),
+    index=list(messages.LANGUAGES.keys()).index(st.session_state.lang),
+    key='lang'
+)
 
 # 레이아웃 설정 (2개 컬럼)
 col1, col2 = st.columns([1.2, 1])
@@ -439,10 +444,10 @@ with col1:
 
     with col1_2:
         error_correction_options = {
-            msgs["error_correction_options"]["Low (7%)"]: qrcode.constants.ERROR_CORRECT_L,
-            msgs["error_correction_options"]["Medium (15%)"]: qrcode.constants.ERROR_CORRECT_M,
-            msgs["error_correction_options"]["Quartile (25%)"]: qrcode.constants.ERROR_CORRECT_Q,
-            msgs["error_correction_options"]["High (30%)"]: qrcode.constants.ERROR_CORRECT_H,
+            "Low (7%)": qrcode.constants.ERROR_CORRECT_L,
+            "Medium (15%)": qrcode.constants.ERROR_CORRECT_M,
+            "Quartile (25%)": qrcode.constants.ERROR_CORRECT_Q,
+            "High (30%)": qrcode.constants.ERROR_CORRECT_H,
         }
         error_correction_choice = st.selectbox(msgs["error_correction_label"], list(error_correction_options.keys()), key="error_correction_select")
         error_correction = error_correction_options[error_correction_choice]
@@ -486,14 +491,14 @@ with col2:
     
     current_data = qr_data.strip() if st.session_state.strip_option else qr_data
     
-    is_pattern_color_valid_preview = (pattern_color_choice != msgs["color_options_custom"]) or (pattern_color_choice == msgs["color_options_custom"] and pattern_color and is_valid_color(pattern_color))
-    is_bg_color_valid_preview = (bg_color_choice != msgs["color_options_custom"]) or (bg_color_choice == msgs["color_options_custom"] and bg_color and is_valid_color(bg_color))
+    is_pattern_color_valid_preview = (st.session_state.pattern_color_select != msgs["color_options_custom"]) or (st.session_state.pattern_color_select == msgs["color_options_custom"] and pattern_color and is_valid_color(pattern_color))
+    is_bg_color_valid_preview = (st.session_state.bg_color_select != msgs["color_options_custom"]) or (st.session_state.bg_color_select == msgs["color_options_custom"] and bg_color and is_valid_color(bg_color))
     is_colors_same_preview = (is_pattern_color_valid_preview and is_bg_color_valid_preview and pattern_color and bg_color and pattern_color == bg_color)
     
     preview_image_display = None
     preview_qr_object = None
     
-    can_generate_preview = current_data and (file_format == "SVG" or (is_pattern_color_valid_preview and is_bg_color_valid_preview and not is_colors_same_preview))
+    can_generate_preview = current_data and (st.session_state.file_format_select == "SVG" or (is_pattern_color_valid_preview and is_bg_color_valid_preview and not is_colors_same_preview))
 
     download_data = None
     download_mime = ""
@@ -503,12 +508,13 @@ with col2:
     if can_generate_preview:
         try:
             qr = get_qr_data_object(
-                current_data, int(st.session_state.box_size_input), int(st.session_state.border_input), error_correction,
+                current_data, int(st.session_state.box_size_input), int(st.session_state.border_input),
+                messages.LANGUAGES[st.session_state.lang]["error_correction_options"][st.session_state.error_correction_select],
                 int(st.session_state.mask_pattern_select)
             )
             if qr:
                 preview_qr_object = qr
-                if file_format in ["PNG", "JPG"]:
+                if st.session_state.file_format_select in ["PNG", "JPG"]:
                     preview_image_display = draw_custom_shape_image(
                         qr, int(st.session_state.box_size_input), int(st.session_state.border_input),
                         pattern_color, bg_color, st.session_state.pattern_shape_select,
@@ -517,13 +523,13 @@ with col2:
                         st.session_state.finder_pattern_shape_select
                     )
                     img_buffer = io.BytesIO()
-                    if file_format == "PNG":
+                    if st.session_state.file_format_select == "PNG":
                         preview_image_display.save(img_buffer, format='PNG')
                         download_mime = "image/png"
                         download_extension = ".png"
-                    elif file_format == "JPG":
+                    elif st.session_state.file_format_select == "JPG":
                         rgb_image = preview_image_display.convert('RGB')
-                        rgb_image.save(img_buffer, format='JPEG', quality=jpg_quality)
+                        rgb_image.save(img_buffer, format='JPEG', quality=st.session_state.jpg_quality_input)
                         download_mime = "image/jpeg"
                         download_extension = ".jpg"
                         
@@ -531,7 +537,8 @@ with col2:
 
                 else: # SVG
                     svg_data, _ = generate_qr_code_svg(
-                        current_data, int(st.session_state.box_size_input), int(st.session_state.border_input), error_correction,
+                        current_data, int(st.session_state.box_size_input), int(st.session_state.border_input),
+                        messages.LANGUAGES[st.session_state.lang]["error_correction_options"][st.session_state.error_correction_select],
                         int(st.session_state.mask_pattern_select), "black", "white"
                     )
                     download_data = svg_data.encode('utf-8')
@@ -569,8 +576,8 @@ with col2:
             ** **
             - **{msgs["qr_info_calculation"]}**
             ** **
-            - {msgs["qr_info_pattern_color"].format(color="black" if file_format == "SVG" else pattern_color)}
-            - {msgs["qr_info_bg_color"].format(color="white" if file_format == "SVG" else bg_color)}
+            - {msgs["qr_info_pattern_color"].format(color="black" if st.session_state.file_format_select == "SVG" else pattern_color)}
+            - {msgs["qr_info_bg_color"].format(color="white" if st.session_state.file_format_select == "SVG" else bg_color)}
             """)
 
         st.markdown(msgs["main_separator"])
@@ -599,14 +606,14 @@ with col2:
     elif current_data:
         st.warning(msgs["warning_cannot_generate"])
         
-        if file_format != "SVG":
-            if pattern_color_choice == msgs["color_options_custom"] and not pattern_color:
+        if st.session_state.file_format_select != "SVG":
+            if st.session_state.pattern_color_select == msgs["color_options_custom"] and not pattern_color:
                 st.warning(msgs["warning_pattern_hex_empty"])
-            if bg_color_choice == msgs["color_options_custom"] and not bg_color:
+            if st.session_state.bg_color_select == msgs["color_options_custom"] and not bg_color:
                 st.warning(msgs["warning_bg_hex_empty"])
-            if pattern_color_choice == msgs["color_options_custom"] and pattern_color and not is_valid_color(pattern_color):
+            if st.session_state.pattern_color_select == msgs["color_options_custom"] and pattern_color and not is_valid_color(pattern_color):
                 st.warning(msgs["warning_pattern_hex_invalid"])
-            if bg_color_choice == msgs["color_options_custom"] and bg_color and not is_valid_color(bg_color):
+            if st.session_state.bg_color_select == msgs["color_options_custom"] and bg_color and not is_valid_color(bg_color):
                 st.warning(msgs["warning_bg_hex_invalid"])
             if is_colors_same_preview:
                 st.warning(msgs["warning_same_color"])
