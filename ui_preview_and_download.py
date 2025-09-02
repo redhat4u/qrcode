@@ -28,7 +28,6 @@ def build_preview_and_download_ui():
     is_pattern_color_valid_preview = (st.session_state.pattern_color_select != get_message('UI_COLOR_OPTION_DIRECT_INPUT')) or (st.session_state.pattern_color_select == get_message('UI_COLOR_OPTION_DIRECT_INPUT') and st.session_state.custom_pattern_color_input_key and is_valid_color(st.session_state.custom_pattern_color_input_key))
     is_bg_color_valid_preview = (st.session_state.bg_color_select != get_message('UI_COLOR_OPTION_DIRECT_INPUT')) or (st.session_state.bg_color_select == get_message('UI_COLOR_OPTION_DIRECT_INPUT') and st.session_state.custom_bg_color_input_key and is_valid_color(st.session_state.custom_bg_color_input_key))
     
-    # ------------------ 수정된 부분 시작 ------------------
     # 유효성 검사를 통과하고 내용이 있을 때만 QR 코드를 생성합니다.
     if current_data and is_pattern_color_valid_preview and is_bg_color_valid_preview:
         try:
@@ -47,7 +46,7 @@ def build_preview_and_download_ui():
                     back_color=bg_color_final
                 )
                 st.session_state.qr_svg_bytes = qr_img_buffer.getvalue()
-                st.image(st.session_state.qr_svg_bytes, use_column_width=True)
+                st.image(st.session_state.qr_svg_bytes, use_container_width=True) # <-- 이 부분을 수정했습니다.
             else:
                 qr_img, _ = generate_qr_code_png(
                     data=current_data,
@@ -62,7 +61,7 @@ def build_preview_and_download_ui():
                 buf = io.BytesIO()
                 qr_img.save(buf, format="PNG")
                 st.session_state.qr_image_bytes = buf.getvalue()
-                st.image(st.session_state.qr_image_bytes, use_column_width=True)
+                st.image(st.session_state.qr_image_bytes, use_container_width=True) # <-- 이 부분을 수정했습니다.
 
             # 다운로드 버튼 및 기타 정보 표시
             st.markdown(get_message('UI_SUCCESS_MESSAGE'))
