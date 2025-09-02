@@ -56,10 +56,11 @@ def generate_qr_code_png(
                         dot_img = Image.new('RGBA', (box_size, box_size), (0, 0, 0, 0))
                         draw = ImageDraw.Draw(dot_img)
                         
-                        if dot_style == "원형":
-                            draw.ellipse((0, 0, box_size, box_size), fill=fill_color)
-                        elif dot_style == "둥근 원형":
+                        if dot_style == "둥근 사각":
                             draw.rounded_rectangle((0, 0, box_size, box_size), radius=box_size/4, fill=fill_color)
+                        elif dot_style == "원형":
+                            draw.ellipse((0, 0, box_size, box_size), fill=fill_color)
+                            
                         # --- 💡 다이아몬드(마름모) 모양 추가 ---
                         elif dot_style == "마름모":
                             points = [
