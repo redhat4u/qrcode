@@ -57,7 +57,7 @@ UI_TEXT_CHAR_COUNT_OK = "✅ 현재 입력된 총 문자 수: **{char_count}**"
 # ui_preview_and_download.py
 # =========================================================
 UI_HEADER_PREVIEW_AND_GENERATE = "👀 미리보기 및 생성"
-UI_CAPTION_QR_DATA_EMPTY = "QR 코드 내용을 입력하면 생성될 QR 코드를 미리 보여드립니다."
+UI_CAPTION_QR_DATA_EMPTY = "QR 코드 내용을 입력하면 아래에 생성될 QR 코드가 나타납니다."
 UI_BUTTON_GENERATE = "⚡ QR 코드 생성"
 UI_ERROR_QR_DATA_EMPTY = "⚠️ 생성할 QR 코드 내용을 입력해 주세요."
 UI_ERROR_HEX_PATTERN_EMPTY = "⚠️ 패턴 색의 HEX 값을 입력해 주세요."
