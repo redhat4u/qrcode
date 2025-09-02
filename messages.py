@@ -1,7 +1,6 @@
 # messages.py
 
 import streamlit as st
-import qrcode
 
 MESSAGES = {
     "ko": {
@@ -239,31 +238,20 @@ MESSAGES = {
         "UI_SUBHEADER_DOWNLOAD": "📥 Download QR Code",
         "UI_DOWNLOAD_LABEL": "💾 Download QR Code",
         "UI_DOWNLOAD_HELP": "Click to save the QR code.",
-        "UI_BUTTON_RESET": "초기화",
-        "UI_DOWNLOAD_FILENAME_LABEL": "생성 파일명",
+        "UI_BUTTON_RESET": "Reset",
+        "UI_DOWNLOAD_FILENAME_LABEL": "Generated Filename",
     }
 }
 
 def get_message(key):
     """
-    현재 선택된 언어에 따라 메시지를 반환합니다.
-    언어 설정이 세션 상태에 저장됩니다.
+    Retrieves the correct message based on the current language selected in the session state.
     """
     if 'language_select' not in st.session_state:
-        # 초기 로드 시 기본 언어 설정
+        # Initial setup if not already in session state
         st.session_state.language_select = MESSAGES['ko']['UI_LANG_SELECT_OPTIONS'][0]
-        st.session_state.current_language = 'ko'
     
-    current_lang_code = get_current_language_code()
+    current_lang_code = 'ko' if st.session_state.language_select == '한국어' else 'en'
     
-    # 딕셔너리에서 키를 찾아서 반환
     return MESSAGES.get(current_lang_code, {}).get(key, f"Missing message for key: {key}")
-
-def get_current_language_code():
-    """현재 언어 선택에 따른 언어 코드를 반환합니다."""
-    lang_name = st.session_state.get('language_select', '한국어')
-    if lang_name == "한국어":
-        return "ko"
-    elif lang_name == "English":
-        return "en"
-    return "ko"  # 기본값
+    
