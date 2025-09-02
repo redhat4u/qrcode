@@ -319,10 +319,12 @@ with col1:
     # 두 개의 패턴 모양 선택 옵션 추가
     col_pattern_shape, col_finder_shape = st.columns(2)
     
+    pattern_options = ("사각", "둥근사각", "동그라미", "마름모", "별", "십자가")
+    
     with col_pattern_shape:
         pattern_shape = st.selectbox(
             "일반 패턴 모양",
-            ("사각", "둥근사각", "동그라미", "마름모", "별", "십자가"),
+            pattern_options,
             key="pattern_shape_select",
             disabled=pattern_shape_disabled,
         )
@@ -330,7 +332,7 @@ with col1:
     with col_finder_shape:
         finder_pattern_shape = st.selectbox(
             "파인더 패턴 모양",
-            ("사각", "둥근사각", "동그라미"),
+            pattern_options,
             key="finder_pattern_shape_select",
             disabled=pattern_shape_disabled,
         )
