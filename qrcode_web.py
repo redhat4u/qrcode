@@ -20,6 +20,8 @@ import hashlib
 import re
 import base64 # SVG 이미지 표시를 위해 추가
 import qrcode.image.svg # SVG 생성을 위해 추가
+# [추가] 패턴 모양 선택을 위해 qrcode.image.styles를 import
+import qrcode.image.styles
 
 
 # 페이지 설정
@@ -77,6 +79,9 @@ if 'strip_option' not in st.session_state:  # 상태 변수 이름 통일
     st.session_state.strip_option = True
 if 'file_format_select' not in st.session_state: # 파일 형식 선택 상태 추가
     st.session_state.file_format_select = "PNG"
+# [추가] 패턴 모양 선택 상태 추가
+if 'pattern_shape_select' not in st.session_state:
+    st.session_state.pattern_shape_select = "Square"
 
 
 # 파일명에 특수문자 포함시 '_' 문자로 치환
@@ -97,7 +102,8 @@ def is_valid_color(color_name):
 
 
 # QR 코드 생성 함수 (업데이트된 qrcode 라이브러리 문법 적용)
-def generate_qr_code_png(data, box_size, border, error_correction, mask_pattern, fill_color, back_color):
+# [수정] pattern_style 인자 추가
+def generate_qr_code_png(data, box_size, border, error_correction, mask_pattern, fill_color, back_color, pattern_style):
     try:
         qr = qrcode.QRCode(
             version=1,
@@ -109,7 +115,19 @@ def generate_qr_code_png(data, box_size, border, error_correction, mask_pattern,
         qr.add_data(data, optimize=0)
         qr.make(fit=True)
         
-        img = qr.make_image(fill_color=fill_color, back_color=back_color)
+        # [추가] 패턴 스타일에 따른 image_factory 선택
+        style_mapping = {
+            "Square": qrcode.image.styles.SquareModuleDrawer(),
+            "Rounded": qrcode.image.styles.RoundedModuleDrawer(),
+            "Circle": qrcode.image.styles.CircleModuleDrawer(),
+            "Diamond": qrcode.image.styles.VerticalBarsDrawer(), # 마름모는 VerticalBarsDrawer 사용
+        }
+        
+        img = qr.make_image(
+            fill_color=fill_color,
+            back_color=back_color,
+            module_drawer=style_mapping[pattern_style]
+        )
 
         if hasattr(img, 'convert'):
             img = img.convert('RGB')
@@ -121,7 +139,8 @@ def generate_qr_code_png(data, box_size, border, error_correction, mask_pattern,
 
 
 # QR 코드 SVG 생성 함수
-def generate_qr_code_svg(data, box_size, border, error_correction, mask_pattern, fill_color, back_color):
+# [수정] pattern_style 인자 추가 (실제로는 사용하지 않지만, 함수 시그니처 통일을 위해 유지)
+def generate_qr_code_svg(data, box_size, border, error_correction, mask_pattern, fill_color, back_color, pattern_style):
     try:
         qr = qrcode.QRCode(
             version=1,
@@ -133,6 +152,7 @@ def generate_qr_code_svg(data, box_size, border, error_correction, mask_pattern,
         qr.add_data(data, optimize=0)
         qr.make(fit=True)
         
+        # SVG는 스타일을 직접 지원하지 않으므로 기본 SvgPathImage를 사용
         img_svg = qr.make_image(image_factory=qrcode.image.svg.SvgPathImage)
         
         svg_buffer = io.BytesIO()
@@ -182,6 +202,7 @@ def reset_all_settings():
     st.session_state.bg_color_select = "white"
     st.session_state.strip_option = True
     st.session_state.file_format_select = "PNG" # 파일 형식도 초기화
+    st.session_state.pattern_shape_select = "Square" # [추가] 패턴 모양 초기화
 
     st.session_state.qr_generated = False
     st.session_state.show_generate_success = False
@@ -283,6 +304,17 @@ with col1:
         error_correction_choice = st.selectbox("오류 보정 레벨", list(error_correction_options.keys()), key="error_correction_select", on_change=on_qr_setting_change)
         error_correction = error_correction_options[error_correction_choice]
         mask_pattern = st.selectbox("마스크 패턴 선택 (0~7)", options=list(range(8)), key="mask_pattern_select", on_change=on_qr_setting_change)
+
+    # [추가] 패턴 모양 선택 기능
+    pattern_shape = st.selectbox(
+        "패턴 모양 선택",
+        ("Square", "Rounded", "Circle", "Diamond"),
+        key="pattern_shape_select",
+        on_change=on_qr_setting_change
+    )
+    # [추가] SVG 파일 선택 시 경고 메시지
+    if st.session_state.file_format_select == "SVG" and st.session_state.pattern_shape_select != "Square":
+        st.warning("⚠️ SVG 파일 형식은 **사각형** 패턴만 지원합니다. 모양을 변경하려면 PNG 형식을 선택하세요.")
 
     st.markdown("---")
     st.subheader("🛠️ 색상 설정")
@@ -397,6 +429,7 @@ with col2:
             int(st.session_state.mask_pattern_select), 
             "black" if file_format_is_svg else pattern_color, # SVG일 경우 검정으로 고정
             "white" if file_format_is_svg else bg_color,      # SVG일 경우 하양으로 고정
+            st.session_state.pattern_shape_select if not file_format_is_svg else "Square", # 패턴 모양 적용
         )
         if img and qr:
             preview_image_display = img
@@ -443,6 +476,7 @@ with col2:
                 img, qr = generate_qr_code_png(
                     current_data, int(st.session_state.box_size_input), int(st.session_state.border_input), error_correction,
                     int(st.session_state.mask_pattern_select), final_pattern_color, final_bg_color,
+                    st.session_state.pattern_shape_select # 패턴 모양 인자 전달
                 )
                 if img and qr:
                     img_buffer = io.BytesIO()
@@ -457,7 +491,7 @@ with col2:
                 # SVG 생성 함수는 색상 인자를 무시하므로 검정색과 흰색을 넘겨줌
                 svg_data, qr = generate_qr_code_svg(
                     current_data, int(st.session_state.box_size_input), int(st.session_state.border_input), error_correction,
-                    int(st.session_state.mask_pattern_select), "black", "white",
+                    int(st.session_state.mask_pattern_select), "black", "white", "Square" # SVG는 항상 사각형
                 )
                 if svg_data and qr:
                     st.session_state.qr_svg_bytes = svg_data.encode('utf-8')
@@ -467,7 +501,7 @@ with col2:
                     # 미리보기용 PNG도 별도로 생성
                     png_img, png_qr = generate_qr_code_png(
                         current_data, int(st.session_state.box_size_input), int(st.session_state.border_input), error_correction,
-                        int(st.session_state.mask_pattern_select), "black", "white",
+                        int(st.session_state.mask_pattern_select), "black", "white", "Square"
                     )
                     preview_image_display = png_img
                     preview_qr_object = png_qr
@@ -643,5 +677,4 @@ st.markdown(
     '<p style="text-align: center; color: hotpink; font-size: 15px;">© 2025 QR 코드 생성기  |  Streamlit으로 제작  |  제작: 류종훈(redhat4u@gmail.com)</p>',
     unsafe_allow_html=True
 )
-# 최신버전(25/09/01-23:31)..
-
+# 최신버전(25/09/03-01:43)..
