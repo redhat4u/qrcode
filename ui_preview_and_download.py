@@ -41,7 +41,6 @@ def build_preview_and_download_ui():
     
     if current_data and (file_format_is_svg or (is_pattern_color_valid_preview and is_bg_color_valid_preview and not is_colors_same_preview)):
         
-        # SVG 미리보기일 경우 패턴 모양을 사각형으로 강제 설정
         preview_dot_style = "사각형" if file_format_is_svg else st.session_state.dot_style_select
         
         img, qr = generate_qr_code_png(
@@ -49,7 +48,7 @@ def build_preview_and_download_ui():
             int(st.session_state.mask_pattern_select),
             "black" if file_format_is_svg else pattern_color,
             "white" if file_format_is_svg else bg_color,
-            preview_dot_style # <-- preview_dot_style 사용
+            preview_dot_style
         )
         if img and qr:
             preview_image_display = img
@@ -91,7 +90,7 @@ def build_preview_and_download_ui():
                 img, qr = generate_qr_code_png(
                     current_data, int(st.session_state.box_size_input), int(st.session_state.border_input), error_correction,
                     int(st.session_state.mask_pattern_select), final_pattern_color, final_bg_color,
-                    st.session_state.dot_style_select # <-- dot_style 매개변수 추가
+                    st.session_state.dot_style_select
                 )
                 if img and qr:
                     img_buffer = io.BytesIO()
@@ -116,7 +115,6 @@ def build_preview_and_download_ui():
     if st.session_state.error_message:
         st.error(st.session_state.error_message)
     elif st.session_state.show_generate_success:
-#        st.success("✅ QR 코드 생성 완료!! 반드시 파일명을 확인하고, 화면 아래의 [💾 QR 코드 다운로드] 버튼을 클릭하세요.")
          st.markdown(
              """
              <div style='
@@ -135,8 +133,9 @@ def build_preview_and_download_ui():
              """,
              unsafe_allow_html=True,
          )
+    elif is_colors_same_preview: # <-- 이 부분이 추가됨
+        st.warning("⚠️ 패턴과 배경은 같은 색을 사용할 수 없습니다. 다른 색을 선택해 주세요.")
     elif preview_image_display:
-#        st.success("✅ 현재 입력된 내용으로 QR 코드를 미리 표현해 보았습니다. 이 QR 코드가 맘에 드신다면, 위의 [⚡ QR 코드 생성] 버튼을 클릭하세요.")
          st.markdown(
              """
              <div style='
@@ -216,7 +215,6 @@ def build_preview_and_download_ui():
         )
 
     if st.session_state.download_initiated:
-#       st.success("✅ 생성한 QR 코드를 다운로드할 수 있습니다! 휴대폰은 'Download' 폴더에 저장됩니다.")
         st.markdown(
             """
             <div style='
