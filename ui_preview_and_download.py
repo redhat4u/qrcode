@@ -36,49 +36,10 @@ def build_preview_and_download_ui():
         "High (30%) - 오류 보정": qrcode.constants.ERROR_CORRECT_H,
     }
     error_correction = error_correction_options[st.session_state.error_correction_select]
-
-    # 미리보기 이미지 생성 및 표시
-    if current_data:
-        if not file_format_is_svg and (not is_pattern_color_valid or not is_bg_color_valid or is_colors_same):
-            if not is_pattern_color_valid:
-                st.error(UI_ERROR_HEX_PATTERN_INVALID)
-            elif not is_bg_color_valid:
-                st.error(UI_ERROR_HEX_BG_INVALID)
-            elif is_colors_same:
-                st.error(UI_ERROR_COLORS_SAME)
-            st.caption(UI_CAPTION_QR_PREVIEW_ERROR)
-        else:
-            if st.session_state.file_format_select == UI_FILE_FORMAT_PNG:
-                img, qr = generate_qr_code_png(
-                    current_data, int(st.session_state.box_size_input), int(st.session_state.border_input), error_correction,
-                    int(st.session_state.mask_pattern_select),
-                    "black" if file_format_is_svg else pattern_color,
-                    "white" if file_format_is_svg else bg_color,
-                    st.session_state.dot_style_select
-                )
-                if img:
-                    img_buffer = io.BytesIO()
-                    img.save(img_buffer, format='PNG')
-                    st.session_state.qr_image_bytes = img_buffer.getvalue()
-                    # use_column_width를 use_container_width로 변경
-                    st.image(st.session_state.qr_image_bytes, use_container_width=True)
-            elif st.session_state.file_format_select == UI_FILE_FORMAT_SVG:
-                img_svg, qr = generate_qr_code_svg(
-                    current_data, int(st.session_state.box_size_input), int(st.session_state.border_input), error_correction,
-                    int(st.session_state.mask_pattern_select),
-                    "black",
-                    "white"
-                )
-                if img_svg:
-                    st.session_state.qr_svg_bytes = img_svg
-                    # use_column_width를 use_container_width로 변경
-                    st.image(st.session_state.qr_svg_bytes, use_container_width=True)
-    else:
-        st.caption(UI_CAPTION_QR_DATA_EMPTY)
-
+    
     st.markdown("---")
 
-    # QR 코드 생성 버튼 및 다운로드 로직 (기존 로직 유지)
+    # QR 코드 생성 버튼
     generate_btn = st.button(UI_BUTTON_GENERATE, use_container_width=True)
     
     if generate_btn:
@@ -112,49 +73,89 @@ def build_preview_and_download_ui():
         else:
             st.session_state.error_message = None
             st.session_state.show_generate_success = True
-            
+            if st.session_state.file_format_select == UI_FILE_FORMAT_PNG:
+                img, qr = generate_qr_code_png(
+                    current_data, int(st.session_state.box_size_input), int(st.session_state.border_input), error_correction,
+                    int(st.session_state.mask_pattern_select),
+                    final_pattern_color,
+                    final_bg_color,
+                    st.session_state.dot_style_select
+                )
+                if img and qr:
+                    img_buffer = io.BytesIO()
+                    img.save(img_buffer, format='PNG')
+                    st.session_state.qr_image_bytes = img_buffer.getvalue()
+                    st.session_state.qr_generated = True
+                else:
+                    st.session_state.error_message = "알 수 없는 오류가 발생했습니다. 잠시 후 다시 시도해주세요."
+                    st.session_state.show_generate_success = False
+            elif st.session_state.file_format_select == UI_FILE_FORMAT_SVG:
+                img_svg, qr = generate_qr_code_svg(
+                    current_data, int(st.session_state.box_size_input), int(st.session_state.border_input), error_correction,
+                    int(st.session_state.mask_pattern_select),
+                    "black",
+                    "white"
+                )
+                if img_svg and qr:
+                    st.session_state.qr_svg_bytes = img_svg
+                    st.session_state.qr_generated = True
+                else:
+                    st.session_state.error_message = "알 수 없는 오류가 발생했습니다. 잠시 후 다시 시도해주세요."
+                    st.session_state.show_generate_success = False
+    
+    # 미리보기 및 다운로드
+    st.markdown("---")
+    
     if st.session_state.generate_button_clicked:
         if st.session_state.error_message:
             st.error(st.session_state.error_message)
-        elif st.session_state.show_generate_success:
+            st.caption(UI_CAPTION_QR_PREVIEW_ERROR)
+        elif st.session_state.show_generate_success and current_data:
             st.success(UI_SUCCESS_MESSAGE)
+            st.markdown(
+                f'<div style="text-align: center; border: 1px solid #ddd; padding: 10px; margin-bottom: 20px;">'
+                f'{st.image(st.session_state.qr_image_bytes, use_container_width=True) if st.session_state.file_format_select == UI_FILE_FORMAT_PNG else st.image(st.session_state.qr_svg_bytes, use_container_width=True)}'
+                f'</div>',
+                unsafe_allow_html=True
+            )
+            final_filename = st.session_state.filename_input_key.strip()
+            if not final_filename:
+                korean_tz = ZoneInfo("Asia/Seoul")
+                timestamp = datetime.now(korean_tz).strftime("%Y%m%d_%H%M%S")
+                final_filename = f"qrcode_{timestamp}"
+
+            if st.session_state.file_format_select == UI_FILE_FORMAT_PNG:
+                download_data = st.session_state.qr_image_bytes
+                download_mime = "image/png"
+                download_extension = ".png"
+            else:
+                download_data = st.session_state.qr_svg_bytes
+                download_mime = "image/svg+xml"
+                download_extension = ".svg"
             
-            if current_data:
-                final_filename = st.session_state.filename_input_key.strip()
-                if not final_filename:
-                    korean_tz = ZoneInfo("Asia/Seoul")
-                    timestamp = datetime.now(korean_tz).strftime("%Y%m%d_%H%M%S")
-                    final_filename = f"qrcode_{timestamp}"
-                
-                if st.session_state.file_format_select == UI_FILE_FORMAT_PNG:
-                    download_data = st.session_state.qr_image_bytes
-                    download_mime = "image/png"
-                    download_extension = ".png"
-                else:
-                    download_data = st.session_state.qr_svg_bytes
-                    download_mime = "image/svg+xml"
-                    download_extension = ".svg"
-                
-                download_filename = f"{sanitize_filename(final_filename)}{download_extension}"
-                
-                st.download_button(
-                    label=UI_BUTTON_DOWNLOAD,
-                    data=download_data,
-                    file_name=download_filename,
-                    mime=download_mime,
-                    use_container_width=True,
-                    help=UI_BUTTON_DOWNLOAD_HELP,
-                    on_click=set_download_initiated,
-                )
-        
-                st.markdown(
-                    f'<p style="font-size:18px;">'
-                    f'<span style="color:darkorange; font-weight:bold;">📄 다운로드 파일명: </span> '
-                    f'<span style="color:dodgerblue;"> {download_filename}</span>'
-                    f'</p>',
-                    unsafe_allow_html=True,
-                )
-    
+            download_filename = f"{sanitize_filename(final_filename)}{download_extension}"
+            
+            st.download_button(
+                label=UI_BUTTON_DOWNLOAD,
+                data=download_data,
+                file_name=download_filename,
+                mime=download_mime,
+                use_container_width=True,
+                help=UI_BUTTON_DOWNLOAD_HELP,
+                on_click=set_download_initiated,
+            )
+
+            st.markdown(
+                f'<p style="font-size:18px;">'
+                f'<span style="color:darkorange; font-weight:bold;">📄 다운로드 파일명: </span> '
+                f'<span style="color:dodgerblue;"> {download_filename}</span>'
+                f'</p>',
+                unsafe_allow_html=True,
+            )
+        else:
+            st.caption(UI_CAPTION_QR_DATA_EMPTY)
+
+    # 다운로드 성공 시 메시지
     if st.session_state.download_initiated:
         st.markdown(
             """
