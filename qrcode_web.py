@@ -13,7 +13,7 @@ import qrcode.image.svg # SVG 생성을 위해 추가
 import math
 
 # messages.py에서 메시지 관리 함수 불러오기
-from messages import get_message, get_language_options, get_language_codes, get_language_labels
+from messages import get_message, get_language_options, get_language_codes, get_language_labels, get_pattern_options, get_error_correction_options
 
 # 페이지 설정
 st.set_page_config(
@@ -29,8 +29,7 @@ if 'lang' not in st.session_state:
 def initialize_session_state():
     """세션 상태의 모든 변수를 초기화합니다."""
     # 언어 선택 드롭다운에 쓰이는 정보 불러오기
-    lang_options = get_language_options()
-    lang_codes = list(lang_options.keys())
+    lang_codes = get_language_codes()
 
     # 언어 선택 상태 관리
     if 'lang' not in st.session_state or st.session_state.lang not in lang_codes:
@@ -49,7 +48,7 @@ def initialize_session_state():
     if 'border_input' not in st.session_state:
         st.session_state.border_input = 2
     if 'error_correction_select' not in st.session_state:
-        st.session_state.error_correction_select = 'Low'
+        st.session_state.error_correction_select = 'low' # 키 값으로 저장
     if 'mask_pattern_select' not in st.session_state:
         st.session_state.mask_pattern_select = 2
     if 'pattern_color_select' not in st.session_state:
@@ -61,9 +60,9 @@ def initialize_session_state():
     if 'file_format_select' not in st.session_state:
         st.session_state.file_format_select = "PNG"
     if 'pattern_shape_select' not in st.session_state:
-        st.session_state.pattern_shape_select = 'Square'
+        st.session_state.pattern_shape_select = 'square' # 키 값으로 저장
     if 'finder_pattern_shape_select' not in st.session_state:
-        st.session_state.finder_pattern_shape_select = 'Square'
+        st.session_state.finder_pattern_shape_select = 'square' # 키 값으로 저장
     if 'corner_radius_input' not in st.session_state:
         st.session_state.corner_radius_input = 25
     if 'cell_gap_input' not in st.session_state:
@@ -115,7 +114,7 @@ def get_qr_data_object(data, box_size, border, error_correction, mask_pattern):
 
 
 # 사용자 정의 모양으로 QR 코드 이미지 생성 함수 (PNG)
-def draw_custom_shape_image(qr_object, box_size, border, fill_color, back_color, pattern_shape, corner_radius, cell_gap, finder_pattern_shape):
+def draw_custom_shape_image(qr_object, box_size, border, fill_color, back_color, pattern_shape_key, corner_radius, cell_gap, finder_pattern_shape_key):
     if not qr_object:
         return None
 
@@ -127,12 +126,12 @@ def draw_custom_shape_image(qr_object, box_size, border, fill_color, back_color,
     gap_pixels = int(box_size * (cell_gap / 100))
     effective_box_size = box_size - gap_pixels
 
-    def draw_shape(draw, xy, shape, fill, corner_radius):
+    def draw_shape(draw, xy, shape_key, fill, corner_radius):
         x1, y1, x2, y2 = xy
         effective_size = x2 - x1
-        if shape == get_message(st.session_state.lang, "shape_square"):
+        if shape_key == 'square':
             draw.rectangle(xy, fill=fill)
-        elif shape == get_message(st.session_state.lang, "shape_rounded_square"):
+        elif shape_key == 'rounded_square':
             radius = int(effective_size * (corner_radius / 100))
             draw.rectangle([x1 + radius, y1, x2 - radius, y2], fill=fill)
             draw.rectangle([x1, y1 + radius, x2, y2 - radius], fill=fill)
@@ -140,11 +139,11 @@ def draw_custom_shape_image(qr_object, box_size, border, fill_color, back_color,
             draw.pieslice([x2 - radius * 2, y1, x2, y1 + radius * 2], 270, 360, fill=fill)
             draw.pieslice([x1, y2 - radius * 2, x1 + radius * 2, y2], 90, 180, fill=fill)
             draw.pieslice([x2 - radius * 2, y2 - radius * 2, x2, y2], 0, 90, fill=fill)
-        elif shape == get_message(st.session_state.lang, "shape_circle"):
+        elif shape_key == 'circle':
             draw.ellipse(xy, fill=fill)
-        elif shape == get_message(st.session_state.lang, "shape_diamond"):
+        elif shape_key == 'diamond':
             draw.polygon([(x1 + effective_size/2, y1), (x1 + effective_size, y1 + effective_size/2), (x1 + effective_size/2, y1 + effective_size), (x1, y1 + effective_size/2)], fill=fill)
-        elif shape == get_message(st.session_state.lang, "shape_star"):
+        elif shape_key == 'star':
             x_center = (x1 + x2) / 2
             y_center = (y1 + y2) / 2
             radius_outer = (x2 - x1) / 2
@@ -160,7 +159,7 @@ def draw_custom_shape_image(qr_object, box_size, border, fill_color, back_color,
                 y_inner = y_center + radius_inner * math.sin(angle_inner)
                 points.append((x_inner, y_inner))
             draw.polygon(points, fill=fill)
-        elif shape == get_message(st.session_state.lang, "shape_cross"):
+        elif shape_key == 'cross':
             x_center = (x1 + x2) / 2
             y_center = (y1 + y2) / 2
             cross_width = (x2 - x1) * 0.3
@@ -186,9 +185,9 @@ def draw_custom_shape_image(qr_object, box_size, border, fill_color, back_color,
                 y = (r + border) * box_size
                 
                 # 간격을 적용한 새로운 좌표 계산
-                current_shape = finder_pattern_shape if is_finder_pattern else pattern_shape
+                current_shape_key = finder_pattern_shape_key if is_finder_pattern else pattern_shape_key
                 
-                if current_shape != get_message(st.session_state.lang, "shape_square"):
+                if current_shape_key != 'square':
                     new_x = x + gap_pixels // 2
                     new_y = y + gap_pixels // 2
                     new_x_end = x + box_size - (gap_pixels - gap_pixels // 2)
@@ -197,7 +196,7 @@ def draw_custom_shape_image(qr_object, box_size, border, fill_color, back_color,
                 else:
                     draw_coords = [x, y, x + box_size, y + box_size]
 
-                draw_shape(draw, draw_coords, current_shape, fill_color, corner_radius)
+                draw_shape(draw, draw_coords, current_shape_key, fill_color, corner_radius)
 
     return img
 
@@ -247,15 +246,10 @@ def reset_all_settings(lang_code):
     
     st.session_state.box_size_input = 20
     st.session_state.border_input = 2
-    # 언어에 따라 초기화되는 텍스트 값을 변경
-    if lang_code == 'ko':
-        st.session_state.error_correction_select = 'Low'
-        st.session_state.pattern_shape_select = 'Square'
-        st.session_state.finder_pattern_shape_select = 'Square'
-    elif lang_code == 'en':
-        st.session_state.error_correction_select = 'Low'
-        st.session_state.pattern_shape_select = 'Square'
-        st.session_state.finder_pattern_shape_select = 'Square'
+    # 언어에 관계없이 키 값으로 초기화
+    st.session_state.error_correction_select = 'low'
+    st.session_state.pattern_shape_select = 'square'
+    st.session_state.finder_pattern_shape_select = 'square'
     
     st.session_state.mask_pattern_select = 2
     st.session_state.pattern_color_select = "black"
@@ -273,15 +267,14 @@ def reset_all_settings(lang_code):
 st.title(get_message(st.session_state.lang, "main_title"))
 
 # 언어 선택 드롭다운
-lang_codes = get_language_codes()
-lang_labels = get_language_labels()
-lang_options = get_language_options()
+lang_options_map = get_language_options()
+lang_codes = list(lang_options_map.keys())
 current_lang_index = lang_codes.index(st.session_state.lang)
 
 st.selectbox(
     label=get_message(st.session_state.lang, "language_select_label"),
     options=lang_codes, # 값으로 코드(ko, en)를 사용
-    format_func=lambda code: lang_options[code]['label'], # 라벨은 사용자에게 보여지는 텍스트
+    format_func=lambda code: lang_options_map[code]['label'], # 라벨은 사용자에게 보여지는 텍스트
     index=current_lang_index,
     key="language_selection",
     on_change=set_language_callback
@@ -373,30 +366,33 @@ with col1:
     # 두 개의 패턴 모양 선택 옵션 추가
     col_pattern_shape, col_finder_shape = st.columns(2)
     
-    pattern_options = (get_message(st.session_state.lang, "shape_square"), get_message(st.session_state.lang, "shape_rounded_square"), get_message(st.session_state.lang, "shape_circle"), get_message(st.session_state.lang, "shape_diamond"), get_message(st.session_state.lang, "shape_star"), get_message(st.session_state.lang, "shape_cross"))
+    pattern_options_map = get_pattern_options(st.session_state.lang)
+    pattern_options_keys = list(pattern_options_map.keys())
 
     with col_pattern_shape:
-        pattern_shape_index = pattern_options.index(st.session_state.pattern_shape_select) if st.session_state.pattern_shape_select in pattern_options else 0
+        pattern_shape_index = pattern_options_keys.index(st.session_state.pattern_shape_select) if st.session_state.pattern_shape_select in pattern_options_keys else 0
         st.session_state.pattern_shape_select = st.selectbox(
             get_message(st.session_state.lang, "pattern_shape_label"),
-            pattern_options,
+            options=pattern_options_keys,
+            format_func=lambda key: pattern_options_map[key],
             key="pattern_shape_select",
             disabled=pattern_shape_disabled,
             index=pattern_shape_index
         )
     
     with col_finder_shape:
-        finder_pattern_shape_index = pattern_options.index(st.session_state.finder_pattern_shape_select) if st.session_state.finder_pattern_shape_select in pattern_options else 0
+        finder_pattern_shape_index = pattern_options_keys.index(st.session_state.finder_pattern_shape_select) if st.session_state.finder_pattern_shape_select in pattern_options_keys else 0
         st.session_state.finder_pattern_shape_select = st.selectbox(
             get_message(st.session_state.lang, "finder_pattern_shape_label"),
-            pattern_options,
+            options=pattern_options_keys,
+            format_func=lambda key: pattern_options_map[key],
             key="finder_pattern_shape_select",
             disabled=pattern_shape_disabled,
             index=finder_pattern_shape_index
         )
 
     # 둥근사각 전용 슬라이더
-    if st.session_state.pattern_shape_select == get_message(st.session_state.lang, "shape_rounded_square") or st.session_state.finder_pattern_shape_select == get_message(st.session_state.lang, "shape_rounded_square"):
+    if st.session_state.pattern_shape_select == 'rounded_square' or st.session_state.finder_pattern_shape_select == 'rounded_square':
         corner_radius_disabled = (file_format == "SVG")
         st.caption(get_message(st.session_state.lang, "svg_no_rounded_corners_warning"))
         corner_radius = st.slider(
@@ -412,7 +408,7 @@ with col1:
         corner_radius = 0
         
     # 패턴 간격 슬라이더 (사각 제외)
-    cell_gap_disabled = (st.session_state.pattern_shape_select == get_message(st.session_state.lang, "shape_square")) or (st.session_state.finder_pattern_shape_select == get_message(st.session_state.lang, "shape_square")) or (file_format == "SVG")
+    cell_gap_disabled = (st.session_state.pattern_shape_select == 'square') or (st.session_state.finder_pattern_shape_select == 'square') or (file_format == "SVG")
     st.caption(get_message(st.session_state.lang, "no_gap_warning"))
     cell_gap = st.slider(
         get_message(st.session_state.lang, "cell_gap_label"),
@@ -492,26 +488,19 @@ with col1:
         border = st.number_input(get_message(st.session_state.lang, "border_label"), min_value=0, max_value=10, key="border_input")
 
     with col1_2:
-        error_correction_options = {
-            'Low': qrcode.constants.ERROR_CORRECT_L,
-            'Medium': qrcode.constants.ERROR_CORRECT_M,
-            'Quartile': qrcode.constants.ERROR_CORRECT_Q,
-            'High': qrcode.constants.ERROR_CORRECT_H,
-        }
-        error_correction_labels = [get_message(st.session_state.lang, f"error_correction_options_{key.lower()}") for key in error_correction_options.keys()]
+        error_correction_map = get_error_correction_options(st.session_state.lang)
+        error_correction_keys = list(error_correction_map.keys())
         
-        # 선택된 값의 인덱스를 안전하게 가져오기
-        selected_index = error_correction_labels.index(get_message(st.session_state.lang, f"error_correction_options_{st.session_state.error_correction_select.lower()}")) if get_message(st.session_state.lang, f"error_correction_options_{st.session_state.error_correction_select.lower()}") in error_correction_labels else 0
+        selected_index = error_correction_keys.index(st.session_state.error_correction_select) if st.session_state.error_correction_select in error_correction_keys else 0
 
-        error_correction_choice = st.selectbox(
+        st.session_state.error_correction_select = st.selectbox(
             get_message(st.session_state.lang, "error_correction_label"), 
-            error_correction_labels,
+            options=error_correction_keys,
+            format_func=lambda key: error_correction_map[key]['label'],
             key="error_correction_select",
             index=selected_index
         )
-        # 선택된 라벨에서 실제 코드로 변환
-        selected_key = next(key for key, label in zip(error_correction_options.keys(), error_correction_labels) if label == error_correction_choice)
-        error_correction = error_correction_options[selected_key]
+        error_correction = error_correction_map[st.session_state.error_correction_select]['value']
         
         mask_pattern = st.selectbox(get_message(st.session_state.lang, "mask_pattern_label"), options=list(range(8)), key="mask_pattern_select")
 
@@ -609,10 +598,10 @@ with col2:
                     # SVG 미리보기를 위한 이미지 생성
                     preview_image_display = draw_custom_shape_image(
                         qr, int(st.session_state.box_size_input), int(st.session_state.border_input),
-                        "black", "white", get_message(st.session_state.lang, "shape_square"),
+                        "black", "white", 'square',
                         st.session_state.corner_radius_input,
                         st.session_state.cell_gap_input,
-                        get_message(st.session_state.lang, "shape_square"),
+                        'square',
                     )
         except Exception as e:
             st.error(f"오류가 발생했습니다: {str(e)}")
