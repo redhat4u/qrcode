@@ -5,6 +5,9 @@
 # qrcode_web.py
 # =========================================================
 APP_TITLE = "QR 코드 생성기"
+APP_MAIN_HEADER = "🔲 QR 코드 생성기"
+APP_RESET_BUTTON_LABEL = "🔄 전체 초기화"
+APP_RESET_BUTTON_HELP = "모든 내용을 초기화 합니다."
 
 # =========================================================
 # ui_input_and_settings.py
@@ -46,6 +49,9 @@ UI_TEXT_INPUT_FILENAME_PLACEHOLDER = "이 곳에 파일명을 입력해 주세�
 UI_BUTTON_DELETE_FILENAME_LABEL = "🗑️ 파일명 삭제"
 UI_BUTTON_DELETE_FILENAME_HELP = "입력한 파일명을 삭제합니다"
 UI_RADIO_FILE_FORMAT = "파일 형식 선택"
+UI_TEXT_CHAR_COUNT_OVER = "⚠️ 현재 입력된 총 문자 수: **{char_count}** (권장 최대 문자 수 초과)"
+UI_TEXT_CHAR_COUNT_NEAR = "⚠️ 현재 입력된 총 문자 수: **{char_count}** (권장 문자 수에 근접)"
+UI_TEXT_CHAR_COUNT_OK = "✅ 현재 입력된 총 문자 수: **{char_count}**"
 
 # =========================================================
 # ui_preview_and_download.py
@@ -88,9 +94,6 @@ UI_PREVIEW_READY_MESSAGE = """
 아래의 QR 코드가 맘에 드시면, 위의 [⚡ QR 코드 생성] 버튼을 클릭하세요.
 """
 UI_INFO_ENTER_QR_DATA = "QR 코드 내용을 입력하면 생성될 QR 코드를 미리 보여드립니다."
-UI_TEXT_CHAR_COUNT_OVER = "⚠️ 현재 입력된 총 문자 수: **{char_count}** (권장 최대 문자 수 초과)"
-UI_TEXT_CHAR_COUNT_NEAR = "⚠️ 현재 입력된 총 문자 수: **{char_count}** (권장 문자 수에 근접)"
-UI_TEXT_CHAR_COUNT_OK = "✅ 현재 입력된 총 문자 수: **{char_count}**"
 
 # =========================================================
 # state_manager.py
@@ -104,3 +107,54 @@ UI_DEFAULT_BG_COLOR = "white"
 UI_DEFAULT_STRIP_OPTION = True
 UI_DEFAULT_DOT_STYLE = "사각형"
 UI_FILE_FORMAT_PNG = "PNG"
+
+# =========================================================
+# sidebar.py
+# =========================================================
+SIDEBAR_HEADER_HOWTO = "📖 사용 방법"
+SIDEBAR_GUIDE_HOWTO = """
+1. **QR 코드 내용** 영역에 변환할 텍스트를 입력하세요
+2. **QR 코드 설정**에서 크기와 오류 보정 레벨을 조정하세요
+3. **패턴 모양**에서 QR 코드 점의 모양을 선택하세요 (SVG 형식은 사각형만 가능합니다)
+4. **색상 설정**에서 패턴과 배경 색상을 선택하세요 (SVG 형식은 기본색만 가능합니다)
+5. **파일 설정**에서 원하는 파일 형식(PNG/SVG)을 선택하고 파일명을 지정하세요
+6. **QR 코드 생성** 버튼으로 최종 파일을 다운로드하세요
+"""
+SIDEBAR_HEADER_USAGE_TIPS = "💡 용도별 QR 코드 생성 팁"
+SIDEBAR_GUIDE_USAGE_TIPS = """
+- **텍스트**: `QR 코드로 생성할 텍스트를 입력합니다`
+- **웹사이트**: `https://www.example.com`
+- **이메일**: `mailto:user@example.com`
+- **이메일(제목,본문, 여러 수신자 포함)**: `mailto:user1@example.com,user2@example.com?subject=제목&body=메시지 내용`
+- **전화번호**: `tel:type=CELL:+82 10-1234-5678`
+- **SMS (번호만)**: `sms:type=CELL:+82 10-1234-5678`
+- **SMS (메시지 포함)**: `sms:type=CELL:+82 10-1234-5678?body=메시지 내용`
+- **WiFi**: `WIFI:T:WPA;S:네트워크명(SSID);P:비밀번호;H:false;;`
+"""
+SIDEBAR_HEADER_SETTINGS_GUIDE = "⚙️ 설정 가이드"
+SIDEBAR_GUIDE_ERROR_CORRECTION = "**오류 보정 레벨:**"
+SIDEBAR_GUIDE_ERROR_CORRECTION_DESC = """
+- **Low (7%)**: 손상되지 않는 환경
+- **Medium (15%)**: 일반적인 사용
+- **Quartile (25%)**: 약간의 손상 가능
+- **High (30%)**: 로고 삽입, 손상이 잦은 환경
+"""
+SIDEBAR_GUIDE_MASK_PATTERN = "**마스크 패턴:**"
+SIDEBAR_GUIDE_MASK_PATTERN_DESC = """
+- 0~7 중 선택 (같은 내용이라도 번호에 따라 패턴이 달라짐)
+"""
+SIDEBAR_GUIDE_DOT_STYLE = "**패턴 모양:**"
+SIDEBAR_GUIDE_DOT_STYLE_DESC = """
+- 사각형, 둥근 사각, 원형, 마름모 중 선택
+- **SVG** 파일 형식 선택 시에는 **사각형**만 지원합니다.
+"""
+SIDEBAR_GUIDE_COLOR_INPUT = "**색상 입력:**"
+SIDEBAR_GUIDE_COLOR_INPUT_DESC = """
+- **직접 입력**: 리스트에 없는 색상은 HEX 코드로 직접 입력 가능합니다.
+- **오류 메시지**: 색상 입력 시 유효성 검사를 진행하여 입력 칸이 비어 있거나 올바른 색상 값이 아닐 경우 경고 메시지가 표시됩니다.
+- **SVG** 파일 형식 선택 시에는 패턴:검은색, 배경:흰색만 지원합니다.
+"""
+# =========================================================
+# footer.py
+# =========================================================
+FOOTER_MESSAGE = "© 2025 QR 코드 생성기 | Streamlit으로 제작 | 제작: 류종훈(redhat4u@gmail.com)"
