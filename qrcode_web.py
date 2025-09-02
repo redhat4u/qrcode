@@ -284,6 +284,7 @@ with col1:
         "마지막 입력문자 이후 모든 공백/줄바꿈 제거",
         value=st.session_state.strip_option,
         key="strip_option",
+        help="입력한 내용 마지막에 공백이나 줄바꿈이 있을 경우 QR 코드는 완전히 달라집니다."
     )
 
     # 입력 내용 삭제 버튼
