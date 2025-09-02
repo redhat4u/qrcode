@@ -124,7 +124,8 @@ def build_input_and_settings_ui():
             st.text_input(get_message('UI_TEXT_INPUT_FILENAME_LABEL'), placeholder=get_message('UI_TEXT_INPUT_FILENAME_PLACEHOLDER'), key="filename_input_key")
         with col_filename_delete:
             is_filename_input_empty = st.session_state.filename_input_key == ""
-            st.markdown("<div style='height: 28px;'></div>", unsafe_allow_html=True) 
+            # height 값을 18px로 조정하여 버튼을 위로 올립니다.
+            st.markdown("<div style='height: 18px;'></div>", unsafe_allow_html=True) 
             st.button(
                 get_message('UI_BUTTON_DELETE_FILENAME_LABEL'),
                 use_container_width=True,
@@ -132,4 +133,3 @@ def build_input_and_settings_ui():
                 on_click=clear_filename_callback,
                 disabled=is_filename_input_empty
             )
-            
