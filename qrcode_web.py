@@ -326,7 +326,7 @@ with col1:
             help="높은 품질(100)은 파일 크기가 크고 선명하며, 낮은 품질(1)은 파일 크기가 작고 화질이 저하됩니다."
         )
     else:
-        jpg_quality = 90
+        jpg_quality = 75
     
     # 패턴 모양 설정
     st.markdown("---")
@@ -383,41 +383,17 @@ with col1:
         disabled=cell_gap_disabled,
         key="cell_gap_input",
     )
-
-
+    
 #========================================================================================================================================================================
 
-    # QR 코드 설정
-    st.markdown("---")
-    st.subheader("🔨 QR 코드 설정")
-
-    col1_1, col1_2 = st.columns(2)
-    with col1_1:
-        box_size = st.number_input("QR 코드 1개의 사각 cell 크기 (px)", min_value=1, max_value=100, key="box_size_input")
-        border = st.number_input("QR 코드 테두리/여백", min_value=0, max_value=10, key="border_input")
-
-    with col1_2:
-        error_correction_options = {
-            "Low (7%) - 오류 보정": qrcode.constants.ERROR_CORRECT_L,
-            "Medium (15%) - 오류 보정": qrcode.constants.ERROR_CORRECT_M,
-            "Quartile (25%) - 오류 보정": qrcode.constants.ERROR_CORRECT_Q,
-            "High (30%) - 오류 보정": qrcode.constants.ERROR_CORRECT_H,
-        }
-        error_correction_choice = st.selectbox("오류 보정 레벨", list(error_correction_options.keys()), key="error_correction_select")
-        error_correction = error_correction_options[error_correction_choice]
-        mask_pattern = st.selectbox("마스크 패턴 선택 (0~7)", options=list(range(8)), key="mask_pattern_select")
-
-
-#========================================================================================================================================================================
-
-    # 색상 설정
+    # 색상 설정 (순서 변경)
     st.markdown("---")
     st.subheader("🎨 색상 설정")
     
     file_format_is_svg = (st.session_state.file_format_select == "SVG")
     
     if file_format_is_svg:
-        st.warning("⚠️ SVG 파일은 벡터 형식으로 현재는 다양한 색상이나 패턴을 지원하지 않습니다. 여러가지 색상과 스타일을 원한다면 'PNG' 또는 'JPG' 형식을 선택하세요.")
+        st.warning("⚠️ SVG 파일은 벡터 형식이므로 원하는 색상을 선택할 수 없습니다. 다양한 색상을 원한다면 'PNG' 형식을 선택하세요.")
 
     colors = [
         "<직접 입력>", "black", "white", "gray", "lightgray", "dimgray",
@@ -459,6 +435,28 @@ with col1:
     
     pattern_color = st.session_state.get('custom_pattern_color_input_key', '').strip() if pattern_color_choice == "<직접 입력>" else pattern_color_choice
     bg_color = st.session_state.get('custom_bg_color_input_key', '').strip() if bg_color_choice == "<직접 입력>" else bg_color_choice
+
+#========================================================================================================================================================================
+
+    # QR 코드 설정 (순서 변경)
+    st.markdown("---")
+    st.subheader("🔨 QR 코드 설정")
+
+    col1_1, col1_2 = st.columns(2)
+    with col1_1:
+        box_size = st.number_input("QR 코드 1개의 사각 cell 크기 (px)", min_value=1, max_value=100, key="box_size_input")
+        border = st.number_input("QR 코드 테두리/여백", min_value=0, max_value=10, key="border_input")
+
+    with col1_2:
+        error_correction_options = {
+            "Low (7%) - 오류 보정": qrcode.constants.ERROR_CORRECT_L,
+            "Medium (15%) - 오류 보정": qrcode.constants.ERROR_CORRECT_M,
+            "Quartile (25%) - 오류 보정": qrcode.constants.ERROR_CORRECT_Q,
+            "High (30%) - 오류 보정": qrcode.constants.ERROR_CORRECT_H,
+        }
+        error_correction_choice = st.selectbox("오류 보정 레벨", list(error_correction_options.keys()), key="error_correction_select")
+        error_correction = error_correction_options[error_correction_choice]
+        mask_pattern = st.selectbox("마스크 패턴 선택 (0~7)", options=list(range(8)), key="mask_pattern_select")
 
 
 #========================================================================================================================================================================
