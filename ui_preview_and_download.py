@@ -61,11 +61,15 @@ def build_preview_and_download_ui():
         }
         error_correction = error_correction_options[st.session_state.error_correction_select]
 
-        # [수정] SVG 선택 시 미리보기 패턴을 강제로 사각형으로 변경
+        # [수정] SVG 선택 시 미리보기 패턴과 색상을 강제로 기본값으로 변경
         if file_format_is_svg:
             preview_module_shape = "기본 사각형 (Square)"
+            preview_pattern_color = "black"
+            preview_bg_color = "white"
         else:
             preview_module_shape = st.session_state.module_shape_select
+            preview_pattern_color = pattern_color_for_preview
+            preview_bg_color = bg_color_for_preview
 
         img, qr = generate_qr_code_png(
             current_data,
@@ -73,8 +77,8 @@ def build_preview_and_download_ui():
             int(st.session_state.border_input),
             error_correction,
             int(st.session_state.mask_pattern_select),
-            pattern_color_for_preview,
-            bg_color_for_preview,
+            preview_pattern_color, # 수정된 미리보기 패턴 색상 사용
+            preview_bg_color, # 수정된 미리보기 배경 색상 사용
             preview_module_shape, # 수정된 미리보기 모듈 모양 사용
         )
         if img and qr:
@@ -150,14 +154,15 @@ def build_preview_and_download_ui():
                     st.session_state.qr_generated = True
                     st.session_state.show_generate_success = True
             else:  # SVG
+                # [수정] SVG 다운로드 시에도 색상을 기본값으로 통일
                 svg_data, qr = generate_qr_code_svg(
                     current_data,
                     int(st.session_state.box_size_input),
                     int(st.session_state.border_input),
                     st.session_state.error_correction_select,
                     int(st.session_state.mask_pattern_select),
-                    final_pattern_color,
-                    final_bg_color,
+                    "black", # SVG 색상 기본값으로 고정
+                    "white", # SVG 색상 기본값으로 고정
                 )
                 if svg_data and qr:
                     st.session_state.qr_svg_bytes = svg_data.encode("utf-8")
