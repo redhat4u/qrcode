@@ -31,38 +31,6 @@ def build_sidebar_ui():
 
     st.markdown("---")
 
-# 이 파일은 사이드바 UI를 구성하는 함수를 정의합니다.
-# sidebar.py
-
-import streamlit as st
-
-def build_sidebar_ui():
-    """사이드바를 빌드합니다."""
-    st.header("📖 사용 방법")
-    st.markdown("""
-    1. **QR 코드 내용** 영역에 변환할 텍스트를 입력하세요
-    2. **QR 코드 설정**에서 크기와 오류 보정 레벨을 조정하세요
-    3. **패턴 모양**에서 QR 코드 점의 모양을 선택하세요. (SVG 형식은 사각형만 가능합니다)
-    4. **색상 설정**에서 패턴과 배경 색상을 선택하세요
-    5. **파일 설정**에서 원하는 파일 형식(PNG/SVG)을 선택하고 파일명을 지정하세요.
-    6. **QR 코드 생성** 버튼으로 최종 파일을 다운로드하세요
-    """)
-
-    st.markdown("---")
-
-    st.header("💡 용도별 QR 코드 생성 팁")
-    st.markdown("""
-    - **텍스트**: `QR 코드로 생성할 텍스트를 입력합니다`
-    - **웹사이트**: `https://www.example.com`
-    - **이메일**: `mailto:user@example.com`
-    - **전화번호**: `tel:010-1234-5678`
-    - **SMS**: `sms:010-1234-5678`
-    - **SMS (내용 포함)**: `sms:010-1234-5678?body=안녕하세요`
-    - **WiFi**: `WIFI:T:WPA;S:네트워크명(SSID);P:비밀번호;H:false;;`
-    """)
-
-    st.markdown("---")
-
     st.header("⚙️ 설정 가이드")
         st.markdown("**오류 보정 레벨:**")
     st.markdown("""
