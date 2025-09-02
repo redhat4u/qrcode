@@ -32,7 +32,7 @@ st.set_page_config(
 
 # 세션 상태 초기화
 if 'download_initiated' not in st.session_state:
-    st.session_state.download_initiated = False
+    st.session_state.download_initiated = False
 if 'show_generate_success' not in st.session_state:
     st.session_state.show_generate_success = False
 if 'qr_generated' not in st.session_state:
