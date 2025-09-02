@@ -714,6 +714,6 @@ with st.sidebar:
 # 하단 정보
 st.markdown("---")
 st.markdown(
-    '<p style="text-align: center; color: #f8f8ff; font-size: 15px;">© 2025 QR 코드 생성기  |  Streamlit으로 제작  |  제작: 류종훈(redhat4u@gmail.com)</p>',
+    '<p style="text-align: center; color: lightcyan; font-size: 15px;">© 2025 QR 코드 생성기  |  Streamlit으로 제작  |  제작: 류종훈(redhat4u@gmail.com)</p>',
     unsafe_allow_html=True
 )
