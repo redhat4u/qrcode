@@ -647,13 +647,13 @@ with st.sidebar:
     st.header(msgs["sidebar_title_tips"])
     st.markdown(f"""
     {msgs["sidebar_tip_text"]}
-    {msgs["sidebar_tip_website"]}
-    {msgs["sidebar_tip_email"]}
-    {msgs["sidebar_tip_email_full"]}
-    {msgs["sidebar_tip_tel"]}
-    {msgs["sidebar_tip_sms"]}
-    {msgs["sidebar_tip_sms_full"]}
-    {msgs["sidebar_tip_wifi"]}
+    - {msgs["sidebar_tip_website"]}
+    - {msgs["sidebar_tip_email"]}
+    - {msgs["sidebar_tip_email_full"]}
+    - {msgs["sidebar_tip_tel"]}
+    - {msgs["sidebar_tip_sms"]}
+    - {msgs["sidebar_tip_sms_full"]}
+    - {msgs["sidebar_tip_wifi"]}
     """)
 
     st.markdown(msgs["main_separator"])
@@ -661,32 +661,32 @@ with st.sidebar:
     st.header(msgs["sidebar_title_guide"])
     st.markdown(msgs["sidebar_guide_file_format"])
     st.markdown(f"""
-    {msgs["sidebar_guide_png"]}
-    {msgs["sidebar_guide_jpg"]}
-    {msgs["sidebar_guide_svg"]}
+    - {msgs["sidebar_guide_png"]}
+    - {msgs["sidebar_guide_jpg"]}
+    - {msgs["sidebar_guide_svg"]}
     """)
 
     st.markdown(msgs["main_separator"])
 
     st.markdown(msgs["sidebar_guide_pattern_shape"])
     st.markdown(f"""
-    {msgs["sidebar_guide_pattern_shape_desc_1"]}
-    {msgs["sidebar_guide_pattern_shape_desc_2"]}
+    - {msgs["sidebar_guide_pattern_shape_desc_1"]}
+    - {msgs["sidebar_guide_pattern_shape_desc_2"]}
     """)
     
     st.markdown(msgs["sidebar_guide_cell_gap"])
     st.markdown(f"""
-    {msgs["sidebar_guide_cell_gap_desc_1"]}
-    {msgs["sidebar_guide_cell_gap_desc_2"]}
+    - {msgs["sidebar_guide_cell_gap_desc_1"]}
+    - {msgs["sidebar_guide_cell_gap_desc_2"]}
     """)
 
     st.markdown(msgs["main_separator"])
 
     st.markdown(msgs["sidebar_guide_color"])
     st.markdown(f"""
-    {msgs["sidebar_guide_color_desc_1"]}
-    {msgs["sidebar_guide_color_desc_2"]}
-    {msgs["sidebar_guide_color_desc_3"]}
+    - {msgs["sidebar_guide_color_desc_1"]}
+    - {msgs["sidebar_guide_color_desc_2"]}
+    - {msgs["sidebar_guide_color_desc_3"]}
     """)
 
     st.markdown(msgs["main_separator"])
@@ -694,15 +694,15 @@ with st.sidebar:
     st.markdown(msgs["sidebar_guide_qr_settings"])
     st.markdown(msgs["sidebar_guide_error_correction"])
     st.markdown(f"""
-    {msgs["sidebar_guide_ec_L"]}
-    {msgs["sidebar_guide_ec_M"]}
-    {msgs["sidebar_guide_ec_Q"]}
-    {msgs["sidebar_guide_ec_H"]}
+    - {msgs["sidebar_guide_ec_L"]}
+    - {msgs["sidebar_guide_ec_M"]}
+    - {msgs["sidebar_guide_ec_Q"]}
+    - {msgs["sidebar_guide_ec_H"]}
     """)
 
     st.markdown(msgs["sidebar_guide_mask_pattern"])
     st.markdown(f"""
-    {msgs["sidebar_guide_mask_pattern_desc"]}
+    - {msgs["sidebar_guide_mask_pattern_desc"]}
     """)
 
 # 하단 정보
