@@ -58,25 +58,37 @@ def update_language_labels():
 
 # 세션 상태 초기화
 if 'lang' not in st.session_state:
-st.session_state.lang = "ko"
-# 기본 UI 라벨만 설정
-update_language_labels()
+    st.session_state.lang = "ko"
+    # 기본 UI 라벨만 설정
+    update_language_labels()
 if 'qr_input_area' not in st.session_state:
-st.session_state.qr_input_area = ""
+    st.session_state.qr_input_area = ""
 if 'custom_pattern_color_input_key' not in st.session_state:
-st.session_state.custom_pattern_color_input_key = ""
+    st.session_state.custom_pattern_color_input_key = ""
 if 'custom_bg_color_input_key' not in st.session_state:
-st.session_state.custom_bg_color_input_key = ""
+    st.session_state.custom_bg_color_input_key = ""
 if 'filename_input_key' not in st.session_state:
-st.session_state.filename_input_key = ""
+    st.session_state.filename_input_key = ""
 if 'pattern_color_select' not in st.session_state:
-st.session_state.pattern_color_select = "black"
+    st.session_state.pattern_color_select = "black"
 if 'bg_color_select' not in st.session_state:
-st.session_state.bg_color_select = "white"
+    st.session_state.bg_color_select = "white"
 if 'box_size_input' not in st.session_state:
-st.session_state.box_size_input = 20
+    st.session_state.box_size_input = 20
 if 'border_input' not in st.session_state:
-st.markdown("---")
+    st.session_state.border_input = 2
+if 'mask_pattern_select' not in st.session_state:
+    st.session_state.mask_pattern_select = 2
+if 'corner_radius_input' not in st.session_state:
+    st.session_state.corner_radius_input = 25
+if 'cell_gap_input' not in st.session_state:
+    st.session_state.cell_gap_input = 0
+if 'jpg_quality_input' not in st.session_state:
+    st.session_state.jpg_quality_input = 70
+if 'strip_option' not in st.session_state:
+    st.session_state.strip_option = True
+if 'file_format_select' not in st.session_state:
+    st.session_state.file_format_select = "PNG"
 
 # 레이아웃 설정 (2개 컬럼)
 col1, col2 = st.columns([1.2, 1])
