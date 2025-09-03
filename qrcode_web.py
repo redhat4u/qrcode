@@ -481,7 +481,7 @@ with col1:
     if pattern_shape == lang_messages['pattern_shape_rounded']:
         corner_radius_disabled = (file_format == "SVG")
         st.caption(lang_messages['corner_radius_warning'])
-        st.slider(
+        st.session_state.corner_radius_input = st.slider(
             lang_messages['corner_radius_label'],
             min_value=0,
             max_value=50,
@@ -489,7 +489,6 @@ with col1:
             help=lang_messages['corner_radius_help'],
             key="corner_radius_input",
             disabled=corner_radius_disabled,
-            on_change=lambda: None,
         )
     else:
         st.session_state.corner_radius_input = 0
@@ -520,7 +519,7 @@ with col1:
     if finder_pattern_shape == lang_messages['pattern_shape_rounded']:
         finder_corner_radius_disabled = (file_format == "SVG")
         st.caption(lang_messages['finder_corner_radius_warning'])
-        st.slider(
+        st.session_state.finder_corner_radius_input = st.slider(
             lang_messages['finder_corner_radius_label'],
             min_value=0,
             max_value=50,
@@ -528,7 +527,6 @@ with col1:
             help=lang_messages['finder_corner_radius_help'],
             key="finder_corner_radius_input",
             disabled=finder_corner_radius_disabled,
-            on_change=lambda: None,
         )
     else:
         st.session_state.finder_corner_radius_input = 0
