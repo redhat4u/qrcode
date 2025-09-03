@@ -119,7 +119,6 @@ def is_valid_color(color_name):
 
 
 # QR 코드 데이터 생성
-@st.cache_data
 def get_qr_data_object(data, box_size, border, error_correction, mask_pattern,):
     try:
         qr = qrcode.QRCode(
@@ -137,7 +136,6 @@ def get_qr_data_object(data, box_size, border, error_correction, mask_pattern,):
         return None
     
 # 사용자 정의 모양으로 QR 코드 이미지 생성 함수 (PNG)
-@st.cache_data(show_spinner=False)
 def draw_custom_shape_image(qr_object, box_size, border, fill_color, back_color, pattern_shape, finder_pattern_shape, pattern_corner_radius, finder_corner_radius, pattern_cell_gap, finder_cell_gap,):
     if not qr_object:
         return None
@@ -218,7 +216,6 @@ def draw_custom_shape_image(qr_object, box_size, border, fill_color, back_color,
 
 
 # QR 코드 SVG 생성 함수
-@st.cache_data
 def generate_qr_code_svg(data, box_size, border, error_correction, mask_pattern, fill_color, back_color,):
     try:
         qr = qrcode.QRCode(
@@ -484,7 +481,7 @@ with col1:
     if pattern_shape == lang_messages['pattern_shape_rounded']:
         corner_radius_disabled = (file_format == "SVG")
         st.caption(lang_messages['corner_radius_warning'])
-        corner_radius = st.slider(
+        st.slider(
             lang_messages['corner_radius_label'],
             min_value=0,
             max_value=50,
@@ -492,9 +489,10 @@ with col1:
             help=lang_messages['corner_radius_help'],
             key="corner_radius_input",
             disabled=corner_radius_disabled,
+            on_change=lambda: None,
         )
     else:
-        corner_radius = 0
+        st.session_state.corner_radius_input = 0
 
     # 패턴 간격 슬라이더 (일반 패턴)
     cell_gap_disabled = (file_format == "SVG")
@@ -522,7 +520,7 @@ with col1:
     if finder_pattern_shape == lang_messages['pattern_shape_rounded']:
         finder_corner_radius_disabled = (file_format == "SVG")
         st.caption(lang_messages['finder_corner_radius_warning'])
-        finder_corner_radius = st.slider(
+        st.slider(
             lang_messages['finder_corner_radius_label'],
             min_value=0,
             max_value=50,
@@ -530,9 +528,10 @@ with col1:
             help=lang_messages['finder_corner_radius_help'],
             key="finder_corner_radius_input",
             disabled=finder_corner_radius_disabled,
+            on_change=lambda: None,
         )
     else:
-        finder_corner_radius = 0
+        st.session_state.finder_corner_radius_input = 0
 
     # 패턴 간격 슬라이더 (파인더 패턴)
     finder_cell_gap_disabled = (file_format == "SVG")
