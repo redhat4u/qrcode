@@ -477,19 +477,19 @@ with col1:
         disabled=pattern_shape_disabled,
     )
 
-    # 둥근사각 전용 슬라이더 (일반 패턴)
+    # 둥근사각 전용 슬라이더 (일반 패턴) - 조건문 밖으로 이동
+    corner_radius_disabled = (file_format == "SVG") or (pattern_shape != lang_messages['pattern_shape_rounded'])
     if pattern_shape == lang_messages['pattern_shape_rounded']:
-        corner_radius_disabled = (file_format == "SVG")
         st.caption(lang_messages['corner_radius_warning'])
-        corner_radius = st.slider(
-            lang_messages['corner_radius_label'],
-            min_value=0,
-            max_value=50,
-            value=st.session_state.corner_radius_input,
-            help=lang_messages['corner_radius_help'],
-            key="corner_radius_input",
-            disabled=corner_radius_disabled,
-        )
+    corner_radius = st.slider(
+        lang_messages['corner_radius_label'],
+        min_value=0,
+        max_value=50,
+        value=st.session_state.corner_radius_input,
+        help=lang_messages['corner_radius_help'],
+        key="corner_radius_input",
+        disabled=corner_radius_disabled,
+    )
 
     # 패턴 간격 슬라이더 (일반 패턴)
     cell_gap_disabled = (file_format == "SVG")
@@ -513,19 +513,19 @@ with col1:
         disabled=pattern_shape_disabled,
     )
 
-    # 둥근사각 전용 슬라이더 (파인더 패턴)
+    # 둥근사각 전용 슬라이더 (파인더 패턴) - 조건문 밖으로 이동
+    finder_corner_radius_disabled = (file_format == "SVG") or (finder_pattern_shape != lang_messages['pattern_shape_rounded'])
     if finder_pattern_shape == lang_messages['pattern_shape_rounded']:
-        finder_corner_radius_disabled = (file_format == "SVG")
         st.caption(lang_messages['finder_corner_radius_warning'])
-        finder_corner_radius = st.slider(
-            lang_messages['finder_corner_radius_label'],
-            min_value=0,
-            max_value=50,
-            value=st.session_state.finder_corner_radius_input,
-            help=lang_messages['finder_corner_radius_help'],
-            key="finder_corner_radius_input",
-            disabled=finder_corner_radius_disabled,
-        )
+    finder_corner_radius = st.slider(
+        lang_messages['finder_corner_radius_label'],
+        min_value=0,
+        max_value=50,
+        value=st.session_state.finder_corner_radius_input,
+        help=lang_messages['finder_corner_radius_help'],
+        key="finder_corner_radius_input",
+        disabled=finder_corner_radius_disabled,
+    )
 
     # 패턴 간격 슬라이더 (파인더 패턴)
     finder_cell_gap_disabled = (file_format == "SVG")
