@@ -21,9 +21,17 @@ st.set_page_config(
     layout="wide",
 )
 
+# 오류 복원 수준 옵션과 상수 매핑
+error_correction_map = {
+    'low': qrcode.constants.ERROR_CORRECT_L,
+    'medium': qrcode.constants.ERROR_CORRECT_M,
+    'quartile': qrcode.constants.ERROR_CORRECT_Q,
+    'high': qrcode.constants.ERROR_CORRECT_H,
+}
+
 # 기본 설정값을 초기화하는 함수
 def reset_language_defaults():
-    st.session_state.error_correction_select = messages[st.session_state.lang]['error_correction_low_select']
+    st.session_state.error_correction_select = error_correction_map['low']
     st.session_state.pattern_shape_select = messages[st.session_state.lang]['pattern_shape_square']
     st.session_state.finder_pattern_shape_select = messages[st.session_state.lang]['pattern_shape_square']
     st.session_state.pattern_color_select = "black"
@@ -49,7 +57,6 @@ if 'custom_bg_color_input_key' not in st.session_state:
     st.session_state.custom_bg_color_input_key = ""
 if 'filename_input_key' not in st.session_state:
     st.session_state.filename_input_key = ""
-# 언어 변경 시 값이 초기화되지 않도록 모든 위젯의 기본값을 초기화
 if 'box_size_input' not in st.session_state:
     st.session_state.box_size_input = 20
 if 'border_input' not in st.session_state:
@@ -60,6 +67,8 @@ if 'pattern_color_select' not in st.session_state:
     st.session_state.pattern_color_select = "black"
 if 'bg_color_select' not in st.session_state:
     st.session_state.bg_color_select = "white"
+if 'error_correction_select' not in st.session_state:
+    st.session_state.error_correction_select = error_correction_map['low']
 
 
 # 현재 언어 설정 불러오기
@@ -234,7 +243,7 @@ def reset_all_settings():
 
     st.session_state.box_size_input = 20
     st.session_state.border_input = 2
-    st.session_state.error_correction_select = lang_messages['error_correction_low_select']
+    st.session_state.error_correction_select = error_correction_map['low']
     st.session_state.mask_pattern_select = 2
     st.session_state.pattern_color_select = "black"
     st.session_state.bg_color_select = "white"
@@ -253,7 +262,7 @@ def set_language():
     current_box_size = st.session_state.get('box_size_input', 20)
     current_border = st.session_state.get('border_input', 2)
     current_mask_pattern = st.session_state.get('mask_pattern_select', 2)
-    current_error_correction = st.session_state.get('error_correction_select', messages[st.session_state.lang]['error_correction_low_select'])
+    current_error_correction = st.session_state.get('error_correction_select', error_correction_map['low'])
     current_pattern_color_choice = st.session_state.get('pattern_color_select', "black")
     current_bg_color_choice = st.session_state.get('bg_color_select', "white")
     current_custom_pattern_color = st.session_state.get('custom_pattern_color_input_key', "")
@@ -516,7 +525,23 @@ with col1:
             lang_messages['error_correction_quartile_select']: qrcode.constants.ERROR_CORRECT_Q,
             lang_messages['error_correction_high_select']: qrcode.constants.ERROR_CORRECT_H,
         }
-        error_correction_choice = st.selectbox(lang_messages['error_correction_label'], list(error_correction_options.keys()), key="error_correction_select",)
+
+        # Session state에 저장된 상수 값을 기반으로 현재 언어의 텍스트 옵션에서 인덱스 찾기
+        error_correction_options_list = list(error_correction_options.keys())
+        error_correction_constant_to_label = {v: k for k, v in error_correction_options.items()}
+
+        current_error_label = error_correction_constant_to_label.get(st.session_state.error_correction_select, lang_messages['error_correction_low_select'])
+        try:
+            error_correction_index = error_correction_options_list.index(current_error_label)
+        except ValueError:
+            error_correction_index = 0
+
+        error_correction_choice = st.selectbox(
+            lang_messages['error_correction_label'],
+            options=error_correction_options_list,
+            index=error_correction_index,
+            key="error_correction_select",
+        )
         error_correction = error_correction_options[error_correction_choice]
         mask_pattern = st.selectbox(lang_messages['mask_pattern_label'], options=list(range(8)), key="mask_pattern_select",)
 
