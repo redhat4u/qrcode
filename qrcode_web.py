@@ -489,7 +489,7 @@ with col1:
         disabled=pattern_shape_disabled,
     )
 
-    # 둥근사각 전용 슬라이더 (일반 패턴) - 조건문 밖으로 이동
+    # 둥근사각 전용 슬라이더 (일반 패턴) - 즉각 반응을 위해 조건문 밖으로 이동
     corner_radius_disabled = (file_format == "SVG") or (pattern_shape != lang_messages['pattern_shape_rounded'])
     if pattern_shape == lang_messages['pattern_shape_rounded']:
         st.caption(lang_messages['corner_radius_warning'])
@@ -508,7 +508,7 @@ with col1:
     st.caption(lang_messages['cell_gap_warning'])
     cell_gap = st.slider(
         lang_messages['cell_gap_label'],
-        min_value=0,
+        min_value=1,
         max_value=40,
         value=st.session_state.cell_gap_input,
         help=lang_messages['cell_gap_help'],
@@ -525,7 +525,7 @@ with col1:
         disabled=pattern_shape_disabled,
     )
 
-    # 둥근사각 전용 슬라이더 (파인더 패턴) - 조건문 밖으로 이동
+    # 둥근사각 전용 슬라이더 (파인더 패턴) - 즉각 반응을 위해 조건문 밖으로 이동
     finder_corner_radius_disabled = (file_format == "SVG") or (finder_pattern_shape != lang_messages['pattern_shape_rounded'])
     if finder_pattern_shape == lang_messages['pattern_shape_rounded']:
         st.caption(lang_messages['finder_corner_radius_warning'])
@@ -544,7 +544,7 @@ with col1:
     st.caption(lang_messages['finder_cell_gap_warning'])
     finder_cell_gap = st.slider(
         lang_messages['finder_cell_gap_label'],
-        min_value=0,
+        min_value=1,
         max_value=40,
         value=st.session_state.finder_cell_gap_input,
         help=lang_messages['finder_cell_gap_help'],
