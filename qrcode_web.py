@@ -84,6 +84,10 @@ if 'finder_cell_gap_input' not in st.session_state:
     st.session_state.finder_cell_gap_input = 0
 
 
+def format_option(option_key):
+    return f"{messages[option_key]['native_flag']} {messages[option_key]['native_name']}"
+
+
 # 언어에 따른 페이지 제목 매핑
 dynamic_page_titles = {
     "ko": "QR 코드 생성기",
@@ -402,11 +406,21 @@ lang_options = {
 # 새롭게 개선된 코드
 selected_lang = st.selectbox(
     label=messages[st.session_state.lang]['language_select_label'],
+    options=list(messages.keys()),  # 드롭다운 옵션으로 언어 코드를 직접 사용
+    on_change=set_language,
+    key="lang_select",
+    index=list(messages.keys()).index(st.session_state.lang),
+    format_func=format_option  # 이모지를 표시하기 위한 포매팅 함수 적용
+)
+'''
+selected_lang = st.selectbox(
+    label=messages[st.session_state.lang]['language_select_label'],
     options=lang_options.keys(),
     on_change=set_language,
     key="lang_select",
     index=list(lang_options.values()).index(st.session_state.lang),
 )
+'''
 
 # 선택된 언어 코드를 변수에 할당
 lang = lang_options[selected_lang]
