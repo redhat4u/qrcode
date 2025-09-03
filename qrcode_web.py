@@ -1,15 +1,3 @@
-"""
-QR 코드 생성 웹앱 - Streamlit 버전
-휴대폰에서도 사용 가능
-
-실행 방법:
-1. pip install streamlit qrcode[pil]
-2. streamlit run qrcode_web.py
-
-또는 온라인에서 실행:
-- Streamlit Cloud, Heroku, Replit 등에 배포 가능
-"""
-
 # qrcode_web.py
 
 import streamlit as st
@@ -33,7 +21,7 @@ st.set_page_config(
     layout="wide",
 )
 
-# 기본 설정값을 초기화하는 함수
+# 기본 설정값을 초기화하는 함수 (언어 변경 시 호출하지 않음)
 def reset_language_defaults():
     st.session_state.error_correction_select = messages[st.session_state.lang]['error_correction_low_select']
     st.session_state.pattern_shape_select = messages[st.session_state.lang]['pattern_shape_square']
@@ -49,24 +37,10 @@ def reset_language_defaults():
     st.session_state.strip_option = True
     st.session_state.file_format_select = "PNG"
 
-# 세션 상태 초기화 (초기 1회만 실행)
+# 세션 상태 초기화
 if 'lang' not in st.session_state:
     st.session_state.lang = "ko"
-    # 최초 실행 시에만 기본값 설정
-    st.session_state.error_correction_select = messages[st.session_state.lang]['error_correction_low_select']
-    st.session_state.pattern_shape_select = messages[st.session_state.lang]['pattern_shape_square']
-    st.session_state.finder_pattern_shape_select = messages[st.session_state.lang]['pattern_shape_square']
-    st.session_state.pattern_color_select = "black"
-    st.session_state.bg_color_select = "white"
-    st.session_state.box_size_input = 20
-    st.session_state.border_input = 2
-    st.session_state.mask_pattern_select = 2
-    st.session_state.corner_radius_input = 25
-    st.session_state.cell_gap_input = 0
-    st.session_state.jpg_quality_input = 70
-    st.session_state.strip_option = True
-    st.session_state.file_format_select = "PNG"
-    
+    reset_language_defaults()
 if 'qr_input_area' not in st.session_state:
     st.session_state.qr_input_area = ""
 if 'custom_pattern_color_input_key' not in st.session_state:
@@ -75,6 +49,9 @@ if 'custom_bg_color_input_key' not in st.session_state:
     st.session_state.custom_bg_color_input_key = ""
 if 'filename_input_key' not in st.session_state:
     st.session_state.filename_input_key = ""
+if 'lang_select' not in st.session_state:
+    lang_map = {"한국어": "ko", "English": "en"}
+    st.session_state.lang_select = list(lang_map.keys())[list(lang_map.values()).index(st.session_state.lang)]
 
 
 # 현재 언어 설정 불러오기
@@ -266,8 +243,59 @@ def set_language():
     # 선택된 언어 이름을 언어 코드로 변환
     lang_map = {"한국어": "ko", "English": "en"}
     new_lang = lang_map.get(st.session_state.lang_select, "ko")
+
+    # 언어가 실제로 변경되었을 때만 처리
     if new_lang != st.session_state.lang:
+        # 기존 설정값들을 저장
+        old_lang = st.session_state.lang
+        old_pattern_shape_select = st.session_state.pattern_shape_select
+        old_finder_pattern_shape_select = st.session_state.finder_pattern_shape_select
+        old_error_correction_select = st.session_state.error_correction_select
+
+        # 언어 변경
         st.session_state.lang = new_lang
+
+        # 변경된 언어의 messages 사전 불러오기
+        new_lang_messages = messages[st.session_state.lang]
+
+        # 기존 설정값을 새로운 언어의 메시지로 다시 할당
+        # pattern_shape_select
+        if old_pattern_shape_select == messages[old_lang]['pattern_shape_square']:
+            st.session_state.pattern_shape_select = new_lang_messages['pattern_shape_square']
+        elif old_pattern_shape_select == messages[old_lang]['pattern_shape_rounded']:
+            st.session_state.pattern_shape_select = new_lang_messages['pattern_shape_rounded']
+        elif old_pattern_shape_select == messages[old_lang]['pattern_shape_circle']:
+            st.session_state.pattern_shape_select = new_lang_messages['pattern_shape_circle']
+        elif old_pattern_shape_select == messages[old_lang]['pattern_shape_diamond']:
+            st.session_state.pattern_shape_select = new_lang_messages['pattern_shape_diamond']
+        elif old_pattern_shape_select == messages[old_lang]['pattern_shape_star']:
+            st.session_state.pattern_shape_select = new_lang_messages['pattern_shape_star']
+        elif old_pattern_shape_select == messages[old_lang]['pattern_shape_cross']:
+            st.session_state.pattern_shape_select = new_lang_messages['pattern_shape_cross']
+        
+        # finder_pattern_shape_select
+        if old_finder_pattern_shape_select == messages[old_lang]['pattern_shape_square']:
+            st.session_state.finder_pattern_shape_select = new_lang_messages['pattern_shape_square']
+        elif old_finder_pattern_shape_select == messages[old_lang]['pattern_shape_rounded']:
+            st.session_state.finder_pattern_shape_select = new_lang_messages['pattern_shape_rounded']
+        elif old_finder_pattern_shape_select == messages[old_lang]['pattern_shape_circle']:
+            st.session_state.finder_pattern_shape_select = new_lang_messages['pattern_shape_circle']
+        elif old_finder_pattern_shape_select == messages[old_lang]['pattern_shape_diamond']:
+            st.session_state.finder_pattern_shape_select = new_lang_messages['pattern_shape_diamond']
+        elif old_finder_pattern_shape_select == messages[old_lang]['pattern_shape_star']:
+            st.session_state.finder_pattern_shape_select = new_lang_messages['pattern_shape_star']
+        elif old_finder_pattern_shape_select == messages[old_lang]['pattern_shape_cross']:
+            st.session_state.finder_pattern_shape_select = new_lang_messages['pattern_shape_cross']
+
+        # error_correction_select
+        if old_error_correction_select == messages[old_lang]['error_correction_low_select']:
+            st.session_state.error_correction_select = new_lang_messages['error_correction_low_select']
+        elif old_error_correction_select == messages[old_lang]['error_correction_medium_select']:
+            st.session_state.error_correction_select = new_lang_messages['error_correction_medium_select']
+        elif old_error_correction_select == messages[old_lang]['error_correction_quartile_select']:
+            st.session_state.error_correction_select = new_lang_messages['error_correction_quartile_select']
+        elif old_error_correction_select == messages[old_lang]['error_correction_high_select']:
+            st.session_state.error_correction_select = new_lang_messages['error_correction_high_select']
 
 #[메인]====================================================================================================================================================================
 
@@ -748,4 +776,4 @@ st.markdown(
     f'<p style="text-align: center; color: mediumslateblue; font-size: 15px;">{lang_messages["author_info"]}</p>',
     unsafe_allow_html=True
 )
-#  최종버전(다중 언어 지원 통함 파일 버전)
+# 최종버전(다중 언어 지원 통함 파일 버전)
