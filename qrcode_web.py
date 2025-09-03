@@ -254,54 +254,15 @@ def reset_all_settings():
     st.session_state.cell_gap_input = 0
     st.session_state.jpg_quality_input = 70
 
-# UI 텍스트를 다른 언어로 번역하는 새 함수
-def translate_ui_text(current_value, old_lang, new_lang):
-    """
-    현재 선택된 UI 텍스트 값(예: '정사각형')을 새로운 언어의 값(예: 'Square')으로 변환합니다.
-    """
-    # 이전 언어의 메시지 딕셔너리를 순회하여 현재 값과 일치하는 키를 찾습니다.
-    for key, value in messages[old_lang].items():
-        if value == current_value:
-            # 찾은 키를 사용하여 새 언어의 메시지 딕셔너리에서 해당 값을 반환합니다.
-            return messages[new_lang].get(key, current_value)
-    # 일치하는 키를 찾지 못하면 원래 값을 그대로 반환합니다.
-    return current_value
-
-# 초기화 대신 '번역'을 수행하도록 수정한 함수
+# 언어 변경 콜백 함수
 def set_language():
-    """언어 변경 시 호출되는 콜백 함수"""
+    # 선택된 언어 이름을 언어 코드로 변환
     lang_map = {"한국어": "ko", "English": "en"}
     new_lang = lang_map.get(st.session_state.lang_select, "ko")
-
     if new_lang != st.session_state.lang:
-        old_lang = st.session_state.lang  # 변경 전 언어 저장
-
-        # 새 언어로 상태 변경
         st.session_state.lang = new_lang
-
-        # 언어에 따라 텍스트가 달라지는 설정 값들을 '번역'합니다.
-        # 그 외의 모든 설정(입력 텍스트, 숫자, 색상 코드 등)은 그대로 유지됩니다.
-
-        # 1. 오류 복원 수준 (Error Correction) 번역
-        st.session_state.error_correction_select = translate_ui_text(
-            st.session_state.error_correction_select, old_lang, new_lang
-        )
-        # 2. 패턴 모양 (Pattern Shape) 번역
-        st.session_state.pattern_shape_select = translate_ui_text(
-            st.session_state.pattern_shape_select, old_lang, new_lang
-        )
-        # 3. 파인더 패턴 모양 (Finder Pattern Shape) 번역
-        st.session_state.finder_pattern_shape_select = translate_ui_text(
-            st.session_state.finder_pattern_shape_select, old_lang, new_lang
-        )
-        # 4. 색상 선택에서 '사용자 정의' 옵션 번역
-        if st.session_state.pattern_color_select == messages[old_lang]['custom_color_select']:
-            st.session_state.pattern_color_select = messages[new_lang]['custom_color_select']
-        
-        if st.session_state.bg_color_select == messages[old_lang]['custom_color_select']:
-            st.session_state.bg_color_select = messages[new_lang]['custom_color_select']
-        
-        # 중요: reset_language_defaults() 호출을 제거하여 상태가 초기화되지 않도록 합니다.
+        # 언어 변경 시 기본값 재설정
+        reset_language_defaults()
 
 #[메인]====================================================================================================================================================================
 
@@ -439,7 +400,7 @@ with col1:
         corner_radius = 0
 
     # 패턴 간격 슬라이더 (사각 제외)
-    cell_gap_disabled = (pattern_shape == lang_messages['pattern_shape_square']) and (finder_pattern_shape == lang_messages['pattern_shape_square']) or (file_format == "SVG")
+    cell_gap_disabled = (pattern_shape == lang_messages['pattern_shape_square']) or (finder_pattern_shape == lang_messages['pattern_shape_square']) or (file_format == "SVG")
     st.caption(lang_messages['cell_gap_warning'])
     cell_gap = st.slider(
         lang_messages['cell_gap_label'],
