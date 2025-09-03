@@ -51,9 +51,9 @@ layout="wide",
 
 # 언어 의존적인 UI 라벨/옵션만 갱신하는 함수
 def update_language_labels():
-st.session_state.error_correction_select = messages[st.session_state.lang]['error_correction_low_select']
-st.session_state.pattern_shape_select = messages[st.session_state.lang]['pattern_shape_square']
-st.session_state.finder_pattern_shape_select = messages[st.session_state.lang]['pattern_shape_square']
+    st.session_state.error_correction_select = messages[st.session_state.lang]['error_correction_low_select']
+    st.session_state.pattern_shape_select = messages[st.session_state.lang]['pattern_shape_square']
+    st.session_state.finder_pattern_shape_select = messages[st.session_state.lang]['pattern_shape_square']
 
 
 # 세션 상태 초기화
