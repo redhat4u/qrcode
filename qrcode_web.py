@@ -16,21 +16,31 @@ QR 코드 생성 웹앱 - Streamlit 버전
 
 # qrcode_web.py
 
-import streamlit as st
-import qrcode
-import io
-import re
-import math
-import hashlib
-import base64 # SVG 이미지 표시를 위해 추가
-import qrcode.image.svg # SVG 생성을 위해 추가
+# 💡 필요한 라이브러리 및 모듈을 가져옵니다.
+import streamlit as st # 웹 앱을 만들기 위한 핵심 라이브러리
+import qrcode # QR 코드 생성 라이브러리
+import io # 이미지 데이터를 메모리에서 처리하기 위한 모듈
+import re # 정규표현식(Regular Expression)을 사용하여 문자열을 처리하는 모듈
+import math # 수학 연산을 위한 모듈 (여기서는 별 모양을 그리는 데 사용)
+import hashlib # 해시(Hash) 함수를 사용하기 위한 모듈 (현재는 사용되지 않으나 추후 확장성을 위해 남겨둠)
+import base64 # 이진 데이터를 텍스트로 변환하는 모듈 (SVG 이미지 표시를 위해 추가됨)
+import qrcode.image.svg # SVG 이미지 생성을 위한 모듈
 from datetime import datetime
 from zoneinfo import ZoneInfo
-from messages import messages
-from PIL import Image, ImageDraw
+from messages import messages # 언어별 메시지를 담은 별도의 파일에서 사전(dictionary)을 가져옴
+from PIL import Image, ImageDraw # Pillow 라이브러리: 이미지 생성 및 편집을 위한 모듈
 
 
-# 오류 복원 수준 옵션과 상수 매핑
+# 💡 Streamlit 앱의 페이지 설정을 담당하는 함수입니다.
+# 이 함수는 앱이 처음 시작될 때 단 한 번만 호출됩니다.
+st.set_page_config(
+    page_title="QR 코드 생성기", # 웹 브라우저 탭에 표시될 제목
+    page_icon="🔲", # 탭에 표시될 아이콘
+    layout="wide", # 전체 화면 너비를 사용하도록 설정
+)
+
+# 💡 QR 코드의 오류 복원 수준 옵션과 qrcode 라이브러리의 상수 값을 매핑합니다.
+# 사용자가 선택한 텍스트 옵션을 실제 QR 코드 생성에 필요한 상수 값으로 변환합니다.
 error_correction_map = {
     'low': qrcode.constants.ERROR_CORRECT_L,
     'medium': qrcode.constants.ERROR_CORRECT_M,
@@ -38,8 +48,10 @@ error_correction_map = {
     'high': qrcode.constants.ERROR_CORRECT_H,
 }
 
-# 기본 설정값을 초기화하는 함수
+# 💡 언어 변경 시 기본 설정값들을 초기화하는 함수입니다.
+# `set_language` 함수에서 언어가 변경될 때 호출되어, 새로운 언어에 맞는 기본값으로 위젯을 초기화합니다.
 def reset_language_defaults():
+    # Streamlit의 `st.session_state`에 저장된 위젯 상태를 초기화합니다.
     st.session_state.error_correction_select = messages[st.session_state.lang]['error_correction_low_select']
     st.session_state.pattern_shape_select = messages[st.session_state.lang]['pattern_shape_square']
     st.session_state.finder_pattern_shape_select = messages[st.session_state.lang]['pattern_shape_square']
@@ -56,9 +68,11 @@ def reset_language_defaults():
     st.session_state.strip_option = True
     st.session_state.file_format_select = "PNG"
 
-# 세션 상태 초기화
+# 💡 세션 상태를 초기화하는 부분입니다.
+# Streamlit 앱을 처음 실행하거나 새로고침할 때만 실행됩니다.
+# `if '키' not in st.session_state:` 구문은 해당 키가 세션 상태에 존재하지 않을 때만 실행되도록 보장합니다.
 if 'lang' not in st.session_state:
-    st.session_state.lang = "ko"
+    st.session_state.lang = "ko" # 기본 언어를 한국어로 설정
     reset_language_defaults()
 if 'qr_input_area' not in st.session_state:
     st.session_state.qr_input_area = ""
@@ -83,25 +97,14 @@ if 'finder_corner_radius_input' not in st.session_state:
 if 'finder_cell_gap_input' not in st.session_state:
     st.session_state.finder_cell_gap_input = 0
 
-# 언어에 따른 페이지 제목 매핑
-dynamic_page_titles = {
-    "ko": "QR 코드 생성기",
-    "en": "QR Code Generator"
-}
 
-# 페이지 설정
-st.set_page_config(
-    page_title=dynamic_page_titles[st.session_state.lang],
-    page_icon="🔲",
-    layout="wide",
-)
-
-
-# 현재 언어 설정 불러오기
+# 💡 현재 세션 상태에 설정된 언어에 따라 메시지 딕셔너리를 불러옵니다.
+# 이렇게 하면 모든 텍스트가 동적으로 변경됩니다.
 lang_messages = messages[st.session_state.lang]
 
 
-# 파일명에 특수문자 포함시 '_' 문자로 치환
+# 💡 파일명에 특수문자가 포함된 경우 안전하게 '_'로 치환하는 함수입니다.
+# 사용자가 입력한 파일명이 시스템에서 오류를 일으키지 않도록 방지합니다.
 def sanitize_filename(name: str) -> str:
     invalid_chars = '\\/:*?"<>|[]'
     for ch in invalid_chars:
@@ -109,46 +112,56 @@ def sanitize_filename(name: str) -> str:
     return name.strip()
 
 
-# 유효한 색상인지 확인하는 함수
+# 💡 입력된 문자열이 유효한 색상(헥스 코드) 형식인지 확인하는 함수입니다.
 def is_valid_color(color_name):
     if not color_name:
         return False
     color_name = color_name.strip()
-    hex_pattern = re.compile(r'^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$')
+    hex_pattern = re.compile(r'^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$') # #RRGGBB 또는 #RGB 형식의 정규표현식
     return hex_pattern.match(color_name)
 
 
-# QR 코드 데이터 생성
+# 💡 QR 코드 데이터를 기반으로 `qrcode` 라이브러리의 QR 객체를 생성하는 함수입니다.
+# QR 코드의 버전, 오류 복원 수준, 박스 크기, 테두리 등을 설정합니다.
 def get_qr_data_object(data, box_size, border, error_correction, mask_pattern,):
     try:
+        # qrcode.QRCode 객체를 생성합니다.
         qr = qrcode.QRCode(
-            version=1,
-            error_correction=error_correction,
-            box_size=box_size,
-            border=border,
-            mask_pattern=mask_pattern,
+            version=1, # QR 코드의 버전 (1-40) - 1로 설정하면 데이터 양에 따라 자동으로 결정
+            error_correction=error_correction, # 오류 복원 수준
+            box_size=box_size, # QR 코드의 각 "박스"(모듈) 크기 (픽셀 단위)
+            border=border, # QR 코드 주변의 테두리 두께 (모듈 단위)
+            mask_pattern=mask_pattern, # 마스크 패턴 번호 (0-7)
         )
-        qr.add_data(data, optimize=0,)
-        qr.make(fit=True)
+        qr.add_data(data, optimize=0,) # QR 코드에 데이터를 추가합니다.
+        qr.make(fit=True) # 데이터에 맞게 QR 코드의 크기를 최적화합니다.
         return qr
     except Exception as e:
+        # 오류 발생 시 사용자에게 에러 메시지를 표시합니다.
         st.error(f"{lang_messages['qr_code_data_error']}: {str(e)}")
         return None
     
-# 사용자 정의 모양으로 QR 코드 이미지 생성 함수 (PNG)
+# 💡 사용자 정의 모양으로 QR 코드 이미지(PNG/JPG)를 생성하는 핵심 함수입니다.
+# `qrcode` 라이브러리 기본 기능 대신, PIL(Pillow)을 사용해 모듈 하나하나를 직접 그려서 다양한 모양을 구현합니다.
 def draw_custom_shape_image(qr_object, box_size, border, fill_color, back_color, pattern_shape, finder_pattern_shape, pattern_corner_radius, finder_corner_radius, pattern_cell_gap, finder_cell_gap,):
     if not qr_object:
         return None
 
+    # 전체 이미지 크기를 계산합니다. (QR 모듈 수 + 테두리) * 박스 크기
     img_size = (qr_object.modules_count + 2 * border) * box_size
+    # 새로운 이미지 객체를 생성합니다.
     img = Image.new('RGB', (img_size, img_size), back_color,)
-    draw = ImageDraw.Draw(img)
+    draw = ImageDraw.Draw(img) # 이미지에 그리기 위한 `ImageDraw` 객체를 생성합니다.
 
+    # 💡 다양한 모양을 그리는 내부 함수
+    # 이 함수는 각 모듈(점)을 그릴 때 호출됩니다.
     def draw_shape(draw, xy, shape, fill, corner_radius, cell_gap,):
-        x1, y1, x2, y2 = xy
+        x1, y1, x2, y2 = xy # 그릴 영역의 좌표를 가져옵니다.
         effective_size = x2 - x1
         
+        # 픽셀 단위로 셀 간격(cell_gap)을 계산합니다.
         gap_pixels = int(box_size * (cell_gap / 100))
+        # 간격이 적용된 새로운 좌표를 계산합니다.
         new_x = x1 + gap_pixels // 2
         new_y = y1 + gap_pixels // 2
         new_x_end = x2 - (gap_pixels - gap_pixels // 2)
@@ -157,10 +170,13 @@ def draw_custom_shape_image(qr_object, box_size, border, fill_color, back_color,
 
         effective_size_after_gap = new_x_end - new_x
         
+        # 선택된 모양에 따라 적절한 그리기 함수를 호출합니다.
         if shape == lang_messages['pattern_shape_square']:
             draw.rectangle(draw_coords, fill=fill,)
         elif shape == lang_messages['pattern_shape_rounded']:
+            # 둥근 사각형을 그리기 위해 모서리 반지름을 계산합니다.
             radius = int(effective_size_after_gap * (corner_radius / 100))
+            # 4개의 모서리를 제외한 부분을 사각형으로 채우고, 4개의 모서리를 원호로 채웁니다.
             draw.rectangle([new_x + radius, new_y, new_x_end - radius, new_y_end], fill=fill,)
             draw.rectangle([new_x, new_y + radius, new_x_end, new_y_end - radius], fill=fill,)
             draw.pieslice([new_x, new_y, new_x + radius * 2, new_y + radius * 2], 180, 270, fill=fill,)
@@ -170,8 +186,10 @@ def draw_custom_shape_image(qr_object, box_size, border, fill_color, back_color,
         elif shape == lang_messages['pattern_shape_circle']:
             draw.ellipse(draw_coords, fill=fill,)
         elif shape == lang_messages['pattern_shape_diamond']:
+            # 다이아몬드(마름모) 모양을 그립니다.
             draw.polygon([(new_x + effective_size_after_gap/2, new_y), (new_x + effective_size_after_gap, new_y + effective_size_after_gap/2), (new_x + effective_size_after_gap/2, new_y + effective_size_after_gap), (new_x, new_y + effective_size_after_gap/2)], fill=fill,)
         elif shape == lang_messages['pattern_shape_star']:
+            # 별 모양을 그립니다.
             x_center = (new_x + new_x_end) / 2
             y_center = (new_y + new_y_end) / 2
             radius_outer = effective_size_after_gap / 2
@@ -188,23 +206,28 @@ def draw_custom_shape_image(qr_object, box_size, border, fill_color, back_color,
                 points.append((x_inner, y_inner))
             draw.polygon(points, fill=fill,)
         elif shape == lang_messages['pattern_shape_cross']:
+            # 십자 모양을 그립니다.
             x_center = (new_x + new_x_end) / 2
             y_center = (new_y + new_y_end) / 2
             cross_width = effective_size_after_gap * 0.3
             draw.rectangle([new_x, y_center - cross_width/2, new_x_end, y_center + cross_width/2], fill=fill,)
             draw.rectangle([x_center - cross_width/2, new_y, x_center + cross_width/2, new_y_end], fill=fill,)
 
+    # 💡 QR 코드의 모든 모듈(점)을 순회하며 그립니다.
     for r in range(qr_object.modules_count):
         for c in range(qr_object.modules_count):
             is_finder_pattern = False
-            # 세 개의 파인더 패턴 위치에 있는지 확인
+            # 세 개의 파인더 패턴(모서리의 큰 사각형) 위치에 있는지 확인합니다.
             if (r < 7 and c < 7) or (r >= qr_object.modules_count - 7 and c < 7) or (r < 7 and c >= qr_object.modules_count - 7):
                 is_finder_pattern = True
 
+            # 모듈이 검은색(True)이면 그립니다.
             if qr_object.modules[r][c]:
+                # 픽셀 좌표를 계산합니다.
                 x = (c + border) * box_size
                 y = (r + border) * box_size
 
+                # 파인더 패턴인지 일반 패턴인지에 따라 적용할 모양과 값을 결정합니다.
                 current_shape = finder_pattern_shape if is_finder_pattern else pattern_shape
                 current_corner_radius = finder_corner_radius if is_finder_pattern else pattern_corner_radius
                 current_cell_gap = finder_cell_gap if is_finder_pattern else pattern_cell_gap
@@ -215,7 +238,8 @@ def draw_custom_shape_image(qr_object, box_size, border, fill_color, back_color,
     return img
 
 
-# QR 코드 SVG 생성 함수
+# 💡 QR 코드 SVG를 생성하는 함수입니다.
+# SVG는 벡터 기반이므로 모양 및 색상 변경 로직이 PNG/JPG와 다릅니다.
 def generate_qr_code_svg(data, box_size, border, error_correction, mask_pattern, fill_color, back_color,):
     try:
         qr = qrcode.QRCode(
@@ -228,12 +252,14 @@ def generate_qr_code_svg(data, box_size, border, error_correction, mask_pattern,
         qr.add_data(data, optimize=0)
         qr.make(fit=True)
 
+        # SVG 이미지 객체를 생성합니다.
         img_svg = qr.make_image(image_factory=qrcode.image.svg.SvgPathImage)
 
         svg_buffer = io.BytesIO()
         img_svg.save(svg_buffer)
         svg_data = svg_buffer.getvalue().decode('utf-8')
 
+        # SVG 파일 내의 기본 색상(black, white)을 사용자가 선택한 색상으로 교체합니다.
         svg_data = svg_data.replace('fill="black"', f'fill="{fill_color}"', 1,)
         svg_data = svg_data.replace('fill="white"', f'fill="{back_color}"', 1,)
 
@@ -243,15 +269,16 @@ def generate_qr_code_svg(data, box_size, border, error_correction, mask_pattern,
         return None, None
 
 
-# QR 내용만 초기화하는 콜백 함수 (파일명은 유지)
+# 💡 QR 코드 내용 입력창을 초기화하는 콜백 함수입니다.
+# 버튼 클릭 시 `st.session_state` 값을 변경하여 입력창을 비웁니다.
 def clear_text_input():
     st.session_state.qr_input_area = ""
 
-# 파일명 초기화 콜백 함수
+# 💡 파일명 입력창을 초기화하는 콜백 함수입니다.
 def clear_filename_callback():
     st.session_state.filename_input_key = ""
 
-# 전체 초기화 콜백 함수
+# 💡 모든 설정값을 초기화하는 콜백 함수입니다.
 def reset_all_settings():
     st.session_state.qr_input_area = ""
     st.session_state.custom_pattern_color_input_key = ""
@@ -274,11 +301,13 @@ def reset_all_settings():
     st.session_state.finder_cell_gap_input = 0
     st.session_state.jpg_quality_input = 70
 
-# 언어 변경 콜백 함수
+# 💡 언어 변경을 처리하는 핵심 콜백 함수입니다.
+# 사용자가 언어를 변경하면 기존 위젯의 상태를 저장하고, 새로운 언어로 변환한 뒤 복원합니다.
+# 이렇게 함으로써 언어를 바꿔도 입력된 내용이나 설정값들이 사라지지 않게 됩니다.
 def set_language():
     old_lang = st.session_state.lang
 
-    # 현재 설정값들을 임시 저장
+    # 현재 설정값들을 임시 저장합니다.
     current_qr_data = st.session_state.get('qr_input_area', "")
     current_box_size = st.session_state.get('box_size_input', 20)
     current_border = st.session_state.get('border_input', 2)
@@ -300,14 +329,14 @@ def set_language():
     current_jpg_quality = st.session_state.get('jpg_quality_input', 70)
 
 
-    # 선택된 언어 이름을 언어 코드로 변환
+    # 선택된 언어 이름을 언어 코드로 변환합니다.
     lang_map = {"한국어": "ko", "English": "en"}
     new_lang = lang_map.get(st.session_state.lang_select, "ko")
 
-    # 언어 변경이 발생했을 때만 상태를 업데이트
+    # 언어 변경이 발생했을 때만 상태를 업데이트합니다.
     if new_lang != old_lang:
         st.session_state.lang = new_lang
-        # 기존 언어의 오류 복원 레벨을 상수값으로 변환
+        # 기존 언어의 오류 복원 레벨 텍스트를 상수값으로 변환합니다.
         error_correction_map_old_lang = {
             messages[old_lang]['error_correction_low_select']: qrcode.constants.ERROR_CORRECT_L,
             messages[old_lang]['error_correction_medium_select']: qrcode.constants.ERROR_CORRECT_M,
@@ -316,7 +345,7 @@ def set_language():
         }
         current_error_constant = error_correction_map_old_lang.get(current_error_correction_label, qrcode.constants.ERROR_CORRECT_L)
 
-        # 새로운 언어의 텍스트로 변환
+        # 새로운 언어의 텍스트로 변환합니다.
         error_correction_map_new_lang = {
             qrcode.constants.ERROR_CORRECT_L: messages[new_lang]['error_correction_low_select'],
             qrcode.constants.ERROR_CORRECT_M: messages[new_lang]['error_correction_medium_select'],
@@ -325,7 +354,7 @@ def set_language():
         }
         st.session_state.error_correction_select = error_correction_map_new_lang.get(current_error_constant, messages[new_lang]['error_correction_low_select'])
 
-        # 패턴 모양도 동일하게 변환
+        # 패턴 모양도 동일하게 변환합니다.
         pattern_shape_map_old_lang = {
             messages[old_lang]['pattern_shape_square']: 'square',
             messages[old_lang]['pattern_shape_rounded']: 'rounded',
@@ -344,14 +373,14 @@ def set_language():
             'cross': messages[new_lang]['pattern_shape_cross'],
         }
 
-        # 기존 선택된 값을 새 언어의 값으로 업데이트
+        # 기존 선택된 값을 새 언어의 값으로 업데이트합니다.
         old_pattern_shape_key = pattern_shape_map_old_lang.get(current_pattern_shape, 'square')
         st.session_state.pattern_shape_select = pattern_shape_map_new_lang.get(old_pattern_shape_key, messages[new_lang]['pattern_shape_square'])
         
         old_finder_shape_key = pattern_shape_map_old_lang.get(current_finder_shape, 'square')
         st.session_state.finder_pattern_shape_select = pattern_shape_map_new_lang.get(old_finder_shape_key, messages[new_lang]['pattern_shape_square'])
 
-    # 언어 변경 후, 저장했던 값들을 다시 복원
+    # 언어 변경 후, 임시 저장했던 값들을 다시 복원합니다.
     st.session_state.qr_input_area = current_qr_data
     st.session_state.box_size_input = current_box_size
     st.session_state.border_input = current_border
@@ -375,19 +404,20 @@ def set_language():
 st.title(lang_messages['title'])
 st.markdown("---")
 
-# 언어 선택 드롭다운
+# 💡 언어 선택 드롭다운
 lang_options = {"한국어": "ko", "English": "en"}
 lang_selected_name = st.selectbox(
     "Select Language" if st.session_state.lang == "en" else "언어 선택(Select Language)",
     options=list(lang_options.keys()),
-    on_change=set_language,
+    on_change=set_language, # ❗ 드롭다운 선택 시 `set_language` 함수를 호출하여 언어를 변경합니다.
     key="lang_select",
     index=list(lang_options.values()).index(st.session_state.lang),
 )
 
 st.markdown("---")
 
-# 레이아웃 설정 (2개 컬럼)
+# 💡 메인 레이아웃을 두 개의 컬럼으로 나눕니다.
+# col1: 입력 및 설정 영역, col2: 미리보기 및 다운로드 영역
 col1, col2 = st.columns([1.2, 1])
 
 with col1:
@@ -401,10 +431,10 @@ with col1:
         lang_messages['text_area_label'],
         height=200,
         placeholder=lang_messages['text_area_placeholder'],
-        key="qr_input_area",
+        key="qr_input_area", # ❗ 사용자의 입력값을 세션 상태에 저장합니다.
     )
 
-    # 문자 수 표시
+    # 입력된 문자 수에 따라 경고/정보 메시지를 표시합니다.
     char_count = len(qr_data) if qr_data else 0
     if char_count > 0:
         if char_count > 2900:
@@ -427,14 +457,14 @@ with col1:
     # 입력 내용 삭제 버튼
     col_clear1, col_clear2, col_clear3 = st.columns([1, 1, 1])
     with col_clear2:
-        delete_btn_disabled = (char_count == 0)
+        delete_btn_disabled = (char_count == 0) # 입력 내용이 없으면 버튼 비활성화
         st.button(
             lang_messages['delete_button'],
             help=lang_messages['delete_button_help'],
             use_container_width=True,
             type="secondary",
             disabled=delete_btn_disabled,
-            on_click=clear_text_input,
+            on_click=clear_text_input, # ❗ 버튼 클릭 시 `clear_text_input` 함수 호출
         )
 
     st.markdown("---")
@@ -465,17 +495,30 @@ with col1:
     # 패턴 모양 설정
     st.markdown("---")
     st.subheader(lang_messages['pattern_shape_subheader'])
+    # SVG 형식은 커스텀 모양을 지원하지 않으므로, SVG 선택 시 위젯을 비활성화합니다.
     pattern_shape_disabled = (file_format == "SVG")
     st.caption(lang_messages['pattern_shape_warning'])
 
-    # 일반 패턴 모양 선택 옵션
+    # 두 개의 패턴 모양 선택 옵션 추가
+    col_pattern_shape, col_finder_shape = st.columns(2)
+
     pattern_options = (lang_messages['pattern_shape_square'], lang_messages['pattern_shape_rounded'], lang_messages['pattern_shape_circle'], lang_messages['pattern_shape_diamond'], lang_messages['pattern_shape_star'], lang_messages['pattern_shape_cross'],)
-    pattern_shape = st.selectbox(
-        lang_messages['pattern_select_label'],
-        pattern_options,
-        key="pattern_shape_select",
-        disabled=pattern_shape_disabled,
-    )
+
+    with col_pattern_shape:
+        pattern_shape = st.selectbox(
+            lang_messages['pattern_select_label'],
+            pattern_options,
+            key="pattern_shape_select",
+            disabled=pattern_shape_disabled,
+        )
+
+    with col_finder_shape:
+        finder_pattern_shape = st.selectbox(
+            lang_messages['finder_pattern_select_label'],
+            pattern_options,
+            key="finder_pattern_shape_select",
+            disabled=pattern_shape_disabled,
+        )
 
     # 둥근사각 전용 슬라이더 (일반 패턴)
     if pattern_shape == lang_messages['pattern_shape_rounded']:
@@ -493,28 +536,6 @@ with col1:
     else:
         corner_radius = 0
 
-    # 패턴 간격 슬라이더 (일반 패턴)
-    cell_gap_disabled = (file_format == "SVG")
-    st.caption(lang_messages['cell_gap_warning'])
-    cell_gap = st.slider(
-        lang_messages['cell_gap_label'],
-        min_value=0,
-        max_value=40,
-        value=st.session_state.cell_gap_input,
-        help=lang_messages['cell_gap_help'],
-        disabled=cell_gap_disabled,
-        key="cell_gap_input",
-    )
-
-    # 파인더 패턴 모양 선택 옵션
-    st.markdown("---")
-    finder_pattern_shape = st.selectbox(
-        lang_messages['finder_pattern_select_label'],
-        pattern_options,
-        key="finder_pattern_shape_select",
-        disabled=pattern_shape_disabled,
-    )
-
     # 둥근사각 전용 슬라이더 (파인더 패턴)
     if finder_pattern_shape == lang_messages['pattern_shape_rounded']:
         finder_corner_radius_disabled = (file_format == "SVG")
@@ -531,6 +552,19 @@ with col1:
     else:
         finder_corner_radius = 0
 
+    # 패턴 간격 슬라이더 (일반 패턴)
+    cell_gap_disabled = (file_format == "SVG")
+    st.caption(lang_messages['cell_gap_warning'])
+    cell_gap = st.slider(
+        lang_messages['cell_gap_label'],
+        min_value=0,
+        max_value=40,
+        value=st.session_state.cell_gap_input,
+        help=lang_messages['cell_gap_help'],
+        disabled=cell_gap_disabled,
+        key="cell_gap_input",
+    )
+
     # 패턴 간격 슬라이더 (파인더 패턴)
     finder_cell_gap_disabled = (file_format == "SVG")
     st.caption(lang_messages['finder_cell_gap_warning'])
@@ -543,10 +577,10 @@ with col1:
         disabled=finder_cell_gap_disabled,
         key="finder_cell_gap_input",
     )
-
+    
 #========================================================================================================================================================================
 
-    # 색상 설정 (순서 변경)
+    # 색상 설정
     st.markdown("---")
     st.subheader(lang_messages['color_subheader'])
 
@@ -555,6 +589,7 @@ with col1:
     if file_format_is_svg:
         st.warning(lang_messages['svg_color_warning'])
 
+    # 색상 선택 드롭다운 리스트
     colors = [
         lang_messages['custom_color_select'], "black", "white", "gray", "lightgray", "dimgray",
         "red", "green", "blue", "yellow", "cyan", "magenta", "maroon",
@@ -584,6 +619,7 @@ with col1:
         st.text_input(
             lang_messages['pattern_hex_label'],
             placeholder=lang_messages['custom_color_placeholder'],
+            # "직접 입력"을 선택하거나 SVG 형식이면 비활성화
             disabled=(pattern_color_choice != lang_messages['custom_color_select']) or file_format_is_svg,
             key="custom_pattern_color_input_key",
         )
@@ -595,6 +631,7 @@ with col1:
             key="custom_bg_color_input_key",
         )
 
+    # 최종 색상 값을 결정합니다.
     pattern_color = st.session_state.get('custom_pattern_color_input_key', '',).strip() if pattern_color_choice == lang_messages['custom_color_select'] else pattern_color_choice
     bg_color = st.session_state.get('custom_bg_color_input_key', '',).strip() if bg_color_choice == lang_messages['custom_color_select'] else bg_color_choice
 
@@ -610,6 +647,7 @@ with col1:
         border = st.number_input(lang_messages['border_label'], min_value=0, max_value=10, key="border_input",)
 
     with col1_2:
+        # 오류 복원 수준 옵션과 상수 매핑
         error_correction_options = {
             lang_messages['error_correction_low_select']: qrcode.constants.ERROR_CORRECT_L,
             lang_messages['error_correction_medium_select']: qrcode.constants.ERROR_CORRECT_M,
@@ -652,7 +690,7 @@ with col1:
 
     with col_filename_delete:
         st.markdown('<div style="margin-top: 28px;"></div>', unsafe_allow_html=True)
-        filename_delete_disabled = not st.session_state.get("filename_input_key", "")
+        filename_delete_disabled = not st.session_state.get("filename_input_key", "") # 파일명이 없으면 버튼 비활성화
         st.button(
             lang_messages['filename_delete_button'],
             help=lang_messages['filename_delete_help'],
@@ -664,12 +702,12 @@ with col1:
 
 
 #========================================================================================================================================================================
-
 with col2:
     st.header(lang_messages['preview_header'])
 
     current_data = qr_data.strip() if st.session_state.strip_option else qr_data
 
+    # 미리보기 생성 가능 여부 검사
     is_pattern_color_valid_preview = (pattern_color_choice != lang_messages['custom_color_select']) or (pattern_color_choice == lang_messages['custom_color_select'] and pattern_color and is_valid_color(pattern_color))
     is_bg_color_valid_preview = (bg_color_choice != lang_messages['custom_color_select']) or (bg_color_choice == lang_messages['custom_color_select'] and bg_color and is_valid_color(bg_color))
     is_colors_same_preview = (is_pattern_color_valid_preview and is_bg_color_valid_preview and pattern_color and bg_color and pattern_color == bg_color)
@@ -677,6 +715,7 @@ with col2:
     preview_image_display = None
     preview_qr_object = None
 
+    # 미리보기를 생성할 수 있는 조건을 확인합니다.
     can_generate_preview = current_data and (file_format == "SVG" or (is_pattern_color_valid_preview and is_bg_color_valid_preview and not is_colors_same_preview))
 
     download_data = None
@@ -686,6 +725,7 @@ with col2:
 
     if can_generate_preview:
         try:
+            # QR 코드 데이터 객체를 생성합니다.
             qr = get_qr_data_object(
                 current_data, int(st.session_state.box_size_input), int(st.session_state.border_input), error_correction,
                 int(st.session_state.mask_pattern_select)
@@ -693,6 +733,7 @@ with col2:
             if qr:
                 preview_qr_object = qr
                 if file_format in ["PNG", "JPG"]:
+                    # PNG/JPG 형식일 경우 커스텀 모양 이미지 생성 함수 호출
                     preview_image_display = draw_custom_shape_image(
                         qr, int(st.session_state.box_size_input), int(st.session_state.border_input),
                         pattern_color, bg_color, st.session_state.pattern_shape_select,
@@ -717,6 +758,7 @@ with col2:
                     download_data = img_buffer.getvalue()
 
                 else: # SVG
+                    # SVG 형식일 경우 SVG 생성 함수 호출
                     svg_data, _ = generate_qr_code_svg(
                         current_data, int(st.session_state.box_size_input), int(st.session_state.border_input), error_correction,
                         int(st.session_state.mask_pattern_select), "black", "white",
@@ -725,7 +767,7 @@ with col2:
                     download_mime = "image/svg+xml"
                     download_extension = ".svg"
 
-                    # SVG 미리보기를 위한 이미지 생성
+                    # SVG는 색상 미리보기가 불가능하여, PNG용으로 변환된 기본 미리보기 이미지 생성
                     preview_image_display = draw_custom_shape_image(
                         qr, int(st.session_state.box_size_input), int(st.session_state.border_input),
                         "black", "white", lang_messages['pattern_shape_square'],
@@ -740,6 +782,7 @@ with col2:
 
     st.markdown("---")
 
+    # 미리보기 이미지 표시 및 정보 출력
     if preview_image_display:
         st.success(lang_messages['preview_success'])
         st.subheader(lang_messages['preview_subheader'])
@@ -766,6 +809,7 @@ with col2:
         st.markdown("---")
         st.subheader(lang_messages['download_subheader'])
         now = datetime.now(ZoneInfo("Asia/Seoul"))
+        # 파일명이 비어 있으면 현재 시각을 기반으로 자동 생성합니다.
         final_filename = sanitize_filename(st.session_state.filename_input_key.strip() if st.session_state.filename_input_key.strip() else now.strftime("QR_%Y-%m-%d_%H-%M-%S"))
         download_filename = f"{final_filename}{download_extension}"
 
@@ -786,6 +830,7 @@ with col2:
             unsafe_allow_html=True,
         )
 
+    # 미리보기 생성 불가능 시 경고 메시지 표시
     elif current_data:
         st.warning(lang_messages['preview_warning'])
 
@@ -814,6 +859,7 @@ st.button(
     help=lang_messages['reset_button_help'],
 )
 
+# 사이드바 내용
 with st.sidebar:
     st.header(lang_messages['sidebar_title'])
     st.markdown(f"""
