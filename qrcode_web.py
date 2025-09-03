@@ -750,7 +750,7 @@ with col2:
         st.success(lang_messages['preview_success'])
         st.subheader(lang_messages['preview_subheader'])
         col_left, col_center, col_right = st.columns([1, 1, 1])
-        with col_left:
+        with col_center:
             st.image(preview_image_display, caption=lang_messages['preview_subheader'], width=378)
 
         if preview_qr_object:
