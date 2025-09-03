@@ -38,6 +38,8 @@ messages = {
         "pattern_shape_warning": "⚠️ SVG 형식은 사각만 지원합니다.",
         "pattern_select_label": "일반 패턴 모양",
         "finder_pattern_select_label": "파인더 패턴 모양",
+        "finder_cell_gap_label": "파인더 패턴 간격(%)",
+        "finder_cell_gap_warning": "파인더 패턴의 간격은 QR 코드 인식률에 큰 영향을 줍니다.", # 이 줄을 추가
         "corner_radius_warning": "⚠️ SVG 형식은 둥근 모서리를 지원하지 않습니다.",
         "corner_radius_label": "둥근 모서리 반경 (%)",
         "corner_radius_help": "모서리를 얼마나 둥글게 할지 결정합니다. 0%는 사각, 50%는 원에 가까워집니다.",
@@ -166,6 +168,8 @@ messages = {
         "pattern_shape_warning": "⚠️ SVG format only supports square shape.",
         "pattern_select_label": "Regular Pattern Shape",
         "finder_pattern_select_label": "Finder Pattern Shape",
+        "finder_cell_gap_label": "Finder Pattern Spacing (%)",
+        "finder_cell_gap_warning": "Finder pattern spacing significantly affects QR code readability.", # 이 줄을 추가
         "corner_radius_warning": "⚠️ SVG format does not support rounded corners.",
         "corner_radius_label": "Corner Radius (%)",
         "corner_radius_help": "Determines how rounded the corners are. 0% is square, 50% is close to a circle.",
