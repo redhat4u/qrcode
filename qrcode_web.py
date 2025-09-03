@@ -731,15 +731,15 @@ with col2:
                     download_mime = "image/svg+xml"
                     download_extension = ".svg"
 
-                    # SVG 미리보기를 위한 이미지 생성
+                    # SVG 미리보기를 위한 이미지 생성 (간격 0으로)
                     preview_image_display = draw_custom_shape_image(
                         qr, int(st.session_state.box_size_input), int(st.session_state.border_input),
                         "black", "white", lang_messages['pattern_shape_square'],
                         lang_messages['pattern_shape_square'],
                         st.session_state.corner_radius_input,
                         st.session_state.finder_corner_radius_input,
-                        st.session_state.cell_gap_input,
-                        st.session_state.finder_cell_gap_input,
+                        0, # SVG는 간격을 지원하지 않으므로 미리보기에서 간격 0으로 설정
+                        0,
                     )
         except Exception as e:
             st.error(f"{lang_messages['error_occurred']}: {str(e)}")
