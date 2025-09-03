@@ -217,6 +217,26 @@ def draw_custom_shape_image(qr_object, box_size, border, fill_color, back_color,
             draw.polygon([(new_x, new_y + x_width), (new_x + x_width, new_y), (new_x_end, new_y_end - x_width), (new_x_end - x_width, new_y_end)], fill=fill,)
             # 대각선 2: 오른쪽 위에서 왼쪽 아래로
             draw.polygon([(new_x_end, new_y + x_width), (new_x_end - x_width, new_y), (new_x, new_y_end - x_width), (new_x + x_width, new_y_end)], fill=fill,)
+        elif shape == lang_messages['pattern_shape_donut']:
+            # 도넛 모양 그리기 로직
+            x1, y1, x2, y2 = xy
+            effective_size = x2 - x1
+            gap_pixels = int(box_size * (cell_gap / 100))
+            new_x = x1 + gap_pixels // 2
+            new_y = y1 + gap_pixels // 2
+            new_x_end = x2 - (gap_pixels - gap_pixels // 2)
+            new_y_end = y2 - (gap_pixels - gap_pixels // 2)
+            draw_coords = [new_x, new_y, new_x_end, new_y_end]
+            # 바깥쪽 원 (패턴 색상)
+            draw.ellipse(draw_coords, fill=fill,)
+            # 안쪽 원 (배경 색상)
+            hole_size_ratio = 0.5 # 구멍 크기 비율을 조정 가능합니다.
+            hole_size = effective_size * hole_size_ratio
+            hole_x1 = new_x + (new_x_end - new_x) / 2 - hole_size / 2
+            hole_y1 = new_y + (new_y_end - new_y) / 2 - hole_size / 2
+            hole_x2 = new_x + (new_x_end - new_x) / 2 + hole_size / 2
+            hole_y2 = new_y + (new_y_end - new_y) / 2 + hole_size / 2
+            draw.ellipse([hole_x1, hole_y1, hole_x2, hole_y2], fill=back_color,) # back_color 변수 사용
 
     for r in range(qr_object.modules_count):
         for c in range(qr_object.modules_count):
@@ -358,6 +378,7 @@ def set_language():
             messages[old_lang]['pattern_shape_star']: 'star',
             messages[old_lang]['pattern_shape_cross']: 'cross',
             messages[old_lang]['pattern_shape_x']: 'x',
+            messages[old_lang]['pattern_shape_donut']: 'x',
         }
         
         pattern_shape_map_new_lang = {
@@ -368,6 +389,7 @@ def set_language():
             'star': messages[new_lang]['pattern_shape_star'],
             'cross': messages[new_lang]['pattern_shape_cross'],
             'x': messages[new_lang]['pattern_shape_x'],
+            'donut': messages[new_lang]['pattern_shape_donut'],
         }
 
         # 기존 선택된 값을 새 언어의 값으로 업데이트
@@ -513,11 +535,12 @@ with col1:
         lang_messages['pattern_shape_star'],
         lang_messages['pattern_shape_cross'],
         lang_messages['pattern_shape_x'],
+        lang_messages['pattern_shape_donut'],
     )
 
     pattern_shape = st.selectbox(
         lang_messages['pattern_select_label'],
-        pattern_options,
+        pattern_options, # pattern_options 튜플을 재사용
         key="pattern_shape_select",
         disabled=pattern_shape_disabled,
     )
