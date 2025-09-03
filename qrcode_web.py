@@ -212,7 +212,7 @@ def draw_custom_shape_image(qr_object, box_size, border, fill_color, back_color,
             x_center = (new_x + new_x_end) / 2
             y_center = (new_y + new_y_end) / 2
             effective_size = new_x_end - new_x # 간격이 적용된 유효한 크기
-            x_width = effective_size * 0.5 # 엑스 너비 조정
+            x_width = effective_size * 0.2 # 엑스 너비 조정
             # 대각선 1: 왼쪽 위에서 오른쪽 아래로
             draw.polygon([(new_x, new_y + x_width), (new_x + x_width, new_y), (new_x_end, new_y_end - x_width), (new_x_end - x_width, new_y_end)], fill=fill,)
             # 대각선 2: 오른쪽 위에서 왼쪽 아래로
@@ -230,7 +230,7 @@ def draw_custom_shape_image(qr_object, box_size, border, fill_color, back_color,
             # 바깥쪽 원 (패턴 색상)
             draw.ellipse(draw_coords, fill=fill,)
             # 안쪽 원 (배경 색상)
-            hole_size_ratio = 0.2 # 구멍 크기 비율을 조정 가능합니다.
+            hole_size_ratio = 0.3 # 구멍 크기 비율을 조정 가능합니다.
             hole_size = effective_size * hole_size_ratio
             hole_x1 = new_x + (new_x_end - new_x) / 2 - hole_size / 2
             hole_y1 = new_y + (new_y_end - new_y) / 2 - hole_size / 2
