@@ -481,7 +481,7 @@ with col1:
         corner_radius = 0
 
     # 패턴 간격 슬라이더 (사각 제외)
-    cell_gap_disabled = (pattern_shape == lang_messages['pattern_shape_square']) or (finder_pattern_shape == lang_messages['pattern_shape_square']) or (file_format == "SVG")
+    cell_gap_disabled = (file_format == "SVG")
     st.caption(lang_messages['cell_gap_warning'])
     cell_gap = st.slider(
         lang_messages['cell_gap_label'],
