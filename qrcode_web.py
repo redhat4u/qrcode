@@ -261,8 +261,13 @@ def set_language():
     new_lang = lang_map.get(st.session_state.lang_select, "ko")
     if new_lang != st.session_state.lang:
         st.session_state.lang = new_lang
+        # 기존 설정값은 유지하고, 언어와 관련된 변수만 새로운 메시지로 업데이트
+        # (qr_input_area를 포함한 다른 설정값은 그대로 둠)
+        # 필요한 경우, 언어 변경에 따른 일부 선택 옵션만 갱신할 수 있음
+        # 예: st.session_state.error_correction_select = messages[new_lang]['error_correction_low_select']
+
         # 언어 변경 시 기본값 재설정
-        reset_language_defaults()
+ #       reset_language_defaults()
 
 #[메인]====================================================================================================================================================================
 
