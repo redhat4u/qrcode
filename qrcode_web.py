@@ -206,7 +206,7 @@ def draw_custom_shape_image(qr_object, box_size, border, fill_color, back_color,
             cross_width = effective_size_after_gap * 0.3 # 십자 너비를 조정할 수 있습니다.
             draw.rectangle([new_x, y_center - cross_width/2, new_x_end, y_center + cross_width/2], fill=fill,)
             draw.rectangle([x_center - cross_width/2, new_y, x_center + cross_width/2, new_y_end], fill=fill,)
-elif shape == lang_messages['pattern_shape_x']:
+        elif shape == lang_messages['pattern_shape_x']:
             # 'X'자 모양은 두 개의 겹치는 대각선으로 구현합니다.
             # 간격이 적용된 좌표를 사용
             x_center = (new_x + new_x_end) / 2
