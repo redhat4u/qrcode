@@ -1,31 +1,3 @@
-"""
-자.. 지금부터 이 코드가 기준이 되는 코드야...
-수정하다 오류나거나 잘못된 방향으로 수정되면 항상 이버전으로
-다시 시작하는 거야.. 알겠지??
-
-한국어로 사용하다가 영어로 바뀌면 입력창 내용및 모든 설정이 초기화돼..
-모든걸 그대로 유지하면서 언어만 바뀌게 해줘..
-
-입력한 내용이 저장되는 변수 - st.session_state.qr_input_area
-
-언어를 바꾸면 입력창의 내용이 사라져.. 그리고 다른 설정값도 바뀌었어.. 
-색상값이 직접입력으로 바뀌었고, 1cell의 크기가 1, 테두리 값은 0, 
-마스크 패턴 값도 0으로 바뀌었어.. 뭐가 문제야??
-
-코드를 수정했는데도 똑같은 문제가 발생되고 있어..
-
-
-QR 코드 생성 웹앱 - Streamlit 버전
-휴대폰에서도 사용 가능
-
-실행 방법:
-1. pip install streamlit qrcode[pil]
-2. streamlit run qrcode_web.py
-
-또는 온라인에서 실행:
-- Streamlit Cloud, Heroku, Replit 등에 배포 가능
-"""
-
 # qrcode_web.py
 
 import streamlit as st
@@ -77,6 +49,17 @@ if 'custom_bg_color_input_key' not in st.session_state:
     st.session_state.custom_bg_color_input_key = ""
 if 'filename_input_key' not in st.session_state:
     st.session_state.filename_input_key = ""
+# 언어 변경 시 값이 초기화되지 않도록 모든 위젯의 기본값을 초기화
+if 'box_size_input' not in st.session_state:
+    st.session_state.box_size_input = 20
+if 'border_input' not in st.session_state:
+    st.session_state.border_input = 2
+if 'mask_pattern_select' not in st.session_state:
+    st.session_state.mask_pattern_select = 2
+if 'pattern_color_select' not in st.session_state:
+    st.session_state.pattern_color_select = "black"
+if 'bg_color_select' not in st.session_state:
+    st.session_state.bg_color_select = "white"
 
 
 # 현재 언어 설정 불러오기
@@ -265,13 +248,53 @@ def reset_all_settings():
 
 # 언어 변경 콜백 함수
 def set_language():
+    # 현재 설정값들을 임시 저장
+    current_qr_data = st.session_state.get('qr_input_area', "")
+    current_box_size = st.session_state.get('box_size_input', 20)
+    current_border = st.session_state.get('border_input', 2)
+    current_mask_pattern = st.session_state.get('mask_pattern_select', 2)
+    current_error_correction = st.session_state.get('error_correction_select', messages[st.session_state.lang]['error_correction_low_select'])
+    current_pattern_color_choice = st.session_state.get('pattern_color_select', "black")
+    current_bg_color_choice = st.session_state.get('bg_color_select', "white")
+    current_custom_pattern_color = st.session_state.get('custom_pattern_color_input_key', "")
+    current_custom_bg_color = st.session_state.get('custom_bg_color_input_key', "")
+    current_filename = st.session_state.get('filename_input_key', "")
+    current_strip_option = st.session_state.get('strip_option', True)
+    current_file_format = st.session_state.get('file_format_select', "PNG")
+    current_pattern_shape = st.session_state.get('pattern_shape_select', messages[st.session_state.lang]['pattern_shape_square'])
+    current_finder_shape = st.session_state.get('finder_pattern_shape_select', messages[st.session_state.lang]['pattern_shape_square'])
+    current_corner_radius = st.session_state.get('corner_radius_input', 25)
+    current_cell_gap = st.session_state.get('cell_gap_input', 0)
+    current_jpg_quality = st.session_state.get('jpg_quality_input', 70)
+
+
     # 선택된 언어 이름을 언어 코드로 변환
     lang_map = {"한국어": "ko", "English": "en"}
     new_lang = lang_map.get(st.session_state.lang_select, "ko")
+
+    # 언어 변경이 발생했을 때만 상태를 업데이트
     if new_lang != st.session_state.lang:
         st.session_state.lang = new_lang
-        # 언어 변경 시 기본값 재설정
-#        reset_language_defaults()
+
+    # 언어 변경 후, 저장했던 값들을 다시 복원
+    st.session_state.qr_input_area = current_qr_data
+    st.session_state.box_size_input = current_box_size
+    st.session_state.border_input = current_border
+    st.session_state.mask_pattern_select = current_mask_pattern
+    st.session_state.error_correction_select = current_error_correction
+    st.session_state.pattern_color_select = current_pattern_color_choice
+    st.session_state.bg_color_select = current_bg_color_choice
+    st.session_state.custom_pattern_color_input_key = current_custom_pattern_color
+    st.session_state.custom_bg_color_input_key = current_custom_bg_color
+    st.session_state.filename_input_key = current_filename
+    st.session_state.strip_option = current_strip_option
+    st.session_state.file_format_select = current_file_format
+    st.session_state.pattern_shape_select = current_pattern_shape
+    st.session_state.finder_pattern_shape_select = current_finder_shape
+    st.session_state.corner_radius_input = current_corner_radius
+    st.session_state.cell_gap_input = current_cell_gap
+    st.session_state.jpg_quality_input = current_jpg_quality
+
 
 #[메인]====================================================================================================================================================================
 
@@ -442,12 +465,14 @@ with col1:
     with col1_3:
         pattern_color_choice = st.selectbox(
             lang_messages['pattern_color_label'], colors,
+            index=colors.index(st.session_state.pattern_color_select),
             key="pattern_color_select",
             disabled=file_format_is_svg,
         )
     with col1_4:
         bg_color_choice = st.selectbox(
             lang_messages['bg_color_label'], colors,
+            index=colors.index(st.session_state.bg_color_select),
             key="bg_color_select",
             disabled=file_format_is_svg,
         )
@@ -752,4 +777,4 @@ st.markdown(
     f'<p style="text-align: center; color: mediumslateblue; font-size: 15px;">{lang_messages["author_info"]}</p>',
     unsafe_allow_html=True
 )
-#  최종버전(다중 언어 지원 통함 파일 버전)
+# 최종버전(다중 언어 지원 통함 파일 버전)
