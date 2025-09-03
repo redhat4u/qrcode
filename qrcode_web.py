@@ -84,6 +84,8 @@ if 'finder_cell_gap_input' not in st.session_state:
     st.session_state.finder_cell_gap_input = 0
 
 
+# messages.py 딕셔너리에서 동적으로 언어 목록 생성
+# 이 함수는 st.selectbox의 format_func에 사용됩니다.
 def format_option(option_key):
     return f"{messages[option_key]['native_flag']} {messages[option_key]['native_name']}"
 
@@ -397,33 +399,18 @@ st.title(lang_messages['title'])
 st.markdown("---")
 
 # 언어 선택 드롭다운
-# messages.py 딕셔너리에서 동적으로 언어 목록 생성
-lang_options = {
-    f"{messages[code]['native_flag']} {messages[code]['native_name']}": code
-    for code in messages
-}
-
-# 새롭게 개선된 코드
 selected_lang = st.selectbox(
     label=messages[st.session_state.lang]['language_select_label'],
-    options=list(messages.keys()),  # 드롭다운 옵션으로 언어 코드를 직접 사용
+    options=list(messages.keys()),  # options에 직접 언어 코드를 사용
     on_change=set_language,
     key="lang_select",
     index=list(messages.keys()).index(st.session_state.lang),
-    format_func=format_option  # 이모지를 표시하기 위한 포매팅 함수 적용
+    format_func=format_option  # 드롭다운에 표시될 형식을 정의하는 함수 적용
 )
-'''
-selected_lang = st.selectbox(
-    label=messages[st.session_state.lang]['language_select_label'],
-    options=lang_options.keys(),
-    on_change=set_language,
-    key="lang_select",
-    index=list(lang_options.values()).index(st.session_state.lang),
-)
-'''
 
 # 선택된 언어 코드를 변수에 할당
-lang = lang_options[selected_lang]
+# format_func를 사용하면 selected_lang 변수에 이미 언어 코드('ko', 'en' 등)가 담깁니다.
+lang = selected_lang
 
 st.markdown("---")
 
