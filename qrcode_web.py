@@ -31,7 +31,7 @@ error_correction_map = {
 
 # 기본 설정값을 초기화하는 함수
 def reset_language_defaults():
-    st.session_state.error_correction_select = error_correction_map['low']
+    st.session_state.error_correction_select = messages[st.session_state.lang]['error_correction_low_select']
     st.session_state.pattern_shape_select = messages[st.session_state.lang]['pattern_shape_square']
     st.session_state.finder_pattern_shape_select = messages[st.session_state.lang]['pattern_shape_square']
     st.session_state.pattern_color_select = "black"
@@ -67,8 +67,6 @@ if 'pattern_color_select' not in st.session_state:
     st.session_state.pattern_color_select = "black"
 if 'bg_color_select' not in st.session_state:
     st.session_state.bg_color_select = "white"
-if 'error_correction_select' not in st.session_state:
-    st.session_state.error_correction_select = error_correction_map['low']
 
 
 # 현재 언어 설정 불러오기
@@ -243,7 +241,7 @@ def reset_all_settings():
 
     st.session_state.box_size_input = 20
     st.session_state.border_input = 2
-    st.session_state.error_correction_select = error_correction_map['low']
+    st.session_state.error_correction_select = messages[st.session_state.lang]['error_correction_low_select']
     st.session_state.mask_pattern_select = 2
     st.session_state.pattern_color_select = "black"
     st.session_state.bg_color_select = "white"
@@ -257,12 +255,14 @@ def reset_all_settings():
 
 # 언어 변경 콜백 함수
 def set_language():
+    old_lang = st.session_state.lang
+
     # 현재 설정값들을 임시 저장
     current_qr_data = st.session_state.get('qr_input_area', "")
     current_box_size = st.session_state.get('box_size_input', 20)
     current_border = st.session_state.get('border_input', 2)
     current_mask_pattern = st.session_state.get('mask_pattern_select', 2)
-    current_error_correction = st.session_state.get('error_correction_select', error_correction_map['low'])
+    current_error_correction_label = st.session_state.get('error_correction_select', messages[old_lang]['error_correction_low_select'])
     current_pattern_color_choice = st.session_state.get('pattern_color_select', "black")
     current_bg_color_choice = st.session_state.get('bg_color_select', "white")
     current_custom_pattern_color = st.session_state.get('custom_pattern_color_input_key', "")
@@ -270,8 +270,8 @@ def set_language():
     current_filename = st.session_state.get('filename_input_key', "")
     current_strip_option = st.session_state.get('strip_option', True)
     current_file_format = st.session_state.get('file_format_select', "PNG")
-    current_pattern_shape = st.session_state.get('pattern_shape_select', messages[st.session_state.lang]['pattern_shape_square'])
-    current_finder_shape = st.session_state.get('finder_pattern_shape_select', messages[st.session_state.lang]['pattern_shape_square'])
+    current_pattern_shape = st.session_state.get('pattern_shape_select', messages[old_lang]['pattern_shape_square'])
+    current_finder_shape = st.session_state.get('finder_pattern_shape_select', messages[old_lang]['pattern_shape_square'])
     current_corner_radius = st.session_state.get('corner_radius_input', 25)
     current_cell_gap = st.session_state.get('cell_gap_input', 0)
     current_jpg_quality = st.session_state.get('jpg_quality_input', 70)
@@ -282,15 +282,31 @@ def set_language():
     new_lang = lang_map.get(st.session_state.lang_select, "ko")
 
     # 언어 변경이 발생했을 때만 상태를 업데이트
-    if new_lang != st.session_state.lang:
+    if new_lang != old_lang:
         st.session_state.lang = new_lang
+        # 기존 언어의 오류 복원 레벨을 상수값으로 변환
+        error_correction_map_old_lang = {
+            messages[old_lang]['error_correction_low_select']: error_correction_map['low'],
+            messages[old_lang]['error_correction_medium_select']: error_correction_map['medium'],
+            messages[old_lang]['error_correction_quartile_select']: error_correction_map['quartile'],
+            messages[old_lang]['error_correction_high_select']: error_correction_map['high'],
+        }
+        current_error_constant = error_correction_map_old_lang.get(current_error_correction_label, error_correction_map['low'])
+
+        # 새로운 언어의 텍스트로 변환
+        error_correction_map_new_lang = {
+            error_correction_map['low']: messages[new_lang]['error_correction_low_select'],
+            error_correction_map['medium']: messages[new_lang]['error_correction_medium_select'],
+            error_correction_map['quartile']: messages[new_lang]['error_correction_quartile_select'],
+            error_correction_map['high']: messages[new_lang]['error_correction_high_select'],
+        }
+        st.session_state.error_correction_select = error_correction_map_new_lang.get(current_error_constant, messages[new_lang]['error_correction_low_select'])
 
     # 언어 변경 후, 저장했던 값들을 다시 복원
     st.session_state.qr_input_area = current_qr_data
     st.session_state.box_size_input = current_box_size
     st.session_state.border_input = current_border
     st.session_state.mask_pattern_select = current_mask_pattern
-    st.session_state.error_correction_select = current_error_correction
     st.session_state.pattern_color_select = current_pattern_color_choice
     st.session_state.bg_color_select = current_bg_color_choice
     st.session_state.custom_pattern_color_input_key = current_custom_pattern_color
@@ -525,21 +541,17 @@ with col1:
             lang_messages['error_correction_quartile_select']: qrcode.constants.ERROR_CORRECT_Q,
             lang_messages['error_correction_high_select']: qrcode.constants.ERROR_CORRECT_H,
         }
-
-        # Session state에 저장된 상수 값을 기반으로 현재 언어의 텍스트 옵션에서 인덱스 찾기
         error_correction_options_list = list(error_correction_options.keys())
-        error_correction_constant_to_label = {v: k for k, v in error_correction_options.items()}
 
-        current_error_label = error_correction_constant_to_label.get(st.session_state.error_correction_select, lang_messages['error_correction_low_select'])
         try:
-            error_correction_index = error_correction_options_list.index(current_error_label)
+            current_error_index = error_correction_options_list.index(st.session_state.error_correction_select)
         except ValueError:
-            error_correction_index = 0
+            current_error_index = 0 # 만약 세션 상태 값이 없으면 기본값으로
 
         error_correction_choice = st.selectbox(
             lang_messages['error_correction_label'],
             options=error_correction_options_list,
-            index=error_correction_index,
+            index=current_error_index,
             key="error_correction_select",
         )
         error_correction = error_correction_options[error_correction_choice]
