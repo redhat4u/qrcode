@@ -203,7 +203,7 @@ def draw_custom_shape_image(qr_object, box_size, border, fill_color, back_color,
         elif shape == lang_messages['pattern_shape_cross']:
             x_center = (new_x + new_x_end) / 2
             y_center = (new_y + new_y_end) / 2
-            cross_width = effective_size_after_gap * 0.33 # 십자 너비를 조정할 수 있습니다.
+            cross_width = effective_size_after_gap * 0.3 # 십자 너비를 조정할 수 있습니다.
             draw.rectangle([new_x, y_center - cross_width/2, new_x_end, y_center + cross_width/2], fill=fill,)
             draw.rectangle([x_center - cross_width/2, new_y, x_center + cross_width/2, new_y_end], fill=fill,)
         elif shape == lang_messages['pattern_shape_x']:
@@ -230,7 +230,7 @@ def draw_custom_shape_image(qr_object, box_size, border, fill_color, back_color,
             # 바깥쪽 원 (패턴 색상)
             draw.ellipse(draw_coords, fill=fill,)
             # 안쪽 원 (배경 색상)
-            hole_size_ratio = 0.3 # 구멍 크기 비율을 조정 가능합니다.
+            hole_size_ratio = 0.25 # 구멍 크기 비율을 조정 가능합니다.
             hole_size = effective_size * hole_size_ratio
             hole_x1 = new_x + (new_x_end - new_x) / 2 - hole_size / 2
             hole_y1 = new_y + (new_y_end - new_y) / 2 - hole_size / 2
