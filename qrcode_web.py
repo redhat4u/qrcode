@@ -462,26 +462,14 @@ with col1:
     pattern_shape_disabled = (file_format == "SVG")
     st.caption(lang_messages['pattern_shape_warning'])
 
-    # 두 개의 패턴 모양 선택 옵션 추가
-    col_pattern_shape, col_finder_shape = st.columns(2)
-
+    # 일반 패턴 모양 선택 옵션
     pattern_options = (lang_messages['pattern_shape_square'], lang_messages['pattern_shape_rounded'], lang_messages['pattern_shape_circle'], lang_messages['pattern_shape_diamond'], lang_messages['pattern_shape_star'], lang_messages['pattern_shape_cross'],)
-
-    with col_pattern_shape:
-        pattern_shape = st.selectbox(
-            lang_messages['pattern_select_label'],
-            pattern_options,
-            key="pattern_shape_select",
-            disabled=pattern_shape_disabled,
-        )
-
-    with col_finder_shape:
-        finder_pattern_shape = st.selectbox(
-            lang_messages['finder_pattern_select_label'],
-            pattern_options,
-            key="finder_pattern_shape_select",
-            disabled=pattern_shape_disabled,
-        )
+    pattern_shape = st.selectbox(
+        lang_messages['pattern_select_label'],
+        pattern_options,
+        key="pattern_shape_select",
+        disabled=pattern_shape_disabled,
+    )
 
     # 둥근사각 전용 슬라이더 (일반 패턴)
     if pattern_shape == lang_messages['pattern_shape_rounded']:
@@ -499,6 +487,28 @@ with col1:
     else:
         corner_radius = 0
 
+    # 패턴 간격 슬라이더 (일반 패턴)
+    cell_gap_disabled = (file_format == "SVG")
+    st.caption(lang_messages['cell_gap_warning'])
+    cell_gap = st.slider(
+        lang_messages['cell_gap_label'],
+        min_value=0,
+        max_value=40,
+        value=st.session_state.cell_gap_input,
+        help=lang_messages['cell_gap_help'],
+        disabled=cell_gap_disabled,
+        key="cell_gap_input",
+    )
+
+    # 파인더 패턴 모양 선택 옵션
+    st.markdown("---")
+    finder_pattern_shape = st.selectbox(
+        lang_messages['finder_pattern_select_label'],
+        pattern_options,
+        key="finder_pattern_shape_select",
+        disabled=pattern_shape_disabled,
+    )
+
     # 둥근사각 전용 슬라이더 (파인더 패턴)
     if finder_pattern_shape == lang_messages['pattern_shape_rounded']:
         finder_corner_radius_disabled = (file_format == "SVG")
@@ -515,19 +525,6 @@ with col1:
     else:
         finder_corner_radius = 0
 
-    # 패턴 간격 슬라이더 (일반 패턴)
-    cell_gap_disabled = (file_format == "SVG")
-    st.caption(lang_messages['cell_gap_warning'])
-    cell_gap = st.slider(
-        lang_messages['cell_gap_label'],
-        min_value=0,
-        max_value=40,
-        value=st.session_state.cell_gap_input,
-        help=lang_messages['cell_gap_help'],
-        disabled=cell_gap_disabled,
-        key="cell_gap_input",
-    )
-    
     # 패턴 간격 슬라이더 (파인더 패턴)
     finder_cell_gap_disabled = (file_format == "SVG")
     st.caption(lang_messages['finder_cell_gap_warning'])
@@ -540,7 +537,7 @@ with col1:
         disabled=finder_cell_gap_disabled,
         key="finder_cell_gap_input",
     )
-    
+
 #========================================================================================================================================================================
 
     # 색상 설정 (순서 변경)
