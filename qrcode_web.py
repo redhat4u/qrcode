@@ -42,9 +42,9 @@ st.set_page_config(
 
 # 기본 설정값을 초기화하는 함수
 def reset_language_defaults():
-    st.session_state.error_correction_select = messages[st.session_state.lang]['error_correction_low_select']
-    st.session_state.pattern_shape_select = messages[st.session_state.lang]['pattern_shape_square']
-    st.session_state.finder_pattern_shape_select = messages[st.session_state.lang]['pattern_shape_square']
+    st.session_state.error_correction_select = "low"
+    st.session_state.pattern_shape_select = "square"
+    st.session_state.finder_pattern_shape_select = "square"
     st.session_state.pattern_color_select = "black"
     st.session_state.bg_color_select = "white"
     st.session_state.box_size_input = 20
@@ -122,12 +122,25 @@ def draw_custom_shape_image(qr_object, box_size, border, fill_color, back_color,
     gap_pixels = int(box_size * (cell_gap / 100))
     effective_box_size = box_size - gap_pixels
 
+    # 언어에 독립적인 모양 이름으로 변경
+    shape_map = {
+        "square": lang_messages['pattern_shape_square'],
+        "rounded": lang_messages['pattern_shape_rounded'],
+        "circle": lang_messages['pattern_shape_circle'],
+        "diamond": lang_messages['pattern_shape_diamond'],
+        "star": lang_messages['pattern_shape_star'],
+        "cross": lang_messages['pattern_shape_cross'],
+    }
+    
+    current_pattern_shape = shape_map[pattern_shape]
+    current_finder_shape = shape_map[finder_pattern_shape]
+
     def draw_shape(draw, xy, shape, fill, corner_radius,):
         x1, y1, x2, y2 = xy
         effective_size = x2 - x1
-        if shape == lang_messages['pattern_shape_square']:
+        if shape == shape_map['square']:
             draw.rectangle(xy, fill=fill,)
-        elif shape == lang_messages['pattern_shape_rounded']:
+        elif shape == shape_map['rounded']:
             radius = int(effective_size * (corner_radius / 100))
             draw.rectangle([x1 + radius, y1, x2 - radius, y2], fill=fill,)
             draw.rectangle([x1, y1 + radius, x2, y2 - radius], fill=fill,)
@@ -135,11 +148,11 @@ def draw_custom_shape_image(qr_object, box_size, border, fill_color, back_color,
             draw.pieslice([x2 - radius * 2, y1, x2, y1 + radius * 2], 270, 360, fill=fill,)
             draw.pieslice([x1, y2 - radius * 2, x1 + radius * 2, y2], 90, 180, fill=fill,)
             draw.pieslice([x2 - radius * 2, y2 - radius * 2, x2, y2], 0, 90, fill=fill,)
-        elif shape == lang_messages['pattern_shape_circle']:
+        elif shape == shape_map['circle']:
             draw.ellipse(xy, fill=fill,)
-        elif shape == lang_messages['pattern_shape_diamond']:
+        elif shape == shape_map['diamond']:
             draw.polygon([(x1 + effective_size/2, y1), (x1 + effective_size, y1 + effective_size/2), (x1 + effective_size/2, y1 + effective_size), (x1, y1 + effective_size/2)], fill=fill,)
-        elif shape == lang_messages['pattern_shape_star']:
+        elif shape == shape_map['star']:
             x_center = (x1 + x2) / 2
             y_center = (y1 + y2) / 2
             radius_outer = (x2 - x1) / 2
@@ -155,7 +168,7 @@ def draw_custom_shape_image(qr_object, box_size, border, fill_color, back_color,
                 y_inner = y_center + radius_inner * math.sin(angle_inner)
                 points.append((x_inner, y_inner))
             draw.polygon(points, fill=fill,)
-        elif shape == lang_messages['pattern_shape_cross']:
+        elif shape == shape_map['cross']:
             x_center = (x1 + x2) / 2
             y_center = (y1 + y2) / 2
             cross_width = (x2 - x1) * 0.3
@@ -181,9 +194,9 @@ def draw_custom_shape_image(qr_object, box_size, border, fill_color, back_color,
                 y = (r + border) * box_size
 
                 # 간격을 적용한 새로운 좌표 계산
-                current_shape = finder_pattern_shape if is_finder_pattern else pattern_shape
+                current_shape = current_finder_shape if is_finder_pattern else current_pattern_shape
 
-                if current_shape != lang_messages['pattern_shape_square']:
+                if current_shape != shape_map['square']:
                     new_x = x + gap_pixels // 2
                     new_y = y + gap_pixels // 2
                     new_x_end = x + box_size - (gap_pixels - gap_pixels // 2)
@@ -239,20 +252,9 @@ def reset_all_settings():
     st.session_state.custom_pattern_color_input_key = ""
     st.session_state.custom_bg_color_input_key = ""
     st.session_state.filename_input_key = ""
-
-    st.session_state.box_size_input = 20
-    st.session_state.border_input = 2
-    st.session_state.error_correction_select = lang_messages['error_correction_low_select']
-    st.session_state.mask_pattern_select = 2
-    st.session_state.pattern_color_select = "black"
-    st.session_state.bg_color_select = "white"
-    st.session_state.strip_option = True
-    st.session_state.file_format_select = "PNG"
-    st.session_state.pattern_shape_select = lang_messages['pattern_shape_square']
-    st.session_state.finder_pattern_shape_select = lang_messages['pattern_shape_square']
-    st.session_state.corner_radius_input = 25
-    st.session_state.cell_gap_input = 0
-    st.session_state.jpg_quality_input = 70
+    
+    # reset_language_defaults() 함수를 직접 호출하여 언어 독립적인 값으로 초기화
+    reset_language_defaults()
 
 # 언어 변경 콜백 함수
 def set_language():
@@ -261,8 +263,9 @@ def set_language():
     new_lang = lang_map.get(st.session_state.lang_select, "ko")
     if new_lang != st.session_state.lang:
         st.session_state.lang = new_lang
-        # 언어 변경 시 기본값 재설정
+        # 언어 변경 시 기본값 재설정 호출은 주석 처리
         # reset_language_defaults()
+
 
 #[메인]====================================================================================================================================================================
 
@@ -365,12 +368,14 @@ with col1:
     # 두 개의 패턴 모양 선택 옵션 추가
     col_pattern_shape, col_finder_shape = st.columns(2)
 
-    pattern_options = (lang_messages['pattern_shape_square'], lang_messages['pattern_shape_rounded'], lang_messages['pattern_shape_circle'], lang_messages['pattern_shape_diamond'], lang_messages['pattern_shape_star'], lang_messages['pattern_shape_cross'],)
-
+    # 언어 독립적인 값으로 변경
+    pattern_options = ["square", "rounded", "circle", "diamond", "star", "cross"]
+    
     with col_pattern_shape:
         pattern_shape = st.selectbox(
             lang_messages['pattern_select_label'],
-            pattern_options,
+            options=pattern_options,
+            format_func=lambda x: lang_messages[f'pattern_shape_{x}'],
             key="pattern_shape_select",
             disabled=pattern_shape_disabled,
         )
@@ -378,13 +383,14 @@ with col1:
     with col_finder_shape:
         finder_pattern_shape = st.selectbox(
             lang_messages['finder_pattern_select_label'],
-            pattern_options,
+            options=pattern_options,
+            format_func=lambda x: lang_messages[f'pattern_shape_{x}'],
             key="finder_pattern_shape_select",
             disabled=pattern_shape_disabled,
         )
 
     # 둥근사각 전용 슬라이더
-    if pattern_shape == lang_messages['pattern_shape_rounded'] or finder_pattern_shape == lang_messages['pattern_shape_rounded']:
+    if pattern_shape == "rounded" or finder_pattern_shape == "rounded":
         corner_radius_disabled = (file_format == "SVG")
         st.caption(lang_messages['corner_radius_warning'])
         corner_radius = st.slider(
@@ -400,7 +406,7 @@ with col1:
         corner_radius = 0
 
     # 패턴 간격 슬라이더 (사각 제외)
-    cell_gap_disabled = (pattern_shape == lang_messages['pattern_shape_square']) or (finder_pattern_shape == lang_messages['pattern_shape_square']) or (file_format == "SVG")
+    cell_gap_disabled = (pattern_shape == "square") or (finder_pattern_shape == "square") or (file_format == "SVG")
     st.caption(lang_messages['cell_gap_warning'])
     cell_gap = st.slider(
         lang_messages['cell_gap_label'],
@@ -423,22 +429,34 @@ with col1:
     if file_format_is_svg:
         st.warning(lang_messages['svg_color_warning'])
 
-    colors = [
-        lang_messages['custom_color_select'], "black", "white", "gray", "lightgray", "dimgray",
+    # 언어 독립적인 값으로 변경
+    color_options = [
+        "custom", "black", "white", "gray", "lightgray", "dimgray",
         "red", "green", "blue", "yellow", "cyan", "magenta", "maroon",
         "purple", "navy", "lime", "olive", "teal", "aqua", "fuchsia",
         "silver", "gold", "orange", "orangered", "crimson", "indigo",
     ]
+    
+    def format_color_label(color_key):
+        if color_key == "custom":
+            return lang_messages['custom_color_select']
+        else:
+            return color_key
+            
     col1_3, col1_4 = st.columns(2)
     with col1_3:
         pattern_color_choice = st.selectbox(
-            lang_messages['pattern_color_label'], colors,
+            lang_messages['pattern_color_label'], 
+            options=color_options,
+            format_func=format_color_label,
             key="pattern_color_select",
             disabled=file_format_is_svg,
         )
     with col1_4:
         bg_color_choice = st.selectbox(
-            lang_messages['bg_color_label'], colors,
+            lang_messages['bg_color_label'], 
+            options=color_options,
+            format_func=format_color_label,
             key="bg_color_select",
             disabled=file_format_is_svg,
         )
@@ -450,19 +468,19 @@ with col1:
         st.text_input(
             lang_messages['pattern_hex_label'],
             placeholder=lang_messages['custom_color_placeholder'],
-            disabled=(pattern_color_choice != lang_messages['custom_color_select']) or file_format_is_svg,
+            disabled=(pattern_color_choice != "custom") or file_format_is_svg,
             key="custom_pattern_color_input_key",
         )
     with col1_6:
         st.text_input(
             lang_messages['bg_hex_label'],
             placeholder=lang_messages['custom_color_placeholder'],
-            disabled=(bg_color_choice != lang_messages['custom_color_select']) or file_format_is_svg,
+            disabled=(bg_color_choice != "custom") or file_format_is_svg,
             key="custom_bg_color_input_key",
         )
 
-    pattern_color = st.session_state.get('custom_pattern_color_input_key', '',).strip() if pattern_color_choice == lang_messages['custom_color_select'] else pattern_color_choice
-    bg_color = st.session_state.get('custom_bg_color_input_key', '',).strip() if bg_color_choice == lang_messages['custom_color_select'] else bg_color_choice
+    pattern_color = st.session_state.get('custom_pattern_color_input_key', '',).strip() if pattern_color_choice == "custom" else pattern_color_choice
+    bg_color = st.session_state.get('custom_bg_color_input_key', '',).strip() if bg_color_choice == "custom" else bg_color_choice
 
 #========================================================================================================================================================================
 
@@ -476,14 +494,22 @@ with col1:
         border = st.number_input(lang_messages['border_label'], min_value=0, max_value=10, key="border_input",)
 
     with col1_2:
+        # 언어 독립적인 값으로 변경
         error_correction_options = {
-            lang_messages['error_correction_low_select']: qrcode.constants.ERROR_CORRECT_L,
-            lang_messages['error_correction_medium_select']: qrcode.constants.ERROR_CORRECT_M,
-            lang_messages['error_correction_quartile_select']: qrcode.constants.ERROR_CORRECT_Q,
-            lang_messages['error_correction_high_select']: qrcode.constants.ERROR_CORRECT_H,
+            "low": qrcode.constants.ERROR_CORRECT_L,
+            "medium": qrcode.constants.ERROR_CORRECT_M,
+            "quartile": qrcode.constants.ERROR_CORRECT_Q,
+            "high": qrcode.constants.ERROR_CORRECT_H,
         }
-        error_correction_choice = st.selectbox(lang_messages['error_correction_label'], list(error_correction_options.keys()), key="error_correction_select",)
+        
+        error_correction_choice = st.selectbox(
+            lang_messages['error_correction_label'], 
+            options=list(error_correction_options.keys()), 
+            format_func=lambda x: lang_messages[f'error_correction_{x}_select'],
+            key="error_correction_select",
+        )
         error_correction = error_correction_options[error_correction_choice]
+
         mask_pattern = st.selectbox(lang_messages['mask_pattern_label'], options=list(range(8)), key="mask_pattern_select",)
 
 
@@ -524,8 +550,8 @@ with col2:
 
     current_data = qr_data.strip() if st.session_state.strip_option else qr_data
 
-    is_pattern_color_valid_preview = (pattern_color_choice != lang_messages['custom_color_select']) or (pattern_color_choice == lang_messages['custom_color_select'] and pattern_color and is_valid_color(pattern_color))
-    is_bg_color_valid_preview = (bg_color_choice != lang_messages['custom_color_select']) or (bg_color_choice == lang_messages['custom_color_select'] and bg_color and is_valid_color(bg_color))
+    is_pattern_color_valid_preview = (pattern_color_choice != "custom") or (pattern_color_choice == "custom" and pattern_color and is_valid_color(pattern_color))
+    is_bg_color_valid_preview = (bg_color_choice != "custom") or (bg_color_choice == "custom" and bg_color and is_valid_color(bg_color))
     is_colors_same_preview = (is_pattern_color_valid_preview and is_bg_color_valid_preview and pattern_color and bg_color and pattern_color == bg_color)
 
     preview_image_display = None
@@ -547,6 +573,7 @@ with col2:
             if qr:
                 preview_qr_object = qr
                 if file_format in ["PNG", "JPG"]:
+                    # 언어 독립적인 값으로 변경
                     preview_image_display = draw_custom_shape_image(
                         qr, int(st.session_state.box_size_input), int(st.session_state.border_input),
                         pattern_color, bg_color, st.session_state.pattern_shape_select,
@@ -580,10 +607,10 @@ with col2:
                     # SVG 미리보기를 위한 이미지 생성
                     preview_image_display = draw_custom_shape_image(
                         qr, int(st.session_state.box_size_input), int(st.session_state.border_input),
-                        "black", "white", lang_messages['pattern_shape_square'],
+                        "black", "white", "square",
                         st.session_state.corner_radius_input,
                         st.session_state.cell_gap_input,
-                        lang_messages['pattern_shape_square'],
+                        "square",
                     )
         except Exception as e:
             st.error(f"{lang_messages['error_occurred']}: {str(e)}")
@@ -640,13 +667,13 @@ with col2:
         st.warning(lang_messages['preview_warning'])
 
         if file_format != "SVG":
-            if pattern_color_choice == lang_messages['custom_color_select'] and not pattern_color:
+            if pattern_color_choice == "custom" and not pattern_color:
                 st.warning(lang_messages['pattern_hex_empty_warning'])
-            if bg_color_choice == lang_messages['custom_color_select'] and not bg_color:
+            if bg_color_choice == "custom" and not bg_color:
                 st.warning(lang_messages['bg_hex_empty_warning'])
-            if pattern_color_choice == lang_messages['custom_color_select'] and pattern_color and not is_valid_color(pattern_color):
+            if pattern_color_choice == "custom" and pattern_color and not is_valid_color(pattern_color):
                 st.warning(lang_messages['pattern_hex_invalid_warning'])
-            if bg_color_choice == lang_messages['custom_color_select'] and bg_color and not is_valid_color(bg_color):
+            if bg_color_choice == "custom" and bg_color and not is_valid_color(bg_color):
                 st.warning(lang_messages['bg_hex_invalid_warning'])
             if is_colors_same_preview:
                 st.warning(lang_messages['same_color_warning'])
