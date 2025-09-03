@@ -286,21 +286,47 @@ def set_language():
         st.session_state.lang = new_lang
         # 기존 언어의 오류 복원 레벨을 상수값으로 변환
         error_correction_map_old_lang = {
-            messages[old_lang]['error_correction_low_select']: error_correction_map['low'],
-            messages[old_lang]['error_correction_medium_select']: error_correction_map['medium'],
-            messages[old_lang]['error_correction_quartile_select']: error_correction_map['quartile'],
-            messages[old_lang]['error_correction_high_select']: error_correction_map['high'],
+            messages[old_lang]['error_correction_low_select']: qrcode.constants.ERROR_CORRECT_L,
+            messages[old_lang]['error_correction_medium_select']: qrcode.constants.ERROR_CORRECT_M,
+            messages[old_lang]['error_correction_quartile_select']: qrcode.constants.ERROR_CORRECT_Q,
+            messages[old_lang]['error_correction_high_select']: qrcode.constants.ERROR_CORRECT_H,
         }
-        current_error_constant = error_correction_map_old_lang.get(current_error_correction_label, error_correction_map['low'])
+        current_error_constant = error_correction_map_old_lang.get(current_error_correction_label, qrcode.constants.ERROR_CORRECT_L)
 
         # 새로운 언어의 텍스트로 변환
         error_correction_map_new_lang = {
-            error_correction_map['low']: messages[new_lang]['error_correction_low_select'],
-            error_correction_map['medium']: messages[new_lang]['error_correction_medium_select'],
-            error_correction_map['quartile']: messages[new_lang]['error_correction_quartile_select'],
-            error_correction_map['high']: messages[new_lang]['error_correction_high_select'],
+            qrcode.constants.ERROR_CORRECT_L: messages[new_lang]['error_correction_low_select'],
+            qrcode.constants.ERROR_CORRECT_M: messages[new_lang]['error_correction_medium_select'],
+            qrcode.constants.ERROR_CORRECT_Q: messages[new_lang]['error_correction_quartile_select'],
+            qrcode.constants.ERROR_CORRECT_H: messages[new_lang]['error_correction_high_select'],
         }
         st.session_state.error_correction_select = error_correction_map_new_lang.get(current_error_constant, messages[new_lang]['error_correction_low_select'])
+
+        # 패턴 모양도 동일하게 변환
+        pattern_shape_map_old_lang = {
+            messages[old_lang]['pattern_shape_square']: 'square',
+            messages[old_lang]['pattern_shape_rounded']: 'rounded',
+            messages[old_lang]['pattern_shape_circle']: 'circle',
+            messages[old_lang]['pattern_shape_diamond']: 'diamond',
+            messages[old_lang]['pattern_shape_star']: 'star',
+            messages[old_lang]['pattern_shape_cross']: 'cross',
+        }
+        
+        pattern_shape_map_new_lang = {
+            'square': messages[new_lang]['pattern_shape_square'],
+            'rounded': messages[new_lang]['pattern_shape_rounded'],
+            'circle': messages[new_lang]['pattern_shape_circle'],
+            'diamond': messages[new_lang]['pattern_shape_diamond'],
+            'star': messages[new_lang]['pattern_shape_star'],
+            'cross': messages[new_lang]['pattern_shape_cross'],
+        }
+
+        # 기존 선택된 값을 새 언어의 값으로 업데이트
+        old_pattern_shape_key = pattern_shape_map_old_lang.get(current_pattern_shape, 'square')
+        st.session_state.pattern_shape_select = pattern_shape_map_new_lang.get(old_pattern_shape_key, messages[new_lang]['pattern_shape_square'])
+        
+        old_finder_shape_key = pattern_shape_map_old_lang.get(current_finder_shape, 'square')
+        st.session_state.finder_pattern_shape_select = pattern_shape_map_new_lang.get(old_finder_shape_key, messages[new_lang]['pattern_shape_square'])
 
     # 언어 변경 후, 저장했던 값들을 다시 복원
     st.session_state.qr_input_area = current_qr_data
@@ -314,8 +340,6 @@ def set_language():
     st.session_state.filename_input_key = current_filename
     st.session_state.strip_option = current_strip_option
     st.session_state.file_format_select = current_file_format
-    st.session_state.pattern_shape_select = current_pattern_shape
-    st.session_state.finder_pattern_shape_select = current_finder_shape
     st.session_state.corner_radius_input = current_corner_radius
     st.session_state.cell_gap_input = current_cell_gap
     st.session_state.jpg_quality_input = current_jpg_quality
