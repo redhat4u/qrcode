@@ -1,19 +1,3 @@
-"""
-자.. 지금부터 이 코드가 기준이 되는 코드야...
-수정하다 오류나거나 잘못된 방향으로 수정되면 항상 이버전으로
-다시 시작하는 거야.. 알겠지??
-
-QR 코드 생성 웹앱 - Streamlit 버전
-휴대폰에서도 사용 가능
-
-실행 방법:
-1. pip install streamlit qrcode[pil]
-2. streamlit run qrcode_web.py
-
-또는 온라인에서 실행:
-- Streamlit Cloud, Heroku, Replit 등에 배포 가능
-"""
-
 # qrcode_web.py
 
 import streamlit as st
@@ -55,8 +39,10 @@ def reset_language_defaults():
     st.session_state.box_size_input = 20
     st.session_state.border_input = 2
     st.session_state.mask_pattern_select = 2
-    st.session_state.corner_radius_input = 25
-    st.session_state.cell_gap_input = 0
+    st.session_state.general_corner_radius_input = 25
+    st.session_state.finder_corner_radius_input = 25
+    st.session_state.general_cell_gap_input = 0
+    st.session_state.finder_cell_gap_input = 0
     st.session_state.jpg_quality_input = 70
     st.session_state.strip_option = True
     st.session_state.file_format_select = "PNG"
@@ -83,6 +69,14 @@ if 'pattern_color_select' not in st.session_state:
     st.session_state.pattern_color_select = "black"
 if 'bg_color_select' not in st.session_state:
     st.session_state.bg_color_select = "white"
+if 'general_corner_radius_input' not in st.session_state:
+    st.session_state.general_corner_radius_input = 25
+if 'finder_corner_radius_input' not in st.session_state:
+    st.session_state.finder_corner_radius_input = 25
+if 'general_cell_gap_input' not in st.session_state:
+    st.session_state.general_cell_gap_input = 0
+if 'finder_cell_gap_input' not in st.session_state:
+    st.session_state.finder_cell_gap_input = 0
 
 
 # 현재 언어 설정 불러오기
@@ -125,17 +119,17 @@ def get_qr_data_object(data, box_size, border, error_correction, mask_pattern,):
 
 
 # 사용자 정의 모양으로 QR 코드 이미지 생성 함수 (PNG)
-def draw_custom_shape_image(qr_object, box_size, border, fill_color, back_color, pattern_shape, corner_radius, cell_gap, finder_pattern_shape,):
+def draw_custom_shape_image(
+    qr_object, box_size, border, fill_color, back_color,
+    pattern_shape, general_corner_radius, finder_corner_radius,
+    general_cell_gap, finder_cell_gap, finder_pattern_shape,
+):
     if not qr_object:
         return None
 
     img_size = (qr_object.modules_count + 2 * border) * box_size
     img = Image.new('RGB', (img_size, img_size), back_color,)
     draw = ImageDraw.Draw(img)
-
-    # 간격 계산
-    gap_pixels = int(box_size * (cell_gap / 100))
-    effective_box_size = box_size - gap_pixels
 
     def draw_shape(draw, xy, shape, fill, corner_radius,):
         x1, y1, x2, y2 = xy
@@ -195,6 +189,14 @@ def draw_custom_shape_image(qr_object, box_size, border, fill_color, back_color,
                 x = (c + border) * box_size
                 y = (r + border) * box_size
 
+                # 간격 계산
+                if is_finder_pattern:
+                    gap_pixels = int(box_size * (finder_cell_gap / 100))
+                    current_corner_radius = finder_corner_radius
+                else:
+                    gap_pixels = int(box_size * (general_cell_gap / 100))
+                    current_corner_radius = general_corner_radius
+
                 # 간격을 적용한 새로운 좌표 계산
                 current_shape = finder_pattern_shape if is_finder_pattern else pattern_shape
 
@@ -204,7 +206,7 @@ def draw_custom_shape_image(qr_object, box_size, border, fill_color, back_color,
                 new_y_end = y + box_size - (gap_pixels - gap_pixels // 2)
                 draw_coords = [new_x, new_y, new_x_end, new_y_end]
 
-                draw_shape(draw, draw_coords, current_shape, fill_color, corner_radius,)
+                draw_shape(draw, draw_coords, current_shape, fill_color, current_corner_radius,)
 
     return img
 
@@ -262,8 +264,10 @@ def reset_all_settings():
     st.session_state.file_format_select = "PNG"
     st.session_state.pattern_shape_select = lang_messages['pattern_shape_square']
     st.session_state.finder_pattern_shape_select = lang_messages['pattern_shape_square']
-    st.session_state.corner_radius_input = 25
-    st.session_state.cell_gap_input = 0
+    st.session_state.general_corner_radius_input = 25
+    st.session_state.finder_corner_radius_input = 25
+    st.session_state.general_cell_gap_input = 0
+    st.session_state.finder_cell_gap_input = 0
     st.session_state.jpg_quality_input = 70
 
 # 언어 변경 콜백 함수
@@ -285,8 +289,10 @@ def set_language():
     current_file_format = st.session_state.get('file_format_select', "PNG")
     current_pattern_shape = st.session_state.get('pattern_shape_select', messages[old_lang]['pattern_shape_square'])
     current_finder_shape = st.session_state.get('finder_pattern_shape_select', messages[old_lang]['pattern_shape_square'])
-    current_corner_radius = st.session_state.get('corner_radius_input', 25)
-    current_cell_gap = st.session_state.get('cell_gap_input', 0)
+    current_general_corner_radius = st.session_state.get('general_corner_radius_input', 25)
+    current_finder_corner_radius = st.session_state.get('finder_corner_radius_input', 25)
+    current_general_cell_gap = st.session_state.get('general_cell_gap_input', 0)
+    current_finder_cell_gap = st.session_state.get('finder_cell_gap_input', 0)
     current_jpg_quality = st.session_state.get('jpg_quality_input', 70)
 
 
@@ -353,8 +359,10 @@ def set_language():
     st.session_state.filename_input_key = current_filename
     st.session_state.strip_option = current_strip_option
     st.session_state.file_format_select = current_file_format
-    st.session_state.corner_radius_input = current_corner_radius
-    st.session_state.cell_gap_input = current_cell_gap
+    st.session_state.general_corner_radius_input = current_general_corner_radius
+    st.session_state.finder_corner_radius_input = current_finder_corner_radius
+    st.session_state.general_cell_gap_input = current_general_cell_gap
+    st.session_state.finder_cell_gap_input = current_finder_cell_gap
     st.session_state.jpg_quality_input = current_jpg_quality
 
 
@@ -478,33 +486,54 @@ with col1:
         )
 
     # 둥근사각 전용 슬라이더
-    if pattern_shape == lang_messages['pattern_shape_rounded'] or finder_pattern_shape == lang_messages['pattern_shape_rounded']:
+    is_general_rounded = pattern_shape == lang_messages['pattern_shape_rounded']
+    is_finder_rounded = finder_pattern_shape == lang_messages['pattern_shape_rounded']
+    if is_general_rounded or is_finder_rounded:
         corner_radius_disabled = (file_format == "SVG")
         st.caption(lang_messages['corner_radius_warning'])
-        corner_radius = st.slider(
-            lang_messages['corner_radius_label'],
-            min_value=0,
-            max_value=50,
-            value=st.session_state.corner_radius_input,
-            help=lang_messages['corner_radius_help'],
-            key="corner_radius_input",
-            disabled=corner_radius_disabled,
-        )
+        col_corner_1, col_corner_2 = st.columns(2)
+        with col_corner_1:
+            if is_general_rounded:
+                general_corner_radius = st.slider(
+                    lang_messages['general_corner_radius_label'],
+                    min_value=0, max_value=50, value=st.session_state.general_corner_radius_input,
+                    help=lang_messages['general_corner_radius_help'], key="general_corner_radius_input",
+                    disabled=corner_radius_disabled,
+                )
+            else:
+                general_corner_radius = 0
+        with col_corner_2:
+            if is_finder_rounded:
+                finder_corner_radius = st.slider(
+                    lang_messages['finder_corner_radius_label'],
+                    min_value=0, max_value=50, value=st.session_state.finder_corner_radius_input,
+                    help=lang_messages['finder_corner_radius_help'], key="finder_corner_radius_input",
+                    disabled=corner_radius_disabled,
+                )
+            else:
+                finder_corner_radius = 0
     else:
-        corner_radius = 0
+        general_corner_radius = 0
+        finder_corner_radius = 0
 
     # 패턴 간격 슬라이더 (사각 제외)
     cell_gap_disabled = (file_format == "SVG")
     st.caption(lang_messages['cell_gap_warning'])
-    cell_gap = st.slider(
-        lang_messages['cell_gap_label'],
-        min_value=0,
-        max_value=40,
-        value=st.session_state.cell_gap_input,
-        help=lang_messages['cell_gap_help'],
-        disabled=cell_gap_disabled,
-        key="cell_gap_input",
-    )
+    col_gap_1, col_gap_2 = st.columns(2)
+    with col_gap_1:
+        general_cell_gap = st.slider(
+            lang_messages['general_cell_gap_label'],
+            min_value=0, max_value=40, value=st.session_state.general_cell_gap_input,
+            help=lang_messages['general_cell_gap_help'], disabled=cell_gap_disabled,
+            key="general_cell_gap_input",
+        )
+    with col_gap_2:
+        finder_cell_gap = st.slider(
+            lang_messages['finder_cell_gap_label'],
+            min_value=0, max_value=40, value=st.session_state.finder_cell_gap_input,
+            help=lang_messages['finder_cell_gap_help'], disabled=cell_gap_disabled,
+            key="finder_cell_gap_input",
+        )
 
 #========================================================================================================================================================================
 
@@ -658,8 +687,10 @@ with col2:
                     preview_image_display = draw_custom_shape_image(
                         qr, int(st.session_state.box_size_input), int(st.session_state.border_input),
                         pattern_color, bg_color, st.session_state.pattern_shape_select,
-                        st.session_state.corner_radius_input,
-                        st.session_state.cell_gap_input,
+                        st.session_state.general_corner_radius_input,
+                        st.session_state.finder_corner_radius_input,
+                        st.session_state.general_cell_gap_input,
+                        st.session_state.finder_cell_gap_input,
                         st.session_state.finder_pattern_shape_select,
                     )
                     img_buffer = io.BytesIO()
@@ -689,8 +720,10 @@ with col2:
                     preview_image_display = draw_custom_shape_image(
                         qr, int(st.session_state.box_size_input), int(st.session_state.border_input),
                         "black", "white", lang_messages['pattern_shape_square'],
-                        st.session_state.corner_radius_input,
-                        st.session_state.cell_gap_input,
+                        st.session_state.general_corner_radius_input,
+                        st.session_state.finder_corner_radius_input,
+                        st.session_state.general_cell_gap_input,
+                        st.session_state.finder_cell_gap_input,
                         lang_messages['pattern_shape_square'],
                     )
         except Exception as e:
