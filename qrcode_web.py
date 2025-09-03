@@ -30,13 +30,6 @@ from messages import messages
 from PIL import Image, ImageDraw
 
 
-# 페이지 설정
-st.set_page_config(
-    page_title="QR 코드 생성기",
-    page_icon="🔲",
-    layout="wide",
-)
-
 # 오류 복원 수준 옵션과 상수 매핑
 error_correction_map = {
     'low': qrcode.constants.ERROR_CORRECT_L,
@@ -89,6 +82,19 @@ if 'finder_corner_radius_input' not in st.session_state:
     st.session_state.finder_corner_radius_input = 25
 if 'finder_cell_gap_input' not in st.session_state:
     st.session_state.finder_cell_gap_input = 0
+
+# 언어에 따른 페이지 제목 매핑
+dynamic_page_titles = {
+    "ko": "QR 코드 생성기",
+    "en": "QR Code Generator"
+}
+
+# 페이지 설정
+st.set_page_config(
+    page_title=dynamic_page_titles[st.session_state.lang],
+    page_icon="🔲",
+    layout="wide",
+)
 
 
 # 현재 언어 설정 불러오기
