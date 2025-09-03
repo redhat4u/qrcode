@@ -351,13 +351,23 @@ def set_language():
         old_finder_shape_key = pattern_shape_map_old_lang.get(current_finder_shape, 'square')
         st.session_state.finder_pattern_shape_select = pattern_shape_map_new_lang.get(old_finder_shape_key, messages[new_lang]['pattern_shape_square'])
 
+        # 색상 선택 값도 변환
+        if current_pattern_color_choice == messages[old_lang]['custom_color_select']:
+            st.session_state.pattern_color_select = messages[new_lang]['custom_color_select']
+        else:
+            st.session_state.pattern_color_select = current_pattern_color_choice
+
+        if current_bg_color_choice == messages[old_lang]['custom_color_select']:
+            st.session_state.bg_color_select = messages[new_lang]['custom_color_select']
+        else:
+            st.session_state.bg_color_select = current_bg_color_choice
+
+
     # 언어 변경 후, 저장했던 값들을 다시 복원
     st.session_state.qr_input_area = current_qr_data
     st.session_state.box_size_input = current_box_size
     st.session_state.border_input = current_border
     st.session_state.mask_pattern_select = current_mask_pattern
-    st.session_state.pattern_color_select = current_pattern_color_choice
-    st.session_state.bg_color_select = current_bg_color_choice
     st.session_state.custom_pattern_color_input_key = current_custom_pattern_color
     st.session_state.custom_bg_color_input_key = current_custom_bg_color
     st.session_state.filename_input_key = current_filename
@@ -689,7 +699,6 @@ with col2:
             if qr:
                 preview_qr_object = qr
                 if file_format in ["PNG", "JPG"]:
-                    # PNG/JPG 미리보기
                     preview_image_display = draw_custom_shape_image(
                         qr, int(st.session_state.box_size_input), int(st.session_state.border_input),
                         pattern_color, bg_color, st.session_state.pattern_shape_select,
@@ -714,24 +723,23 @@ with col2:
                     download_data = img_buffer.getvalue()
 
                 else: # SVG
-                    # SVG 다운로드 데이터 생성 (색상 조정 포함)
                     svg_data, _ = generate_qr_code_svg(
                         current_data, int(st.session_state.box_size_input), int(st.session_state.border_input), error_correction,
-                        int(st.session_state.mask_pattern_select), pattern_color, bg_color,
+                        int(st.session_state.mask_pattern_select), "black", "white",
                     )
                     download_data = svg_data.encode('utf-8')
                     download_mime = "image/svg+xml"
                     download_extension = ".svg"
 
-                    # SVG 미리보기를 위한 이미지 생성 (간격 0으로)
+                    # SVG 미리보기를 위한 이미지 생성
                     preview_image_display = draw_custom_shape_image(
                         qr, int(st.session_state.box_size_input), int(st.session_state.border_input),
-                        "black", "white", lang_messages['pattern_shape_square'], # SVG는 무조건 사각형으로 미리보기
-                        lang_messages['pattern_shape_square'], # SVG는 무조건 사각형으로 미리보기
+                        "black", "white", lang_messages['pattern_shape_square'],
+                        lang_messages['pattern_shape_square'],
                         st.session_state.corner_radius_input,
                         st.session_state.finder_corner_radius_input,
-                        0, # SVG는 간격을 지원하지 않으므로 미리보기에서 간격 0으로 설정
-                        0,
+                        st.session_state.cell_gap_input,
+                        st.session_state.finder_cell_gap_input,
                     )
         except Exception as e:
             st.error(f"{lang_messages['error_occurred']}: {str(e)}")
@@ -756,8 +764,8 @@ with col2:
 ---
 - **{lang_messages['qr_size_formula']}**
 ---
-- **{lang_messages['qr_pattern_color'].format(color=pattern_color)}**
-- **{lang_messages['qr_bg_color'].format(color=bg_color)}**
+- **{lang_messages['qr_pattern_color'].format(color='black' if file_format == 'SVG' else pattern_color)}**
+- **{lang_messages['qr_bg_color'].format(color='white' if file_format == 'SVG' else bg_color)}**
             """)
 
         # 다운로드 섹션의 위치를 미리보기 아래로 이동
