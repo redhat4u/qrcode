@@ -357,6 +357,7 @@ def set_language():
             messages[old_lang]['pattern_shape_diamond']: 'diamond',
             messages[old_lang]['pattern_shape_star']: 'star',
             messages[old_lang]['pattern_shape_cross']: 'cross',
+            messages[old_lang]['pattern_shape_x']: 'x',
         }
         
         pattern_shape_map_new_lang = {
@@ -366,6 +367,7 @@ def set_language():
             'diamond': messages[new_lang]['pattern_shape_diamond'],
             'star': messages[new_lang]['pattern_shape_star'],
             'cross': messages[new_lang]['pattern_shape_cross'],
+            'x': messages[new_lang]['pattern_shape_x'],
         }
 
         # 기존 선택된 값을 새 언어의 값으로 업데이트
