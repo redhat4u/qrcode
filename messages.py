@@ -134,6 +134,7 @@ messages = {
         "pattern_shape_star": "별",
         "pattern_shape_cross": "십자가",
         "pattern_shape_x": "엑스",
+        "pattern_shape_donut": "도넛",
         "custom_color_select": "<직접 입력>",
     },
     "en": {
@@ -269,6 +270,7 @@ messages = {
         "pattern_shape_star": "Star",
         "pattern_shape_cross": "Cross",
         "pattern_shape_x": "X",
+        "pattern_shape_donut": "Donut",
         "custom_color_select": "<Custom Input>",
     },
 }
