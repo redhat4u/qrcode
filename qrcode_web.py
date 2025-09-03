@@ -40,7 +40,7 @@ st.set_page_config(
     layout="wide",
 )
 
-# 기본 설정값을 초기화하는 함수
+# 기본 설정값을 초기화하는 함수 (언어 독립적인 값으로 수정)
 def reset_language_defaults():
     st.session_state.error_correction_select = "low"
     st.session_state.pattern_shape_select = "square"
@@ -55,6 +55,7 @@ def reset_language_defaults():
     st.session_state.jpg_quality_input = 70
     st.session_state.strip_option = True
     st.session_state.file_format_select = "PNG"
+
 
 # 세션 상태 초기화
 if 'lang' not in st.session_state:
