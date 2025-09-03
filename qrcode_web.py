@@ -182,14 +182,11 @@ def draw_custom_shape_image(qr_object, box_size, border, fill_color, back_color,
                 # 간격을 적용한 새로운 좌표 계산
                 current_shape = finder_pattern_shape if is_finder_pattern else pattern_shape
 
-                if current_shape != lang_messages['pattern_shape_square']:
-                    new_x = x + gap_pixels // 2
-                    new_y = y + gap_pixels // 2
-                    new_x_end = x + box_size - (gap_pixels - gap_pixels // 2)
-                    new_y_end = y + box_size - (gap_pixels - gap_pixels // 2)
-                    draw_coords = [new_x, new_y, new_x_end, new_y_end]
-                else:
-                    draw_coords = [x, y, x + box_size, y + box_size,]
+                new_x = x + gap_pixels // 2
+                new_y = y + gap_pixels // 2
+                new_x_end = x + box_size - (gap_pixels - gap_pixels // 2)
+                new_y_end = y + box_size - (gap_pixels - gap_pixels // 2)
+                draw_coords = [new_x, new_y, new_x_end, new_y_end]
 
                 draw_shape(draw, draw_coords, current_shape, fill_color, corner_radius,)
 
