@@ -210,7 +210,7 @@ def draw_custom_shape_image(qr_object, box_size, border, fill_color, back_color,
             # X자 모양은 두 개의 십자형 사각형으로 구현할 수 있습니다.
             x1, y1, x2, y2 = xy
             effective_size = x2 - x1
-            x_width = effective_size * 0.2 # 엑스 너비를 조정할 수 있습니다.
+            x_width = effective_size * 0.22 # 엑스 너비를 조정할 수 있습니다.
             # 대각선 1: 왼쪽 위에서 오른쪽 아래로
             draw.polygon([(x1, y1 + x_width), (x1 + x_width, y1), (x2, y2 - x_width), (x2 - x_width, y2)], fill=fill,)
             # 대각선 2: 오른쪽 위에서 왼쪽 아래로
