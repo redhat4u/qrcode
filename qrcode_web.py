@@ -378,7 +378,7 @@ def set_language():
             messages[old_lang]['pattern_shape_star']: 'star',
             messages[old_lang]['pattern_shape_cross']: 'cross',
             messages[old_lang]['pattern_shape_x']: 'x',
-            messages[old_lang]['pattern_shape_donut']: 'x',
+            messages[old_lang]['pattern_shape_donut']: 'donut',
         }
         
         pattern_shape_map_new_lang = {
