@@ -206,15 +206,17 @@ def draw_custom_shape_image(qr_object, box_size, border, fill_color, back_color,
             cross_width = effective_size_after_gap * 0.3 # 십자 너비를 조정할 수 있습니다.
             draw.rectangle([new_x, y_center - cross_width/2, new_x_end, y_center + cross_width/2], fill=fill,)
             draw.rectangle([x_center - cross_width/2, new_y, x_center + cross_width/2, new_y_end], fill=fill,)
-        elif shape == lang_messages['pattern_shape_x']:
-            # X자 모양은 두 개의 십자형 사각형으로 구현할 수 있습니다.
-            x1, y1, x2, y2 = xy
-            effective_size = x2 - x1
-            x_width = effective_size * 0.2 # 엑스 너비를 조정할 수 있습니다.
+elif shape == lang_messages['pattern_shape_x']:
+            # 'X'자 모양은 두 개의 겹치는 대각선으로 구현합니다.
+            # 간격이 적용된 좌표를 사용
+            x_center = (new_x + new_x_end) / 2
+            y_center = (new_y + new_y_end) / 2
+            effective_size = new_x_end - new_x # 간격이 적용된 유효한 크기
+            x_width = effective_size * 0.2 # 엑스 너비 조정
             # 대각선 1: 왼쪽 위에서 오른쪽 아래로
-            draw.polygon([(x1, y1 + x_width), (x1 + x_width, y1), (x2, y2 - x_width), (x2 - x_width, y2)], fill=fill,)
+            draw.polygon([(new_x, new_y + x_width), (new_x + x_width, new_y), (new_x_end, new_y_end - x_width), (new_x_end - x_width, new_y_end)], fill=fill,)
             # 대각선 2: 오른쪽 위에서 왼쪽 아래로
-            draw.polygon([(x2, y1 + x_width), (x2 - x_width, y1), (x1, y2 - x_width), (x1 + x_width, y2)], fill=fill,)
+            draw.polygon([(new_x_end, new_y + x_width), (new_x_end - x_width, new_y), (new_x, new_y_end - x_width), (new_x + x_width, new_y_end)], fill=fill,)
 
     for r in range(qr_object.modules_count):
         for c in range(qr_object.modules_count):
