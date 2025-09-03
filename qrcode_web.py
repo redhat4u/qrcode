@@ -689,6 +689,7 @@ with col2:
             if qr:
                 preview_qr_object = qr
                 if file_format in ["PNG", "JPG"]:
+                    # PNG/JPG 미리보기
                     preview_image_display = draw_custom_shape_image(
                         qr, int(st.session_state.box_size_input), int(st.session_state.border_input),
                         pattern_color, bg_color, st.session_state.pattern_shape_select,
@@ -713,23 +714,24 @@ with col2:
                     download_data = img_buffer.getvalue()
 
                 else: # SVG
+                    # SVG 다운로드 데이터 생성 (색상 조정 포함)
                     svg_data, _ = generate_qr_code_svg(
                         current_data, int(st.session_state.box_size_input), int(st.session_state.border_input), error_correction,
-                        int(st.session_state.mask_pattern_select), "black", "white",
+                        int(st.session_state.mask_pattern_select), pattern_color, bg_color,
                     )
                     download_data = svg_data.encode('utf-8')
                     download_mime = "image/svg+xml"
                     download_extension = ".svg"
 
-                    # SVG 미리보기를 위한 이미지 생성
+                    # SVG 미리보기를 위한 이미지 생성 (간격 0으로)
                     preview_image_display = draw_custom_shape_image(
                         qr, int(st.session_state.box_size_input), int(st.session_state.border_input),
-                        "black", "white", lang_messages['pattern_shape_square'],
-                        lang_messages['pattern_shape_square'],
+                        pattern_color, bg_color, st.session_state.pattern_shape_select,
+                        st.session_state.finder_pattern_shape_select,
                         st.session_state.corner_radius_input,
                         st.session_state.finder_corner_radius_input,
-                        st.session_state.cell_gap_input,
-                        st.session_state.finder_cell_gap_input,
+                        0, # SVG는 간격을 지원하지 않으므로 미리보기에서 간격 0으로 설정
+                        0,
                     )
         except Exception as e:
             st.error(f"{lang_messages['error_occurred']}: {str(e)}")
@@ -754,8 +756,8 @@ with col2:
 ---
 - **{lang_messages['qr_size_formula']}**
 ---
-- **{lang_messages['qr_pattern_color'].format(color='black' if file_format == 'SVG' else pattern_color)}**
-- **{lang_messages['qr_bg_color'].format(color='white' if file_format == 'SVG' else bg_color)}**
+- **{lang_messages['qr_pattern_color'].format(color=pattern_color)}**
+- **{lang_messages['qr_bg_color'].format(color=bg_color)}**
             """)
 
         # 다운로드 섹션의 위치를 미리보기 아래로 이동
