@@ -1,18 +1,30 @@
+"""
+QR 코드 생성 웹앱 - Streamlit 버전
+휴대폰에서도 사용 가능
+
+실행 방법:
+1. pip install streamlit qrcode[pil]
+2. streamlit run qrcode_web.py
+
+또는 온라인에서 실행:
+- Streamlit Cloud, Heroku, Replit 등에 배포 가능
+"""
+
 # qrcode_web.py
 
 import streamlit as st
 import qrcode
 import io
-from datetime import datetime
-from zoneinfo import ZoneInfo
-from PIL import Image, ImageDraw
-import hashlib
 import re
+import math
+import hashlib
 import base64 # SVG 이미지 표시를 위해 추가
 import qrcode.image.svg # SVG 생성을 위해 추가
-import math
-
+from datetime import datetime
+from zoneinfo import ZoneInfo
 from messages import messages
+from PIL import Image, ImageDraw
+
 
 # 페이지 설정
 st.set_page_config(
@@ -82,7 +94,7 @@ def is_valid_color(color_name):
 
 
 # QR 코드 데이터 생성
-def get_qr_data_object(data, box_size, border, error_correction, mask_pattern):
+def get_qr_data_object(data, box_size, border, error_correction, mask_pattern,):
     try:
         qr = qrcode.QRCode(
             version=1,
@@ -91,7 +103,7 @@ def get_qr_data_object(data, box_size, border, error_correction, mask_pattern):
             border=border,
             mask_pattern=mask_pattern,
         )
-        qr.add_data(data, optimize=0)
+        qr.add_data(data, optimize=0,)
         qr.make(fit=True)
         return qr
     except Exception as e:
@@ -100,35 +112,35 @@ def get_qr_data_object(data, box_size, border, error_correction, mask_pattern):
 
 
 # 사용자 정의 모양으로 QR 코드 이미지 생성 함수 (PNG)
-def draw_custom_shape_image(qr_object, box_size, border, fill_color, back_color, pattern_shape, corner_radius, cell_gap, finder_pattern_shape):
+def draw_custom_shape_image(qr_object, box_size, border, fill_color, back_color, pattern_shape, corner_radius, cell_gap, finder_pattern_shape,):
     if not qr_object:
         return None
 
     img_size = (qr_object.modules_count + 2 * border) * box_size
-    img = Image.new('RGB', (img_size, img_size), back_color)
+    img = Image.new('RGB', (img_size, img_size), back_color,)
     draw = ImageDraw.Draw(img)
     
     # 간격 계산
     gap_pixels = int(box_size * (cell_gap / 100))
     effective_box_size = box_size - gap_pixels
 
-    def draw_shape(draw, xy, shape, fill, corner_radius):
+    def draw_shape(draw, xy, shape, fill, corner_radius,):
         x1, y1, x2, y2 = xy
         effective_size = x2 - x1
         if shape == lang_messages['pattern_shape_square']:
-            draw.rectangle(xy, fill=fill)
+            draw.rectangle(xy, fill=fill,)
         elif shape == lang_messages['pattern_shape_rounded']:
             radius = int(effective_size * (corner_radius / 100))
-            draw.rectangle([x1 + radius, y1, x2 - radius, y2], fill=fill)
-            draw.rectangle([x1, y1 + radius, x2, y2 - radius], fill=fill)
-            draw.pieslice([x1, y1, x1 + radius * 2, y1 + radius * 2], 180, 270, fill=fill)
-            draw.pieslice([x2 - radius * 2, y1, x2, y1 + radius * 2], 270, 360, fill=fill)
-            draw.pieslice([x1, y2 - radius * 2, x1 + radius * 2, y2], 90, 180, fill=fill)
-            draw.pieslice([x2 - radius * 2, y2 - radius * 2, x2, y2], 0, 90, fill=fill)
+            draw.rectangle([x1 + radius, y1, x2 - radius, y2], fill=fill,)
+            draw.rectangle([x1, y1 + radius, x2, y2 - radius], fill=fill,)
+            draw.pieslice([x1, y1, x1 + radius * 2, y1 + radius * 2], 180, 270, fill=fill,)
+            draw.pieslice([x2 - radius * 2, y1, x2, y1 + radius * 2], 270, 360, fill=fill,)
+            draw.pieslice([x1, y2 - radius * 2, x1 + radius * 2, y2], 90, 180, fill=fill,)
+            draw.pieslice([x2 - radius * 2, y2 - radius * 2, x2, y2], 0, 90, fill=fill,)
         elif shape == lang_messages['pattern_shape_circle']:
-            draw.ellipse(xy, fill=fill)
+            draw.ellipse(xy, fill=fill,)
         elif shape == lang_messages['pattern_shape_diamond']:
-            draw.polygon([(x1 + effective_size/2, y1), (x1 + effective_size, y1 + effective_size/2), (x1 + effective_size/2, y1 + effective_size), (x1, y1 + effective_size/2)], fill=fill)
+            draw.polygon([(x1 + effective_size/2, y1), (x1 + effective_size, y1 + effective_size/2), (x1 + effective_size/2, y1 + effective_size), (x1, y1 + effective_size/2)], fill=fill,)
         elif shape == lang_messages['pattern_shape_star']:
             x_center = (x1 + x2) / 2
             y_center = (y1 + y2) / 2
@@ -144,19 +156,19 @@ def draw_custom_shape_image(qr_object, box_size, border, fill_color, back_color,
                 x_inner = x_center + radius_inner * math.cos(angle_inner)
                 y_inner = y_center + radius_inner * math.sin(angle_inner)
                 points.append((x_inner, y_inner))
-            draw.polygon(points, fill=fill)
+            draw.polygon(points, fill=fill,)
         elif shape == lang_messages['pattern_shape_cross']:
             x_center = (x1 + x2) / 2
             y_center = (y1 + y2) / 2
             cross_width = (x2 - x1) * 0.3
-            draw.rectangle([x1, y_center - cross_width/2, x2, y_center + cross_width/2], fill=fill)
-            draw.rectangle([x_center - cross_width/2, y1, x_center + cross_width/2, y2], fill=fill)
+            draw.rectangle([x1, y_center - cross_width/2, x2, y_center + cross_width/2], fill=fill,)
+            draw.rectangle([x_center - cross_width/2, y1, x_center + cross_width/2, y2], fill=fill,)
     
     # 세 개의 큰 파인더 패턴의 위치를 미리 계산
     finder_pattern_coords = [
         (border * box_size, border * box_size),
         (border * box_size, (qr_object.modules_count - 7 + border) * box_size),
-        ((qr_object.modules_count - 7 + border) * box_size, border * box_size)
+        ((qr_object.modules_count - 7 + border) * box_size, border * box_size),
     ]
     
     for r in range(qr_object.modules_count):
@@ -180,15 +192,15 @@ def draw_custom_shape_image(qr_object, box_size, border, fill_color, back_color,
                     new_y_end = y + box_size - (gap_pixels - gap_pixels // 2)
                     draw_coords = [new_x, new_y, new_x_end, new_y_end]
                 else:
-                    draw_coords = [x, y, x + box_size, y + box_size]
+                    draw_coords = [x, y, x + box_size, y + box_size,]
 
-                draw_shape(draw, draw_coords, current_shape, fill_color, corner_radius)
+                draw_shape(draw, draw_coords, current_shape, fill_color, corner_radius,)
 
     return img
 
 
 # QR 코드 SVG 생성 함수
-def generate_qr_code_svg(data, box_size, border, error_correction, mask_pattern, fill_color, back_color):
+def generate_qr_code_svg(data, box_size, border, error_correction, mask_pattern, fill_color, back_color,):
     try:
         qr = qrcode.QRCode(
             version=1,
@@ -206,8 +218,8 @@ def generate_qr_code_svg(data, box_size, border, error_correction, mask_pattern,
         img_svg.save(svg_buffer)
         svg_data = svg_buffer.getvalue().decode('utf-8')
         
-        svg_data = svg_data.replace('fill="black"', f'fill="{fill_color}"', 1) 
-        svg_data = svg_data.replace('fill="white"', f'fill="{back_color}"', 1)
+        svg_data = svg_data.replace('fill="black"', f'fill="{fill_color}"', 1,) 
+        svg_data = svg_data.replace('fill="white"', f'fill="{back_color}"', 1,)
         
         return svg_data, qr
     except Exception as e:
@@ -249,21 +261,22 @@ def set_language():
     # 선택된 언어 이름을 언어 코드로 변환
     lang_map = {"한국어": "ko", "English": "en"}
     st.session_state.lang = lang_map.get(st.session_state.lang_select, "ko")
-    print("Language changed to:", st.session_state.lang)
-    
+
 #[메인]====================================================================================================================================================================
+
+st.title(lang_messages['title'])
+st.markdown("---")
 
 # 언어 선택 드롭다운
 lang_options = {"한국어": "ko", "English": "en"}
 lang_selected_name = st.selectbox(
-    "Select Language" if st.session_state.lang == "en" else "언어 선택",
+    "Select Language" if st.session_state.lang == "en" else "언어 선택(Select Language)",
     options=list(lang_options.keys()),
     on_change=set_language,
     key="lang_select",
-    index=list(lang_options.values()).index(st.session_state.lang)
+    index=list(lang_options.values()).index(st.session_state.lang),
 )
 
-st.title(lang_messages['title'])
 st.markdown("---")
 
 # 레이아웃 설정 (2개 컬럼)
@@ -300,7 +313,7 @@ with col1:
         lang_messages['strip_option'],
         value=st.session_state.strip_option,
         key="strip_option",
-        help=lang_messages['strip_option_help']
+        help=lang_messages['strip_option_help'],
     )
 
     # 입력 내용 삭제 버튼
@@ -336,7 +349,7 @@ with col1:
             max_value=100,
             value=st.session_state.jpg_quality_input,
             key="jpg_quality_input",
-            help=lang_messages['jpg_quality_help']
+            help=lang_messages['jpg_quality_help'],
         )
     else:
         jpg_quality = 70
@@ -350,7 +363,7 @@ with col1:
     # 두 개의 패턴 모양 선택 옵션 추가
     col_pattern_shape, col_finder_shape = st.columns(2)
     
-    pattern_options = (lang_messages['pattern_shape_square'], lang_messages['pattern_shape_rounded'], lang_messages['pattern_shape_circle'], lang_messages['pattern_shape_diamond'], lang_messages['pattern_shape_star'], lang_messages['pattern_shape_cross'])
+    pattern_options = (lang_messages['pattern_shape_square'], lang_messages['pattern_shape_rounded'], lang_messages['pattern_shape_circle'], lang_messages['pattern_shape_diamond'], lang_messages['pattern_shape_star'], lang_messages['pattern_shape_cross'],)
     
     with col_pattern_shape:
         pattern_shape = st.selectbox(
@@ -379,7 +392,7 @@ with col1:
             value=st.session_state.corner_radius_input,
             help=lang_messages['corner_radius_help'],
             key="corner_radius_input",
-            disabled=corner_radius_disabled
+            disabled=corner_radius_disabled,
         )
     else:
         corner_radius = 0
@@ -419,13 +432,13 @@ with col1:
         pattern_color_choice = st.selectbox(
             lang_messages['pattern_color_label'], colors, 
             key="pattern_color_select", 
-            disabled=file_format_is_svg
+            disabled=file_format_is_svg,
         )
     with col1_4:
         bg_color_choice = st.selectbox(
             lang_messages['bg_color_label'], colors, 
             key="bg_color_select", 
-            disabled=file_format_is_svg
+            disabled=file_format_is_svg,
         )
 
     st.markdown(lang_messages['custom_color_info'])
@@ -446,8 +459,8 @@ with col1:
             key="custom_bg_color_input_key",
         )
     
-    pattern_color = st.session_state.get('custom_pattern_color_input_key', '').strip() if pattern_color_choice == lang_messages['custom_color_select'] else pattern_color_choice
-    bg_color = st.session_state.get('custom_bg_color_input_key', '').strip() if bg_color_choice == lang_messages['custom_color_select'] else bg_color_choice
+    pattern_color = st.session_state.get('custom_pattern_color_input_key', '',).strip() if pattern_color_choice == lang_messages['custom_color_select'] else pattern_color_choice
+    bg_color = st.session_state.get('custom_bg_color_input_key', '',).strip() if bg_color_choice == lang_messages['custom_color_select'] else bg_color_choice
 
 #========================================================================================================================================================================
 
@@ -457,8 +470,8 @@ with col1:
 
     col1_1, col1_2 = st.columns(2)
     with col1_1:
-        box_size = st.number_input(lang_messages['box_size_label'], min_value=1, max_value=100, key="box_size_input")
-        border = st.number_input(lang_messages['border_label'], min_value=0, max_value=10, key="border_input")
+        box_size = st.number_input(lang_messages['box_size_label'], min_value=1, max_value=100, key="box_size_input",)
+        border = st.number_input(lang_messages['border_label'], min_value=0, max_value=10, key="border_input",)
 
     with col1_2:
         error_correction_options = {
@@ -467,9 +480,9 @@ with col1:
             lang_messages['error_correction_quartile_select']: qrcode.constants.ERROR_CORRECT_Q,
             lang_messages['error_correction_high_select']: qrcode.constants.ERROR_CORRECT_H,
         }
-        error_correction_choice = st.selectbox(lang_messages['error_correction_label'], list(error_correction_options.keys()), key="error_correction_select")
+        error_correction_choice = st.selectbox(lang_messages['error_correction_label'], list(error_correction_options.keys()), key="error_correction_select",)
         error_correction = error_correction_options[error_correction_choice]
-        mask_pattern = st.selectbox(lang_messages['mask_pattern_label'], options=list(range(8)), key="mask_pattern_select")
+        mask_pattern = st.selectbox(lang_messages['mask_pattern_label'], options=list(range(8)), key="mask_pattern_select",)
 
 
 #========================================================================================================================================================================
@@ -537,7 +550,7 @@ with col2:
                         pattern_color, bg_color, st.session_state.pattern_shape_select,
                         st.session_state.corner_radius_input,
                         st.session_state.cell_gap_input,
-                        st.session_state.finder_pattern_shape_select
+                        st.session_state.finder_pattern_shape_select,
                     )
                     img_buffer = io.BytesIO()
                     if file_format == "PNG":
@@ -556,7 +569,7 @@ with col2:
                 else: # SVG
                     svg_data, _ = generate_qr_code_svg(
                         current_data, int(st.session_state.box_size_input), int(st.session_state.border_input), error_correction,
-                        int(st.session_state.mask_pattern_select), "black", "white"
+                        int(st.session_state.mask_pattern_select), "black", "white",
                     )
                     download_data = svg_data.encode('utf-8')
                     download_mime = "image/svg+xml"
@@ -610,7 +623,7 @@ with col2:
             file_name=download_filename,
             mime=download_mime,
             use_container_width=True,
-            help=lang_messages['download_help']
+            help=lang_messages['download_help'],
         )
         
         st.markdown(
