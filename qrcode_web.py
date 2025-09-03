@@ -595,7 +595,7 @@ with col2:
         st.subheader(lang_messages['preview_subheader'])
         col_left, col_center, col_right = st.columns([1, 2, 1])
         with col_center:
-            st.image(preview_image_display, caption=lang_messages['preview_subheader'], width=377)
+            st.image(preview_image_display, caption=lang_messages['preview_subheader'], width=378)
 
         if preview_qr_object:
             st.subheader(lang_messages['qr_info_header'])
