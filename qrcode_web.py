@@ -726,8 +726,8 @@ with col2:
                     # SVG 미리보기를 위한 이미지 생성 (간격 0으로)
                     preview_image_display = draw_custom_shape_image(
                         qr, int(st.session_state.box_size_input), int(st.session_state.border_input),
-                        pattern_color, bg_color, st.session_state.pattern_shape_select,
-                        st.session_state.finder_pattern_shape_select,
+                        pattern_color, bg_color, lang_messages['pattern_shape_square'], # SVG는 무조건 사각형으로 미리보기
+                        lang_messages['pattern_shape_square'], # SVG는 무조건 사각형으로 미리보기
                         st.session_state.corner_radius_input,
                         st.session_state.finder_corner_radius_input,
                         0, # SVG는 간격을 지원하지 않으므로 미리보기에서 간격 0으로 설정
