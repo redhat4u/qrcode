@@ -423,7 +423,7 @@ messages = {
         "sidebar_qr_setting": "QR码设置:",
         "sidebar_error_correction": "纠错级别:",
         "sidebar_mask_pattern": "掩码图案:",
-        "author_info": '© 2025 QR码生成器 | 使用Streamlit制作 | 制作: 류종훈(redhat4u@gmail.com)',
+        "author_info": '© 2025 QR码生成器 | 使用Streamlit制作 | 制作: 柳鐘焄(redhat4u@gmail.com)',
         "main_header": "⚙️ 输入和设置",
         "qr_content_subheader": "📝 QR码内容",
         "max_char_info": "最大可输入字符数根据类型不同，约为2,400~2,900个。",
