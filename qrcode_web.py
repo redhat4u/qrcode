@@ -1,3 +1,24 @@
+"""
+자.. 지금부터 이 코드가 기준이 되는 코드야...
+수정하다 오류나거나 잘못된 방향으로 수정되면 항상 이버전으로
+다시 시작하는 거야.. 알겠지??
+
+테스트해보니 패턴 간격 조절은 일반 패턴과 파일더 패턴 각각 
+따로 조절하도록 해야할 것 같아.. 현재는 조절을 서로 같이 
+사용해서 qr 인식하느데 문제가 있어.. 둥근 모서리 반경도 따로 
+사용하는게 나은거 같아..
+
+QR 코드 생성 웹앱 - Streamlit 버전
+휴대폰에서도 사용 가능
+
+실행 방법:
+1. pip install streamlit qrcode[pil]
+2. streamlit run qrcode_web.py
+
+또는 온라인에서 실행:
+- Streamlit Cloud, Heroku, Replit 등에 배포 가능
+"""
+
 # qrcode_web.py
 
 import streamlit as st
@@ -39,11 +60,10 @@ def reset_language_defaults():
     st.session_state.box_size_input = 20
     st.session_state.border_input = 2
     st.session_state.mask_pattern_select = 2
-    # ✨ 수정: 둥근 모서리 반경과 패턴 간격을 각각 초기화하도록 변경
-    st.session_state.corner_radius_pattern_input = 25
-    st.session_state.corner_radius_finder_input = 25
-    st.session_state.cell_gap_pattern_input = 0
-    st.session_state.cell_gap_finder_input = 0
+    st.session_state.corner_radius_input = 25
+    st.session_state.finder_corner_radius_input = 25
+    st.session_state.cell_gap_input = 0
+    st.session_state.finder_cell_gap_input = 0
     st.session_state.jpg_quality_input = 70
     st.session_state.strip_option = True
     st.session_state.file_format_select = "PNG"
@@ -70,15 +90,10 @@ if 'pattern_color_select' not in st.session_state:
     st.session_state.pattern_color_select = "black"
 if 'bg_color_select' not in st.session_state:
     st.session_state.bg_color_select = "white"
-# ✨ 수정: 새로운 session_state 키 초기화
-if 'corner_radius_pattern_input' not in st.session_state:
-    st.session_state.corner_radius_pattern_input = 25
-if 'corner_radius_finder_input' not in st.session_state:
-    st.session_state.corner_radius_finder_input = 25
-if 'cell_gap_pattern_input' not in st.session_state:
-    st.session_state.cell_gap_pattern_input = 0
-if 'cell_gap_finder_input' not in st.session_state:
-    st.session_state.cell_gap_finder_input = 0
+if 'finder_corner_radius_input' not in st.session_state:
+    st.session_state.finder_corner_radius_input = 25
+if 'finder_cell_gap_input' not in st.session_state:
+    st.session_state.finder_cell_gap_input = 0
 
 
 # 현재 언어 설정 불러오기
@@ -117,15 +132,10 @@ def get_qr_data_object(data, box_size, border, error_correction, mask_pattern,):
         return qr
     except Exception as e:
         st.error(f"{lang_messages['qr_code_data_error']}: {str(e)}")
-        return None, None # 오류 발생 시 None 반환
-
-# ✨ 수정: 함수 시그니처에 새로운 파라미터 추가
+        return None
+    
 # 사용자 정의 모양으로 QR 코드 이미지 생성 함수 (PNG)
-def draw_custom_shape_image(
-    qr_object, box_size, border, fill_color, back_color,
-    pattern_shape, corner_radius_pattern, cell_gap_pattern,
-    finder_pattern_shape, corner_radius_finder, cell_gap_finder
-):
+def draw_custom_shape_image(qr_object, box_size, border, fill_color, back_color, pattern_shape, finder_pattern_shape, pattern_corner_radius, finder_corner_radius, pattern_cell_gap, finder_cell_gap,):
     if not qr_object:
         return None
 
@@ -135,42 +145,35 @@ def draw_custom_shape_image(
 
     def draw_shape(draw, xy, shape, fill, corner_radius, cell_gap,):
         x1, y1, x2, y2 = xy
+        effective_size = x2 - x1
         
-        # ✨ 수정: 패턴 간격을 각각 적용
         gap_pixels = int(box_size * (cell_gap / 100))
-        new_x1 = x1 + gap_pixels // 2
-        new_y1 = y1 + gap_pixels // 2
-        new_x2 = x2 - (gap_pixels - gap_pixels // 2)
-        new_y2 = y2 - (gap_pixels - gap_pixels // 2)
-        draw_coords = [new_x1, new_y1, new_x2, new_y2]
+        new_x = x1 + gap_pixels // 2
+        new_y = y1 + gap_pixels // 2
+        new_x_end = x2 - (gap_pixels - gap_pixels // 2)
+        new_y_end = y2 - (gap_pixels - gap_pixels // 2)
+        draw_coords = [new_x, new_y, new_x_end, new_y_end]
 
-        effective_size = new_x2 - new_x1
+        effective_size_after_gap = new_x_end - new_x
+        
         if shape == lang_messages['pattern_shape_square']:
             draw.rectangle(draw_coords, fill=fill,)
         elif shape == lang_messages['pattern_shape_rounded']:
-            # ✨ 수정: 둥근 모서리 반경을 각각 적용
-            radius = int(effective_size * (corner_radius / 100))
-            if radius > effective_size / 2:
-                radius = int(effective_size / 2) # 반경이 크기를 초과하지 않도록 보정
-
-            # 네 개의 직사각형
-            draw.rectangle([new_x1 + radius, new_y1, new_x2 - radius, new_y2], fill=fill)
-            draw.rectangle([new_x1, new_y1 + radius, new_x2, new_y2 - radius], fill=fill)
-
-            # 네 개의 원 (원의 중심과 반경)
-            draw.pieslice([new_x1, new_y1, new_x1 + radius * 2, new_y1 + radius * 2], 180, 270, fill=fill)
-            draw.pieslice([new_x2 - radius * 2, new_y1, new_x2, new_y1 + radius * 2], 270, 360, fill=fill)
-            draw.pieslice([new_x1, new_y2 - radius * 2, new_x1 + radius * 2, new_y2], 90, 180, fill=fill)
-            draw.pieslice([new_x2 - radius * 2, new_y2 - radius * 2, new_x2, new_y2], 0, 90, fill=fill)
-
+            radius = int(effective_size_after_gap * (corner_radius / 100))
+            draw.rectangle([new_x + radius, new_y, new_x_end - radius, new_y_end], fill=fill,)
+            draw.rectangle([new_x, new_y + radius, new_x_end, new_y_end - radius], fill=fill,)
+            draw.pieslice([new_x, new_y, new_x + radius * 2, new_y + radius * 2], 180, 270, fill=fill,)
+            draw.pieslice([new_x_end - radius * 2, new_y, new_x_end, new_y + radius * 2], 270, 360, fill=fill,)
+            draw.pieslice([new_x, new_y_end - radius * 2, new_x + radius * 2, new_y_end], 90, 180, fill=fill,)
+            draw.pieslice([new_x_end - radius * 2, new_y_end - radius * 2, new_x_end, new_y_end], 0, 90, fill=fill,)
         elif shape == lang_messages['pattern_shape_circle']:
             draw.ellipse(draw_coords, fill=fill,)
         elif shape == lang_messages['pattern_shape_diamond']:
-            draw.polygon([(new_x1 + effective_size/2, new_y1), (new_x1 + effective_size, new_y1 + effective_size/2), (new_x1 + effective_size/2, new_y2), (new_x1, new_y1 + effective_size/2)], fill=fill,)
+            draw.polygon([(new_x + effective_size_after_gap/2, new_y), (new_x + effective_size_after_gap, new_y + effective_size_after_gap/2), (new_x + effective_size_after_gap/2, new_y + effective_size_after_gap), (new_x, new_y + effective_size_after_gap/2)], fill=fill,)
         elif shape == lang_messages['pattern_shape_star']:
-            x_center = (new_x1 + new_x2) / 2
-            y_center = (new_y1 + new_y2) / 2
-            radius_outer = (new_x2 - new_x1) / 2
+            x_center = (new_x + new_x_end) / 2
+            y_center = (new_y + new_y_end) / 2
+            radius_outer = effective_size_after_gap / 2
             radius_inner = radius_outer * 0.4
             points = []
             for i in range(5):
@@ -184,18 +187,11 @@ def draw_custom_shape_image(
                 points.append((x_inner, y_inner))
             draw.polygon(points, fill=fill,)
         elif shape == lang_messages['pattern_shape_cross']:
-            x_center = (new_x1 + new_x2) / 2
-            y_center = (new_y1 + new_y2) / 2
-            cross_width = (new_x2 - new_x1) * 0.3
-            draw.rectangle([new_x1, y_center - cross_width/2, new_x2, y_center + cross_width/2], fill=fill,)
-            draw.rectangle([x_center - cross_width/2, new_y1, x_center + cross_width/2, new_y2], fill=fill,)
-
-    # 세 개의 큰 파인더 패턴의 위치를 미리 계산
-    finder_pattern_coords = [
-        (border * box_size, border * box_size),
-        (border * box_size, (qr_object.modules_count - 7 + border) * box_size),
-        ((qr_object.modules_count - 7 + border) * box_size, border * box_size),
-    ]
+            x_center = (new_x + new_x_end) / 2
+            y_center = (new_y + new_y_end) / 2
+            cross_width = effective_size_after_gap * 0.3
+            draw.rectangle([new_x, y_center - cross_width/2, new_x_end, y_center + cross_width/2], fill=fill,)
+            draw.rectangle([x_center - cross_width/2, new_y, x_center + cross_width/2, new_y_end], fill=fill,)
 
     for r in range(qr_object.modules_count):
         for c in range(qr_object.modules_count):
@@ -208,12 +204,12 @@ def draw_custom_shape_image(
                 x = (c + border) * box_size
                 y = (r + border) * box_size
 
-                # ✨ 수정: 패턴 유형에 따라 다른 모양, 간격, 모서리 반경 적용
                 current_shape = finder_pattern_shape if is_finder_pattern else pattern_shape
-                current_corner_radius = corner_radius_finder if is_finder_pattern else corner_radius_pattern
-                current_cell_gap = cell_gap_finder if is_finder_pattern else cell_gap_pattern
+                current_corner_radius = finder_corner_radius if is_finder_pattern else pattern_corner_radius
+                current_cell_gap = finder_cell_gap if is_finder_pattern else pattern_cell_gap
 
-                draw_shape(draw, [x, y, x + box_size, y + box_size], current_shape, fill_color, current_corner_radius, current_cell_gap)
+                draw_coords = [x, y, x + box_size, y + box_size]
+                draw_shape(draw, draw_coords, current_shape, fill_color, current_corner_radius, current_cell_gap,)
 
     return img
 
@@ -271,13 +267,11 @@ def reset_all_settings():
     st.session_state.file_format_select = "PNG"
     st.session_state.pattern_shape_select = lang_messages['pattern_shape_square']
     st.session_state.finder_pattern_shape_select = lang_messages['pattern_shape_square']
-    # ✨ 수정: 둥근 모서리 반경과 패턴 간격을 각각 초기화하도록 변경
-    st.session_state.corner_radius_pattern_input = 25
-    st.session_state.corner_radius_finder_input = 25
-    st.session_state.cell_gap_pattern_input = 0
-    st.session_state.cell_gap_finder_input = 0
+    st.session_state.corner_radius_input = 25
+    st.session_state.finder_corner_radius_input = 25
+    st.session_state.cell_gap_input = 0
+    st.session_state.finder_cell_gap_input = 0
     st.session_state.jpg_quality_input = 70
-
 
 # 언어 변경 콜백 함수
 def set_language():
@@ -298,11 +292,10 @@ def set_language():
     current_file_format = st.session_state.get('file_format_select', "PNG")
     current_pattern_shape = st.session_state.get('pattern_shape_select', messages[old_lang]['pattern_shape_square'])
     current_finder_shape = st.session_state.get('finder_pattern_shape_select', messages[old_lang]['pattern_shape_square'])
-    # ✨ 수정: 새로운 session_state 키 저장
-    current_corner_radius_pattern = st.session_state.get('corner_radius_pattern_input', 25)
-    current_corner_radius_finder = st.session_state.get('corner_radius_finder_input', 25)
-    current_cell_gap_pattern = st.session_state.get('cell_gap_pattern_input', 0)
-    current_cell_gap_finder = st.session_state.get('cell_gap_finder_input', 0)
+    current_corner_radius = st.session_state.get('corner_radius_input', 25)
+    current_finder_corner_radius = st.session_state.get('finder_corner_radius_input', 25)
+    current_cell_gap = st.session_state.get('cell_gap_input', 0)
+    current_finder_cell_gap = st.session_state.get('finder_cell_gap_input', 0)
     current_jpg_quality = st.session_state.get('jpg_quality_input', 70)
 
 
@@ -369,11 +362,10 @@ def set_language():
     st.session_state.filename_input_key = current_filename
     st.session_state.strip_option = current_strip_option
     st.session_state.file_format_select = current_file_format
-    # ✨ 수정: 새로운 session_state 키 복원
-    st.session_state.corner_radius_pattern_input = current_corner_radius_pattern
-    st.session_state.corner_radius_finder_input = current_corner_radius_finder
-    st.session_state.cell_gap_pattern_input = current_cell_gap_pattern
-    st.session_state.cell_gap_finder_input = current_cell_gap_finder
+    st.session_state.corner_radius_input = current_corner_radius
+    st.session_state.finder_corner_radius_input = current_finder_corner_radius
+    st.session_state.cell_gap_input = current_cell_gap
+    st.session_state.finder_cell_gap_input = current_finder_cell_gap
     st.session_state.jpg_quality_input = current_jpg_quality
 
 
@@ -496,63 +488,64 @@ with col1:
             disabled=pattern_shape_disabled,
         )
 
-    # ✨ 수정: 둥근 모서리 반경을 각각 조절하는 슬라이더 추가
-    if pattern_shape == lang_messages['pattern_shape_rounded'] or finder_pattern_shape == lang_messages['pattern_shape_rounded']:
+    # 둥근사각 전용 슬라이더 (일반 패턴)
+    if pattern_shape == lang_messages['pattern_shape_rounded']:
         corner_radius_disabled = (file_format == "SVG")
         st.caption(lang_messages['corner_radius_warning'])
-        
-        col_radius1, col_radius2 = st.columns(2)
-        with col_radius1:
-            corner_radius_pattern = st.slider(
-                lang_messages['corner_radius_pattern_label'], # 새 메시지 키 추가 필요
-                min_value=0,
-                max_value=50,
-                value=st.session_state.corner_radius_pattern_input,
-                help=lang_messages['corner_radius_help'],
-                key="corner_radius_pattern_input",
-                disabled=corner_radius_disabled,
-            )
-        with col_radius2:
-            corner_radius_finder = st.slider(
-                lang_messages['corner_radius_finder_label'], # 새 메시지 키 추가 필요
-                min_value=0,
-                max_value=50,
-                value=st.session_state.corner_radius_finder_input,
-                help=lang_messages['corner_radius_help'],
-                key="corner_radius_finder_input",
-                disabled=corner_radius_disabled,
-            )
+        corner_radius = st.slider(
+            lang_messages['corner_radius_label'],
+            min_value=0,
+            max_value=50,
+            value=st.session_state.corner_radius_input,
+            help=lang_messages['corner_radius_help'],
+            key="corner_radius_input",
+            disabled=corner_radius_disabled,
+        )
     else:
-        corner_radius_pattern = 0
-        corner_radius_finder = 0
+        corner_radius = 0
 
+    # 둥근사각 전용 슬라이더 (파인더 패턴)
+    if finder_pattern_shape == lang_messages['pattern_shape_rounded']:
+        finder_corner_radius_disabled = (file_format == "SVG")
+        st.caption(lang_messages['finder_corner_radius_warning'])
+        finder_corner_radius = st.slider(
+            lang_messages['finder_corner_radius_label'],
+            min_value=0,
+            max_value=50,
+            value=st.session_state.finder_corner_radius_input,
+            help=lang_messages['finder_corner_radius_help'],
+            key="finder_corner_radius_input",
+            disabled=finder_corner_radius_disabled,
+        )
+    else:
+        finder_corner_radius = 0
 
-    # ✨ 수정: 패턴 간격을 각각 조절하는 슬라이더 추가
+    # 패턴 간격 슬라이더 (일반 패턴)
     cell_gap_disabled = (file_format == "SVG")
     st.caption(lang_messages['cell_gap_warning'])
-    
-    col_gap1, col_gap2 = st.columns(2)
-    with col_gap1:
-        cell_gap_pattern = st.slider(
-            lang_messages['cell_gap_pattern_label'], # 새 메시지 키 추가 필요
-            min_value=0,
-            max_value=40,
-            value=st.session_state.cell_gap_pattern_input,
-            help=lang_messages['cell_gap_help'],
-            disabled=cell_gap_disabled,
-            key="cell_gap_pattern_input",
-        )
-    with col_gap2:
-        cell_gap_finder = st.slider(
-            lang_messages['cell_gap_finder_label'], # 새 메시지 키 추가 필요
-            min_value=0,
-            max_value=40,
-            value=st.session_state.cell_gap_finder_input,
-            help=lang_messages['cell_gap_help'],
-            disabled=cell_gap_disabled,
-            key="cell_gap_finder_input",
-        )
+    cell_gap = st.slider(
+        lang_messages['cell_gap_label'],
+        min_value=0,
+        max_value=40,
+        value=st.session_state.cell_gap_input,
+        help=lang_messages['cell_gap_help'],
+        disabled=cell_gap_disabled,
+        key="cell_gap_input",
+    )
 
+    # 패턴 간격 슬라이더 (파인더 패턴)
+    finder_cell_gap_disabled = (file_format == "SVG")
+    st.caption(lang_messages['finder_cell_gap_warning'])
+    finder_cell_gap = st.slider(
+        lang_messages['finder_cell_gap_label'],
+        min_value=0,
+        max_value=40,
+        value=st.session_state.finder_cell_gap_input,
+        help=lang_messages['finder_cell_gap_help'],
+        disabled=finder_cell_gap_disabled,
+        key="finder_cell_gap_input",
+    )
+    
 #========================================================================================================================================================================
 
     # 색상 설정 (순서 변경)
@@ -702,15 +695,14 @@ with col2:
             if qr:
                 preview_qr_object = qr
                 if file_format in ["PNG", "JPG"]:
-                    # ✨ 수정: draw_custom_shape_image 함수 호출 시 새로운 파라미터 전달
                     preview_image_display = draw_custom_shape_image(
                         qr, int(st.session_state.box_size_input), int(st.session_state.border_input),
                         pattern_color, bg_color, st.session_state.pattern_shape_select,
-                        st.session_state.corner_radius_pattern_input,
-                        st.session_state.cell_gap_pattern_input,
                         st.session_state.finder_pattern_shape_select,
-                        st.session_state.corner_radius_finder_input,
-                        st.session_state.cell_gap_finder_input,
+                        st.session_state.corner_radius_input,
+                        st.session_state.finder_corner_radius_input,
+                        st.session_state.cell_gap_input,
+                        st.session_state.finder_cell_gap_input,
                     )
                     img_buffer = io.BytesIO()
                     if file_format == "PNG":
@@ -735,18 +727,16 @@ with col2:
                     download_mime = "image/svg+xml"
                     download_extension = ".svg"
 
-                    # SVG 미리보기를 위한 이미지 생성 (SVG는 모양, 색상, 간격 지원X)
-                    # ✨ 수정: SVG 미리보기는 사각형 패턴으로 고정하고 새로운 파라미터 전달
+                    # SVG 미리보기를 위한 이미지 생성
                     preview_image_display = draw_custom_shape_image(
                         qr, int(st.session_state.box_size_input), int(st.session_state.border_input),
                         "black", "white", lang_messages['pattern_shape_square'],
-                        st.session_state.corner_radius_pattern_input,
-                        st.session_state.cell_gap_pattern_input,
                         lang_messages['pattern_shape_square'],
-                        st.session_state.corner_radius_finder_input,
-                        st.session_state.cell_gap_finder_input,
+                        st.session_state.corner_radius_input,
+                        st.session_state.finder_corner_radius_input,
+                        st.session_state.cell_gap_input,
+                        st.session_state.finder_cell_gap_input,
                     )
-
         except Exception as e:
             st.error(f"{lang_messages['error_occurred']}: {str(e)}")
 
