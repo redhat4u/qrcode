@@ -32,14 +32,6 @@ from messages import messages
 from PIL import Image, ImageDraw
 
 
-# 오류 복원 수준 옵션과 상수 매핑
-error_correction_map = {
-    'low': qrcode.constants.ERROR_CORRECT_L,
-    'medium': qrcode.constants.ERROR_CORRECT_M,
-    'quartile': qrcode.constants.ERROR_CORRECT_Q,
-    'high': qrcode.constants.ERROR_CORRECT_H,
-}
-
 # 기본 설정값을 초기화하는 함수
 def reset_language_defaults():
     st.session_state.error_correction_select = messages[st.session_state.lang]['error_correction_low_select']
@@ -52,9 +44,9 @@ def reset_language_defaults():
     st.session_state.mask_pattern_select = 2
     st.session_state.corner_radius_input = 25
     st.session_state.finder_corner_radius_input = 25
-    st.session_state.cell_gap_input = 0
-    st.session_state.finder_cell_gap_input = 0
-    st.session_state.jpg_quality_input = 70
+    st.session_state.cell_gap_input = 1
+    st.session_state.finder_cell_gap_input = 1
+    st.session_state.jpg_quality_input = 50
     st.session_state.strip_option = True
     st.session_state.file_format_select = "PNG"
 
@@ -82,8 +74,10 @@ if 'bg_color_select' not in st.session_state:
     st.session_state.bg_color_select = "white"
 if 'finder_corner_radius_input' not in st.session_state:
     st.session_state.finder_corner_radius_input = 25
-if 'finder_cell_gap_input' not in st.session_state:
-    st.session_state.finder_cell_gap_input = 0
+if 'cell_gap_input' not in st.session_state or st.session_state.cell_gap_input < 1:
+    st.session_state.cell_gap_input = 1
+if 'finder_cell_gap_input' not in st.session_state or st.session_state.finder_cell_gap_input < 1:
+    st.session_state.finder_cell_gap_input = 1
 
 # 언어에 따른 페이지 제목 매핑
 dynamic_page_titles = {
@@ -118,6 +112,23 @@ def is_valid_color(color_name):
     color_name = color_name.strip()
     hex_pattern = re.compile(r'^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$')
     return hex_pattern.match(color_name)
+
+
+# 패턴 간격을 강제로 최소 1값 이상으로 지정
+def enforce_min_value():
+    if st.session_state.cell_gap_input < 1:
+        st.session_state.cell_gap_input = 1
+    if st.session_state.finder_cell_gap_input < 1:
+        st.session_state.finder_cell_gap_input = 1
+
+
+# 오류 복원 수준 옵션과 상수 매핑
+error_correction_map = {
+    'low': qrcode.constants.ERROR_CORRECT_L,
+    'medium': qrcode.constants.ERROR_CORRECT_M,
+    'quartile': qrcode.constants.ERROR_CORRECT_Q,
+    'high': qrcode.constants.ERROR_CORRECT_H,
+}
 
 
 # QR 코드 데이터 생성
@@ -272,9 +283,9 @@ def reset_all_settings():
     st.session_state.finder_pattern_shape_select = lang_messages['pattern_shape_square']
     st.session_state.corner_radius_input = 25
     st.session_state.finder_corner_radius_input = 25
-    st.session_state.cell_gap_input = 0
-    st.session_state.finder_cell_gap_input = 0
-    st.session_state.jpg_quality_input = 70
+    st.session_state.cell_gap_input = 1
+    st.session_state.finder_cell_gap_input = 1
+    st.session_state.jpg_quality_input = 50
 
 # 언어 변경 콜백 함수
 def set_language():
@@ -297,9 +308,9 @@ def set_language():
     current_finder_shape = st.session_state.get('finder_pattern_shape_select', messages[old_lang]['pattern_shape_square'])
     current_corner_radius = st.session_state.get('corner_radius_input', 25)
     current_finder_corner_radius = st.session_state.get('finder_corner_radius_input', 25)
-    current_cell_gap = st.session_state.get('cell_gap_input', 0)
-    current_finder_cell_gap = st.session_state.get('finder_cell_gap_input', 0)
-    current_jpg_quality = st.session_state.get('jpg_quality_input', 70)
+    current_cell_gap = st.session_state.get('cell_gap_input', 1)
+    current_finder_cell_gap = st.session_state.get('finder_cell_gap_input', 1)
+    current_jpg_quality = st.session_state.get('jpg_quality_input', 50)
 
 
     # 선택된 언어 이름을 언어 코드로 변환
@@ -472,7 +483,7 @@ with col1:
             help=lang_messages['jpg_quality_help'],
         )
     else:
-        jpg_quality = 70
+        jpg_quality = 50
 
     # 패턴 모양 설정
     st.markdown("---")
@@ -514,6 +525,7 @@ with col1:
         help=lang_messages['cell_gap_help'],
         disabled=cell_gap_disabled,
         key="cell_gap_input",
+        on_change=enforce_min_value,
     )
 
     # 파인더 패턴 모양 선택 옵션
@@ -550,6 +562,7 @@ with col1:
         help=lang_messages['finder_cell_gap_help'],
         disabled=finder_cell_gap_disabled,
         key="finder_cell_gap_input",
+        on_change=enforce_min_value,
     )
 
 #========================================================================================================================================================================
@@ -902,4 +915,3 @@ st.markdown(
     unsafe_allow_html=True
 )
 # 최종버전(다중 언어 지원 통함 파일 버전)
-
