@@ -393,14 +393,23 @@ st.title(lang_messages['title'])
 st.markdown("---")
 
 # 언어 선택 드롭다운
-lang_options = {"한국어": "ko", "English": "en", "日本語": "ja", "中文": "zh", "Deutsch": "de", "Français": "fr", "Español": "es",}
-lang_selected_name = st.selectbox(
-    "언어 선택(Select Language)" if st.session_state.lang == "ko" else "Select Language",
-    options=list(lang_options.keys()),
+# messages.py 딕셔너리에서 동적으로 언어 목록 생성
+lang_options = {
+    f"{messages[code]['native_flag']} {messages[code]['native_name']}": code
+    for code in messages
+}
+
+# 새롭게 개선된 코드
+selected_lang = st.selectbox(
+    label=messages[st.session_state.lang]['language_select_label'],
+    options=lang_options.keys(),
     on_change=set_language,
     key="lang_select",
     index=list(lang_options.values()).index(st.session_state.lang),
 )
+
+# 선택된 언어 코드를 변수에 할당
+lang = lang_options[selected_lang]
 
 st.markdown("---")
 
