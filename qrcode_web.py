@@ -203,9 +203,18 @@ def draw_custom_shape_image(qr_object, box_size, border, fill_color, back_color,
         elif shape == lang_messages['pattern_shape_cross']:
             x_center = (new_x + new_x_end) / 2
             y_center = (new_y + new_y_end) / 2
-            cross_width = effective_size_after_gap * 0.3
+            cross_width = effective_size_after_gap * 0.3 # 십자 너비를 조정할 수 있습니다.
             draw.rectangle([new_x, y_center - cross_width/2, new_x_end, y_center + cross_width/2], fill=fill,)
             draw.rectangle([x_center - cross_width/2, new_y, x_center + cross_width/2, new_y_end], fill=fill,)
+        elif shape == lang_messages['pattern_shape_x']:
+            # X자 모양은 두 개의 십자형 사각형으로 구현할 수 있습니다.
+            x1, y1, x2, y2 = xy
+            effective_size = x2 - x1
+            x_width = effective_size * 0.3 # 엑스 너비를 조정할 수 있습니다.
+            # 대각선 1: 왼쪽 위에서 오른쪽 아래로
+            draw.polygon([(x1, y1 + x_width), (x1 + x_width, y1), (x2, y2 - x_width), (x2 - x_width, y2)], fill=fill,)
+            # 대각선 2: 오른쪽 위에서 왼쪽 아래로
+            draw.polygon([(x2, y1 + x_width), (x2 - x_width, y1), (x1, y2 - x_width), (x1 + x_width, y2)], fill=fill,)
 
     for r in range(qr_object.modules_count):
         for c in range(qr_object.modules_count):
@@ -492,7 +501,16 @@ with col1:
     st.caption(lang_messages['pattern_shape_warning'])
 
     # 일반 패턴 모양 선택 옵션
-    pattern_options = (lang_messages['pattern_shape_square'], lang_messages['pattern_shape_rounded'], lang_messages['pattern_shape_circle'], lang_messages['pattern_shape_diamond'], lang_messages['pattern_shape_star'], lang_messages['pattern_shape_cross'],)
+    pattern_options = (
+        lang_messages['pattern_shape_square'],
+        lang_messages['pattern_shape_rounded'],
+        lang_messages['pattern_shape_circle'],
+        lang_messages['pattern_shape_diamond'],
+        lang_messages['pattern_shape_star'],
+        lang_messages['pattern_shape_cross'],
+        lang_messages['pattern_shape_x'],
+    )
+
     pattern_shape = st.selectbox(
         lang_messages['pattern_select_label'],
         pattern_options,
@@ -532,7 +550,7 @@ with col1:
     st.markdown("---")
     finder_pattern_shape = st.selectbox(
         lang_messages['finder_pattern_select_label'],
-        pattern_options,
+        pattern_options, # pattern_options 튜플을 재사용
         key="finder_pattern_shape_select",
         disabled=pattern_shape_disabled,
     )
