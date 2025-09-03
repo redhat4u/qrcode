@@ -22,8 +22,8 @@ import io
 import re
 import math
 import hashlib
-import base64  # SVG 이미지 표시를 위해 추가
-import qrcode.image.svg  # SVG 생성을 위해 추가
+import base64 # SVG 이미지 표시를 위해 추가
+import qrcode.image.svg # SVG 생성을 위해 추가
 from datetime import datetime
 from zoneinfo import ZoneInfo
 from messages import messages
@@ -40,9 +40,9 @@ error_correction_map = {
 
 # 기본 설정값을 초기화하는 함수
 def reset_language_defaults():
-    st.session_state.error_correction_key = "low"
-    st.session_state.pattern_shape_key = "square"
-    st.session_state.finder_pattern_shape_key = "square"
+    st.session_state.error_correction_select = messages[st.session_state.lang]['error_correction_low_select']
+    st.session_state.pattern_shape_select = messages[st.session_state.lang]['pattern_shape_square']
+    st.session_state.finder_pattern_shape_select = messages[st.session_state.lang]['pattern_shape_square']
     st.session_state.pattern_color_select = "black"
     st.session_state.bg_color_select = "white"
     st.session_state.box_size_input = 20
@@ -65,7 +65,7 @@ if 'qr_input_area' not in st.session_state:
 if 'custom_pattern_color_input_key' not in st.session_state:
     st.session_state.custom_pattern_color_input_key = ""
 if 'custom_bg_color_input_key' not in st.session_state:
-    st.session_state.custom_bg_color_key = ""
+    st.session_state.custom_bg_color_input_key = ""
 if 'filename_input_key' not in st.session_state:
     st.session_state.filename_input_key = ""
 if 'box_size_input' not in st.session_state:
@@ -83,7 +83,6 @@ if 'finder_corner_radius_input' not in st.session_state:
 if 'finder_cell_gap_input' not in st.session_state:
     st.session_state.finder_cell_gap_input = 0
 
-
 # 언어에 따른 페이지 제목 매핑
 dynamic_page_titles = {
     "ko": "QR 코드 생성기",
@@ -100,6 +99,7 @@ st.set_page_config(
 
 # 현재 언어 설정 불러오기
 lang_messages = messages[st.session_state.lang]
+
 
 # 파일명에 특수문자 포함시 '_' 문자로 치환
 def sanitize_filename(name: str) -> str:
@@ -132,10 +132,9 @@ def get_qr_data_object(data, box_size, border, error_correction, mask_pattern,):
         qr.make(fit=True)
         return qr
     except Exception as e:
-        st.error(f"{lang_messages.get('qr_code_data_error', 'QR Code data creation error')}: {str(e)}")
+        st.error(f"{lang_messages['qr_code_data_error']}: {str(e)}")
         return None
     
-
 # 사용자 정의 모양으로 QR 코드 이미지 생성 함수 (PNG)
 def draw_custom_shape_image(qr_object, box_size, border, fill_color, back_color, pattern_shape, finder_pattern_shape, pattern_corner_radius, finder_corner_radius, pattern_cell_gap, finder_cell_gap,):
     if not qr_object:
@@ -240,7 +239,7 @@ def generate_qr_code_svg(data, box_size, border, error_correction, mask_pattern,
 
         return svg_data, qr
     except Exception as e:
-        st.error(f"{lang_messages.get('qr_code_svg_error', 'QR Code SVG creation error')}: {str(e)}")
+        st.error(f"{lang_messages['qr_code_svg_error']}: {str(e)}")
         return None, None
 
 
@@ -248,11 +247,9 @@ def generate_qr_code_svg(data, box_size, border, error_correction, mask_pattern,
 def clear_text_input():
     st.session_state.qr_input_area = ""
 
-
 # 파일명 초기화 콜백 함수
 def clear_filename_callback():
     st.session_state.filename_input_key = ""
-
 
 # 전체 초기화 콜백 함수
 def reset_all_settings():
@@ -260,45 +257,596 @@ def reset_all_settings():
     st.session_state.custom_pattern_color_input_key = ""
     st.session_state.custom_bg_color_input_key = ""
     st.session_state.filename_input_key = ""
+
     st.session_state.box_size_input = 20
     st.session_state.border_input = 2
-    st.session_state.error_correction_key = "low"
+    st.session_state.error_correction_select = messages[st.session_state.lang]['error_correction_low_select']
     st.session_state.mask_pattern_select = 2
     st.session_state.pattern_color_select = "black"
     st.session_state.bg_color_select = "white"
     st.session_state.strip_option = True
     st.session_state.file_format_select = "PNG"
-    st.session_state.pattern_shape_key = "square"
-    st.session_state.finder_pattern_shape_key = "square"
+    st.session_state.pattern_shape_select = lang_messages['pattern_shape_square']
+    st.session_state.finder_pattern_shape_select = lang_messages['pattern_shape_square']
     st.session_state.corner_radius_input = 25
     st.session_state.finder_corner_radius_input = 25
     st.session_state.cell_gap_input = 0
     st.session_state.finder_cell_gap_input = 0
     st.session_state.jpg_quality_input = 70
 
-
 # 언어 변경 콜백 함수
 def set_language():
-    new_lang = st.session_state.language_select
-    st.session_state.lang = new_lang
-    reset_language_defaults()
+    old_lang = st.session_state.lang
+
+    # 현재 설정값들을 임시 저장
+    current_qr_data = st.session_state.get('qr_input_area', "")
+    current_box_size = st.session_state.get('box_size_input', 20)
+    current_border = st.session_state.get('border_input', 2)
+    current_mask_pattern = st.session_state.get('mask_pattern_select', 2)
+    current_error_correction_label = st.session_state.get('error_correction_select', messages[old_lang]['error_correction_low_select'])
+    current_pattern_color_choice = st.session_state.get('pattern_color_select', "black")
+    current_bg_color_choice = st.session_state.get('bg_color_select', "white")
+    current_custom_pattern_color = st.session_state.get('custom_pattern_color_input_key', "")
+    current_custom_bg_color = st.session_state.get('custom_bg_color_input_key', "")
+    current_filename = st.session_state.get('filename_input_key', "")
+    current_strip_option = st.session_state.get('strip_option', True)
+    current_file_format = st.session_state.get('file_format_select', "PNG")
+    current_pattern_shape = st.session_state.get('pattern_shape_select', messages[old_lang]['pattern_shape_square'])
+    current_finder_shape = st.session_state.get('finder_pattern_shape_select', messages[old_lang]['pattern_shape_square'])
+    current_corner_radius = st.session_state.get('corner_radius_input', 25)
+    current_finder_corner_radius = st.session_state.get('finder_corner_radius_input', 25)
+    current_cell_gap = st.session_state.get('cell_gap_input', 0)
+    current_finder_cell_gap = st.session_state.get('finder_cell_gap_input', 0)
+    current_jpg_quality = st.session_state.get('jpg_quality_input', 70)
 
 
-# --- 사이드바 ---
+    # 선택된 언어 이름을 언어 코드로 변환
+    lang_map = {"한국어": "ko", "English": "en"}
+    new_lang = lang_map.get(st.session_state.lang_select, "ko")
+
+    # 언어 변경이 발생했을 때만 상태를 업데이트
+    if new_lang != old_lang:
+        st.session_state.lang = new_lang
+        # 기존 언어의 오류 복원 레벨을 상수값으로 변환
+        error_correction_map_old_lang = {
+            messages[old_lang]['error_correction_low_select']: qrcode.constants.ERROR_CORRECT_L,
+            messages[old_lang]['error_correction_medium_select']: qrcode.constants.ERROR_CORRECT_M,
+            messages[old_lang]['error_correction_quartile_select']: qrcode.constants.ERROR_CORRECT_Q,
+            messages[old_lang]['error_correction_high_select']: qrcode.constants.ERROR_CORRECT_H,
+        }
+        current_error_constant = error_correction_map_old_lang.get(current_error_correction_label, qrcode.constants.ERROR_CORRECT_L)
+
+        # 새로운 언어의 텍스트로 변환
+        error_correction_map_new_lang = {
+            qrcode.constants.ERROR_CORRECT_L: messages[new_lang]['error_correction_low_select'],
+            qrcode.constants.ERROR_CORRECT_M: messages[new_lang]['error_correction_medium_select'],
+            qrcode.constants.ERROR_CORRECT_Q: messages[new_lang]['error_correction_quartile_select'],
+            qrcode.constants.ERROR_CORRECT_H: messages[new_lang]['error_correction_high_select'],
+        }
+        st.session_state.error_correction_select = error_correction_map_new_lang.get(current_error_constant, messages[new_lang]['error_correction_low_select'])
+
+        # 패턴 모양도 동일하게 변환
+        pattern_shape_map_old_lang = {
+            messages[old_lang]['pattern_shape_square']: 'square',
+            messages[old_lang]['pattern_shape_rounded']: 'rounded',
+            messages[old_lang]['pattern_shape_circle']: 'circle',
+            messages[old_lang]['pattern_shape_diamond']: 'diamond',
+            messages[old_lang]['pattern_shape_star']: 'star',
+            messages[old_lang]['pattern_shape_cross']: 'cross',
+        }
+        
+        pattern_shape_map_new_lang = {
+            'square': messages[new_lang]['pattern_shape_square'],
+            'rounded': messages[new_lang]['pattern_shape_rounded'],
+            'circle': messages[new_lang]['pattern_shape_circle'],
+            'diamond': messages[new_lang]['pattern_shape_diamond'],
+            'star': messages[new_lang]['pattern_shape_star'],
+            'cross': messages[new_lang]['pattern_shape_cross'],
+        }
+
+        # 기존 선택된 값을 새 언어의 값으로 업데이트
+        old_pattern_shape_key = pattern_shape_map_old_lang.get(current_pattern_shape, 'square')
+        st.session_state.pattern_shape_select = pattern_shape_map_new_lang.get(old_pattern_shape_key, messages[new_lang]['pattern_shape_square'])
+        
+        old_finder_shape_key = pattern_shape_map_old_lang.get(current_finder_shape, 'square')
+        st.session_state.finder_pattern_shape_select = pattern_shape_map_new_lang.get(old_finder_shape_key, messages[new_lang]['pattern_shape_square'])
+
+        # 색상 선택 값도 변환
+        if current_pattern_color_choice == messages[old_lang]['custom_color_select']:
+            st.session_state.pattern_color_select = messages[new_lang]['custom_color_select']
+        else:
+            st.session_state.pattern_color_select = current_pattern_color_choice
+
+        if current_bg_color_choice == messages[old_lang]['custom_color_select']:
+            st.session_state.bg_color_select = messages[new_lang]['custom_color_select']
+        else:
+            st.session_state.bg_color_select = current_bg_color_choice
+
+
+    # 언어 변경 후, 저장했던 값들을 다시 복원
+    st.session_state.qr_input_area = current_qr_data
+    st.session_state.box_size_input = current_box_size
+    st.session_state.border_input = current_border
+    st.session_state.mask_pattern_select = current_mask_pattern
+    st.session_state.custom_pattern_color_input_key = current_custom_pattern_color
+    st.session_state.custom_bg_color_input_key = current_custom_bg_color
+    st.session_state.filename_input_key = current_filename
+    st.session_state.strip_option = current_strip_option
+    st.session_state.file_format_select = current_file_format
+    st.session_state.corner_radius_input = current_corner_radius
+    st.session_state.finder_corner_radius_input = current_finder_corner_radius
+    st.session_state.cell_gap_input = current_cell_gap
+    st.session_state.finder_cell_gap_input = current_finder_cell_gap
+    st.session_state.jpg_quality_input = current_jpg_quality
+
+
+#[메인]====================================================================================================================================================================
+
+st.title(lang_messages['title'])
+st.markdown("---")
+
+# 언어 선택 드롭다운
+lang_options = {"한국어": "ko", "English": "en"}
+lang_selected_name = st.selectbox(
+    "Select Language" if st.session_state.lang == "en" else "언어 선택(Select Language)",
+    options=list(lang_options.keys()),
+    on_change=set_language,
+    key="lang_select",
+    index=list(lang_options.values()).index(st.session_state.lang),
+)
+
+st.markdown("---")
+
+# 레이아웃 설정 (2개 컬럼)
+col1, col2 = st.columns([1.2, 1])
+
+with col1:
+    st.header(lang_messages['main_header'])
+
+    # QR 코드 입력창
+    st.subheader(lang_messages['qr_content_subheader'])
+    st.info(lang_messages['max_char_info'])
+
+    qr_data = st.text_area(
+        lang_messages['text_area_label'],
+        height=200,
+        placeholder=lang_messages['text_area_placeholder'],
+        key="qr_input_area",
+    )
+
+    # 문자 수 표시
+    char_count = len(qr_data) if qr_data else 0
+    if char_count > 0:
+        if char_count > 2900:
+            st.error(lang_messages['char_count_exceeded'].format(char_count=char_count))
+        elif char_count > 2400:
+            st.warning(lang_messages['char_count_near_limit'].format(char_count=char_count))
+        else:
+            st.success(lang_messages['char_count_ok'].format(char_count=char_count))
+    else:
+        st.caption(lang_messages['char_count_zero'])
+
+    # 공백/줄바꿈 제거 옵션
+    strip_option = st.checkbox(
+        lang_messages['strip_option'],
+        value=st.session_state.strip_option,
+        key="strip_option",
+        help=lang_messages['strip_option_help'],
+    )
+
+    # 입력 내용 삭제 버튼
+    col_clear1, col_clear2, col_clear3 = st.columns([1, 1, 1])
+    with col_clear2:
+        delete_btn_disabled = (char_count == 0)
+        st.button(
+            lang_messages['delete_button'],
+            help=lang_messages['delete_button_help'],
+            use_container_width=True,
+            type="secondary",
+            disabled=delete_btn_disabled,
+            on_click=clear_text_input,
+        )
+
+    st.markdown("---")
+
+    # 파일 형식 설정
+    st.subheader(lang_messages['file_format_subheader'])
+    file_format = st.selectbox(
+        lang_messages['file_format_select_label'],
+        ("PNG", "JPG", "SVG"),
+        index=0 if st.session_state.file_format_select == "PNG" else (1 if st.session_state.file_format_select == "JPG" else 2),
+        key="file_format_select",
+    )
+
+    # JPG 품질 설정 슬라이더 (JPG 선택 시에만 표시)
+    if file_format == "JPG":
+        st.caption(lang_messages['jpg_quality_info'])
+        jpg_quality = st.slider(
+            lang_messages['jpg_quality_label'],
+            min_value=1,
+            max_value=100,
+            value=st.session_state.jpg_quality_input,
+            key="jpg_quality_input",
+            help=lang_messages['jpg_quality_help'],
+        )
+    else:
+        jpg_quality = 70
+
+    # 패턴 모양 설정
+    st.markdown("---")
+    st.subheader(lang_messages['pattern_shape_subheader'])
+    pattern_shape_disabled = (file_format == "SVG")
+    st.caption(lang_messages['pattern_shape_warning'])
+
+    # 일반 패턴 모양 선택 옵션
+    pattern_options = (lang_messages['pattern_shape_square'], lang_messages['pattern_shape_rounded'], lang_messages['pattern_shape_circle'], lang_messages['pattern_shape_diamond'], lang_messages['pattern_shape_star'], lang_messages['pattern_shape_cross'],)
+    pattern_shape = st.selectbox(
+        lang_messages['pattern_select_label'],
+        pattern_options,
+        key="pattern_shape_select",
+        disabled=pattern_shape_disabled,
+    )
+
+    # 둥근사각 전용 슬라이더 (일반 패턴) - 조건문 밖으로 이동
+    corner_radius_disabled = (file_format == "SVG") or (pattern_shape != lang_messages['pattern_shape_rounded'])
+    if pattern_shape == lang_messages['pattern_shape_rounded']:
+        st.caption(lang_messages['corner_radius_warning'])
+    corner_radius = st.slider(
+        lang_messages['corner_radius_label'],
+        min_value=0,
+        max_value=50,
+        value=st.session_state.corner_radius_input,
+        help=lang_messages['corner_radius_help'],
+        key="corner_radius_input",
+        disabled=corner_radius_disabled,
+    )
+
+    # 패턴 간격 슬라이더 (일반 패턴)
+    cell_gap_disabled = (file_format == "SVG")
+    st.caption(lang_messages['cell_gap_warning'])
+    cell_gap = st.slider(
+        lang_messages['cell_gap_label'],
+        min_value=0,
+        max_value=40,
+        value=st.session_state.cell_gap_input,
+        help=lang_messages['cell_gap_help'],
+        disabled=cell_gap_disabled,
+        key="cell_gap_input",
+    )
+
+    # 파인더 패턴 모양 선택 옵션
+    st.markdown("---")
+    finder_pattern_shape = st.selectbox(
+        lang_messages['finder_pattern_select_label'],
+        pattern_options,
+        key="finder_pattern_shape_select",
+        disabled=pattern_shape_disabled,
+    )
+
+    # 둥근사각 전용 슬라이더 (파인더 패턴) - 조건문 밖으로 이동
+    finder_corner_radius_disabled = (file_format == "SVG") or (finder_pattern_shape != lang_messages['pattern_shape_rounded'])
+    if finder_pattern_shape == lang_messages['pattern_shape_rounded']:
+        st.caption(lang_messages['finder_corner_radius_warning'])
+    finder_corner_radius = st.slider(
+        lang_messages['finder_corner_radius_label'],
+        min_value=0,
+        max_value=50,
+        value=st.session_state.finder_corner_radius_input,
+        help=lang_messages['finder_corner_radius_help'],
+        key="finder_corner_radius_input",
+        disabled=finder_corner_radius_disabled,
+    )
+
+    # 패턴 간격 슬라이더 (파인더 패턴)
+    finder_cell_gap_disabled = (file_format == "SVG")
+    st.caption(lang_messages['finder_cell_gap_warning'])
+    finder_cell_gap = st.slider(
+        lang_messages['finder_cell_gap_label'],
+        min_value=0,
+        max_value=40,
+        value=st.session_state.finder_cell_gap_input,
+        help=lang_messages['finder_cell_gap_help'],
+        disabled=finder_cell_gap_disabled,
+        key="finder_cell_gap_input",
+    )
+
+#========================================================================================================================================================================
+
+    # 색상 설정 (순서 변경)
+    st.markdown("---")
+    st.subheader(lang_messages['color_subheader'])
+
+    file_format_is_svg = (st.session_state.file_format_select == "SVG")
+
+    if file_format_is_svg:
+        st.warning(lang_messages['svg_color_warning'])
+
+    colors = [
+        lang_messages['custom_color_select'], "black", "white", "gray", "lightgray", "dimgray",
+        "red", "green", "blue", "yellow", "cyan", "magenta", "maroon",
+        "purple", "navy", "lime", "olive", "teal", "aqua", "fuchsia",
+        "silver", "gold", "orange", "orangered", "crimson", "indigo",
+    ]
+    col1_3, col1_4 = st.columns(2)
+    with col1_3:
+        pattern_color_choice = st.selectbox(
+            lang_messages['pattern_color_label'], colors,
+            index=colors.index(st.session_state.pattern_color_select),
+            key="pattern_color_select",
+            disabled=file_format_is_svg,
+        )
+    with col1_4:
+        bg_color_choice = st.selectbox(
+            lang_messages['bg_color_label'], colors,
+            index=colors.index(st.session_state.bg_color_select),
+            key="bg_color_select",
+            disabled=file_format_is_svg,
+        )
+
+    st.markdown(lang_messages['custom_color_info'])
+    st.caption(lang_messages['custom_color_example'])
+    col1_5, col1_6 = st.columns(2)
+    with col1_5:
+        st.text_input(
+            lang_messages['pattern_hex_label'],
+            placeholder=lang_messages['custom_color_placeholder'],
+            disabled=(pattern_color_choice != lang_messages['custom_color_select']) or file_format_is_svg,
+            key="custom_pattern_color_input_key",
+        )
+    with col1_6:
+        st.text_input(
+            lang_messages['bg_hex_label'],
+            placeholder=lang_messages['custom_color_placeholder'],
+            disabled=(bg_color_choice != lang_messages['custom_color_select']) or file_format_is_svg,
+            key="custom_bg_color_input_key",
+        )
+
+    pattern_color = st.session_state.get('custom_pattern_color_input_key', '',).strip() if pattern_color_choice == lang_messages['custom_color_select'] else pattern_color_choice
+    bg_color = st.session_state.get('custom_bg_color_input_key', '',).strip() if bg_color_choice == lang_messages['custom_color_select'] else bg_color_choice
+
+#========================================================================================================================================================================
+
+    # QR 코드 설정
+    st.markdown("---")
+    st.subheader(lang_messages['qr_setting_subheader'])
+
+    col1_1, col1_2 = st.columns(2)
+    with col1_1:
+        box_size = st.number_input(lang_messages['box_size_label'], min_value=1, max_value=100, key="box_size_input",)
+        border = st.number_input(lang_messages['border_label'], min_value=0, max_value=10, key="border_input",)
+
+    with col1_2:
+        error_correction_options = {
+            lang_messages['error_correction_low_select']: qrcode.constants.ERROR_CORRECT_L,
+            lang_messages['error_correction_medium_select']: qrcode.constants.ERROR_CORRECT_M,
+            lang_messages['error_correction_quartile_select']: qrcode.constants.ERROR_CORRECT_Q,
+            lang_messages['error_correction_high_select']: qrcode.constants.ERROR_CORRECT_H,
+        }
+        error_correction_options_list = list(error_correction_options.keys())
+
+        try:
+            current_error_index = error_correction_options_list.index(st.session_state.error_correction_select)
+        except ValueError:
+            current_error_index = 0 # 만약 세션 상태 값이 없으면 기본값으로
+
+        error_correction_choice = st.selectbox(
+            lang_messages['error_correction_label'],
+            options=error_correction_options_list,
+            index=current_error_index,
+            key="error_correction_select",
+        )
+        error_correction = error_correction_options[error_correction_choice]
+        mask_pattern = st.selectbox(lang_messages['mask_pattern_label'], options=list(range(8)), key="mask_pattern_select",)
+
+
+#========================================================================================================================================================================
+
+    # 파일명 설정
+    st.markdown("---")
+    st.subheader(lang_messages['filename_subheader'])
+
+    col_filename_input, col_filename_delete = st.columns([3, 1.1])
+
+    with col_filename_input:
+        filename = st.text_input(
+            lang_messages['filename_input_label'],
+            placeholder=lang_messages['filename_placeholder'],
+            key="filename_input_key",
+        )
+
+    current_filename = filename.strip()
+
+    with col_filename_delete:
+        st.markdown('<div style="margin-top: 28px;"></div>', unsafe_allow_html=True)
+        filename_delete_disabled = not st.session_state.get("filename_input_key", "")
+        st.button(
+            lang_messages['filename_delete_button'],
+            help=lang_messages['filename_delete_help'],
+            use_container_width=True,
+            type="secondary",
+            disabled=filename_delete_disabled,
+            on_click=clear_filename_callback,
+        )
+
+
+#========================================================================================================================================================================
+
+with col2:
+    st.header(lang_messages['preview_header'])
+
+    current_data = qr_data.strip() if st.session_state.strip_option else qr_data
+
+    is_pattern_color_valid_preview = (pattern_color_choice != lang_messages['custom_color_select']) or (pattern_color_choice == lang_messages['custom_color_select'] and pattern_color and is_valid_color(pattern_color))
+    is_bg_color_valid_preview = (bg_color_choice != lang_messages['custom_color_select']) or (bg_color_choice == lang_messages['custom_color_select'] and bg_color and is_valid_color(bg_color))
+    is_colors_same_preview = (is_pattern_color_valid_preview and is_bg_color_valid_preview and pattern_color and bg_color and pattern_color == bg_color)
+
+    preview_image_display = None
+    preview_qr_object = None
+
+    can_generate_preview = current_data and (file_format == "SVG" or (is_pattern_color_valid_preview and is_bg_color_valid_preview and not is_colors_same_preview))
+
+    download_data = None
+    download_mime = ""
+    download_extension = ""
+    save_format = ""
+
+    if can_generate_preview:
+        try:
+            qr = get_qr_data_object(
+                current_data, int(st.session_state.box_size_input), int(st.session_state.border_input), error_correction,
+                int(st.session_state.mask_pattern_select)
+            )
+            if qr:
+                preview_qr_object = qr
+                if file_format in ["PNG", "JPG"]:
+                    preview_image_display = draw_custom_shape_image(
+                        qr, int(st.session_state.box_size_input), int(st.session_state.border_input),
+                        pattern_color, bg_color, st.session_state.pattern_shape_select,
+                        st.session_state.finder_pattern_shape_select,
+                        st.session_state.corner_radius_input,
+                        st.session_state.finder_corner_radius_input,
+                        st.session_state.cell_gap_input,
+                        st.session_state.finder_cell_gap_input,
+                    )
+                    img_buffer = io.BytesIO()
+                    if file_format == "PNG":
+                        preview_image_display.save(img_buffer, format='PNG')
+                        download_mime = "image/png"
+                        download_extension = ".png"
+                    elif file_format == "JPG":
+                        # JPG는 투명도를 지원하지 않아, RGB 모드로 변환
+                        rgb_image = preview_image_display.convert('RGB')
+                        rgb_image.save(img_buffer, format='JPEG', quality=jpg_quality)
+                        download_mime = "image/jpeg"
+                        download_extension = ".jpg"
+
+                    download_data = img_buffer.getvalue()
+
+                else: # SVG
+                    svg_data, _ = generate_qr_code_svg(
+                        current_data, int(st.session_state.box_size_input), int(st.session_state.border_input), error_correction,
+                        int(st.session_state.mask_pattern_select), "black", "white",
+                    )
+                    download_data = svg_data.encode('utf-8')
+                    download_mime = "image/svg+xml"
+                    download_extension = ".svg"
+
+                    # SVG 미리보기를 위한 이미지 생성 (간격 0으로)
+                    preview_image_display = draw_custom_shape_image(
+                        qr, int(st.session_state.box_size_input), int(st.session_state.border_input),
+                        "black", "white", lang_messages['pattern_shape_square'],
+                        lang_messages['pattern_shape_square'],
+                        st.session_state.corner_radius_input,
+                        st.session_state.finder_corner_radius_input,
+                        0, # SVG는 간격을 지원하지 않으므로 미리보기에서 간격 0으로 설정
+                        0,
+                    )
+        except Exception as e:
+            st.error(f"{lang_messages['error_occurred']}: {str(e)}")
+
+    st.markdown("---")
+
+    if preview_image_display:
+        st.success(lang_messages['preview_success'])
+        st.subheader(lang_messages['preview_subheader'])
+        col_left, col_center, col_right = st.columns([1, 2, 1])
+        with col_center:
+            st.image(preview_image_display, caption=lang_messages['preview_subheader'], width=378)
+
+        if preview_qr_object:
+            st.subheader(lang_messages['qr_info_header'])
+            st.info(f"""
+- **{lang_messages['qr_version'].format(version=preview_qr_object.version)}**
+- **{lang_messages['qr_modules_count'].format(modules_count=preview_qr_object.modules_count)}**
+- **{lang_messages['qr_border_count'].format(border_count=2 * int(st.session_state.border_input))}**
+- **{lang_messages['qr_box_size'].format(box_size=int(st.session_state.box_size_input))}**
+- **{lang_messages['qr_image_size'].format(width=(preview_qr_object.modules_count + 2 * int(st.session_state.border_input)) * int(st.session_state.box_size_input), height=(preview_qr_object.modules_count + 2 * int(st.session_state.border_input)) * int(st.session_state.box_size_input))}**
+---
+- **{lang_messages['qr_size_formula']}**
+---
+- **{lang_messages['qr_pattern_color'].format(color='black' if file_format == 'SVG' else pattern_color)}**
+- **{lang_messages['qr_bg_color'].format(color='white' if file_format == 'SVG' else bg_color)}**
+            """)
+
+        # 다운로드 섹션의 위치를 미리보기 아래로 이동
+        st.markdown("---")
+        st.subheader(lang_messages['download_subheader'])
+        now = datetime.now(ZoneInfo("Asia/Seoul"))
+        final_filename = sanitize_filename(st.session_state.filename_input_key.strip() if st.session_state.filename_input_key.strip() else now.strftime("QR_%Y-%m-%d_%H-%M-%S"))
+        download_filename = f"{final_filename}{download_extension}"
+
+        st.download_button(
+            label=lang_messages['download_button'],
+            data=download_data,
+            file_name=download_filename,
+            mime=download_mime,
+            use_container_width=True,
+            help=lang_messages['download_help'],
+        )
+
+        st.markdown(
+            f'<p style="font-size:18px;">'
+            f'<span style="color:darkorange; font-weight:bold;">{lang_messages["download_filename_display"]} </span> '
+            f'<span style="color:dodgerblue;"> {download_filename}</span>'
+            f'</p>',
+            unsafe_allow_html=True,
+        )
+
+    elif current_data:
+        st.warning(lang_messages['preview_warning'])
+
+        if file_format != "SVG":
+            if pattern_color_choice == lang_messages['custom_color_select'] and not pattern_color:
+                st.warning(lang_messages['pattern_hex_empty_warning'])
+            if bg_color_choice == lang_messages['custom_color_select'] and not bg_color:
+                st.warning(lang_messages['bg_hex_empty_warning'])
+            if pattern_color_choice == lang_messages['custom_color_select'] and pattern_color and not is_valid_color(pattern_color):
+                st.warning(lang_messages['pattern_hex_invalid_warning'])
+            if bg_color_choice == lang_messages['custom_color_select'] and bg_color and not is_valid_color(bg_color):
+                st.warning(lang_messages['bg_hex_invalid_warning'])
+            if is_colors_same_preview:
+                st.warning(lang_messages['same_color_warning'])
+    else:
+        st.info(lang_messages['no_input_info'])
+
+
+st.markdown("---")
+
+st.button(
+    label=lang_messages['reset_button'],
+    use_container_width=True,
+    type="secondary",
+    on_click=reset_all_settings,
+    help=lang_messages['reset_button_help'],
+)
+
 with st.sidebar:
     st.header(lang_messages['sidebar_title'])
-    st.markdown(f"**{lang_messages['sidebar_tip_title']}**")
     st.markdown(f"""
-    - **{lang_messages['text_example']}**
-    - **{lang_messages['website_example']}**
-    - **{lang_messages['email_example']}**
-    - **{lang_messages['email_full_example']}**
-    - **{lang_messages['phone_example']}**
-    - **{lang_messages['sms_example']}**
-    - **{lang_messages['sms_full_example']}**
-    - **{lang_messages['wifi_example']}**
+    {lang_messages['how_to_use_step1']}
+    {lang_messages['how_to_use_step2']}
+    {lang_messages['how_to_use_step3']}
+    {lang_messages['how_to_use_step4']}
+    {lang_messages['how_to_use_step5']}
+    {lang_messages['how_to_use_step6']}
     """)
-    st.markdown("---\n" * 1)
+
+    st.markdown("---")
+
+    st.header(lang_messages['sidebar_tip_title'])
+    st.markdown(f"""
+    - {lang_messages['text_example']}
+    - {lang_messages['website_example']}
+    - {lang_messages['email_example']}
+    - {lang_messages['email_full_example']}
+    - {lang_messages['phone_example']}
+    - {lang_messages['sms_example']}
+    - {lang_messages['sms_full_example']}
+    - {lang_messages['wifi_example']}
+    """)
+
+    st.markdown("---")
+
     st.header(lang_messages['sidebar_setting_guide_title'])
     st.markdown(f"**{lang_messages['sidebar_file_format']}**")
     st.markdown(f"""
@@ -306,23 +854,31 @@ with st.sidebar:
     {lang_messages['file_format_jpg']}
     {lang_messages['file_format_svg']}
     """)
+
+    st.markdown("---")
+
     st.markdown(f"**{lang_messages['sidebar_pattern_shape']}**")
     st.markdown(f"""
     - {lang_messages['pattern_shape_square']}, {lang_messages['pattern_shape_rounded']}, {lang_messages['pattern_shape_circle']}, {lang_messages['pattern_shape_diamond']}, {lang_messages['pattern_shape_star']}, {lang_messages['pattern_shape_cross']} {lang_messages['pattern_shape_svg_note']}
     """)
+
     st.markdown(f"**{lang_messages['sidebar_pattern_gap']}**")
     st.markdown(f"""
     {lang_messages['pattern_gap_note1']}
     {lang_messages['pattern_gap_note2']}
     """)
-    st.markdown("---\n" * 1)
+
+    st.markdown("---")
+
     st.markdown(f"**{lang_messages['sidebar_color_input']}**")
     st.markdown(f"""
     {lang_messages['color_input_note1']}
     {lang_messages['color_input_note2']}
     {lang_messages['color_input_note3']}
     """)
-    st.markdown("---\n" * 1)
+
+    st.markdown("---")
+
     st.markdown(f"**{lang_messages['sidebar_qr_setting']}**")
     st.markdown(f"**{lang_messages['sidebar_error_correction']}**")
     st.markdown(f"""
@@ -331,428 +887,16 @@ with st.sidebar:
     {lang_messages['error_correction_quartile']}
     {lang_messages['error_correction_high']}
     """)
-    st.markdown("---\n" * 1)
+
     st.markdown(f"**{lang_messages['sidebar_mask_pattern']}**")
-    st.markdown(f"{lang_messages['mask_pattern_note']}")
-    st.markdown("---\n" * 1)
-    st.info(lang_messages['author_info'], icon="ℹ️")
+    st.markdown(f"""
+    {lang_messages['mask_pattern_note']}
+    """)
 
-
-# --- 메인 컨텐츠 ---
-st.title(lang_messages['title'])
-st.caption(lang_messages['description'])
-
-# 언어 선택
-lang_options = {
-    "ko": "한국어",
-    "en": "English",
-    "ja": "日本語"
-}
-st.selectbox(
-    lang_messages['language_select_label'],
-    options=list(lang_options.keys()),
-    format_func=lambda x: lang_options[x],
-    key="language_select",
-    on_change=set_language
-)
-
+# 하단 정보
 st.markdown("---")
-
-# 전체 초기화 버튼
-st.button(lang_messages['reset_button'], help=lang_messages['reset_button_help'], on_click=reset_all_settings,)
-st.markdown("---")
-
-# 1. QR 코드 내용
-st.header(lang_messages['main_header'])
-st.subheader(lang_messages['qr_content_subheader'])
-qr_text_input = st.text_area(
-    lang_messages['text_area_label'],
-    placeholder=lang_messages['text_area_placeholder'],
-    value=st.session_state.qr_input_area,
-    height=200,
-    key='qr_input_area',
+st.markdown(
+    f'<p style="text-align: center; color: mediumslateblue; font-size: 15px;">{lang_messages["author_info"]}</p>',
+    unsafe_allow_html=True
 )
-
-strip_option = st.checkbox(
-    lang_messages['strip_option'],
-    value=st.session_state.strip_option,
-    help=lang_messages['strip_option_help'],
-    key='strip_option'
-)
-
-if st.button(lang_messages['delete_button'], help=lang_messages['delete_button_help'], on_click=clear_text_input,):
-    st.rerun()
-
-st.markdown("---")
-
-if strip_option:
-    qr_data = qr_text_input.strip()
-else:
-    qr_data = qr_text_input
-
-# 2. 파일 형식 선택
-st.subheader(lang_messages['file_format_subheader'])
-file_format_select = st.selectbox(
-    lang_messages['file_format_select_label'],
-    options=["PNG", "JPG", "SVG"],
-    key='file_format_select'
-)
-
-if file_format_select == "JPG":
-    st.info(lang_messages['jpg_quality_info'])
-    jpg_quality_input = st.slider(
-        lang_messages['jpg_quality_label'],
-        min_value=1, max_value=100,
-        value=st.session_state.jpg_quality_input,
-        help=lang_messages['jpg_quality_help'],
-        key='jpg_quality_input'
-    )
-else:
-    jpg_quality_input = 100
-
-st.markdown("---")
-
-
-# 3. 패턴 모양 설정
-st.subheader(lang_messages['pattern_shape_subheader'])
-pattern_shape_options = {
-    "square": lang_messages['pattern_shape_square'],
-    "rounded": lang_messages['pattern_shape_rounded'],
-    "circle": lang_messages['pattern_shape_circle'],
-    "diamond": lang_messages['pattern_shape_diamond'],
-    "star": lang_messages['pattern_shape_star'],
-    "cross": lang_messages['pattern_shape_cross']
-}
-finder_pattern_shape_options = {
-    "square": lang_messages['pattern_shape_square'],
-    "rounded": lang_messages['pattern_shape_rounded'],
-    "circle": lang_messages['pattern_shape_circle']
-}
-
-pattern_shape_select = st.selectbox(
-    lang_messages['pattern_select_label'],
-    options=list(pattern_shape_options.keys()),
-    format_func=lambda x: pattern_shape_options[x],
-    key='pattern_shape_key',
-)
-
-finder_pattern_shape_select = st.selectbox(
-    lang_messages['finder_pattern_select_label'],
-    options=list(finder_pattern_shape_options.keys()),
-    format_func=lambda x: finder_pattern_shape_options[x],
-    key='finder_pattern_shape_key',
-)
-
-
-# SVG 형식은 사각만 지원
-if file_format_select == "SVG":
-    st.warning(lang_messages['pattern_shape_warning'])
-
-# 둥근 모서리 반경 설정
-if pattern_shape_select == 'rounded':
-    if file_format_select == "SVG":
-        st.warning(lang_messages['corner_radius_warning'])
-    corner_radius_input = st.slider(
-        lang_messages['corner_radius_label'],
-        min_value=0, max_value=50,
-        value=st.session_state.corner_radius_input,
-        help=lang_messages['corner_radius_help'],
-        key='corner_radius_input'
-    )
-else:
-    corner_radius_input = 0
-
-
-# 파인더 패턴 둥근 모서리 반경
-if finder_pattern_shape_select == 'rounded':
-    finder_corner_radius_input = st.slider(
-        lang_messages['finder_corner_radius_label'],
-        min_value=0, max_value=50,
-        value=st.session_state.finder_corner_radius_input,
-        help=lang_messages['finder_corner_radius_help'],
-        key='finder_corner_radius_input'
-    )
-    st.warning(lang_messages['finder_corner_radius_warning'])
-else:
-    finder_corner_radius_input = 0
-
-
-# 패턴 간격
-if file_format_select == "SVG":
-    st.warning(lang_messages['cell_gap_warning'])
-    cell_gap_input = 0
-else:
-    cell_gap_input = st.slider(
-        lang_messages['cell_gap_label'],
-        min_value=0, max_value=100,
-        value=st.session_state.cell_gap_input,
-        help=lang_messages['cell_gap_help'],
-        key='cell_gap_input'
-    )
-
-finder_cell_gap_input = st.slider(
-    lang_messages['finder_cell_gap_label'],
-    min_value=0, max_value=100,
-    value=st.session_state.finder_cell_gap_input,
-    help=lang_messages['finder_cell_gap_help'],
-    key='finder_cell_gap_input'
-)
-st.warning(lang_messages['finder_cell_gap_warning'])
-
-st.markdown("---")
-
-
-# 4. 색상 설정
-st.subheader(lang_messages['color_subheader'])
-
-# SVG 경고 메시지
-if file_format_select == "SVG":
-    st.warning(lang_messages['svg_color_warning'])
-    pattern_color = "black"
-    bg_color = "white"
-
-else:
-    # 색상 선택 드롭다운
-    color_options = {
-        "black": "검정",
-        "white": "하양",
-        "red": "빨강",
-        "blue": "파랑",
-        "green": "초록",
-        "yellow": "노랑",
-        "custom_color": lang_messages['custom_color_select']
-    }
-    
-    st.session_state.pattern_color_select = st.selectbox(
-        lang_messages['pattern_color_label'],
-        options=list(color_options.keys()),
-        format_func=lambda x: color_options[x] if x != 'custom_color' else messages[st.session_state.lang]['custom_color_select'],
-        key='pattern_color_select'
-    )
-
-    st.session_state.bg_color_select = st.selectbox(
-        lang_messages['bg_color_label'],
-        options=list(color_options.keys()),
-        format_func=lambda x: color_options[x] if x != 'custom_color' else messages[st.session_state.lang]['custom_color_select'],
-        key='bg_color_select'
-    )
-
-    pattern_color_choice = st.session_state.pattern_color_select
-    bg_color_choice = st.session_state.bg_color_select
-
-    # 사용자 정의 색상 입력
-    if pattern_color_choice == "custom_color" or bg_color_choice == "custom_color":
-        st.info(lang_messages['custom_color_info'])
-        st.caption(lang_messages['custom_color_example'])
-
-        # 패턴 색상 HEX 입력
-        if pattern_color_choice == "custom_color":
-            custom_pattern_color_input = st.text_input(
-                lang_messages['pattern_hex_label'],
-                placeholder=lang_messages['custom_color_placeholder'],
-                key='custom_pattern_color_input_key',
-                max_chars=7
-            ).strip()
-            if not is_valid_color(custom_pattern_color_input):
-                st.warning(lang_messages.get('pattern_hex_invalid_warning', "Invalid HEX value for pattern color."), icon="⚠️")
-                pattern_color = None
-            else:
-                pattern_color = custom_pattern_color_input
-        else:
-            pattern_color = pattern_color_choice
-        
-        # 배경 색상 HEX 입력
-        if bg_color_choice == "custom_color":
-            custom_bg_color_input = st.text_input(
-                lang_messages['bg_hex_label'],
-                placeholder=lang_messages['custom_color_placeholder'],
-                key='custom_bg_color_input_key',
-                max_chars=7
-            ).strip()
-            if not is_valid_color(custom_bg_color_input):
-                st.warning(lang_messages.get('bg_hex_invalid_warning', "Invalid HEX value for background color."), icon="⚠️")
-                bg_color = None
-            else:
-                bg_color = custom_bg_color_input
-        else:
-            bg_color = bg_color_choice
-
-    else:
-        pattern_color = pattern_color_choice
-        bg_color = bg_color_choice
-    
-    # 패턴과 배경 색상이 같을 때 경고
-    if pattern_color == bg_color and qr_data:
-        st.warning(lang_messages['same_color_warning'], icon="⚠️")
-        pattern_color = None
-        bg_color = None
-
-st.markdown("---")
-
-
-# 5. QR 코드 설정
-st.subheader(lang_messages['qr_setting_subheader'])
-
-# 오류 보정 레벨
-error_correction_options = {
-    "low": lang_messages['error_correction_low_select'],
-    "medium": lang_messages['error_correction_medium_select'],
-    "quartile": lang_messages['error_correction_quartile_select'],
-    "high": lang_messages['error_correction_high_select'],
-}
-error_correction_key = st.selectbox(
-    lang_messages['error_correction_label'],
-    options=list(error_correction_options.keys()),
-    format_func=lambda x: error_correction_options[x],
-    key='error_correction_key'
-)
-error_correction_level = error_correction_map[error_correction_key]
-
-
-# 박스 사이즈 & 테두리
-box_size_input = st.number_input(
-    lang_messages['box_size_label'],
-    min_value=1, max_value=50,
-    value=st.session_state.box_size_input,
-    key='box_size_input'
-)
-
-border_input = st.number_input(
-    lang_messages['border_label'],
-    min_value=0, max_value=10,
-    value=st.session_state.border_input,
-    key='border_input'
-)
-
-mask_pattern_select = st.radio(
-    lang_messages['mask_pattern_label'],
-    options=list(range(8)),
-    index=st.session_state.mask_pattern_select,
-    key='mask_pattern_select'
-)
-
-st.markdown("---")
-
-# 6. 파일명 설정
-st.subheader(lang_messages['filename_subheader'])
-filename_input = st.text_input(
-    lang_messages['filename_input_label'],
-    placeholder=lang_messages['filename_placeholder'],
-    value=st.session_state.filename_input_key,
-    key='filename_input_key'
-)
-if st.button(lang_messages['filename_delete_button'], help=lang_messages['filename_delete_help'], on_click=clear_filename_callback,):
-    st.rerun()
-
-# 파일명 자동 생성 (입력된 내용의 해시값 사용)
-if not filename_input:
-    file_extension = file_format_select.lower()
-    # 해시 값을 파일명으로 사용
-    hashed_name = hashlib.md5(qr_data.encode()).hexdigest()
-    filename = f"qr-code-{hashed_name}.{file_extension}"
-else:
-    file_extension = file_format_select.lower()
-    filename = f"{sanitize_filename(filename_input)}.{file_extension}"
-
-st.markdown(f"{lang_messages['download_filename_display']} `{filename}`")
-st.markdown("---")
-
-
-# 7. 미리보기 및 다운로드
-st.header(lang_messages['preview_header'])
-
-if qr_data:
-    if pattern_color is not None and bg_color is not None:
-        try:
-            # QR 코드 생성
-            qr_object = get_qr_data_object(
-                data=qr_data,
-                box_size=box_size_input,
-                border=border_input,
-                error_correction=error_correction_level,
-                mask_pattern=mask_pattern_select
-            )
-
-            if qr_object:
-                # 미리보기
-                st.subheader(lang_messages['preview_subheader'])
-                st.info(lang_messages['preview_success'])
-
-                # 이미지 생성
-                if file_format_select == "SVG":
-                    svg_data, _ = generate_qr_code_svg(
-                        data=qr_data,
-                        box_size=box_size_input,
-                        border=border_input,
-                        error_correction=error_correction_level,
-                        mask_pattern=mask_pattern_select,
-                        fill_color="black",
-                        back_color="white",
-                    )
-                    st.image(f"data:image/svg+xml;base64,{base64.b64encode(svg_data.encode('utf-8')).decode('utf-8')}")
-                    img_bytes = svg_data.encode('utf-8')
-                else:
-                    img = draw_custom_shape_image(
-                        qr_object,
-                        box_size_input,
-                        border_input,
-                        pattern_color,
-                        bg_color,
-                        pattern_shape_options[pattern_shape_select],
-                        finder_pattern_shape_options[finder_pattern_shape_select],
-                        corner_radius_input,
-                        finder_corner_radius_input,
-                        cell_gap_input,
-                        finder_cell_gap_input,
-                    )
-
-                    # 바이트 스트림에 이미지 저장
-                    img_bytes_io = io.BytesIO()
-                    if file_format_select == "PNG":
-                        img.save(img_bytes_io, format='PNG')
-                    elif file_format_select == "JPG":
-                        img.save(img_bytes_io, format='JPEG', quality=jpg_quality_input, optimize=True)
-                    img_bytes = img_bytes_io.getvalue()
-
-                    st.image(img)
-
-                # QR 정보 표시
-                qr_version = qr_object.version
-                qr_modules_count = qr_object.modules_count
-                qr_border_count = qr_object.border
-                qr_box_size = qr_object.box_size
-                qr_width = (qr_modules_count + qr_border_count * 2) * qr_box_size
-                qr_height = qr_width
-
-                st.markdown(f"**{lang_messages['qr_info_header']}**")
-                st.markdown(lang_messages['qr_version'].format(version=qr_version))
-                st.markdown(lang_messages['qr_modules_count'].format(modules_count=qr_modules_count))
-                st.markdown(lang_messages['qr_border_count'].format(border_count=qr_border_count))
-                st.markdown(lang_messages['qr_box_size'].format(box_size=qr_box_size))
-                st.markdown(lang_messages['qr_image_size'].format(width=qr_width, height=qr_height))
-                st.markdown(lang_messages['qr_size_formula'])
-                st.markdown(lang_messages['qr_pattern_color'].format(color=pattern_color))
-                st.markdown(lang_messages['qr_bg_color'].format(color=bg_color))
-
-                # 다운로드
-                st.subheader(lang_messages['download_subheader'])
-                st.download_button(
-                    label=lang_messages['download_button'],
-                    data=img_bytes,
-                    file_name=filename,
-                    help=lang_messages['download_help']
-                )
-
-        except Exception as e:
-            st.error(f"Error creating QR code: {str(e)}")
-            st.warning(lang_messages['preview_warning'])
-
-    else:
-        st.warning(lang_messages['preview_warning'])
-else:
-    st.info(lang_messages['no_input_info'])
-
-st.markdown("---")
-kst_zone = ZoneInfo('Asia/Seoul')
-current_time_kst = datetime.now(kst_zone).strftime('%Y-%m-%d %H:%M:%S')
-st.caption(f"최종 업데이트: {current_time_kst} KST")
+# 최종버전(다중 언어 지원 통함 파일 버전)
