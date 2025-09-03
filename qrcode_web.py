@@ -254,8 +254,7 @@ def reset_all_settings():
     st.session_state.cell_gap_input = 0
     st.session_state.jpg_quality_input = 70
 
-
-# <<<< 추가된 함수: UI 선택 값을 다른 언어로 번역합니다.
+# UI 텍스트를 다른 언어로 번역하는 새 함수
 def translate_ui_text(current_value, old_lang, new_lang):
     """
     현재 선택된 UI 텍스트 값(예: '정사각형')을 새로운 언어의 값(예: 'Square')으로 변환합니다.
@@ -268,7 +267,7 @@ def translate_ui_text(current_value, old_lang, new_lang):
     # 일치하는 키를 찾지 못하면 원래 값을 그대로 반환합니다.
     return current_value
 
-# <<<< 수정된 함수: 언어 변경 시 설정을 초기화하는 대신, 필요한 UI 텍스트만 번역합니다.
+# 초기화 대신 '번역'을 수행하도록 수정한 함수
 def set_language():
     """언어 변경 시 호출되는 콜백 함수"""
     lang_map = {"한국어": "ko", "English": "en"}
@@ -302,7 +301,7 @@ def set_language():
         if st.session_state.bg_color_select == messages[old_lang]['custom_color_select']:
             st.session_state.bg_color_select = messages[new_lang]['custom_color_select']
         
-        # reset_language_defaults() 호출을 제거하여 상태가 초기화되지 않도록 합니다.
+        # 중요: reset_language_defaults() 호출을 제거하여 상태가 초기화되지 않도록 합니다.
 
 #[메인]====================================================================================================================================================================
 
