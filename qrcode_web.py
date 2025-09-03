@@ -304,8 +304,8 @@ def set_language():
 
 
     # 선택된 언어 이름을 언어 코드로 변환
-    lang_map = {"한국어": "ko", "English": "en"}
-    new_lang = lang_map.get(st.session_state.lang_select, "ko")
+    lang_map = {"한국어": "ko", "English": "en", "日本語": "ja", "中文": "zh",}
+    new_lang = lang_map.get(st.session_state.lang_select, "ko",)
 
     # 언어 변경이 발생했을 때만 상태를 업데이트
     if new_lang != old_lang:
