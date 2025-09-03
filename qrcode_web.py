@@ -481,7 +481,7 @@ with col1:
     if pattern_shape == lang_messages['pattern_shape_rounded']:
         corner_radius_disabled = (file_format == "SVG")
         st.caption(lang_messages['corner_radius_warning'])
-        st.session_state.corner_radius_input = st.slider(
+        corner_radius = st.slider(
             lang_messages['corner_radius_label'],
             min_value=0,
             max_value=50,
@@ -490,8 +490,6 @@ with col1:
             key="corner_radius_input",
             disabled=corner_radius_disabled,
         )
-    else:
-        st.session_state.corner_radius_input = 0
 
     # 패턴 간격 슬라이더 (일반 패턴)
     cell_gap_disabled = (file_format == "SVG")
@@ -519,7 +517,7 @@ with col1:
     if finder_pattern_shape == lang_messages['pattern_shape_rounded']:
         finder_corner_radius_disabled = (file_format == "SVG")
         st.caption(lang_messages['finder_corner_radius_warning'])
-        st.session_state.finder_corner_radius_input = st.slider(
+        finder_corner_radius = st.slider(
             lang_messages['finder_corner_radius_label'],
             min_value=0,
             max_value=50,
@@ -528,8 +526,6 @@ with col1:
             key="finder_corner_radius_input",
             disabled=finder_corner_radius_disabled,
         )
-    else:
-        st.session_state.finder_corner_radius_input = 0
 
     # 패턴 간격 슬라이더 (파인더 패턴)
     finder_cell_gap_disabled = (file_format == "SVG")
