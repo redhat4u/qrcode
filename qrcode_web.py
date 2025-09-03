@@ -268,15 +268,6 @@ def set_language():
     new_lang = lang_map.get(st.session_state.lang_select, "ko")
     if new_lang != st.session_state.lang:
         st.session_state.lang = new_lang
-        # 언어 변경 시 기본값 재설정
-        # st.session_state.qr_input_area를 제외한 모든 값을 재설정해야 합니다.
-        st.session_state.error_correction_select = messages[st.session_state.lang]['error_correction_low_select']
-        st.session_state.pattern_shape_select = messages[st.session_state.lang]['pattern_shape_square']
-        st.session_state.finder_pattern_shape_select = messages[st.session_state.lang]['pattern_shape_square']
-        st.session_state.pattern_color_select = "black"
-        st.session_state.bg_color_select = "white"
-        st.session_state.file_format_select = "PNG"
-        st.session_state.strip_option = True
 
 #[메인]====================================================================================================================================================================
 
