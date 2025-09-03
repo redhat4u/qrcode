@@ -3,6 +3,8 @@
 수정하다 오류나거나 잘못된 방향으로 수정되면 항상 이버전으로
 다시 시작하는 거야.. 알겠지??
 
+언어 추가시 살펴봐야 하는 줄: 88, 305, 390
+
 QR 코드 생성 웹앱 - Streamlit 버전
 휴대폰에서도 사용 가능
 
@@ -388,7 +390,7 @@ st.markdown("---")
 # 언어 선택 드롭다운
 lang_options = {"한국어": "ko", "English": "en"}
 lang_selected_name = st.selectbox(
-    "Select Language" if st.session_state.lang == "en" else "언어 선택(Select Language)",
+    "언어 선택(Select Language)" if st.session_state.lang == "ko" else "Select Language",
     options=list(lang_options.keys()),
     on_change=set_language,
     key="lang_select",
