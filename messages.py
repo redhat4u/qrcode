@@ -278,6 +278,7 @@ messages = {
     "ja": {
         "page_title": "QR コードジェネレーター",
         "title": "🔲 QR コードジェネレーター",
+        "language_select_label": "言語選択(Select Language)",
         "native_name": "日本語",
         "native_flag": "🇯🇵",
         "description": "最新バージョン",
@@ -414,6 +415,7 @@ messages = {
     "zh": {
         "page_title": "QR 码生成器",
         "title": "🔲 QR 码生成器",
+        "language_select_label": "语言选择(Select Language)",
         "native_name": "中文",
         "native_flag": "🇨🇳",
         "description": "最新版本",
@@ -550,6 +552,7 @@ messages = {
     "de": {
         "page_title": "QR-Code-Generator",
         "title": "🔲 QR-Code-Generator",
+        "language_select_label": "Sprache auswählen(Select Language)",
         "native_name": "Deutsch",
         "native_flag": "🇩🇪",
         "description": "Neueste Version",
@@ -686,6 +689,7 @@ messages = {
     "fr": {
         "page_title": "Générateur de code QR",
         "title": "🔲 Générateur de code QR",
+        "language_select_label": "Sélectionner la langue(Select Language)",
         "native_name": "Français",
         "native_flag": "🇫🇷",
         "description": "Version la plus récente",
@@ -822,6 +826,7 @@ messages = {
     "es": {
         "page_title": "Generador de código QR",
         "title": "🔲 Generador de código QR",
+        "language_select_label": "Seleccionar idioma(Select Language)",
         "native_name": "Español",
         "native_flag": "🇪🇸",
         "description": "Versión más reciente",
