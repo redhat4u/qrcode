@@ -83,14 +83,18 @@ if 'finder_corner_radius_input' not in st.session_state:
 if 'finder_cell_gap_input' not in st.session_state:
     st.session_state.finder_cell_gap_input = 0
 
+
 # 언어에 따른 페이지 제목 매핑
 dynamic_page_titles = {
     "ko": "QR 코드 생성기",
     "en": "QR Code Generator",
     "ja": "QR コードジェネレーター",
     "zh": "QR 码生成器",
-
+    "de": "QR-Code-Generator",
+    "fr": "Générateur de code QR",
+    "es": "Generador de código QR",
 }
+
 
 # 페이지 설정
 st.set_page_config(
@@ -304,7 +308,7 @@ def set_language():
 
 
     # 선택된 언어 이름을 언어 코드로 변환
-    lang_map = {"한국어": "ko", "English": "en", "日本語": "ja", "中文": "zh",}
+    lang_map = {"한국어": "ko", "English": "en", "日本語": "ja", "中文": "zh", "QR-Code-Generator": "de", "Générateur de code QR": "fr", "Generador de código QR": "es",}
     new_lang = lang_map.get(st.session_state.lang_select, "ko",)
 
     # 언어 변경이 발생했을 때만 상태를 업데이트
@@ -389,7 +393,7 @@ st.title(lang_messages['title'])
 st.markdown("---")
 
 # 언어 선택 드롭다운
-lang_options = {"한국어": "ko", "English": "en", "日本語": "ja", "中文": "zh",}
+lang_options = {"한국어": "ko", "English": "en", "日本語": "ja", "中文": "zh", "QR-Code-Generator": "de", "Générateur de code QR": "fr", "Generador de código QR": "es",}
 lang_selected_name = st.selectbox(
     "언어 선택(Select Language)" if st.session_state.lang == "ko" else "Select Language",
     options=list(lang_options.keys()),
