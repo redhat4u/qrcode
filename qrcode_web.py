@@ -119,6 +119,7 @@ def is_valid_color(color_name):
 
 
 # QR 코드 데이터 생성
+@st.cache_data
 def get_qr_data_object(data, box_size, border, error_correction, mask_pattern,):
     try:
         qr = qrcode.QRCode(
@@ -136,6 +137,7 @@ def get_qr_data_object(data, box_size, border, error_correction, mask_pattern,):
         return None
     
 # 사용자 정의 모양으로 QR 코드 이미지 생성 함수 (PNG)
+@st.cache_data(show_spinner=False)
 def draw_custom_shape_image(qr_object, box_size, border, fill_color, back_color, pattern_shape, finder_pattern_shape, pattern_corner_radius, finder_corner_radius, pattern_cell_gap, finder_cell_gap,):
     if not qr_object:
         return None
@@ -216,6 +218,7 @@ def draw_custom_shape_image(qr_object, box_size, border, fill_color, back_color,
 
 
 # QR 코드 SVG 생성 함수
+@st.cache_data
 def generate_qr_code_svg(data, box_size, border, error_correction, mask_pattern, fill_color, back_color,):
     try:
         qr = qrcode.QRCode(
