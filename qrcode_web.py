@@ -86,7 +86,10 @@ if 'finder_cell_gap_input' not in st.session_state:
 # 언어에 따른 페이지 제목 매핑
 dynamic_page_titles = {
     "ko": "QR 코드 생성기",
-    "en": "QR Code Generator"
+    "en": "QR Code Generator",
+    "ja": "QR コードジェネレーター",
+    "zh": "QR 码生成器",
+
 }
 
 # 페이지 설정
@@ -386,7 +389,7 @@ st.title(lang_messages['title'])
 st.markdown("---")
 
 # 언어 선택 드롭다운
-lang_options = {"한국어": "ko", "English": "en"}
+lang_options = {"한국어": "ko", "English": "en", "日本語": "ja", "中文": "zh",}
 lang_selected_name = st.selectbox(
     "Select Language" if st.session_state.lang == "en" else "언어 선택(Select Language)",
     options=list(lang_options.keys()),
