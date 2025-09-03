@@ -749,7 +749,7 @@ with col2:
     if preview_image_display:
         st.success(lang_messages['preview_success'])
         st.subheader(lang_messages['preview_subheader'])
-        col_left, col_center, col_right = st.columns([2, 0, 1])
+        col_left, col_center, col_right = st.columns([0, 2, 1])
         with col_left:
             st.image(preview_image_display, caption=lang_messages['preview_subheader'], width=378)
 
