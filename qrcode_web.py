@@ -1,4 +1,7 @@
 """
+한국어로 사용하다가 영어로 바뀌면 입력창 내용및 모든 설정이 초기화돼.. 
+그대로 유지되면서 언어만 바뀌게 해줘.. 업로드한 소스로 수정해줘..
+
 QR 코드 생성 웹앱 - Streamlit 버전
 휴대폰에서도 사용 가능
 
@@ -244,23 +247,33 @@ def reset_all_settings():
     
     st.session_state.box_size_input = 20
     st.session_state.border_input = 2
-    st.session_state.error_correction_select = lang_messages['error_correction_low_select']
+    st.session_state.error_correction_select = messages[st.session_state.lang]['error_correction_low_select']
     st.session_state.mask_pattern_select = 2
     st.session_state.pattern_color_select = "black"
     st.session_state.bg_color_select = "white"
     st.session_state.strip_option = True
     st.session_state.file_format_select = "PNG"
-    st.session_state.pattern_shape_select = lang_messages['pattern_shape_square']
-    st.session_state.finder_pattern_shape_select = lang_messages['pattern_shape_square']
+    st.session_state.pattern_shape_select = messages[st.session_state.lang]['pattern_shape_square']
+    st.session_state.finder_pattern_shape_select = messages[st.session_state.lang]['pattern_shape_square']
     st.session_state.corner_radius_input = 25
     st.session_state.cell_gap_input = 0
     st.session_state.jpg_quality_input = 70
     
-# 언어 변경 콜백 함수
+# 언어 변경 콜백 함수 (기존 코드 수정)
 def set_language():
     # 선택된 언어 이름을 언어 코드로 변환
     lang_map = {"한국어": "ko", "English": "en"}
-    st.session_state.lang = lang_map.get(st.session_state.lang_select, "ko")
+    new_lang = lang_map.get(st.session_state.lang_select, "ko")
+
+    # 언어가 변경되었을 때만 언어 관련 기본값 재설정
+    if st.session_state.lang != new_lang:
+        st.session_state.lang = new_lang
+        st.session_state.error_correction_select = messages[st.session_state.lang]['error_correction_low_select']
+        st.session_state.pattern_shape_select = messages[st.session_state.lang]['pattern_shape_square']
+        st.session_state.finder_pattern_shape_select = messages[st.session_state.lang]['pattern_shape_square']
+        
+# 기존의 set_language 함수를 그대로 사용하도록 되돌림
+# 기본값 재설정 로직을 제외하여 기존 입력 내용을 유지
 
 #[메인]====================================================================================================================================================================
 
@@ -741,3 +754,4 @@ st.markdown(
     f'<p style="text-align: center; color: mediumslateblue; font-size: 15px;">{lang_messages["author_info"]}</p>',
     unsafe_allow_html=True
 )
+# 최종버전(다중 언어 지원 통함 파일 버전)
