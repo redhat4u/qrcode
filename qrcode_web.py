@@ -498,19 +498,21 @@ with col1:
     else:
         jpg_quality = 70
 
-    # 패턴 모양 설정
+    # 💡 패턴 모양 설정
     st.markdown("---")
     st.subheader(lang_messages['pattern_shape_subheader'])
     # SVG 형식은 커스텀 모양을 지원하지 않으므로, SVG 선택 시 위젯을 비활성화합니다.
     pattern_shape_disabled = (file_format == "SVG")
     st.caption(lang_messages['pattern_shape_warning'])
 
-    # 두 개의 패턴 모양 선택 옵션 추가
+    # ❗ 일반 패턴과 파인더 패턴을 따로 설정하는 드롭다운 메뉴를 각각 만듭니다.
     col_pattern_shape, col_finder_shape = st.columns(2)
-
+    
+    # ❗ 패턴 모양 옵션은 두 선택 상자에서 동일하게 사용합니다.
     pattern_options = (lang_messages['pattern_shape_square'], lang_messages['pattern_shape_rounded'], lang_messages['pattern_shape_circle'], lang_messages['pattern_shape_diamond'], lang_messages['pattern_shape_star'], lang_messages['pattern_shape_cross'],)
 
     with col_pattern_shape:
+        # ❗ 일반 패턴 모양 선택
         pattern_shape = st.selectbox(
             lang_messages['pattern_select_label'],
             pattern_options,
@@ -519,6 +521,7 @@ with col1:
         )
 
     with col_finder_shape:
+        # ❗ 파인더 패턴 모양 선택
         finder_pattern_shape = st.selectbox(
             lang_messages['finder_pattern_select_label'],
             pattern_options,
@@ -526,7 +529,7 @@ with col1:
             disabled=pattern_shape_disabled,
         )
 
-    # 둥근사각 전용 슬라이더 (일반 패턴)
+    # ❗ 일반 패턴 둥근사각 전용 슬라이더
     if pattern_shape == lang_messages['pattern_shape_rounded']:
         corner_radius_disabled = (file_format == "SVG")
         st.caption(lang_messages['corner_radius_warning'])
@@ -542,7 +545,7 @@ with col1:
     else:
         corner_radius = 0
 
-    # 둥근사각 전용 슬라이더 (파인더 패턴)
+    # ❗ 파인더 패턴 둥근사각 전용 슬라이더
     if finder_pattern_shape == lang_messages['pattern_shape_rounded']:
         finder_corner_radius_disabled = (file_format == "SVG")
         st.caption(lang_messages['finder_corner_radius_warning'])
@@ -558,7 +561,7 @@ with col1:
     else:
         finder_corner_radius = 0
 
-    # 패턴 간격 슬라이더 (일반 패턴)
+    # ❗ 일반 패턴 간격 슬라이더
     cell_gap_disabled = (file_format == "SVG")
     st.caption(lang_messages['cell_gap_warning'])
     cell_gap = st.slider(
@@ -571,7 +574,7 @@ with col1:
         key="cell_gap_input",
     )
 
-    # 패턴 간격 슬라이더 (파인더 패턴)
+    # ❗ 파인더 패턴 간격 슬라이더
     finder_cell_gap_disabled = (file_format == "SVG")
     st.caption(lang_messages['finder_cell_gap_warning'])
     finder_cell_gap = st.slider(
