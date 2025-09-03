@@ -38,6 +38,8 @@ messages = {
         "pattern_shape_warning": "⚠️ SVG 형식은 사각만 지원합니다.",
         "pattern_select_label": "일반 패턴 모양",
         "finder_pattern_select_label": "파인더 패턴 모양",
+        "finder_corner_radius_label": "파인더 패턴 둥근 모서리 반경(%)",
+        "finder_corner_radius_warning": "둥근 모서리 반경이 너무 크면 QR 코드 인식률에 영향을 줄 수 있습니다.", # 이 줄을 추가
         "finder_cell_gap_label": "파인더 패턴 간격(%)",
         "finder_cell_gap_warning": "파인더 패턴의 간격은 QR 코드 인식률에 큰 영향을 줍니다.", 
         "finder_cell_gap_help": "파인더 패턴 모서리와 내부 사각형 사이의 여백을 조절합니다.", # 이 줄을 추가
@@ -169,6 +171,8 @@ messages = {
         "pattern_shape_warning": "⚠️ SVG format only supports square shape.",
         "pattern_select_label": "Regular Pattern Shape",
         "finder_pattern_select_label": "Finder Pattern Shape",
+        "finder_corner_radius_label": "Finder Pattern Corner Radius (%)",
+        "finder_corner_radius_warning": "A large corner radius may affect QR code readability.", # 이 줄을 추가
         "finder_cell_gap_label": "Finder Pattern Spacing (%)",
         "finder_cell_gap_warning": "Finder pattern spacing significantly affects QR code readability.",
         "finder_cell_gap_help": "Adjusts the gap between the finder pattern's corners and its inner square.", # 이 줄을 추가
