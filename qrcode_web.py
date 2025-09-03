@@ -1,7 +1,4 @@
 """
-한국어로 사용하다가 영어로 바뀌면 입력창 내용및 모든 설정이 초기화돼.. 
-모든걸 그대로 유지하면서 언어만 바뀌게 해줘.. 
-
 QR 코드 생성 웹앱 - Streamlit 버전
 휴대폰에서도 사용 가능
 
@@ -36,9 +33,40 @@ st.set_page_config(
     layout="wide",
 )
 
-# 세션 상태 초기화
+# 기본 설정값을 초기화하는 함수
+def reset_language_defaults():
+    st.session_state.error_correction_select = messages[st.session_state.lang]['error_correction_low_select']
+    st.session_state.pattern_shape_select = messages[st.session_state.lang]['pattern_shape_square']
+    st.session_state.finder_pattern_shape_select = messages[st.session_state.lang]['pattern_shape_square']
+    st.session_state.pattern_color_select = "black"
+    st.session_state.bg_color_select = "white"
+    st.session_state.box_size_input = 20
+    st.session_state.border_input = 2
+    st.session_state.mask_pattern_select = 2
+    st.session_state.corner_radius_input = 25
+    st.session_state.cell_gap_input = 0
+    st.session_state.jpg_quality_input = 70
+    st.session_state.strip_option = True
+    st.session_state.file_format_select = "PNG"
+
+# 세션 상태 초기화 (초기 1회만 실행)
 if 'lang' not in st.session_state:
     st.session_state.lang = "ko"
+    # 최초 실행 시에만 기본값 설정
+    st.session_state.error_correction_select = messages[st.session_state.lang]['error_correction_low_select']
+    st.session_state.pattern_shape_select = messages[st.session_state.lang]['pattern_shape_square']
+    st.session_state.finder_pattern_shape_select = messages[st.session_state.lang]['pattern_shape_square']
+    st.session_state.pattern_color_select = "black"
+    st.session_state.bg_color_select = "white"
+    st.session_state.box_size_input = 20
+    st.session_state.border_input = 2
+    st.session_state.mask_pattern_select = 2
+    st.session_state.corner_radius_input = 25
+    st.session_state.cell_gap_input = 0
+    st.session_state.jpg_quality_input = 70
+    st.session_state.strip_option = True
+    st.session_state.file_format_select = "PNG"
+    
 if 'qr_input_area' not in st.session_state:
     st.session_state.qr_input_area = ""
 if 'custom_pattern_color_input_key' not in st.session_state:
@@ -47,32 +75,6 @@ if 'custom_bg_color_input_key' not in st.session_state:
     st.session_state.custom_bg_color_input_key = ""
 if 'filename_input_key' not in st.session_state:
     st.session_state.filename_input_key = ""
-if 'box_size_input' not in st.session_state:
-    st.session_state.box_size_input = 20
-if 'border_input' not in st.session_state:
-    st.session_state.border_input = 2
-if 'error_correction_select' not in st.session_state:
-    st.session_state.error_correction_select = messages[st.session_state.lang]['error_correction_low_select']
-if 'mask_pattern_select' not in st.session_state:
-    st.session_state.mask_pattern_select = 2
-if 'pattern_color_select' not in st.session_state:
-    st.session_state.pattern_color_select = "black"
-if 'bg_color_select' not in st.session_state:
-    st.session_state.bg_color_select = "white"
-if 'strip_option' not in st.session_state:
-    st.session_state.strip_option = True
-if 'file_format_select' not in st.session_state:
-    st.session_state.file_format_select = "PNG"
-if 'pattern_shape_select' not in st.session_state:
-    st.session_state.pattern_shape_select = messages[st.session_state.lang]['pattern_shape_square']
-if 'finder_pattern_shape_select' not in st.session_state:
-    st.session_state.finder_pattern_shape_select = messages[st.session_state.lang]['pattern_shape_square']
-if 'corner_radius_input' not in st.session_state:
-    st.session_state.corner_radius_input = 25
-if 'cell_gap_input' not in st.session_state:
-    st.session_state.cell_gap_input = 0
-if 'jpg_quality_input' not in st.session_state:
-    st.session_state.jpg_quality_input = 70
 
 
 # 현재 언어 설정 불러오기
@@ -122,7 +124,7 @@ def draw_custom_shape_image(qr_object, box_size, border, fill_color, back_color,
     img_size = (qr_object.modules_count + 2 * border) * box_size
     img = Image.new('RGB', (img_size, img_size), back_color,)
     draw = ImageDraw.Draw(img)
-    
+
     # 간격 계산
     gap_pixels = int(box_size * (cell_gap / 100))
     effective_box_size = box_size - gap_pixels
@@ -166,28 +168,28 @@ def draw_custom_shape_image(qr_object, box_size, border, fill_color, back_color,
             cross_width = (x2 - x1) * 0.3
             draw.rectangle([x1, y_center - cross_width/2, x2, y_center + cross_width/2], fill=fill,)
             draw.rectangle([x_center - cross_width/2, y1, x_center + cross_width/2, y2], fill=fill,)
-    
+
     # 세 개의 큰 파인더 패턴의 위치를 미리 계산
     finder_pattern_coords = [
         (border * box_size, border * box_size),
         (border * box_size, (qr_object.modules_count - 7 + border) * box_size),
         ((qr_object.modules_count - 7 + border) * box_size, border * box_size),
     ]
-    
+
     for r in range(qr_object.modules_count):
         for c in range(qr_object.modules_count):
             is_finder_pattern = False
             # 세 개의 파인더 패턴 위치에 있는지 확인
             if (r < 7 and c < 7) or (r >= qr_object.modules_count - 7 and c < 7) or (r < 7 and c >= qr_object.modules_count - 7):
                 is_finder_pattern = True
-            
+
             if qr_object.modules[r][c]:
                 x = (c + border) * box_size
                 y = (r + border) * box_size
-                
+
                 # 간격을 적용한 새로운 좌표 계산
                 current_shape = finder_pattern_shape if is_finder_pattern else pattern_shape
-                
+
                 if current_shape != lang_messages['pattern_shape_square']:
                     new_x = x + gap_pixels // 2
                     new_y = y + gap_pixels // 2
@@ -214,16 +216,16 @@ def generate_qr_code_svg(data, box_size, border, error_correction, mask_pattern,
         )
         qr.add_data(data, optimize=0)
         qr.make(fit=True)
-        
+
         img_svg = qr.make_image(image_factory=qrcode.image.svg.SvgPathImage)
-        
+
         svg_buffer = io.BytesIO()
         img_svg.save(svg_buffer)
         svg_data = svg_buffer.getvalue().decode('utf-8')
-        
-        svg_data = svg_data.replace('fill="black"', f'fill="{fill_color}"', 1,) 
+
+        svg_data = svg_data.replace('fill="black"', f'fill="{fill_color}"', 1,)
         svg_data = svg_data.replace('fill="white"', f'fill="{back_color}"', 1,)
-        
+
         return svg_data, qr
     except Exception as e:
         st.error(f"{lang_messages['qr_code_svg_error']}: {str(e)}")
@@ -244,7 +246,7 @@ def reset_all_settings():
     st.session_state.custom_pattern_color_input_key = ""
     st.session_state.custom_bg_color_input_key = ""
     st.session_state.filename_input_key = ""
-    
+
     st.session_state.box_size_input = 20
     st.session_state.border_input = 2
     st.session_state.error_correction_select = lang_messages['error_correction_low_select']
@@ -258,12 +260,16 @@ def reset_all_settings():
     st.session_state.corner_radius_input = 25
     st.session_state.cell_gap_input = 0
     st.session_state.jpg_quality_input = 70
-    
+
 # 언어 변경 콜백 함수
 def set_language():
     # 선택된 언어 이름을 언어 코드로 변환
     lang_map = {"한국어": "ko", "English": "en"}
-    st.session_state.lang = lang_map.get(st.session_state.lang_select, "ko")
+    new_lang = lang_map.get(st.session_state.lang_select, "ko")
+    if new_lang != st.session_state.lang:
+        st.session_state.lang = new_lang
+        # 언어 변경 시 기본값 재설정
+        reset_language_defaults()
 
 #[메인]====================================================================================================================================================================
 
@@ -333,7 +339,7 @@ with col1:
         )
 
     st.markdown("---")
-    
+
     # 파일 형식 설정
     st.subheader(lang_messages['file_format_subheader'])
     file_format = st.selectbox(
@@ -342,7 +348,7 @@ with col1:
         index=0 if st.session_state.file_format_select == "PNG" else (1 if st.session_state.file_format_select == "JPG" else 2),
         key="file_format_select",
     )
-    
+
     # JPG 품질 설정 슬라이더 (JPG 선택 시에만 표시)
     if file_format == "JPG":
         st.caption(lang_messages['jpg_quality_info'])
@@ -356,18 +362,18 @@ with col1:
         )
     else:
         jpg_quality = 70
-    
+
     # 패턴 모양 설정
     st.markdown("---")
     st.subheader(lang_messages['pattern_shape_subheader'])
     pattern_shape_disabled = (file_format == "SVG")
     st.caption(lang_messages['pattern_shape_warning'])
-    
+
     # 두 개의 패턴 모양 선택 옵션 추가
     col_pattern_shape, col_finder_shape = st.columns(2)
-    
+
     pattern_options = (lang_messages['pattern_shape_square'], lang_messages['pattern_shape_rounded'], lang_messages['pattern_shape_circle'], lang_messages['pattern_shape_diamond'], lang_messages['pattern_shape_star'], lang_messages['pattern_shape_cross'],)
-    
+
     with col_pattern_shape:
         pattern_shape = st.selectbox(
             lang_messages['pattern_select_label'],
@@ -389,9 +395,9 @@ with col1:
         corner_radius_disabled = (file_format == "SVG")
         st.caption(lang_messages['corner_radius_warning'])
         corner_radius = st.slider(
-            lang_messages['corner_radius_label'], 
-            min_value=0, 
-            max_value=50, 
+            lang_messages['corner_radius_label'],
+            min_value=0,
+            max_value=50,
             value=st.session_state.corner_radius_input,
             help=lang_messages['corner_radius_help'],
             key="corner_radius_input",
@@ -399,7 +405,7 @@ with col1:
         )
     else:
         corner_radius = 0
-        
+
     # 패턴 간격 슬라이더 (사각 제외)
     cell_gap_disabled = (pattern_shape == lang_messages['pattern_shape_square']) or (finder_pattern_shape == lang_messages['pattern_shape_square']) or (file_format == "SVG")
     st.caption(lang_messages['cell_gap_warning'])
@@ -412,15 +418,15 @@ with col1:
         disabled=cell_gap_disabled,
         key="cell_gap_input",
     )
-    
+
 #========================================================================================================================================================================
 
     # 색상 설정 (순서 변경)
     st.markdown("---")
     st.subheader(lang_messages['color_subheader'])
-    
+
     file_format_is_svg = (st.session_state.file_format_select == "SVG")
-    
+
     if file_format_is_svg:
         st.warning(lang_messages['svg_color_warning'])
 
@@ -433,14 +439,14 @@ with col1:
     col1_3, col1_4 = st.columns(2)
     with col1_3:
         pattern_color_choice = st.selectbox(
-            lang_messages['pattern_color_label'], colors, 
-            key="pattern_color_select", 
+            lang_messages['pattern_color_label'], colors,
+            key="pattern_color_select",
             disabled=file_format_is_svg,
         )
     with col1_4:
         bg_color_choice = st.selectbox(
-            lang_messages['bg_color_label'], colors, 
-            key="bg_color_select", 
+            lang_messages['bg_color_label'], colors,
+            key="bg_color_select",
             disabled=file_format_is_svg,
         )
 
@@ -461,7 +467,7 @@ with col1:
             disabled=(bg_color_choice != lang_messages['custom_color_select']) or file_format_is_svg,
             key="custom_bg_color_input_key",
         )
-    
+
     pattern_color = st.session_state.get('custom_pattern_color_input_key', '',).strip() if pattern_color_choice == lang_messages['custom_color_select'] else pattern_color_choice
     bg_color = st.session_state.get('custom_bg_color_input_key', '',).strip() if bg_color_choice == lang_messages['custom_color_select'] else bg_color_choice
 
@@ -493,7 +499,7 @@ with col1:
     # 파일명 설정
     st.markdown("---")
     st.subheader(lang_messages['filename_subheader'])
-    
+
     col_filename_input, col_filename_delete = st.columns([3, 1.1])
 
     with col_filename_input:
@@ -522,16 +528,16 @@ with col1:
 
 with col2:
     st.header(lang_messages['preview_header'])
-    
+
     current_data = qr_data.strip() if st.session_state.strip_option else qr_data
-    
+
     is_pattern_color_valid_preview = (pattern_color_choice != lang_messages['custom_color_select']) or (pattern_color_choice == lang_messages['custom_color_select'] and pattern_color and is_valid_color(pattern_color))
     is_bg_color_valid_preview = (bg_color_choice != lang_messages['custom_color_select']) or (bg_color_choice == lang_messages['custom_color_select'] and bg_color and is_valid_color(bg_color))
     is_colors_same_preview = (is_pattern_color_valid_preview and is_bg_color_valid_preview and pattern_color and bg_color and pattern_color == bg_color)
-    
+
     preview_image_display = None
     preview_qr_object = None
-    
+
     can_generate_preview = current_data and (file_format == "SVG" or (is_pattern_color_valid_preview and is_bg_color_valid_preview and not is_colors_same_preview))
 
     download_data = None
@@ -566,7 +572,7 @@ with col2:
                         rgb_image.save(img_buffer, format='JPEG', quality=jpg_quality)
                         download_mime = "image/jpeg"
                         download_extension = ".jpg"
-                        
+
                     download_data = img_buffer.getvalue()
 
                 else: # SVG
@@ -577,7 +583,7 @@ with col2:
                     download_data = svg_data.encode('utf-8')
                     download_mime = "image/svg+xml"
                     download_extension = ".svg"
-                    
+
                     # SVG 미리보기를 위한 이미지 생성
                     preview_image_display = draw_custom_shape_image(
                         qr, int(st.session_state.box_size_input), int(st.session_state.border_input),
@@ -590,14 +596,14 @@ with col2:
             st.error(f"{lang_messages['error_occurred']}: {str(e)}")
 
     st.markdown("---")
-    
+
     if preview_image_display:
         st.success(lang_messages['preview_success'])
         st.subheader(lang_messages['preview_subheader'])
         col_left, col_center, col_right = st.columns([1, 2, 1])
         with col_center:
             st.image(preview_image_display, caption=lang_messages['preview_subheader'], width=380)
-        
+
         if preview_qr_object:
             st.subheader(lang_messages['qr_info_header'])
             st.info(f"""
@@ -628,7 +634,7 @@ with col2:
             use_container_width=True,
             help=lang_messages['download_help'],
         )
-        
+
         st.markdown(
             f'<p style="font-size:18px;">'
             f'<span style="color:darkorange; font-weight:bold;">{lang_messages["download_filename_display"]} </span> '
@@ -639,7 +645,7 @@ with col2:
 
     elif current_data:
         st.warning(lang_messages['preview_warning'])
-        
+
         if file_format != "SVG":
             if pattern_color_choice == lang_messages['custom_color_select'] and not pattern_color:
                 st.warning(lang_messages['pattern_hex_empty_warning'])
@@ -658,7 +664,7 @@ with col2:
 st.markdown("---")
 
 st.button(
-    label=lang_messages['reset_button'], 
+    label=lang_messages['reset_button'],
     use_container_width=True,
     type="secondary",
     on_click=reset_all_settings,
@@ -706,7 +712,7 @@ with st.sidebar:
     st.markdown(f"""
     - {lang_messages['pattern_shape_square']}, {lang_messages['pattern_shape_rounded']}, {lang_messages['pattern_shape_circle']}, {lang_messages['pattern_shape_diamond']}, {lang_messages['pattern_shape_star']}, {lang_messages['pattern_shape_cross']} {lang_messages['pattern_shape_svg_note']}
     """)
-    
+
     st.markdown(f"**{lang_messages['sidebar_pattern_gap']}**")
     st.markdown(f"""
     {lang_messages['pattern_gap_note1']}
