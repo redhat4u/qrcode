@@ -391,7 +391,7 @@ st.markdown("---")
 # 언어 선택 드롭다운
 lang_options = {"한국어": "ko", "English": "en", "日本語": "ja", "中文": "zh",}
 lang_selected_name = st.selectbox(
-    "Select Language" if st.session_state.lang == "en" else "언어 선택(Select Language)",
+    "언어 선택(Select Language)" if st.session_state.lang == "ko" else "Select Language",
     options=list(lang_options.keys()),
     on_change=set_language,
     key="lang_select",
