@@ -852,7 +852,7 @@ with col1:
 
     col1_1, col1_2 = st.columns(2)
     with col1_1:
-        box_size = st.number_input(lang_messages['box_size_label'], min_value=1, max_value=100, key="box_size_input",)
+        box_size = st.number_input(lang_messages['box_size_label'], min_value=6, max_value=100, key="box_size_input",)
         border = st.number_input(lang_messages['border_label'], min_value=0, max_value=10, key="border_input",)
 
     with col1_2:
