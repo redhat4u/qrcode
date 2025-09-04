@@ -275,7 +275,7 @@ def draw_custom_shape_image(qr_object, box_size, border, fill_color, back_color,
             # 육각
             x_center = (new_x + new_x_end) / 2
             y_center = (new_y + new_y_end) / 2
-            radius = effective_size_after_gap / 1.96  # 이 값으로 크기를 조절
+            radius = effective_size_after_gap / 1.91  # 이 값으로 크기를 조절
             points = []
             for i in range(6):
                 angle = math.radians(60 * i)
