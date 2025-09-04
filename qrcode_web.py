@@ -328,40 +328,33 @@ def draw_custom_shape_image(qr_object, box_size, border, fill_color, back_color,
             draw.ellipse([x_center - radius*2, y_center - radius, x_center, y_center + radius], fill=fill)
             draw.ellipse([x_center, y_center - radius, x_center + radius*2, y_center + radius], fill=fill)
         elif shape == lang_messages['pattern_shape_club']:
-            # 클로버 모양 (삼각형 배치의 원 3개 + 줄기)
+            # 클로버 모양 (삼각형 배치의 원 3개)
             width = effective_size_after_gap
             height = effective_size_after_gap
             x_center = (new_x + new_x_end) / 2
             y_center = (new_y + new_y_end) / 2
             
             # 클로버 잎 크기
-            leaf_radius = width / 6
-            triangle_radius = width / 3  # 삼각형 배치 반지름
+            leaf_radius = width / 5
+            offset = width / 4  # 원들 사이의 간격
             
-            # 삼각형의 세 꼭짓점에 원 배치
-            # 상단 (12시 방향)
+            # 위쪽에 원 1개
             top_x = x_center
-            top_y = y_center - triangle_radius
+            top_y = y_center - offset
             draw.ellipse([top_x - leaf_radius, top_y - leaf_radius,
                           top_x + leaf_radius, top_y + leaf_radius], fill=fill)
             
-            # 왼쪽 아래 (8시 방향)
-            left_x = x_center - triangle_radius * math.cos(math.pi/6)
-            left_y = y_center + triangle_radius * math.sin(math.pi/6)
+            # 아래쪽 왼쪽에 원 1개
+            left_x = x_center - offset
+            left_y = y_center + offset
             draw.ellipse([left_x - leaf_radius, left_y - leaf_radius,
                           left_x + leaf_radius, left_y + leaf_radius], fill=fill)
             
-            # 오른쪽 아래 (4시 방향)
-            right_x = x_center + triangle_radius * math.cos(math.pi/6)
-            right_y = y_center + triangle_radius * math.sin(math.pi/6)
+            # 아래쪽 오른쪽에 원 1개
+            right_x = x_center + offset
+            right_y = y_center + offset
             draw.ellipse([right_x - leaf_radius, right_y - leaf_radius,
                           right_x + leaf_radius, right_y + leaf_radius], fill=fill)
-            
-            # 줄기 (가운데에서 아래로)
-            stem_width = width * 0.06
-            stem_start_y = y_center + leaf_radius
-            draw.rectangle([x_center - stem_width/2, stem_start_y,
-                            x_center + stem_width/2, new_y_end], fill=fill)
 
 
     for r in range(qr_object.modules_count):
