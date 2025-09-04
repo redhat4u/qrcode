@@ -291,7 +291,7 @@ def draw_custom_shape_image(qr_object, box_size, border, fill_color, back_color,
             draw.ellipse([x_center, y_center - radius, x_center + radius*2, y_center + radius], fill=fill)
             # 아래 삼각형
             draw.polygon([(new_x, y_center), (new_x_end, y_center), (x_center, new_y_end)], fill=fill)
-        elif shape == lang_messages['pattern_shape_star8']:
+        elif shape == lang_messages['pattern_shape_snowflake']:
             # 8각 눈꽃
             x_center = (new_x + new_x_end) / 2
             y_center = (new_y + new_y_end) / 2
