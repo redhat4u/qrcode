@@ -852,7 +852,8 @@ with col1:
 
     col1_1, col1_2 = st.columns(2)
     with col1_1:
-        box_size = st.number_input(lang_messages['box_size_label'], min_value=6, max_value=100, key="box_size_input",)
+        # 1cell당 최소 px은 10으로 고정, 그 이하는 이미지 깨짐
+        box_size = st.number_input(lang_messages['box_size_label'], min_value=10, max_value=100, key="box_size_input",)
         border = st.number_input(lang_messages['border_label'], min_value=0, max_value=10, key="border_input",)
 
     with col1_2:
