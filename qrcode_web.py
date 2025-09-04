@@ -4,7 +4,7 @@
 다시 시작하는 거야.. 알겠지??
 
 언어 추가시 살펴봐야 하는 줄: 82, 359, 464
-패턴 추가시 살펴봐야 하는 줄: 164, 489, 675
+패턴 추가시 살펴봐야 하는 줄: 164, 547, 737
 
 QR 코드 생성 웹앱 - Streamlit 버전
 휴대폰에서도 사용 가능
@@ -364,6 +364,37 @@ def draw_custom_shape_image(qr_object, box_size, border, fill_color, back_color,
                 y_inner = y_center + radius_inner * math.sin(angle_inner)
                 points.append((x_inner, y_inner))
             draw.polygon(points, fill=fill)
+        elif shape == lang_messages['pattern_shape_vertical_line']:
+            # 세로선 패턴
+            for row in range(qr_object.modules_count):
+                for col in range(qr_object.modules_count):
+                    # 현재 셀이 어둡고, 아래쪽 셀이 어두우면 선 그리기
+                    if (qr_object.is_dark(row, col) and 
+                        row + 1 < qr_object.modules_count and 
+                        qr_object.is_dark(row + 1, col)):
+                        
+                        y_center = (new_y + new_y_end) / 2
+                        next_y_center = (new_y_end + (new_y_end + effective_size_after_gap)) / 2
+                        x_center = (new_x + new_x_end) / 2
+                        
+                        draw.line([(x_center, y_center), (x_center, next_y_center)], fill=fill, width=int(effective_size_after_gap * 0.4))
+            return custom_image
+
+        elif shape == lang_messages['pattern_shape_horizontal_line']:
+            # 가로선 패턴
+            for row in range(qr_object.modules_count):
+                for col in range(qr_object.modules_count):
+                    # 현재 셀이 어둡고, 오른쪽 셀이 어두우면 선 그리기
+                    if (qr_object.is_dark(row, col) and 
+                        col + 1 < qr_object.modules_count and 
+                        qr_object.is_dark(row, col + 1)):
+                        
+                        x_center = (new_x + new_x_end) / 2
+                        next_x_center = (new_x_end + (new_x_end + effective_size_after_gap)) / 2
+                        y_center = (new_y + new_y_end) / 2
+                        
+                        draw.line([(x_center, y_center), (next_x_center, y_center)], fill=fill, width=int(effective_size_after_gap * 0.4))
+            return custom_image
 
 
     for r in range(qr_object.modules_count):
@@ -530,6 +561,8 @@ def set_language():
             messages[old_lang]['pattern_shape_spade']: 'spade',
             messages[old_lang]['pattern_shape_club']: 'club',
             messages[old_lang]['pattern_shape_snowflake']: 'snowflake',
+            messages[old_lang]['pattern_shape_verical']: 'verical',
+            messages[old_lang]['pattern_shape_horizen']: 'horizen',
         }
         
         pattern_shape_map_new_lang = {
@@ -548,6 +581,8 @@ def set_language():
             'spade': messages[new_lang]['pattern_shape_spade'],
             'club': messages[new_lang]['pattern_shape_club'],
             'snowflake': messages[new_lang]['pattern_shape_snowflake'],
+            'verical': messages[new_lang]['pattern_shape_verical'],
+            'horizen': messages[new_lang]['pattern_shape_horizen'],
          }
 
         # 기존 선택된 값을 새 언어의 값으로 업데이트
@@ -716,6 +751,8 @@ with col1:
         lang_messages['pattern_shape_spade'],
         lang_messages['pattern_shape_club'],
         lang_messages['pattern_shape_snowflake'],
+        lang_messages['pattern_shape_verical'],
+        lang_messages['pattern_shape_horizen'],
     )
 
     pattern_shape = st.selectbox(
