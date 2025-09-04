@@ -143,6 +143,8 @@ messages = {
         "pattern_shape_spade": "스페이드",
         "pattern_shape_club": "클로버",
         "pattern_shape_snowflake": "눈꽃",
+        "pattern_shape_verical": "수직",
+        "pattern_shape_horizen": "수평",
         "custom_color_select": "<직접 입력>",
     },
     "en": {
@@ -286,6 +288,8 @@ messages = {
         "pattern_shape_spade": "Spade",
         "pattern_shape_club": "Club",
         "pattern_shape_snowflake": "Snowflake",
+        "pattern_shape_verical": "Vertical",
+        "pattern_shape_horizen": "Horizen",
         "custom_color_select": "<Custom Input>",
     },
     "ja": {
@@ -429,6 +433,8 @@ messages = {
         "pattern_shape_spade": "スペード",
         "pattern_shape_club": "クラブ",
         "pattern_shape_snowflake": "雪の結晶",
+        "pattern_shape_verical": "垂直",
+        "pattern_shape_horizen": "水平",
         "custom_color_select": "<直接入力>",
     },
     "zh": {
@@ -572,6 +578,8 @@ messages = {
         "pattern_shape_spade": "黑桃",
         "pattern_shape_club": "梅花",
         "pattern_shape_snowflake": "雪花",
+        "pattern_shape_verical": "垂直",
+        "pattern_shape_horizen": "水平",
         "custom_color_select": "<自定义输入>",
     },
     "de": {
@@ -715,6 +723,8 @@ messages = {
         "pattern_shape_spade": "Pik",
         "pattern_shape_club": "Kreuz",
         "pattern_shape_snowflake": "Schneeflocke",
+        "pattern_shape_verical": "Vertikal",
+        "pattern_shape_horizen": "Horizontal",
         "custom_color_select": "<Direkte Eingabe>",
     },
     "fr": {
@@ -858,6 +868,8 @@ messages = {
         "pattern_shape_spade": "Pique",
         "pattern_shape_club": "Trèfle",
         "pattern_shape_snowflake": "flocon de neige",
+        "pattern_shape_verical": "Vertical",
+        "pattern_shape_horizen": "Horizontal",
         "custom_color_select": "<Saisie directe>",
     },
     "es": {
@@ -1001,6 +1013,8 @@ messages = {
         "pattern_shape_spade": "Pica",
         "pattern_shape_club": "Trébol",
         "pattern_shape_snowflake": "copo de nieve",
+        "pattern_shape_verical": "Vertical",
+        "pattern_shape_horizen": "Horizontal",
         "custom_color_select": "<Entrada directa>",
     },
     "tr": {
@@ -1144,6 +1158,8 @@ messages = {
         "pattern_shape_spade": "Maça",
         "pattern_shape_club": "Sinek",
         "pattern_shape_snowflake": "kar tanesi",
+        "pattern_shape_verical": "Dikey",
+        "pattern_shape_horizen": "Yatay",
         "custom_color_select": "<Doğrudan Giriş>",
     },
     "ru": {
@@ -1287,6 +1303,8 @@ messages = {
         "pattern_shape_club": "Крест",
         "pattern_shape_heart": "сердце",
         "pattern_shape_snowflake": "снежинка",
+        "pattern_shape_verical": "Вертикальный",
+        "pattern_shape_horizen": "Горизонтальный",
         "custom_color_select": "<Прямой ввод>",
     },
     "pt": {
@@ -1430,6 +1448,8 @@ messages = {
         "pattern_shape_spade": "Espada",
         "pattern_shape_club": "Paus",
         "pattern_shape_snowflake": "floco de neve",
+        "pattern_shape_verical": "Vertical",
+        "pattern_shape_horizen": "Horizontal",
         "custom_color_select": "<Entrada Direta>",
     },
     "ar": {
@@ -1573,6 +1593,8 @@ messages = {
         "pattern_shape_spade": "بستوني",
         "pattern_shape_club": "سباتي",
         "pattern_shape_snowflake": "ندفة الثلج",
+        "pattern_shape_verical": "عمودي",
+        "pattern_shape_horizen": "أفقي",
         "custom_color_select": "<إدخال مباشر>",
     },
     "hi": {
@@ -1716,6 +1738,8 @@ messages = {
         "pattern_shape_spade": "हुकुम",
         "pattern_shape_club": "चिड़ी",
         "pattern_shape_snowflake": "हिमपात",
+        "pattern_shape_verical": "ऊर्ध्वाधर",
+        "pattern_shape_horizen": "क्षैतिज",
         "custom_color_select": "<सीधा इनपुट>",
     },
     "bn": {
@@ -1859,6 +1883,8 @@ messages = {
         "pattern_shape_spade": "ইস্কাপন",
         "pattern_shape_club": "চিরুন",
         "pattern_shape_snowflake": "তুষারখণ্ড",
+        "pattern_shape_verical": "উল্লম্ব",
+        "pattern_shape_horizen": "অনুভূমিক",
         "custom_color_select": "<সরাসরি ইনপুট>",
     },
 }
