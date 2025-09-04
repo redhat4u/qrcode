@@ -4,6 +4,7 @@
 다시 시작하는 거야.. 알겠지??
 
 언어 추가시 살펴봐야 하는 줄: 82, 359, 464
+패턴 추가시 살펴봐야 하는 줄: 164, 406, 580
 
 QR 코드 생성 웹앱 - Streamlit 버전
 휴대폰에서도 사용 가능
@@ -160,7 +161,7 @@ def get_qr_data_object(data, box_size, border, error_correction, mask_pattern,):
         st.error(f"{lang_messages['qr_code_data_error']}: {str(e)}")
         return None
     
-# 사용자 정의 모양으로 QR 코드 이미지 생성 함수 (PNG)
+# 사용자 정의 모양으로 QR 코드 패턴 이미지 생성 함수 (PNG)
 def draw_custom_shape_image(qr_object, box_size, border, fill_color, back_color, pattern_shape, finder_pattern_shape, pattern_corner_radius, finder_corner_radius, pattern_cell_gap, finder_cell_gap,):
     if not qr_object:
         return None
@@ -249,6 +250,11 @@ def draw_custom_shape_image(qr_object, box_size, border, fill_color, back_color,
             hole_x2 = new_x + (new_x_end - new_x) / 2 + hole_size / 2
             hole_y2 = new_y + (new_y_end - new_y) / 2 + hole_size / 2
             draw.ellipse([hole_x1, hole_y1, hole_x2, hole_y2], fill=back_color,) # back_color 변수 사용
+        elif shape == lang_messages['pattern_shape_triangle']:
+            # 삼각 그리기 로직
+            x, y = c * size, r * size
+            drawer.polygon([(x, y), (x + size, y), (x, y + size)], fill=fill,)
+            drawer.polygon([(x, y + size), (x + size, y + size), (x + size, y)], fill=fill,)
 
     for r in range(qr_object.modules_count):
         for c in range(qr_object.modules_count):
@@ -403,6 +409,7 @@ def set_language():
             messages[old_lang]['pattern_shape_rounded']: 'rounded',
             messages[old_lang]['pattern_shape_circle']: 'circle',
             messages[old_lang]['pattern_shape_diamond']: 'diamond',
+            messages[old_lang]['pattern_shape_triangle']: 'triangle',
             messages[old_lang]['pattern_shape_star']: 'star',
             messages[old_lang]['pattern_shape_cross']: 'cross',
             messages[old_lang]['pattern_shape_x']: 'x',
@@ -414,11 +421,12 @@ def set_language():
             'rounded': messages[new_lang]['pattern_shape_rounded'],
             'circle': messages[new_lang]['pattern_shape_circle'],
             'diamond': messages[new_lang]['pattern_shape_diamond'],
+            'donut': messages[new_lang]['pattern_shape_triangle'],
             'star': messages[new_lang]['pattern_shape_star'],
             'cross': messages[new_lang]['pattern_shape_cross'],
             'x': messages[new_lang]['pattern_shape_x'],
             'donut': messages[new_lang]['pattern_shape_donut'],
-        }
+         }
 
         # 기존 선택된 값을 새 언어의 값으로 업데이트
         old_pattern_shape_key = pattern_shape_map_old_lang.get(current_pattern_shape, 'square')
@@ -575,6 +583,7 @@ with col1:
         lang_messages['pattern_shape_rounded'],
         lang_messages['pattern_shape_circle'],
         lang_messages['pattern_shape_diamond'],
+        lang_messages['pattern_shape_triangle'],
         lang_messages['pattern_shape_star'],
         lang_messages['pattern_shape_cross'],
         lang_messages['pattern_shape_x'],
