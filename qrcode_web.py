@@ -4,7 +4,7 @@
 다시 시작하는 거야.. 알겠지??
 
 언어 추가시 살펴봐야 하는 줄: 82, 359, 464
-패턴 추가시 살펴봐야 하는 줄: 164, 406, 580
+패턴 추가시 살펴봐야 하는 줄: 164, 462, 644
 
 QR 코드 생성 웹앱 - Streamlit 버전
 휴대폰에서도 사용 가능
@@ -231,7 +231,7 @@ def draw_custom_shape_image(qr_object, box_size, border, fill_color, back_color,
             # 대각선 2: 오른쪽 위에서 왼쪽 아래로
             draw.polygon([(new_x_end, new_y + x_width), (new_x_end - x_width, new_y), (new_x, new_y_end - x_width), (new_x + x_width, new_y_end)], fill=fill,)
         elif shape == lang_messages['pattern_shape_donut']:
-            # 도넛 모양 그리기 로직
+            # 도넛 모양
             x1, y1, x2, y2 = xy
             effective_size = x2 - x1
             gap_pixels = int(box_size * (cell_gap / 100))
@@ -251,11 +251,66 @@ def draw_custom_shape_image(qr_object, box_size, border, fill_color, back_color,
             hole_y2 = new_y + (new_y_end - new_y) / 2 + hole_size / 2
             draw.ellipse([hole_x1, hole_y1, hole_x2, hole_y2], fill=back_color,) # back_color 변수 사용
         elif shape == lang_messages['pattern_shape_triangle']:
-            # gap 반영된 좌표 사용
+            # 위로 향하는 정삼각형
             x1, y1, x2, y2 = draw_coords
             mid_x = (x1 + x2) / 2
-            # 위로 향하는 정삼각형
             draw.polygon([(mid_x, y1), (x2, y2), (x1, y2)], fill=fill,)
+        elif shape == lang_messages['pattern_shape_pentagon']:
+            # 오각
+            x_center = (new_x + new_x_end) / 2
+            y_center = (new_y + new_y_end) / 2
+            radius = effective_size_after_gap / 2
+            points = []
+            for i in range(5):
+                angle = math.radians(72 * i - 90)  # 위쪽 꼭짓점부터 시작
+                x = x_center + radius * math.cos(angle)
+                y = y_center + radius * math.sin(angle)
+                points.append((x, y))
+            draw.polygon(points, fill=fill)
+        elif shape == lang_messages['pattern_shape_hexagon']:
+            # 육각
+            x_center = (new_x + new_x_end) / 2
+            y_center = (new_y + new_y_end) / 2
+            radius = effective_size_after_gap / 2
+            points = []
+            for i in range(6):
+                angle = math.radians(60 * i)
+                x = x_center + radius * math.cos(angle)
+                y = y_center + radius * math.sin(angle)
+                points.append((x, y))
+            draw.polygon(points, fill=fill)
+        elif shape == lang_messages['pattern_shape_heart']:
+            # 하트는 원 + 삼각형 조합으로 단순하게 구현
+            width = effective_size_after_gap
+            height = effective_size_after_gap
+            x_center = (new_x + new_x_end) / 2
+            y_center = (new_y + new_y_end) / 2
+            # 상단 원 두 개
+            radius = width / 4
+            draw.ellipse([x_center - radius*2, y_center - radius, x_center, y_center + radius], fill=fill)
+            draw.ellipse([x_center, y_center - radius, x_center + radius*2, y_center + radius], fill=fill)
+            # 아래 삼각형
+            draw.polygon([(new_x, y_center), (new_x_end, y_center), (x_center, new_y_end)], fill=fill)
+        elif shape == lang_messages['pattern_shape_snowflake']:
+            # 눈꽃
+            x_center = (new_x + new_x_end) / 2
+            y_center = (new_y + new_y_end) / 2
+            radius_outer = effective_size_after_gap / 2
+            radius_inner = radius_outer * 0.5
+            points = []
+            for i in range(6):  # 6방향 대칭
+                angle_outer = math.radians(i * 60)
+                x_outer = x_center + radius_outer * math.cos(angle_outer)
+                y_outer = y_center + radius_outer * math.sin(angle_outer)
+                points.append((x_outer, y_outer))
+        
+                angle_inner = math.radians(i * 60 + 30)
+                x_inner = x_center + radius_inner * math.cos(angle_inner)
+                y_inner = y_center + radius_inner * math.sin(angle_inner)
+                points.append((x_inner, y_inner))
+        
+            draw.polygon(points, fill=fill)
+
 
     for r in range(qr_object.modules_count):
         for c in range(qr_object.modules_count):
@@ -415,6 +470,10 @@ def set_language():
             messages[old_lang]['pattern_shape_cross']: 'cross',
             messages[old_lang]['pattern_shape_x']: 'x',
             messages[old_lang]['pattern_shape_donut']: 'donut',
+            messages[old_lang]['pattern_shape_pentagon']: 'pentagon',
+            messages[old_lang]['pattern_shape_hexagon']: 'hexagon',
+            messages[old_lang]['pattern_shape_heart']: 'heart',
+            messages[old_lang]['pattern_shape_snowflake']: 'snowflake',
         }
         
         pattern_shape_map_new_lang = {
@@ -427,6 +486,10 @@ def set_language():
             'cross': messages[new_lang]['pattern_shape_cross'],
             'x': messages[new_lang]['pattern_shape_x'],
             'donut': messages[new_lang]['pattern_shape_donut'],
+            'donut': messages[new_lang]['pattern_shape_pentagon'],
+            'donut': messages[new_lang]['pattern_shape_hexagon'],
+            'donut': messages[new_lang]['pattern_shape_heart'],
+            'donut': messages[new_lang]['pattern_shape_snowflake'],
          }
 
         # 기존 선택된 값을 새 언어의 값으로 업데이트
@@ -589,6 +652,10 @@ with col1:
         lang_messages['pattern_shape_cross'],
         lang_messages['pattern_shape_x'],
         lang_messages['pattern_shape_donut'],
+        lang_messages['pattern_shape_pentagon'],
+        lang_messages['pattern_shape_hexagon'],
+        lang_messages['pattern_shape_heart'],
+        lang_messages['pattern_shape_snowflake'],
     )
 
     pattern_shape = st.selectbox(
