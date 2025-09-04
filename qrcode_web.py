@@ -316,28 +316,17 @@ def draw_custom_shape_image(qr_object, box_size, border, fill_color, back_color,
                 points.append((x_inner, y_inner))
             draw.polygon(points, fill=fill)
         elif shape == lang_messages['pattern_shape_spade']:
-            # 뒤집힌 하트 (위아래로 길쭉하게)
+            # 하트는 원 + 삼각형 조합으로 단순하게 구현 (상하 뒤집힌 버전)
             width = effective_size_after_gap
             height = effective_size_after_gap
             x_center = (new_x + new_x_end) / 2
             y_center = (new_y + new_y_end) / 2
-            
-            # 하트를 위아래로 길쭉하게 늘림
-            stretch_ratio = 1.3  # 세로로 30% 더 늘림
-            
-            # 상단 삼각형 (뒤집혀서 위로 향함) - 더 길쭉하게
-            triangle_bottom_y = y_center + (height * 0.1)
-            draw.polygon([(x_center, new_y), (new_x, triangle_bottom_y), (new_x_end, triangle_bottom_y)], fill=fill)
-            
-            # 하단 원 두 개 - 세로로 늘림
+            # 상단 삼각형 (뒤집혀서 위로 향함)
+            draw.polygon([(new_x, y_center), (new_x_end, y_center), (x_center, new_y)], fill=fill)
+            # 하단 원 두 개
             radius = width / 4
-            radius_y = radius * stretch_ratio  # 세로 반지름을 늘림
-            circle_y = triangle_bottom_y - radius_y * 0.3
-            
-            draw.ellipse([x_center - radius*2, circle_y - radius_y, 
-                          x_center, circle_y + radius_y], fill=fill)
-            draw.ellipse([x_center, circle_y - radius_y, 
-                          x_center + radius*2, circle_y + radius_y], fill=fill)
+            draw.ellipse([x_center - radius*2, y_center - radius, x_center, y_center + radius], fill=fill)
+            draw.ellipse([x_center, y_center - radius, x_center + radius*2, y_center + radius], fill=fill)
         elif shape == lang_messages['pattern_shape_club']:
             # 클로버 모양
             width = effective_size_after_gap
