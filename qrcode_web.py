@@ -316,7 +316,7 @@ def draw_custom_shape_image(qr_object, box_size, border, fill_color, back_color,
                 points.append((x_inner, y_inner))
             draw.polygon(points, fill=fill)
         elif shape == lang_messages['pattern_shape_spade']:
-            # 스페이드 모양 (뒤집힌 하트 + 아래쪽 이등변삼각형)
+            # 스페이드 모양 (뒤집힌 하트 + 세로로 길쭉한 삼각형)
             width = effective_size_after_gap
             height = effective_size_after_gap
             x_center = (new_x + new_x_end) / 2
@@ -330,13 +330,14 @@ def draw_custom_shape_image(qr_object, box_size, border, fill_color, back_color,
             draw.ellipse([x_center - radius*2, y_center - radius, x_center, y_center + radius], fill=fill,)
             draw.ellipse([x_center, y_center - radius, x_center + radius*2, y_center + radius], fill=fill,)
             
-            # 아래쪽 이등변삼각형 (줄기 역할)
-            triangle_width = width * 0.3  # 삼각형 밑변 폭
-            triangle_start_y = y_center + radius * 0.3  # 원 아래쪽에서 시작
+            # 아래쪽 세로로 길쭉한 삼각형 (줄기 역할)
+            triangle_width = width * 0.15  # 삼각형 밑변 폭을 더 좁게
+            triangle_start_y = y_center + radius * 0.2  # 원과 더 가깝게 시작
+            triangle_height = height * 0.4  # 삼각형 높이를 더 길게
             draw.polygon([
                 (x_center - triangle_width/2, triangle_start_y),  # 왼쪽 밑변
                 (x_center + triangle_width/2, triangle_start_y),  # 오른쪽 밑변  
-                (x_center, new_y_end)                             # 아래쪽 꼭짓점
+                (x_center, triangle_start_y + triangle_height)    # 아래쪽 꼭짓점
             ], fill=fill,)
         elif shape == lang_messages['pattern_shape_club']:
             # 클로버 모양
