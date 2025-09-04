@@ -316,21 +316,19 @@ def draw_custom_shape_image(qr_object, box_size, border, fill_color, back_color,
                 points.append((x_inner, y_inner))
             draw.polygon(points, fill=fill)
         elif shape == lang_messages['pattern_shape_spade']:
+            # 하트 모양을 상하로 뒤집기
             width = effective_size_after_gap
             height = effective_size_after_gap
             x_center = (new_x + new_x_end) / 2
             y_center = (new_y + new_y_end) / 2
-            # 1. 하트 모양을 180도 회전
-            # 상단 두 원을 아래쪽으로 이동
+            
+            # 상단 삼각형을 아래로 옮기기
+            draw.polygon([(new_x, new_y), (new_x_end, new_y), (x_center, new_y_end)], fill=fill,)
+            
+            # 상단 원 두 개를 아래로 옮기기
             radius = width / 4
-            draw.ellipse([x_center - radius*2, new_y_end - radius, x_center, new_y_end + radius], fill=fill)
-            draw.ellipse([x_center, new_y_end - radius, x_center + radius*2, new_y_end + radius], fill=fill)
-            # 아래 삼각형을 위쪽으로 이동
-            draw.polygon([(new_x, y_center), (new_x_end, y_center), (x_center, new_y)], fill=fill)
-            # 2. 스페이드 줄기 추가
-            stem_width = width * 0.2
-            stem_height = height * 0.25
-            draw.polygon([(x_center, new_y_end - stem_height), (x_center - stem_width / 2, new_y_end), (x_center + stem_width / 2, new_y_end)], fill=fill,)
+            draw.ellipse([x_center - radius*2, new_y_end - radius, x_center, new_y_end + radius], fill=fill,)
+            draw.ellipse([x_center, new_y_end - radius, x_center + radius*2, new_y_end + radius], fill=fill,)
         elif shape == lang_messages['pattern_shape_club']:
             # 클로버 모양
             width = effective_size_after_gap
