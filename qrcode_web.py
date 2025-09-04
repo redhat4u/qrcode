@@ -369,9 +369,9 @@ def draw_custom_shape_image(qr_object, box_size, border, fill_color, back_color,
             for row in range(qr_object.modules_count):
                 for col in range(qr_object.modules_count):
                     # 현재 셀이 어둡고, 아래쪽 셀이 어두우면 선 그리기
-                    if (qr_object.is_dark(row, col) and 
+                    if (qr_object.modules[row][col] and 
                         row + 1 < qr_object.modules_count and 
-                        qr_object.is_dark(row + 1, col)):
+                        qr_object.modules[row + 1][col]):
                         
                         y_center = (new_y + new_y_end) / 2
                         next_y_center = (new_y_end + (new_y_end + effective_size_after_gap)) / 2
@@ -385,9 +385,9 @@ def draw_custom_shape_image(qr_object, box_size, border, fill_color, back_color,
             for row in range(qr_object.modules_count):
                 for col in range(qr_object.modules_count):
                     # 현재 셀이 어둡고, 오른쪽 셀이 어두우면 선 그리기
-                    if (qr_object.is_dark(row, col) and 
+                    if (qr_object.modules[row][col] and 
                         col + 1 < qr_object.modules_count and 
-                        qr_object.is_dark(row, col + 1)):
+                        qr_object.modules[row][col + 1]):
                         
                         x_center = (new_x + new_x_end) / 2
                         next_x_center = (new_x_end + (new_x_end + effective_size_after_gap)) / 2
