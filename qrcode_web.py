@@ -247,7 +247,7 @@ def draw_custom_shape_image(qr_object, box_size, border, fill_color, back_color,
             # 바깥쪽 원 (패턴 색상)
             draw.ellipse(draw_coords, fill=fill,)
             # 안쪽 원 (배경 색상)
-            hole_size_ratio = 0.3 # 구멍 크기 비율을 조정 가능합니다.
+            hole_size_ratio = 0.4 # 구멍 크기 비율을 조정 가능합니다.
             hole_size = effective_size * hole_size_ratio
             hole_x1 = new_x + (new_x_end - new_x) / 2 - hole_size / 2
             hole_y1 = new_y + (new_y_end - new_y) / 2 - hole_size / 2
