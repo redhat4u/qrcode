@@ -298,19 +298,45 @@ def draw_custom_shape_image(qr_object, box_size, border, fill_color, back_color,
             radius_outer = effective_size_after_gap / 2
             radius_inner = radius_outer * 0.4
             points = []
-
             for i in range(8):
                 angle_outer = math.radians(i * 45)   # 360° / 8 = 45°
                 x_outer = x_center + radius_outer * math.cos(angle_outer)
                 y_outer = y_center + radius_outer * math.sin(angle_outer)
                 points.append((x_outer, y_outer))
-
                 angle_inner = math.radians(i * 45 + 22.5)  # 중간 각도
                 x_inner = x_center + radius_inner * math.cos(angle_inner)
                 y_inner = y_center + radius_inner * math.sin(angle_inner)
                 points.append((x_inner, y_inner))
-
             draw.polygon(points, fill=fill)
+        elif shape == lang_messages['pattern_shape_spade']:
+            # 스페이드
+            x_center = (new_x + new_x_end) / 2
+            y_center = (new_y + new_y_end) / 2
+            width = effective_size_after_gap
+            height = effective_size_after_gap
+            # 위쪽 하트 부분 (두 개의 원)
+            radius = width / 4
+            draw.ellipse([x_center - radius*2, y_center - radius*1.2, x_center, y_center + radius*0.8], fill=fill)
+            draw.ellipse([x_center, y_center - radius*1.2, x_center + radius*2, y_center + radius*0.8], fill=fill)
+            # 아래 삼각형 부분
+            draw.polygon([(new_x, y_center), (new_x_end, y_center), (x_center, new_y)], fill=fill)
+            # 줄기
+            stem_width = width * 0.2
+            stem_height = height * 0.3
+            draw.rectangle([x_center - stem_width/2, y_center, x_center + stem_width/2, y_center + stem_height], fill=fill)
+        elif shape == lang_messages['pattern_shape_club']:
+            # 클로버
+            x_center = (new_x + new_x_end) / 2
+            y_center = (new_y + new_y_end) / 2
+            radius = effective_size_after_gap / 3
+            # 세 개의 원 (상단, 좌, 우)
+            draw.ellipse([x_center - radius, new_y, x_center + radius, new_y + 2*radius], fill=fill)
+            draw.ellipse([new_x, y_center - radius, new_x + 2*radius, y_center + radius], fill=fill)
+            draw.ellipse([x_center - radius, y_center - radius, x_center + radius, y_center + radius], fill=fill)
+            # 줄기
+            stem_width = effective_size_after_gap * 0.2
+            stem_height = effective_size_after_gap * 0.3
+            draw.rectangle([x_center - stem_width/2, y_center, x_center + stem_width/2, y_center + stem_height], fill=fill)
 
 
     for r in range(qr_object.modules_count):
