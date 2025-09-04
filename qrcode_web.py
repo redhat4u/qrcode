@@ -317,8 +317,8 @@ def draw_custom_shape_image(qr_object, box_size, border, fill_color, back_color,
             draw.polygon(points, fill=fill)
         elif shape == lang_messages['pattern_shape_spade']:
             # 스페이드는 삼각형 + 타원 조합으로 구현 (가로폭 줄이고 세로폭 늘림)
-            base_width = effective_size_after_gap * 0.9  # 가로폭 30% 축소
-            base_height = effective_size_after_gap * 1.5  # 세로폭 20% 확대
+            base_width = effective_size_after_gap * 1.0  # 가로폭 30% 축소
+            base_height = effective_size_after_gap * 1.0  # 세로폭 20% 확대
            
             x_center = (new_x + new_x_end) / 2
             y_center = (new_y + new_y_end) / 2
