@@ -561,7 +561,7 @@ def set_language():
             messages[old_lang]['pattern_shape_spade']: 'spade',
             messages[old_lang]['pattern_shape_club']: 'club',
             messages[old_lang]['pattern_shape_snowflake']: 'snowflake',
-            messages[old_lang]['pattern_shape_verical_line']: 'verical',
+            messages[old_lang]['pattern_shape_vertical_line']: 'vertical',
             messages[old_lang]['pattern_shape_horizontal_line']: 'horizontal',
         }
         
@@ -581,7 +581,7 @@ def set_language():
             'spade': messages[new_lang]['pattern_shape_spade'],
             'club': messages[new_lang]['pattern_shape_club'],
             'snowflake': messages[new_lang]['pattern_shape_snowflake'],
-            'verical': messages[new_lang]['pattern_shape_verical_line'],
+            'vertical': messages[new_lang]['pattern_shape_vertical_line'],
             'horizontal': messages[new_lang]['pattern_shape_horizontal_line'],
          }
 
@@ -751,7 +751,7 @@ with col1:
         lang_messages['pattern_shape_spade'],
         lang_messages['pattern_shape_club'],
         lang_messages['pattern_shape_snowflake'],
-        lang_messages['pattern_shape_verical_line'],
+        lang_messages['pattern_shape_vertical_line'],
         lang_messages['pattern_shape_horizontal_line'],
     )
 
