@@ -4,7 +4,7 @@
 다시 시작하는 거야.. 알겠지??
 
 언어 추가시 살펴봐야 하는 줄: 82, 359, 464
-패턴 추가시 살펴봐야 하는 줄: 164, 462, 644
+패턴 추가시 살펴봐야 하는 줄: 164, 489, 675
 
 QR 코드 생성 웹앱 - Streamlit 버전
 휴대폰에서도 사용 가능
@@ -500,6 +500,8 @@ def set_language():
             messages[old_lang]['pattern_shape_pentagon']: 'pentagon',
             messages[old_lang]['pattern_shape_hexagon']: 'hexagon',
             messages[old_lang]['pattern_shape_heart']: 'heart',
+            messages[old_lang]['pattern_shape_spade']: 'spade',
+            messages[old_lang]['pattern_shape_club']: 'club',
             messages[old_lang]['pattern_shape_snowflake']: 'snowflake',
         }
         
@@ -516,6 +518,8 @@ def set_language():
             'pentagon': messages[new_lang]['pattern_shape_pentagon'],
             'hexagon': messages[new_lang]['pattern_shape_hexagon'],
             'heart': messages[new_lang]['pattern_shape_heart'],
+            'spade': messages[new_lang]['pattern_shape_spade'],
+            'club': messages[new_lang]['pattern_shape_club'],
             'snowflake': messages[new_lang]['pattern_shape_snowflake'],
          }
 
@@ -682,6 +686,8 @@ with col1:
         lang_messages['pattern_shape_pentagon'],
         lang_messages['pattern_shape_hexagon'],
         lang_messages['pattern_shape_heart'],
+        lang_messages['pattern_shape_spade'],
+        lang_messages['pattern_shape_club'],
         lang_messages['pattern_shape_snowflake'],
     )
 
