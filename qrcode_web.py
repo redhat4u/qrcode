@@ -3,7 +3,7 @@
 수정하다 오류나거나 잘못된 방향으로 수정되면 항상 이버전으로
 다시 시작하는 거야.. 알겠지??
 
-언어 추가시 살펴봐야 하는 줄: 82, 355, 456
+언어 추가시 살펴봐야 하는 줄: 82, 359, 464
 
 QR 코드 생성 웹앱 - Streamlit 버전
 휴대폰에서도 사용 가능
@@ -90,6 +90,10 @@ dynamic_page_titles = {
     "es": "Generador de códigos QR",
     "tr": "QR Kod Üretici",
     "ru": "Генератор QR-кода",
+    "pt": "Gerador de Código QR",
+    "ar": "مولد رمز الاستجابة السريعة",
+    "hi": "क्यूआर कोड जनरेटर",
+    "bn": "কিউআর কোড জেনারেটর",
 }
 
 
@@ -363,6 +367,10 @@ def set_language():
         "Español": "es",
         "Türkçe": "tr",
         "Русский": "ru",
+        "Português": "pt",
+        "العربية": "ar",
+        "हिन्दी": "hi",
+        "বাংলা": "bn",
     }
 
     new_lang = lang_map.get(st.session_state.lang_select, "ko",)
@@ -464,6 +472,10 @@ lang_options = {
     "Español": "es",
     "Türkçe": "tr",
     "Русский": "ru",
+    "Português": "pt",
+    "العربية": "ar",
+    "हिन्दी": "hi",
+    "বাংলা": "bn",
 }
 
 lang_selected_name = st.selectbox(
