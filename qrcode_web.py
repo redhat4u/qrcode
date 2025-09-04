@@ -321,24 +321,16 @@ def draw_custom_shape_image(qr_object, box_size, border, fill_color, back_color,
                 x_center = (new_x + new_x_end) / 2
                 y_center = (new_y + new_y_end) / 2
 
-                # 위쪽 원 두 개 (둥근 부분)
+                # 위쪽 두 개 원 (둥근 머리)
                 radius = width / 4
                 draw.ellipse([x_center - radius*2, new_y, x_center, y_center], fill=fill)  # 왼쪽 원
                 draw.ellipse([x_center, new_y, x_center + radius*2, y_center], fill=fill)  # 오른쪽 원
 
-                # 중앙 삼각형 (위 원과 아래 뾰족 부분 연결)
+                # 위 원과 아래 뾰족 삼각형 연결하는 중앙 삼각형
                 draw.polygon([
-                    (new_x, y_center), 
-                    (new_x_end, y_center), 
+                    (x_center - radius*2, y_center), 
+                    (x_center + radius*2, y_center), 
                     (x_center, new_y_end)
-                ], fill=fill)
-
-                # 아래 작은 삼각형 (끝 뾰족 부분)
-                tip_height = height / 4  # 뾰족 삼각형 높이
-                draw.polygon([
-                    (x_center - radius, new_y_end - tip_height), 
-                    (x_center + radius, new_y_end - tip_height), 
-                    (x_center, new_y_end + tip_height)
                 ], fill=fill)
         '''
         elif shape == lang_messages['pattern_shape_spade']:
