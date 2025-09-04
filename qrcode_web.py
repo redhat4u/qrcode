@@ -306,7 +306,7 @@ def draw_custom_shape_image(qr_object, box_size, border, fill_color, back_color,
             # 8각 눈꽃
             x_center = (new_x + new_x_end) / 2
             y_center = (new_y + new_y_end) / 2
-            radius_outer = effective_size_after_gap / 2
+            radius_outer = effective_size_after_gap / 1.5  # 이 값으로 크기를 조절
             radius_inner = radius_outer * 0.4
             points = []
             for i in range(8):
