@@ -291,24 +291,25 @@ def draw_custom_shape_image(qr_object, box_size, border, fill_color, back_color,
             draw.ellipse([x_center, y_center - radius, x_center + radius*2, y_center + radius], fill=fill)
             # 아래 삼각형
             draw.polygon([(new_x, y_center), (new_x_end, y_center), (x_center, new_y_end)], fill=fill)
-        elif shape == lang_messages['pattern_shape_snowflake']:
-            # 눈꽃
+        elif shape == lang_messages['pattern_shape_star8']:
+            # 8각 눈꽃
             x_center = (new_x + new_x_end) / 2
             y_center = (new_y + new_y_end) / 2
             radius_outer = effective_size_after_gap / 2
-            radius_inner = radius_outer * 0.5
+            radius_inner = radius_outer * 0.4
             points = []
-            for i in range(6):  # 6방향 대칭
-                angle_outer = math.radians(i * 60)
+
+            for i in range(8):
+                angle_outer = math.radians(i * 45)   # 360° / 8 = 45°
                 x_outer = x_center + radius_outer * math.cos(angle_outer)
                 y_outer = y_center + radius_outer * math.sin(angle_outer)
                 points.append((x_outer, y_outer))
-        
-                angle_inner = math.radians(i * 60 + 30)
+
+                angle_inner = math.radians(i * 45 + 22.5)  # 중간 각도
                 x_inner = x_center + radius_inner * math.cos(angle_inner)
                 y_inner = y_center + radius_inner * math.sin(angle_inner)
                 points.append((x_inner, y_inner))
-        
+
             draw.polygon(points, fill=fill)
 
 
