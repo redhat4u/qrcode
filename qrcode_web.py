@@ -316,37 +316,28 @@ def draw_custom_shape_image(qr_object, box_size, border, fill_color, back_color,
                 points.append((x_inner, y_inner))
             draw.polygon(points, fill=fill)
         elif shape == lang_messages['pattern_shape_spade']:
-            # 스페이드 모양 (납작한 뒤집힌 하트 + 삼각형)
+            # 뒤집힌 하트 (위아래로 길쭉하게)
             width = effective_size_after_gap
             height = effective_size_after_gap
             x_center = (new_x + new_x_end) / 2
             y_center = (new_y + new_y_end) / 2
             
-            # 하트 부분을 위아래로 압축 (납작하게)
-            heart_height_ratio = 0.6  # 원래 높이의 60%로 압축
-            compressed_height = height * heart_height_ratio
-            heart_y_start = new_y
-            heart_y_end = heart_y_start + compressed_height
-            heart_y_center = (heart_y_start + heart_y_end) / 2
+            # 하트를 위아래로 길쭉하게 늘림
+            stretch_ratio = 1.3  # 세로로 30% 더 늘림
             
-            # 상단 삼각형 (납작하게)
-            draw.polygon([(x_center, heart_y_start), (new_x, heart_y_center), (new_x_end, heart_y_center)], fill=fill)
+            # 상단 삼각형 (뒤집혀서 위로 향함) - 더 길쭉하게
+            triangle_bottom_y = y_center + (height * 0.1)
+            draw.polygon([(x_center, new_y), (new_x, triangle_bottom_y), (new_x_end, triangle_bottom_y)], fill=fill)
             
-            # 중간 원 두 개 (납작하게)
+            # 하단 원 두 개 - 세로로 늘림
             radius = width / 4
-            draw.ellipse([x_center - radius*2, heart_y_center - radius*0.7, 
-                          x_center, heart_y_center + radius*0.7], fill=fill)
-            draw.ellipse([x_center, heart_y_center - radius*0.7, 
-                          x_center + radius*2, heart_y_center + radius*0.7], fill=fill)
+            radius_y = radius * stretch_ratio  # 세로 반지름을 늘림
+            circle_y = triangle_bottom_y - radius_y * 0.3
             
-            # 아래쪽 삼각형 (스페이드 줄기)
-            triangle_width = width * 0.15
-            triangle_start_y = heart_y_end - radius*0.2  # 하트와 연결
-            draw.polygon([
-                (x_center - triangle_width/2, triangle_start_y),  # 왼쪽 밑변
-                (x_center + triangle_width/2, triangle_start_y),  # 오른쪽 밑변  
-                (x_center, new_y_end)                             # 아래쪽 꼭짓점
-            ], fill=fill)
+            draw.ellipse([x_center - radius*2, circle_y - radius_y, 
+                          x_center, circle_y + radius_y], fill=fill)
+            draw.ellipse([x_center, circle_y - radius_y, 
+                          x_center + radius*2, circle_y + radius_y], fill=fill)
         elif shape == lang_messages['pattern_shape_club']:
             # 클로버 모양
             width = effective_size_after_gap
