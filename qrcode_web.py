@@ -463,19 +463,19 @@ st.markdown("---")
 
 # 언어 선택 드롭다운
 lang_options = {
-    "한국어": "ko",
-    "English": "en",
-    "日本語": "ja",
-    "中文": "zh",
-    "Deutsch": "de",
-    "Français": "fr",
-    "Español": "es",
-    "Türkçe": "tr",
-    "Русский": "ru",
-    "Português": "pt",
-    "العربية": "ar",
-    "हिन्दी": "hi",
-    "বাংলা": "bn",
+    "한국어 (Korean)": "ko",
+    "English (US)": "en",
+    "日本語 (Japanese)": "ja",
+    "中文 (Chinese)": "zh",
+    "Deutsch (German)": "de",
+    "Français (French)": "fr",
+    "Español (Spanish)": "es",
+    "Türkçe (Turkish)": "tr",
+    "Русский (Russian)": "ru",
+    "Português (Portuguese)": "pt",
+    "العربية (Arabic)": "ar",
+    "हिन्दी (Hindi)": "hi",
+    "বাংলা (Bengali)": "bn",
 }
 
 lang_selected_name = st.selectbox(
