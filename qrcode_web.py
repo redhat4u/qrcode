@@ -331,20 +331,20 @@ def draw_custom_shape_image(qr_object, box_size, border, fill_color, back_color,
             draw.ellipse([x_center, y_center - radius, x_center + radius*2, y_center + radius], fill=fill,)
             
             # ㅗ 모양 줄기
-            stem_thickness = width * 0.08  # 줄기 두께
-            stem_length = height * 0.25   # 세로 줄기 길이
-            horizontal_length = width * 0.25  # 가로 줄기 길이
+            stem_thickness = width * 0.06  # 줄기 두께
+            stem_length = height * 0.2    # 세로 줄기 길이
+            horizontal_length = width * 0.2  # 가로 줄기 길이
             
-            stem_start_y = y_center + radius * 0.3
+            stem_start_y = y_center + radius * 0.5
+            stem_end_y = stem_start_y + stem_length
             
-            # 세로 부분 (위로만)
+            # 세로 부분 (ㅣ)
             draw.rectangle([x_center - stem_thickness/2, stem_start_y, 
-                            x_center + stem_thickness/2, stem_start_y + stem_length], fill=fill,)
+                            x_center + stem_thickness/2, stem_end_y], fill=fill,)
             
-            # 가로 부분 (ㅗ의 가로선)
-            horizontal_y = stem_start_y + stem_length
-            draw.rectangle([x_center - horizontal_length/2, horizontal_y - stem_thickness/2,
-                            x_center + horizontal_length/2, horizontal_y + stem_thickness/2], fill=fill,)
+            # 가로 부분 (ㅗ의 밑줄) - 세로 줄기 끝에서
+            draw.rectangle([x_center - horizontal_length/2, stem_end_y - stem_thickness/2,
+                            x_center + horizontal_length/2, stem_end_y + stem_thickness/2], fill=fill,)
         elif shape == lang_messages['pattern_shape_club']:
             # 클로버 모양
             width = effective_size_after_gap
