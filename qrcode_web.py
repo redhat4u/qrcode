@@ -316,35 +316,37 @@ def draw_custom_shape_image(qr_object, box_size, border, fill_color, back_color,
                 points.append((x_inner, y_inner))
             draw.polygon(points, fill=fill)
         elif shape == lang_messages['pattern_shape_spade']:
-            # 스페이드 모양 (뒤집힌 하트 + ㅗ 모양 줄기)
+            # 스페이드 모양 (납작한 뒤집힌 하트 + 삼각형)
             width = effective_size_after_gap
             height = effective_size_after_gap
             x_center = (new_x + new_x_end) / 2
             y_center = (new_y + new_y_end) / 2
             
-            # 상단 삼각형 (뒤집혀서 위로 향함)
-            draw.polygon([(x_center, new_y), (new_x, y_center), (new_x_end, y_center)], fill=fill,)
+            # 하트 부분을 위아래로 압축 (납작하게)
+            heart_height_ratio = 0.6  # 원래 높이의 60%로 압축
+            compressed_height = height * heart_height_ratio
+            heart_y_start = new_y
+            heart_y_end = heart_y_start + compressed_height
+            heart_y_center = (heart_y_start + heart_y_end) / 2
             
-            # 중간 원 두 개
+            # 상단 삼각형 (납작하게)
+            draw.polygon([(x_center, heart_y_start), (new_x, heart_y_center), (new_x_end, heart_y_center)], fill=fill)
+            
+            # 중간 원 두 개 (납작하게)
             radius = width / 4
-            draw.ellipse([x_center - radius*2, y_center - radius, x_center, y_center + radius], fill=fill,)
-            draw.ellipse([x_center, y_center - radius, x_center + radius*2, y_center + radius], fill=fill,)
+            draw.ellipse([x_center - radius*2, heart_y_center - radius*0.7, 
+                          x_center, heart_y_center + radius*0.7], fill=fill)
+            draw.ellipse([x_center, heart_y_center - radius*0.7, 
+                          x_center + radius*2, heart_y_center + radius*0.7], fill=fill)
             
-            # ㅗ 모양 줄기
-            stem_thickness = width * 0.06  # 줄기 두께
-            stem_length = height * 0.2    # 세로 줄기 길이
-            horizontal_length = width * 0.2  # 가로 줄기 길이
-            
-            stem_start_y = y_center + radius * 0.5
-            stem_end_y = stem_start_y + stem_length
-            
-            # 세로 부분 (ㅣ)
-            draw.rectangle([x_center - stem_thickness/2, stem_start_y, 
-                            x_center + stem_thickness/2, stem_end_y], fill=fill,)
-            
-            # 가로 부분 (ㅗ의 밑줄) - 세로 줄기 끝에서
-            draw.rectangle([x_center - horizontal_length/2, stem_end_y - stem_thickness/2,
-                            x_center + horizontal_length/2, stem_end_y + stem_thickness/2], fill=fill,)
+            # 아래쪽 삼각형 (스페이드 줄기)
+            triangle_width = width * 0.15
+            triangle_start_y = heart_y_end - radius*0.2  # 하트와 연결
+            draw.polygon([
+                (x_center - triangle_width/2, triangle_start_y),  # 왼쪽 밑변
+                (x_center + triangle_width/2, triangle_start_y),  # 오른쪽 밑변  
+                (x_center, new_y_end)                             # 아래쪽 꼭짓점
+            ], fill=fill)
         elif shape == lang_messages['pattern_shape_club']:
             # 클로버 모양
             width = effective_size_after_gap
