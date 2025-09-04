@@ -316,7 +316,7 @@ def draw_custom_shape_image(qr_object, box_size, border, fill_color, back_color,
                 points.append((x_inner, y_inner))
             draw.polygon(points, fill=fill)
         elif shape == lang_messages['pattern_shape_spade']:
-            # 스페이드 모양 (뒤집힌 하트 + 세로로 길쭉한 삼각형)
+            # 스페이드 모양 (뒤집힌 하트 + ㅗ 모양 줄기)
             width = effective_size_after_gap
             height = effective_size_after_gap
             x_center = (new_x + new_x_end) / 2
@@ -330,15 +330,21 @@ def draw_custom_shape_image(qr_object, box_size, border, fill_color, back_color,
             draw.ellipse([x_center - radius*2, y_center - radius, x_center, y_center + radius], fill=fill,)
             draw.ellipse([x_center, y_center - radius, x_center + radius*2, y_center + radius], fill=fill,)
             
-            # 아래쪽 세로로 길쭉한 삼각형 (줄기 역할)
-            triangle_width = width * 0.15  # 삼각형 밑변 폭을 더 좁게
-            triangle_start_y = y_center + radius * 0.2  # 원과 더 가깝게 시작
-            triangle_height = height * 0.4  # 삼각형 높이를 더 길게
-            draw.polygon([
-                (x_center - triangle_width/2, triangle_start_y),  # 왼쪽 밑변
-                (x_center + triangle_width/2, triangle_start_y),  # 오른쪽 밑변  
-                (x_center, triangle_start_y + triangle_height)    # 아래쪽 꼭짓점
-            ], fill=fill,)
+            # ㅗ 모양 줄기
+            stem_thickness = width * 0.08  # 줄기 두께
+            stem_length = height * 0.25   # 세로 줄기 길이
+            horizontal_length = width * 0.25  # 가로 줄기 길이
+            
+            stem_start_y = y_center + radius * 0.3
+            
+            # 세로 부분 (위로만)
+            draw.rectangle([x_center - stem_thickness/2, stem_start_y, 
+                            x_center + stem_thickness/2, stem_start_y + stem_length], fill=fill,)
+            
+            # 가로 부분 (ㅗ의 가로선)
+            horizontal_y = stem_start_y + stem_length
+            draw.rectangle([x_center - horizontal_length/2, horizontal_y - stem_thickness/2,
+                            x_center + horizontal_length/2, horizontal_y + stem_thickness/2], fill=fill,)
         elif shape == lang_messages['pattern_shape_club']:
             # 클로버 모양
             width = effective_size_after_gap
