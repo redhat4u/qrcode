@@ -421,7 +421,7 @@ def set_language():
             'rounded': messages[new_lang]['pattern_shape_rounded'],
             'circle': messages[new_lang]['pattern_shape_circle'],
             'diamond': messages[new_lang]['pattern_shape_diamond'],
-            'donut': messages[new_lang]['pattern_shape_triangle'],
+            'triangle': messages[new_lang]['pattern_shape_triangle'],
             'star': messages[new_lang]['pattern_shape_star'],
             'cross': messages[new_lang]['pattern_shape_cross'],
             'x': messages[new_lang]['pattern_shape_x'],
