@@ -316,6 +316,32 @@ def draw_custom_shape_image(qr_object, box_size, border, fill_color, back_color,
                 points.append((x_inner, y_inner))
             draw.polygon(points, fill=fill)
         elif shape == lang_messages['pattern_shape_spade']:
+                width = effective_size_after_gap
+                height = effective_size_after_gap
+                x_center = (new_x + new_x_end) / 2
+                y_center = (new_y + new_y_end) / 2
+
+                # 위쪽 원 두 개 (둥근 부분)
+                radius = width / 4
+                draw.ellipse([x_center - radius*2, new_y, x_center, y_center], fill=fill)  # 왼쪽 원
+                draw.ellipse([x_center, new_y, x_center + radius*2, y_center], fill=fill)  # 오른쪽 원
+
+                # 중앙 삼각형 (위 원과 아래 뾰족 부분 연결)
+                draw.polygon([
+                    (new_x, y_center), 
+                    (new_x_end, y_center), 
+                    (x_center, new_y_end)
+                ], fill=fill)
+
+                # 아래 작은 삼각형 (끝 뾰족 부분)
+                tip_height = height / 4  # 뾰족 삼각형 높이
+                draw.polygon([
+                    (x_center - radius, new_y_end - tip_height), 
+                    (x_center + radius, new_y_end - tip_height), 
+                    (x_center, new_y_end + tip_height)
+                ], fill=fill)
+        '''
+        elif shape == lang_messages['pattern_shape_spade']:
              # 하트는 원 + 삼각형 조합으로 단순하게 구현 (상하 뒤집힌 버전)
              width = effective_size_after_gap
              height = effective_size_after_gap
@@ -327,6 +353,7 @@ def draw_custom_shape_image(qr_object, box_size, border, fill_color, back_color,
              radius = width / 4
              draw.ellipse([x_center - radius*2, y_center - radius, x_center, y_center + radius], fill=fill)
              draw.ellipse([x_center, y_center - radius, x_center + radius*2, y_center + radius], fill=fill)
+        '''
         elif shape == lang_messages['pattern_shape_club']:
              # 클로버 모양 (삼각형 배치의 원 3개)
              width = effective_size_after_gap
