@@ -146,6 +146,7 @@ messages = {
         "pattern_shape_verical_line": "수직",
         "pattern_shape_horizontal_line": "수평",
         "custom_color_select": "<직접 입력>",
+        "error_occurred": "오류가 발생했습니다"
     },
     "en": {
         "page_title": "QR Code Generator",
@@ -291,6 +292,7 @@ messages = {
         "pattern_shape_verical_line": "Vertical",
         "pattern_shape_horizontal_line": "horizontal",
         "custom_color_select": "<Custom Input>",
+        "error_occurred": "An error occurred"
     },
     "ja": {
         "page_title": "QRコードジェネレーター",
@@ -436,6 +438,7 @@ messages = {
         "pattern_shape_verical_line": "垂直",
         "pattern_shape_horizontal_line": "水平",
         "custom_color_select": "<直接入力>",
+        "error_occurred": "エラーが発生しました"
     },
     "zh": {
         "page_title": "QR码生成器",
@@ -581,6 +584,7 @@ messages = {
         "pattern_shape_verical_line": "垂直",
         "pattern_shape_horizontal_line": "水平",
         "custom_color_select": "<自定义输入>",
+        "error_occurred": "发生错误"
     },
     "de": {
         "page_title": "QR-Code-Generator",
@@ -726,6 +730,7 @@ messages = {
         "pattern_shape_verical_line": "Vertikal",
         "pattern_shape_horizontal_line": "Horizontal",
         "custom_color_select": "<Direkte Eingabe>",
+        "error_occurred": "Ein Fehler ist aufgetreten"
     },
     "fr": {
         "page_title": "Générateur de code QR",
@@ -871,6 +876,7 @@ messages = {
         "pattern_shape_verical_line": "Vertical",
         "pattern_shape_horizontal_line": "Horizontal",
         "custom_color_select": "<Saisie directe>",
+        "error_occurred": "Une erreur est survenue"
     },
     "es": {
         "page_title": "Generador de código QR",
@@ -1016,6 +1022,7 @@ messages = {
         "pattern_shape_verical_line": "Vertical",
         "pattern_shape_horizontal_line": "Horizontal",
         "custom_color_select": "<Entrada directa>",
+        "error_occurred": "Ha ocurrido un error"
     },
     "tr": {
         "page_title": "QR Kod Oluşturucu",
@@ -1161,6 +1168,7 @@ messages = {
         "pattern_shape_verical_line": "Dikey",
         "pattern_shape_horizontal_line": "Yatay",
         "custom_color_select": "<Doğrudan Giriş>",
+        "error_occurred": "Bir hata oluştu"
     },
     "ru": {
         "page_title": "Генератор QR-кода",
@@ -1306,6 +1314,7 @@ messages = {
         "pattern_shape_verical_line": "Вертикальный",
         "pattern_shape_horizontal_line": "Горизонтальный",
         "custom_color_select": "<Прямой ввод>",
+        "error_occurred": "Произошла ошибка"
     },
     "pt": {
         "page_title": "Gerador de Código QR",
@@ -1451,6 +1460,7 @@ messages = {
         "pattern_shape_verical_line": "Vertical",
         "pattern_shape_horizontal_line": "Horizontal",
         "custom_color_select": "<Entrada Direta>",
+        "error_occurred": "Ocorreu um erro"
     },
     "ar": {
         "page_title": "مولد رمز الاستجابة السريعة",
@@ -1596,6 +1606,7 @@ messages = {
         "pattern_shape_verical_line": "عمودي",
         "pattern_shape_horizontal_line": "أفقي",
         "custom_color_select": "<إدخال مباشر>",
+        "error_occurred": "حدث خطأ"
     },
     "hi": {
         "page_title": "क्यूआर कोड जनरेटर",
@@ -1741,6 +1752,7 @@ messages = {
         "pattern_shape_verical_line": "ऊर्ध्वाधर",
         "pattern_shape_horizontal_line": "क्षैतिज",
         "custom_color_select": "<सीधा इनपुट>",
+        "error_occurred": "एक त्रुटि हुई"
     },
     "bn": {
         "page_title": "কিউআর কোড জেনারেটর",
@@ -1886,5 +1898,6 @@ messages = {
         "pattern_shape_verical_line": "উল্লম্ব",
         "pattern_shape_horizontal_line": "অনুভূমিক",
         "custom_color_select": "<সরাসরি ইনপুট>",
+        "error_occurred": "একটি ত্রুটি ঘটেছে"
     },
 }
