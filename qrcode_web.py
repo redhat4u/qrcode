@@ -166,9 +166,13 @@ def draw_custom_shape_image(qr_object, box_size, border, fill_color, back_color,
     if not qr_object:
         return None
 
-    img_size = (qr_object.modules_count + 2 * border) * box_size
-    img = Image.new('RGB', (img_size, img_size), back_color,)
-    draw = ImageDraw.Draw(img)
+#    img_size = (qr_object.modules_count + 2 * border) * box_size
+#    img = Image.new('RGB', (img_size, img_size), back_color,)
+#    draw = ImageDraw.Draw(img)
+    # 이 부분에 custom_image 변수를 먼저 정의합니다.
+    img_width = img_height = qr_object.modules_count * effective_size_after_gap
+    custom_image = Image.new('RGB', (img_width, img_height), color_background)
+    draw = ImageDraw.Draw(custom_image)
 
     def draw_shape(draw, xy, shape, fill, corner_radius, cell_gap,):
         x1, y1, x2, y2 = xy
