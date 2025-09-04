@@ -162,53 +162,61 @@ def get_qr_data_object(data, box_size, border, error_correction, mask_pattern,):
         return None
     
 # 사용자 정의 모양으로 QR 코드 패턴 이미지 생성 함수 (PNG)
-def draw_custom_shape_image(qr_object, box_size, border, fill_color, back_color, pattern_shape, finder_pattern_shape, pattern_corner_radius, finder_corner_radius, pattern_cell_gap, finder_cell_gap, effective_size_after_gap,):
+def draw_custom_shape_image(qr_object, box_size, border, fill_color, back_color, pattern_shape, finder_pattern_shape, pattern_corner_radius, finder_corner_radius, pattern_cell_gap, finder_cell_gap,):
     if not qr_object:
         return None
 
-#    img_size = (qr_object.modules_count + 2 * border) * box_size
-#    img = Image.new('RGB', (img_size, img_size), back_color,)
-#    draw = ImageDraw.Draw(img)
-    # 이 부분에 custom_image 변수를 먼저 정의합니다.
-    img_width = img_height = qr_object.modules_count * effective_size_after_gap
-    custom_image = Image.new('RGB', (img_width, img_height), color_background)
+    # 이 부분에서 이미지를 먼저 생성하고, draw 객체를 정의합니다.
+    effective_size_after_gap = box_size * (1 - pattern_cell_gap / 100) # 함수 호출 시 필요한 변수를 여기서 정의
+    img_width = qr_object.modules_count * box_size
+    img_height = qr_object.modules_count * box_size
+    
+    custom_image = Image.new('RGB', (img_width, img_height), back_color)
     draw = ImageDraw.Draw(custom_image)
-
-    def draw_shape(draw, xy, shape, fill, corner_radius, cell_gap,):
+    
+    # 이 함수가 모든 패턴을 그리는 역할을 담당합니다.
+    def draw_shape(draw, xy, shape, fill, back_color, corner_radius, cell_gap,):
         x1, y1, x2, y2 = xy
-        effective_size = x2 - x1
         
+        # 유효 크기를 다시 계산
         gap_pixels = int(box_size * (cell_gap / 100))
         new_x = x1 + gap_pixels // 2
         new_y = y1 + gap_pixels // 2
         new_x_end = x2 - (gap_pixels - gap_pixels // 2)
         new_y_end = y2 - (gap_pixels - gap_pixels // 2)
         draw_coords = [new_x, new_y, new_x_end, new_y_end]
-
         effective_size_after_gap = new_x_end - new_x
-        
-        if shape == lang_messages['pattern_shape_square']:
-            draw.rectangle(draw_coords, fill=fill,)
+
+        if shape == lang_messages['pattern_shape_vertical_line']:
+            # 세로선 패턴
+            y_center = (new_y + new_y_end) / 2
+            x_center = (new_x + new_x_end) / 2
+            draw.line([(x_center, y_center), (x_center, new_y_end)], fill=fill, width=int(effective_size_after_gap * 0.4))
+
+        elif shape == lang_messages['pattern_shape_horizontal_line']:
+            # 가로선 패턴
+            x_center = (new_x + new_x_end) / 2
+            y_center = (new_y + new_y_end) / 2
+            draw.line([(x_center, y_center), (new_x_end, y_center)], fill=fill, width=int(effective_size_after_gap * 0.4))
+
+        # 기존 패턴 로직은 그대로 유지
+        elif shape == lang_messages['pattern_shape_square']:
+            draw.rectangle(draw_coords, fill=fill)
         elif shape == lang_messages['pattern_shape_rounded']:
             radius = int(effective_size_after_gap * (corner_radius / 100))
-            draw.rectangle([new_x + radius, new_y, new_x_end - radius, new_y_end], fill=fill,)
-            draw.rectangle([new_x, new_y + radius, new_x_end, new_y_end - radius], fill=fill,)
-            draw.pieslice([new_x, new_y, new_x + radius * 2, new_y + radius * 2], 180, 270, fill=fill,)
-            draw.pieslice([new_x_end - radius * 2, new_y, new_x_end, new_y + radius * 2], 270, 360, fill=fill,)
-            draw.pieslice([new_x, new_y_end - radius * 2, new_x + radius * 2, new_y_end], 90, 180, fill=fill,)
-            draw.pieslice([new_x_end - radius * 2, new_y_end - radius * 2, new_x_end, new_y_end], 0, 90, fill=fill,)
+            draw.rounded_rectangle(draw_coords, radius=radius, fill=fill)
         elif shape == lang_messages['pattern_shape_circle']:
-            draw.ellipse(draw_coords, fill=fill,)
+            draw.ellipse(draw_coords, fill=fill)
         elif shape == lang_messages['pattern_shape_diamond']:
             draw.polygon([(new_x + effective_size_after_gap/2, new_y),
                           (new_x + effective_size_after_gap, new_y + effective_size_after_gap/2),
                           (new_x + effective_size_after_gap/2, new_y + effective_size_after_gap),
                           (new_x, new_y + effective_size_after_gap/2)],
-                          fill=fill,)
+                          fill=fill)
         elif shape == lang_messages['pattern_shape_star']:
             x_center = (new_x + new_x_end) / 2
             y_center = (new_y + new_y_end) / 2
-            radius_outer = effective_size_after_gap / 1.5  # 이 갑으로 별 크기 조절
+            radius_outer = effective_size_after_gap / 1.5
             radius_inner = radius_outer * 0.4
             points = []
             for i in range(5):
@@ -220,66 +228,44 @@ def draw_custom_shape_image(qr_object, box_size, border, fill_color, back_color,
                 x_inner = x_center + radius_inner * math.cos(angle_inner)
                 y_inner = y_center + radius_inner * math.sin(angle_inner)
                 points.append((x_inner, y_inner))
-            draw.polygon(points, fill=fill,)
+            draw.polygon(points, fill=fill)
         elif shape == lang_messages['pattern_shape_cross']:
             x_center = (new_x + new_x_end) / 2
             y_center = (new_y + new_y_end) / 2
-            cross_width = effective_size_after_gap * 0.4 # 십자 너비를 조정
-            draw.rectangle([new_x, y_center - cross_width/2, new_x_end, y_center + cross_width/2], fill=fill,)
-            draw.rectangle([x_center - cross_width/2, new_y, x_center + cross_width/2, new_y_end], fill=fill,)
+            cross_width = effective_size_after_gap * 0.4
+            draw.rectangle([new_x, y_center - cross_width/2, new_x_end, y_center + cross_width/2], fill=fill)
+            draw.rectangle([x_center - cross_width/2, new_y, x_center + cross_width/2, new_y_end], fill=fill)
         elif shape == lang_messages['pattern_shape_x']:
-            # 'X'자 모양은 두 개의 겹치는 대각선으로 구현합니다.
-            # 간격이 적용된 좌표를 사용
             x_center = (new_x + new_x_end) / 2
             y_center = (new_y + new_y_end) / 2
-            effective_size = new_x_end - new_x # 간격이 적용된 유효한 크기
-            x_width = effective_size * 0.25 # 엑스 너비 조정
-            # 대각선 1: 왼쪽 위에서 오른쪽 아래로
-            draw.polygon([(new_x, new_y + x_width), (new_x + x_width, new_y), (new_x_end, new_y_end - x_width), (new_x_end - x_width, new_y_end)], fill=fill,)
-            # 대각선 2: 오른쪽 위에서 왼쪽 아래로
-            draw.polygon([(new_x_end, new_y + x_width), (new_x_end - x_width, new_y), (new_x, new_y_end - x_width), (new_x + x_width, new_y_end)], fill=fill,)
+            effective_size = new_x_end - new_x
+            x_width = effective_size * 0.25
+            draw.polygon([(new_x, new_y + x_width), (new_x + x_width, new_y), (new_x_end, new_y_end - x_width), (new_x_end - x_width, new_y_end)], fill=fill)
+            draw.polygon([(new_x_end, new_y + x_width), (new_x_end - x_width, new_y), (new_x, new_y_end - x_width), (new_x + x_width, new_y_end)], fill=fill)
         elif shape == lang_messages['pattern_shape_donut']:
-            # 도넛 모양
-            x1, y1, x2, y2 = xy
-            effective_size = x2 - x1
-            gap_pixels = int(box_size * (cell_gap / 100))
-            new_x = x1 + gap_pixels // 2
-            new_y = y1 + gap_pixels // 2
-            new_x_end = x2 - (gap_pixels - gap_pixels // 2)
-            new_y_end = y2 - (gap_pixels - gap_pixels // 2)
-            draw_coords = [new_x, new_y, new_x_end, new_y_end]
-            # 바깥쪽 원 (패턴 색상)
-            draw.ellipse(draw_coords, fill=fill,)
-            # 안쪽 원 (배경 색상)
-            hole_size_ratio = 0.25 # 구멍 크기 비율을 조정 가능합니다.
-            hole_size = effective_size * hole_size_ratio
-            hole_x1 = new_x + (new_x_end - new_x) / 2 - hole_size / 2
-            hole_y1 = new_y + (new_y_end - new_y) / 2 - hole_size / 2
-            hole_x2 = new_x + (new_x_end - new_x) / 2 + hole_size / 2
-            hole_y2 = new_y + (new_y_end - new_y) / 2 + hole_size / 2
-            draw.ellipse([hole_x1, hole_y1, hole_x2, hole_y2], fill=back_color,) # back_color 변수 사용
+            hole_size_ratio = 0.25
+            hole_size = effective_size_after_gap * hole_size_ratio
+            draw.ellipse(draw_coords, fill=fill)
+            draw.ellipse([new_x + hole_size, new_y + hole_size, new_x_end - hole_size, new_y_end - hole_size], fill=back_color)
         elif shape == lang_messages['pattern_shape_triangle']:
-            # 위로 향하는 정삼각형
             x1, y1, x2, y2 = draw_coords
             mid_x = (x1 + x2) / 2
-            draw.polygon([(mid_x, y1), (x2, y2), (x1, y2)], fill=fill,)
+            draw.polygon([(mid_x, y1), (x2, y2), (x1, y2)], fill=fill)
         elif shape == lang_messages['pattern_shape_pentagon']:
-            # 오각
             x_center = (new_x + new_x_end) / 2
             y_center = (new_y + new_y_end) / 2
-            radius = effective_size_after_gap / 1.8  # 이 값으로 크기를 조절
+            radius = effective_size_after_gap / 1.8
             points = []
             for i in range(5):
-                angle = math.radians(72 * i - 90)  # 위쪽 꼭짓점부터 시작
+                angle = math.radians(72 * i - 90)
                 x = x_center + radius * math.cos(angle)
                 y = y_center + radius * math.sin(angle)
                 points.append((x, y))
             draw.polygon(points, fill=fill)
         elif shape == lang_messages['pattern_shape_hexagon']:
-            # 육각
             x_center = (new_x + new_x_end) / 2
             y_center = (new_y + new_y_end) / 2
-            radius = effective_size_after_gap / 1.92  # 이 값으로 크기를 조절
+            radius = effective_size_after_gap / 1.92
             points = []
             for i in range(6):
                 angle = math.radians(60 * i)
@@ -288,139 +274,82 @@ def draw_custom_shape_image(qr_object, box_size, border, fill_color, back_color,
                 points.append((x, y))
             draw.polygon(points, fill=fill)
         elif shape == lang_messages['pattern_shape_heart']:
-            # 하트
             width = effective_size_after_gap
             height = effective_size_after_gap
             x_center = new_x + width / 2
             y_center = new_y + height / 2
-            # 하단 삼각형
             triangle_height = height * 0.4
             triangle_points = [
-            (x_center, new_y_end),
-            (new_x, new_y_end - triangle_height),
-            (new_x_end, new_y_end - triangle_height)
+                (x_center, new_y_end),
+                (new_x, new_y_end - triangle_height),
+                (new_x_end, new_y_end - triangle_height)
             ]
             draw.polygon(triangle_points, fill=fill)
-            # 상단 아치 및 원 부분
             radius_x = width / 2
             radius_y = height * 0.35
             draw.ellipse([x_center - radius_x, new_y, x_center, new_y + 2 * radius_y], fill=fill)
             draw.ellipse([x_center, new_y, x_center + radius_x, new_y + 2 * radius_y], fill=fill)
         elif shape == lang_messages['pattern_shape_spade']:
-             # 세로 길이 늘리기
-             new_y_end = new_y + (new_y_end - new_y) * 1.5
-
-             # 하트는 원 + 삼각형 조합으로 단순하게 구현 (상하 뒤집힌 버전)
-             width = effective_size_after_gap
-             height = effective_size_after_gap
-             x_center = (new_x + new_x_end) / 2
-             y_center = (new_y + new_y_end) / 2
-
-             # 상단 삼각형 (뒤집혀서 위로 향함)
-             draw.polygon([(new_x, y_center), (new_x_end, y_center), (x_center, new_y)], fill=fill)
-
-             # 하단 원 두 개
-             radius = width / 4
-             draw.ellipse([x_center - radius*2, y_center - radius, x_center, y_center + radius], fill=fill)
-             draw.ellipse([x_center, y_center - radius, x_center + radius*2, y_center + radius], fill=fill)
-        elif shape == lang_messages['pattern_shape_club']:
-             # 클로버 모양 (삼각형 배치의 원 3개)
-             width = effective_size_after_gap
-             height = effective_size_after_gap
-             x_center = (new_x + new_x_end) / 2
-             y_center = (new_y + new_y_end) / 2
-            
-             # 클로버 잎 크기를 더 크게
-             leaf_radius = width / 4.0  # 원의 크기, 작을수록 커짐
-             offset = width / 4.0  # 원들 사이의 간격, 작을수록 넓어짐
-            
-             # 위쪽에 원 1개
-             top_x = x_center
-             top_y = y_center - offset
-             draw.ellipse([top_x - leaf_radius, top_y - leaf_radius,
-                           top_x + leaf_radius, top_y + leaf_radius], fill=fill)
-            
-             # 아래쪽 왼쪽에 원 1개
-             left_x = x_center - offset
-             left_y = y_center + offset
-             draw.ellipse([left_x - leaf_radius, left_y - leaf_radius,
-                           left_x + leaf_radius, left_y + leaf_radius], fill=fill)
-            
-             # 아래쪽 오른쪽에 원 1개
-             right_x = x_center + offset
-             right_y = y_center + offset
-             draw.ellipse([right_x - leaf_radius, right_y - leaf_radius,
-                           right_x + leaf_radius, right_y + leaf_radius], fill=fill)
-        elif shape == lang_messages['pattern_shape_snowflake']:
-            # 8각 눈꽃
+            new_y_end = new_y + (new_y_end - new_y) * 1.5
+            width = effective_size_after_gap
+            height = effective_size_after_gap
             x_center = (new_x + new_x_end) / 2
             y_center = (new_y + new_y_end) / 2
-            radius_outer = effective_size_after_gap / 1.5  # 이 값으로 크기를 조절
+            draw.polygon([(new_x, y_center), (new_x_end, y_center), (x_center, new_y)], fill=fill)
+            radius = width / 4
+            draw.ellipse([x_center - radius*2, y_center - radius, x_center, y_center + radius], fill=fill)
+            draw.ellipse([x_center, y_center - radius, x_center + radius*2, y_center + radius], fill=fill)
+        elif shape == lang_messages['pattern_shape_club']:
+            width = effective_size_after_gap
+            height = effective_size_after_gap
+            x_center = (new_x + new_x_end) / 2
+            y_center = (new_y + new_y_end) / 2
+            leaf_radius = width / 4.0
+            offset = width / 4.0
+            top_x = x_center
+            top_y = y_center - offset
+            draw.ellipse([top_x - leaf_radius, top_y - leaf_radius, top_x + leaf_radius, top_y + leaf_radius], fill=fill)
+            left_x = x_center - offset
+            left_y = y_center + offset
+            draw.ellipse([left_x - leaf_radius, left_y - leaf_radius, left_x + leaf_radius, left_y + leaf_radius], fill=fill)
+            right_x = x_center + offset
+            right_y = y_center + offset
+            draw.ellipse([right_x - leaf_radius, right_y - leaf_radius, right_x + leaf_radius, right_y + leaf_radius], fill=fill)
+        elif shape == lang_messages['pattern_shape_snowflake']:
+            x_center = (new_x + new_x_end) / 2
+            y_center = (new_y + new_y_end) / 2
+            radius_outer = effective_size_after_gap / 1.5
             radius_inner = radius_outer * 0.4
             points = []
             for i in range(8):
-                angle_outer = math.radians(i * 45)   # 360° / 8 = 45°
+                angle_outer = math.radians(i * 45)
                 x_outer = x_center + radius_outer * math.cos(angle_outer)
                 y_outer = y_center + radius_outer * math.sin(angle_outer)
                 points.append((x_outer, y_outer))
-                angle_inner = math.radians(i * 45 + 22.5)  # 중간 각도
+                angle_inner = math.radians(i * 45 + 22.5)
                 x_inner = x_center + radius_inner * math.cos(angle_inner)
                 y_inner = y_center + radius_inner * math.sin(angle_inner)
                 points.append((x_inner, y_inner))
             draw.polygon(points, fill=fill)
-        elif shape == lang_messages['pattern_shape_vertical_line']:
-            # 세로선 패턴
-            for row in range(qr_object.modules_count):
-                for col in range(qr_object.modules_count):
-                    # 현재 셀이 어둡고, 아래쪽 셀이 어두우면 선 그리기
-                    if (qr_object.modules[row][col] and 
-                        row + 1 < qr_object.modules_count and 
-                        qr_object.modules[row + 1][col]):
-                        
-                        y_center = (new_y + new_y_end) / 2
-                        next_y_center = (new_y_end + (new_y_end + effective_size_after_gap)) / 2
-                        x_center = (new_x + new_x_end) / 2
-                        
-                        draw.line([(x_center, y_center), (x_center, next_y_center)], fill=fill, width=int(effective_size_after_gap * 0.4))
-            return custom_image
 
-        elif shape == lang_messages['pattern_shape_horizontal_line']:
-            # 가로선 패턴
-            for row in range(qr_object.modules_count):
-                for col in range(qr_object.modules_count):
-                    # 현재 셀이 어둡고, 오른쪽 셀이 어두우면 선 그리기
-                    if (qr_object.modules[row][col] and 
-                        col + 1 < qr_object.modules_count and 
-                        qr_object.modules[row][col + 1]):
-                        
-                        x_center = (new_x + new_x_end) / 2
-                        next_x_center = (new_x_end + (new_x_end + effective_size_after_gap)) / 2
-                        y_center = (new_y + new_y_end) / 2
-                        
-                        draw.line([(x_center, y_center), (next_x_center, y_center)], fill=fill, width=int(effective_size_after_gap * 0.4))
-            return custom_image
-
-
+    # 이 루프에서 모든 패턴을 그립니다.
     for r in range(qr_object.modules_count):
         for c in range(qr_object.modules_count):
             is_finder_pattern = False
-            # 세 개의 파인더 패턴 위치에 있는지 확인
             if (r < 7 and c < 7) or (r >= qr_object.modules_count - 7 and c < 7) or (r < 7 and c >= qr_object.modules_count - 7):
                 is_finder_pattern = True
 
             if qr_object.modules[r][c]:
-                x = (c + border) * box_size
-                y = (r + border) * box_size
-
+                x = c * box_size
+                y = r * box_size
                 current_shape = finder_pattern_shape if is_finder_pattern else pattern_shape
                 current_corner_radius = finder_corner_radius if is_finder_pattern else pattern_corner_radius
                 current_cell_gap = finder_cell_gap if is_finder_pattern else pattern_cell_gap
-
+                
                 draw_coords = [x, y, x + box_size, y + box_size]
-                draw_shape(draw, draw_coords, current_shape, fill_color, current_corner_radius, current_cell_gap,)
+                draw_shape(draw, draw_coords, current_shape, fill_color, back_color, current_corner_radius, current_cell_gap)
 
-    return img
-
+    return custom_image
 
 # QR 코드 SVG 생성 함수
 def generate_qr_code_svg(data, box_size, border, error_correction, mask_pattern, fill_color, back_color,):
