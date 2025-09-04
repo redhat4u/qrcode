@@ -487,10 +487,10 @@ def set_language():
             'cross': messages[new_lang]['pattern_shape_cross'],
             'x': messages[new_lang]['pattern_shape_x'],
             'donut': messages[new_lang]['pattern_shape_donut'],
-            'donut': messages[new_lang]['pattern_shape_pentagon'],
-            'donut': messages[new_lang]['pattern_shape_hexagon'],
-            'donut': messages[new_lang]['pattern_shape_heart'],
-            'donut': messages[new_lang]['pattern_shape_snowflake'],
+            'pentagon': messages[new_lang]['pattern_shape_pentagon'],
+            'hexagon': messages[new_lang]['pattern_shape_hexagon'],
+            'heart': messages[new_lang]['pattern_shape_heart'],
+            'snowflake': messages[new_lang]['pattern_shape_snowflake'],
          }
 
         # 기존 선택된 값을 새 언어의 값으로 업데이트
