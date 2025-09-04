@@ -330,8 +330,8 @@ def draw_custom_shape_image(qr_object, box_size, border, fill_color, back_color,
              draw.ellipse([x_center, y_center - radius, x_center + radius*2, y_center + radius], fill=fill)
              """
         elif shape == lang_messages['pattern_shape_spade']:
-             # 세로 길이 40% 늘리기
-             new_y_end = new_y + (new_y_end - new_y) * 1.4
+             # 세로 길이 늘리기
+             new_y_end = new_y + (new_y_end - new_y) * 1.5
 
              # 하트는 원 + 삼각형 조합으로 단순하게 구현 (상하 뒤집힌 버전)
              width = effective_size_after_gap
