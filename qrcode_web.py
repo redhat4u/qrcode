@@ -334,9 +334,9 @@ def draw_custom_shape_image(qr_object, box_size, border, fill_color, back_color,
             x_center = (new_x + new_x_end) / 2
             y_center = (new_y + new_y_end) / 2
             
-            # 클로버 잎 크기
-            leaf_radius = width / 5
-            offset = width / 4  # 원들 사이의 간격
+            # 클로버 잎 크기를 더 크게
+            leaf_radius = width / 4  # 기존 width/5 에서 width/4 로 증가
+            offset = width / 4  # 원들 사이의 간격은 동일
             
             # 위쪽에 원 1개
             top_x = x_center
