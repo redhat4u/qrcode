@@ -302,23 +302,6 @@ def draw_custom_shape_image(qr_object, box_size, border, fill_color, back_color,
             radius_y = height * 0.35
             draw.ellipse([x_center - radius_x, new_y, x_center, new_y + 2 * radius_y], fill=fill)
             draw.ellipse([x_center, new_y, x_center + radius_x, new_y + 2 * radius_y], fill=fill)
-        elif shape == lang_messages['pattern_shape_snowflake']:
-            # 8각 눈꽃
-            x_center = (new_x + new_x_end) / 2
-            y_center = (new_y + new_y_end) / 2
-            radius_outer = effective_size_after_gap / 1.5  # 이 값으로 크기를 조절
-            radius_inner = radius_outer * 0.4
-            points = []
-            for i in range(8):
-                angle_outer = math.radians(i * 45)   # 360° / 8 = 45°
-                x_outer = x_center + radius_outer * math.cos(angle_outer)
-                y_outer = y_center + radius_outer * math.sin(angle_outer)
-                points.append((x_outer, y_outer))
-                angle_inner = math.radians(i * 45 + 22.5)  # 중간 각도
-                x_inner = x_center + radius_inner * math.cos(angle_inner)
-                y_inner = y_center + radius_inner * math.sin(angle_inner)
-                points.append((x_inner, y_inner))
-            draw.polygon(points, fill=fill)
         elif shape == lang_messages['pattern_shape_spade']:
              # 세로 길이 늘리기
              new_y_end = new_y + (new_y_end - new_y) * 1.5
@@ -344,7 +327,7 @@ def draw_custom_shape_image(qr_object, box_size, border, fill_color, back_color,
              y_center = (new_y + new_y_end) / 2
             
              # 클로버 잎 크기를 더 크게
-             leaf_radius = width / 3.5  # 원의 크기, 작을수록 커짐
+             leaf_radius = width / 3.4  # 원의 크기, 작을수록 커짐
              offset = width / 3.4  # 원들 사이의 간격, 작을수록 넓어짐
             
              # 위쪽에 원 1개
@@ -364,6 +347,23 @@ def draw_custom_shape_image(qr_object, box_size, border, fill_color, back_color,
              right_y = y_center + offset
              draw.ellipse([right_x - leaf_radius, right_y - leaf_radius,
                            right_x + leaf_radius, right_y + leaf_radius], fill=fill)
+        elif shape == lang_messages['pattern_shape_snowflake']:
+            # 8각 눈꽃
+            x_center = (new_x + new_x_end) / 2
+            y_center = (new_y + new_y_end) / 2
+            radius_outer = effective_size_after_gap / 1.5  # 이 값으로 크기를 조절
+            radius_inner = radius_outer * 0.4
+            points = []
+            for i in range(8):
+                angle_outer = math.radians(i * 45)   # 360° / 8 = 45°
+                x_outer = x_center + radius_outer * math.cos(angle_outer)
+                y_outer = y_center + radius_outer * math.sin(angle_outer)
+                points.append((x_outer, y_outer))
+                angle_inner = math.radians(i * 45 + 22.5)  # 중간 각도
+                x_inner = x_center + radius_inner * math.cos(angle_inner)
+                y_inner = y_center + radius_inner * math.sin(angle_inner)
+                points.append((x_inner, y_inner))
+            draw.polygon(points, fill=fill)
 
 
     for r in range(qr_object.modules_count):
