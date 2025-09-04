@@ -561,8 +561,8 @@ def set_language():
             messages[old_lang]['pattern_shape_spade']: 'spade',
             messages[old_lang]['pattern_shape_club']: 'club',
             messages[old_lang]['pattern_shape_snowflake']: 'snowflake',
-            messages[old_lang]['pattern_shape_verical']: 'verical',
-            messages[old_lang]['pattern_shape_horizen']: 'horizen',
+            messages[old_lang]['pattern_shape_verical_line']: 'verical',
+            messages[old_lang]['pattern_shape_horizen_line']: 'horizen',
         }
         
         pattern_shape_map_new_lang = {
@@ -581,8 +581,8 @@ def set_language():
             'spade': messages[new_lang]['pattern_shape_spade'],
             'club': messages[new_lang]['pattern_shape_club'],
             'snowflake': messages[new_lang]['pattern_shape_snowflake'],
-            'verical': messages[new_lang]['pattern_shape_verical'],
-            'horizen': messages[new_lang]['pattern_shape_horizen'],
+            'verical': messages[new_lang]['pattern_shape_verical_line'],
+            'horizen': messages[new_lang]['pattern_shape_horizen_line'],
          }
 
         # 기존 선택된 값을 새 언어의 값으로 업데이트
@@ -751,8 +751,8 @@ with col1:
         lang_messages['pattern_shape_spade'],
         lang_messages['pattern_shape_club'],
         lang_messages['pattern_shape_snowflake'],
-        lang_messages['pattern_shape_verical'],
-        lang_messages['pattern_shape_horizen'],
+        lang_messages['pattern_shape_verical_line'],
+        lang_messages['pattern_shape_horizen_line'],
     )
 
     pattern_shape = st.selectbox(
