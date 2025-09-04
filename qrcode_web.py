@@ -348,7 +348,8 @@ def draw_custom_shape_image(qr_object, box_size, border, fill_color, back_color,
             draw.ellipse([
                 x_center, ellipse_y - radius_y, 
                 x_center + radius_x * 2, ellipse_y + radius_y
-            ], fill=fill)        elif shape == lang_messages['pattern_shape_club']:
+            ], fill=fill)
+        elif shape == lang_messages['pattern_shape_club']:
              # 클로버 모양 (삼각형 배치의 원 3개)
              width = effective_size_after_gap
              height = effective_size_after_gap
