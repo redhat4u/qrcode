@@ -196,10 +196,10 @@ def draw_custom_shape_image(qr_object, box_size, border, fill_color, back_color,
         elif shape == lang_messages['pattern_shape_circle']:
             draw.ellipse(draw_coords, fill=fill,)
         elif shape == lang_messages['pattern_shape_diamond']:
-            draw.polygon([(new_x + effective_size_after_gap * 2, new_y),
-                          (new_x + effective_size_after_gap, new_y + effective_size_after_gap * 2), # 오른쪽 꼭짓점
-                          (new_x + effective_size_after_gap * 2, new_y + effective_size_after_gap), # 아래 꼭짓점
-                          (new_x, new_y + effective_size_after_gap * 2)], # 왼쪽 꼭짓점
+            draw.polygon([(new_x + effective_size_after_gap/2, new_y),
+                          (new_x + effective_size_after_gap, new_y + effective_size_after_gap/2),
+                          (new_x + effective_size_after_gap/2, new_y + effective_size_after_gap),
+                          (new_x, new_y + effective_size_after_gap/2)],
                           fill=fill,)
         elif shape == lang_messages['pattern_shape_star']:
             x_center = (new_x + new_x_end) / 2
