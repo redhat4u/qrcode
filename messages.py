@@ -1,4 +1,5 @@
 # messages.py
+# 한국어,영어,일본어,중국어,독일어,프랑스어,스페인어,터키어,러시아어,포르투갈어,아랍어,힌디어,뱅골어
 
 messages = {
     "ko": {
@@ -136,6 +137,10 @@ messages = {
         "pattern_shape_cross": "십자가",
         "pattern_shape_x": "엑스",
         "pattern_shape_donut": "도넛",
+        "pattern_shape_pentagon": "오각",
+        "pattern_shape_hexagon": "육각",
+        "pattern_shape_heart": "하트",
+        "pattern_shape_snowflake": "눈꽃",
         "custom_color_select": "<직접 입력>",
     },
     "en": {
@@ -273,6 +278,10 @@ messages = {
         "pattern_shape_cross": "Cross",
         "pattern_shape_x": "X",
         "pattern_shape_donut": "Donut",
+        "pattern_shape_pentagon": "pentagon",
+        "pattern_shape_hexagon": "hexagon",
+        "pattern_shape_heart": "heart",
+        "pattern_shape_snowflake": "snowflake",
         "custom_color_select": "<Custom Input>",
     },
     "ja": {
@@ -410,6 +419,10 @@ messages = {
         "pattern_shape_cross": "十字",
         "pattern_shape_x": "X",
         "pattern_shape_donut": "ドーナツ",
+        "pattern_shape_pentagon": "五角",
+        "pattern_shape_hexagon": "六角",
+        "pattern_shape_heart": "ハート",
+        "pattern_shape_snowflake": "雪の結晶",
         "custom_color_select": "<直接入力>",
     },
     "zh": {
@@ -547,6 +560,10 @@ messages = {
         "pattern_shape_cross": "十字形",
         "pattern_shape_x": "X形",
         "pattern_shape_donut": "甜甜圈",
+        "pattern_shape_pentagon": "五角形",
+        "pattern_shape_hexagon": "六角形",
+        "pattern_shape_heart": "心形",
+        "pattern_shape_snowflake": "雪花",
         "custom_color_select": "<自定义输入>",
     },
     "de": {
@@ -684,6 +701,10 @@ messages = {
         "pattern_shape_cross": "Kreuz",
         "pattern_shape_x": "X",
         "pattern_shape_donut": "Donut",
+        "pattern_shape_pentagon": "Fünfeck",
+        "pattern_shape_hexagon": "Sechseck",
+        "pattern_shape_heart": "Herz",
+        "pattern_shape_snowflake": "Schneeflocke",
         "custom_color_select": "<Direkte Eingabe>",
     },
     "fr": {
@@ -821,6 +842,10 @@ messages = {
         "pattern_shape_cross": "Croix",
         "pattern_shape_x": "X",
         "pattern_shape_donut": "Donut",
+        "pattern_shape_pentagon": "pentagone",
+        "pattern_shape_hexagon": "hexagone",
+        "pattern_shape_heart": "cœur",
+        "pattern_shape_snowflake": "flocon de neige",
         "custom_color_select": "<Saisie directe>",
     },
     "es": {
@@ -958,6 +983,10 @@ messages = {
         "pattern_shape_cross": "Cruz",
         "pattern_shape_x": "X",
         "pattern_shape_donut": "Dónut",
+        "pattern_shape_pentagon": "pentágono",
+        "pattern_shape_hexagon": "hexágono",
+        "pattern_shape_heart": "corazón",
+        "pattern_shape_snowflake": "copo de nieve",
         "custom_color_select": "<Entrada directa>",
     },
     "tr": {
@@ -1095,6 +1124,10 @@ messages = {
         "pattern_shape_cross": "Haç",
         "pattern_shape_x": "X",
         "pattern_shape_donut": "Donut",
+        "pattern_shape_pentagon": "beşgen",
+        "pattern_shape_hexagon": "altıgen",
+        "pattern_shape_heart": "kalp",
+        "pattern_shape_snowflake": "kar tanesi",
         "custom_color_select": "<Doğrudan Giriş>",
     },
     "ru": {
@@ -1232,6 +1265,10 @@ messages = {
         "pattern_shape_cross": "Крест",
         "pattern_shape_x": "X",
         "pattern_shape_donut": "Пончик",
+        "pattern_shape_pentagon": "пятиугольник",
+        "pattern_shape_hexagon": "шестиугольник",
+        "pattern_shape_heart": "сердце",
+        "pattern_shape_snowflake": "снежинка",
         "custom_color_select": "<Прямой ввод>",
     },
     "pt": {
@@ -1369,6 +1406,10 @@ messages = {
         "pattern_shape_cross": "Cruz",
         "pattern_shape_x": "X",
         "pattern_shape_donut": "Rosquinha",
+        "pattern_shape_pentagon": "pentágono",
+        "pattern_shape_hexagon": "hexágono",
+        "pattern_shape_heart": "coração",
+        "pattern_shape_snowflake": "floco de neve",
         "custom_color_select": "<Entrada Direta>",
     },
     "ar": {
@@ -1506,6 +1547,10 @@ messages = {
         "pattern_shape_cross": "صليب",
         "pattern_shape_x": "X",
         "pattern_shape_donut": "دونات",
+        "pattern_shape_pentagon": "شكل خماسي",
+        "pattern_shape_hexagon": "شكل سداسي",
+        "pattern_shape_heart": "قلب",
+        "pattern_shape_snowflake": "ندفة الثلج",
         "custom_color_select": "<إدخال مباشر>",
     },
     "hi": {
@@ -1643,6 +1688,10 @@ messages = {
         "pattern_shape_cross": "क्रॉस",
         "pattern_shape_x": "एक्स",
         "pattern_shape_donut": "डोनट",
+        "pattern_shape_pentagon": "पंचकोण",
+        "pattern_shape_hexagon": "षट्कोण",
+        "pattern_shape_heart": "हृदय",
+        "pattern_shape_snowflake": "हिमपात",
         "custom_color_select": "<सीधा इनपुट>",
     },
     "bn": {
@@ -1780,6 +1829,10 @@ messages = {
         "pattern_shape_cross": "ক্রস",
         "pattern_shape_x": "এক্স",
         "pattern_shape_donut": "ডোনাট",
+        "pattern_shape_pentagon": "পঞ্চভুজ",
+        "pattern_shape_hexagon": "ষড়ভুজ",
+        "pattern_shape_heart": "হৃদয়",
+        "pattern_shape_snowflake": "তুষারখণ্ড",
         "custom_color_select": "<সরাসরি ইনপুট>",
     },
 }
