@@ -143,7 +143,7 @@ messages = {
         "pattern_shape_spade": "스페이드",
         "pattern_shape_club": "클로버",
         "pattern_shape_snowflake": "눈꽃",
-        "pattern_shape_verical_line": "수직",
+        "pattern_shape_vertical_line": "수직",
         "pattern_shape_horizontal_line": "수평",
         "custom_color_select": "<직접 입력>",
         "error_occurred": "오류가 발생했습니다"
@@ -289,7 +289,7 @@ messages = {
         "pattern_shape_spade": "Spade",
         "pattern_shape_club": "Club",
         "pattern_shape_snowflake": "Snowflake",
-        "pattern_shape_verical_line": "Vertical",
+        "pattern_shape_vertical_line": "Vertical",
         "pattern_shape_horizontal_line": "horizontal",
         "custom_color_select": "<Custom Input>",
         "error_occurred": "An error occurred"
@@ -435,7 +435,7 @@ messages = {
         "pattern_shape_spade": "スペード",
         "pattern_shape_club": "クラブ",
         "pattern_shape_snowflake": "雪の結晶",
-        "pattern_shape_verical_line": "垂直",
+        "pattern_shape_vertical_line": "垂直",
         "pattern_shape_horizontal_line": "水平",
         "custom_color_select": "<直接入力>",
         "error_occurred": "エラーが発生しました"
@@ -581,7 +581,7 @@ messages = {
         "pattern_shape_spade": "黑桃",
         "pattern_shape_club": "梅花",
         "pattern_shape_snowflake": "雪花",
-        "pattern_shape_verical_line": "垂直",
+        "pattern_shape_vertical_line": "垂直",
         "pattern_shape_horizontal_line": "水平",
         "custom_color_select": "<自定义输入>",
         "error_occurred": "发生错误"
@@ -727,7 +727,7 @@ messages = {
         "pattern_shape_spade": "Pik",
         "pattern_shape_club": "Kreuz",
         "pattern_shape_snowflake": "Schneeflocke",
-        "pattern_shape_verical_line": "Vertikal",
+        "pattern_shape_vertical_line": "Vertikal",
         "pattern_shape_horizontal_line": "Horizontal",
         "custom_color_select": "<Direkte Eingabe>",
         "error_occurred": "Ein Fehler ist aufgetreten"
@@ -873,7 +873,7 @@ messages = {
         "pattern_shape_spade": "Pique",
         "pattern_shape_club": "Trèfle",
         "pattern_shape_snowflake": "flocon de neige",
-        "pattern_shape_verical_line": "Vertical",
+        "pattern_shape_vertical_line": "Vertical",
         "pattern_shape_horizontal_line": "Horizontal",
         "custom_color_select": "<Saisie directe>",
         "error_occurred": "Une erreur est survenue"
@@ -1019,7 +1019,7 @@ messages = {
         "pattern_shape_spade": "Pica",
         "pattern_shape_club": "Trébol",
         "pattern_shape_snowflake": "copo de nieve",
-        "pattern_shape_verical_line": "Vertical",
+        "pattern_shape_vertical_line": "Vertical",
         "pattern_shape_horizontal_line": "Horizontal",
         "custom_color_select": "<Entrada directa>",
         "error_occurred": "Ha ocurrido un error"
@@ -1165,7 +1165,7 @@ messages = {
         "pattern_shape_spade": "Maça",
         "pattern_shape_club": "Sinek",
         "pattern_shape_snowflake": "kar tanesi",
-        "pattern_shape_verical_line": "Dikey",
+        "pattern_shape_vertical_line": "Dikey",
         "pattern_shape_horizontal_line": "Yatay",
         "custom_color_select": "<Doğrudan Giriş>",
         "error_occurred": "Bir hata oluştu"
@@ -1311,7 +1311,7 @@ messages = {
         "pattern_shape_club": "Крест",
         "pattern_shape_heart": "сердце",
         "pattern_shape_snowflake": "снежинка",
-        "pattern_shape_verical_line": "Вертикальный",
+        "pattern_shape_vertical_line": "Вертикальный",
         "pattern_shape_horizontal_line": "Горизонтальный",
         "custom_color_select": "<Прямой ввод>",
         "error_occurred": "Произошла ошибка"
@@ -1457,7 +1457,7 @@ messages = {
         "pattern_shape_spade": "Espada",
         "pattern_shape_club": "Paus",
         "pattern_shape_snowflake": "floco de neve",
-        "pattern_shape_verical_line": "Vertical",
+        "pattern_shape_vertical_line": "Vertical",
         "pattern_shape_horizontal_line": "Horizontal",
         "custom_color_select": "<Entrada Direta>",
         "error_occurred": "Ocorreu um erro"
@@ -1603,7 +1603,7 @@ messages = {
         "pattern_shape_spade": "بستوني",
         "pattern_shape_club": "سباتي",
         "pattern_shape_snowflake": "ندفة الثلج",
-        "pattern_shape_verical_line": "عمودي",
+        "pattern_shape_vertical_line": "عمودي",
         "pattern_shape_horizontal_line": "أفقي",
         "custom_color_select": "<إدخال مباشر>",
         "error_occurred": "حدث خطأ"
@@ -1749,7 +1749,7 @@ messages = {
         "pattern_shape_spade": "हुकुम",
         "pattern_shape_club": "चिड़ी",
         "pattern_shape_snowflake": "हिमपात",
-        "pattern_shape_verical_line": "ऊर्ध्वाधर",
+        "pattern_shape_vertical_line": "ऊर्ध्वाधर",
         "pattern_shape_horizontal_line": "क्षैतिज",
         "custom_color_select": "<सीधा इनपुट>",
         "error_occurred": "एक त्रुटि हुई"
@@ -1895,7 +1895,7 @@ messages = {
         "pattern_shape_spade": "ইস্কাপন",
         "pattern_shape_club": "চিরুন",
         "pattern_shape_snowflake": "তুষারখণ্ড",
-        "pattern_shape_verical_line": "উল্লম্ব",
+        "pattern_shape_vertical_line": "উল্লম্ব",
         "pattern_shape_horizontal_line": "অনুভূমিক",
         "custom_color_select": "<সরাসরি ইনপুট>",
         "error_occurred": "একটি ত্রুটি ঘটেছে"
