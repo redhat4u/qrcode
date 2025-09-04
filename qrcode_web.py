@@ -89,6 +89,7 @@ dynamic_page_titles = {
     "fr": "Générateur de code QR",
     "es": "Generador de códigos QR",
     "tr": "QR Kod Üretici",
+    "ru": "Генератор QR-кода",
 }
 
 
@@ -361,6 +362,7 @@ def set_language():
         "Français": "fr",
         "Español": "es",
         "Türkçe": "tr",
+        "Русский": "ru",
     }
 
     new_lang = lang_map.get(st.session_state.lang_select, "ko",)
@@ -452,7 +454,18 @@ st.title(lang_messages['title'])
 st.markdown("---")
 
 # 언어 선택 드롭다운
-lang_options = {"한국어": "ko", "English": "en", "日本語": "ja", "中文": "zh", "Deutsch": "de", "Français": "fr", "Español": "es", "Türkçe": "tr",}
+lang_options = {
+    "한국어": "ko",
+    "English": "en",
+    "日本語": "ja",
+    "中文": "zh",
+    "Deutsch": "de",
+    "Français": "fr",
+    "Español": "es",
+    "Türkçe": "tr",
+    "Русский": "ru",
+}
+
 lang_selected_name = st.selectbox(
     "언어 선택(Select Language)" if st.session_state.lang == "ko" else "Select Language",
     options=list(lang_options.keys()),
