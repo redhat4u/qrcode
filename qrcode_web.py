@@ -279,7 +279,7 @@ def draw_custom_shape_image(qr_object, box_size, border, fill_color, back_color,
                 y = y_center + radius * math.sin(angle)
                 points.append((x, y))
             draw.polygon(points, fill=fill)
-        elif shape == lang_messages['pattern_shape_spade']:
+        elif shape == lang_messages['pattern_shape_heart']:
             # 하트
             width = effective_size_after_gap
             height = effective_size_after_gap
