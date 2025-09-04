@@ -220,7 +220,7 @@ def draw_custom_shape_image(qr_object, box_size, border, fill_color, back_color,
         elif shape == lang_messages['pattern_shape_cross']:
             x_center = (new_x + new_x_end) / 2
             y_center = (new_y + new_y_end) / 2
-            cross_width = effective_size_after_gap * 0.3 # 십자 너비를 조정할 수 있습니다.
+            cross_width = effective_size_after_gap * 0.4 # 십자 너비를 조정할 수 있습니다.
             draw.rectangle([new_x, y_center - cross_width/2, new_x_end, y_center + cross_width/2], fill=fill,)
             draw.rectangle([x_center - cross_width/2, new_y, x_center + cross_width/2, new_y_end], fill=fill,)
         elif shape == lang_messages['pattern_shape_x']:
