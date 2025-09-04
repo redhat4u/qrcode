@@ -200,7 +200,7 @@ def draw_custom_shape_image(qr_object, box_size, border, fill_color, back_color,
         elif shape == lang_messages['pattern_shape_star']:
             x_center = (new_x + new_x_end) / 2
             y_center = (new_y + new_y_end) / 2
-            radius_outer = effective_size_after_gap / 1  # 이 갑으로 별 크기 조절
+            radius_outer = effective_size_after_gap / 1.5  # 이 갑으로 별 크기 조절
             radius_inner = radius_outer * 0.4
             points = []
             for i in range(5):
