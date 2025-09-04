@@ -308,43 +308,43 @@ def draw_custom_shape_image(qr_object, box_size, border, fill_color, back_color,
                 y_inner = y_center + radius_inner * math.sin(angle_inner)
                 points.append((x_inner, y_inner))
             draw.polygon(points, fill=fill)
-    elif shape == lang_messages['pattern_shape_spade']:
-        # 스페이드 모양
-        width = effective_size_after_gap
-        height = effective_size_after_gap
-        x_center = new_x + width / 2
-        y_center = new_y + height / 2
-        # 하단 삼각형
-        triangle_height = height * 0.4
-        triangle_points = [
+        elif shape == lang_messages['pattern_shape_spade']:
+            # 스페이드 모양
+            width = effective_size_after_gap
+            height = effective_size_after_gap
+            x_center = new_x + width / 2
+            y_center = new_y + height / 2
+            # 하단 삼각형
+            triangle_height = height * 0.4
+            triangle_points = [
             (x_center, new_y_end),
             (new_x, new_y_end - triangle_height),
             (new_x_end, new_y_end - triangle_height)
-        ]
-        draw.polygon(triangle_points, fill=fill)
-        # 상단 아치 및 원 부분
-        radius_x = width / 2
-        radius_y = height * 0.35
-        draw.ellipse([x_center - radius_x, new_y, x_center, new_y + 2 * radius_y], fill=fill)
-        draw.ellipse([x_center, new_y, x_center + radius_x, new_y + 2 * radius_y], fill=fill)
-    elif shape == lang_messages['pattern_shape_club']:
-        # 클로버 모양
-        width = effective_size_after_gap
-        height = effective_size_after_gap
-        x_center = new_x + width / 2
-        y_center = new_y + height / 2
-        # 줄기 부분
-        stem_width = width * 0.15
-        stem_height = height * 0.2
-        draw.rectangle([x_center - stem_width/2, new_y_end - stem_height, x_center + stem_width/2, new_y_end], fill=fill)
-        # 원 세 개
-        circle_radius = width * 0.3
-        # 하단 원
-        draw.ellipse([x_center - circle_radius, y_center - circle_radius/2, x_center + circle_radius, y_center + circle_radius*1.5], fill=fill)
-        # 왼쪽 위 원
-        draw.ellipse([new_x, new_y, new_x + circle_radius*2, new_y + circle_radius*2], fill=fill)
-        # 오른쪽 위 원
-        draw.ellipse([new_x_end - circle_radius*2, new_y, new_x_end, new_y + circle_radius*2], fill=fill)
+            ]
+            draw.polygon(triangle_points, fill=fill)
+            # 상단 아치 및 원 부분
+            radius_x = width / 2
+            radius_y = height * 0.35
+            draw.ellipse([x_center - radius_x, new_y, x_center, new_y + 2 * radius_y], fill=fill)
+            draw.ellipse([x_center, new_y, x_center + radius_x, new_y + 2 * radius_y], fill=fill)
+        elif shape == lang_messages['pattern_shape_club']:
+            # 클로버 모양
+            width = effective_size_after_gap
+            height = effective_size_after_gap
+            x_center = new_x + width / 2
+            y_center = new_y + height / 2
+            # 줄기 부분
+            stem_width = width * 0.15
+            stem_height = height * 0.2
+            draw.rectangle([x_center - stem_width/2, new_y_end - stem_height, x_center + stem_width/2, new_y_end], fill=fill)
+            # 원 세 개
+            circle_radius = width * 0.3
+            # 하단 원
+            draw.ellipse([x_center - circle_radius, y_center - circle_radius/2, x_center + circle_radius, y_center + circle_radius*1.5], fill=fill)
+            # 왼쪽 위 원
+            draw.ellipse([new_x, new_y, new_x + circle_radius*2, new_y + circle_radius*2], fill=fill)
+            # 오른쪽 위 원
+            draw.ellipse([new_x_end - circle_radius*2, new_y, new_x_end, new_y + circle_radius*2], fill=fill)
 
 
     for r in range(qr_object.modules_count):
