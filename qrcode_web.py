@@ -251,10 +251,10 @@ def draw_custom_shape_image(qr_object, box_size, border, fill_color, back_color,
             hole_y2 = new_y + (new_y_end - new_y) / 2 + hole_size / 2
             draw.ellipse([hole_x1, hole_y1, hole_x2, hole_y2], fill=back_color,) # back_color 변수 사용
         elif shape == lang_messages['pattern_shape_triangle']:
-            # 삼각 그리기 로직
-            x1, y1, x2, y2 = xy
+            # gap 반영된 좌표 사용
+            x1, y1, x2, y2 = draw_coords
             mid_x = (x1 + x2) / 2
-            # 정삼각형 형태 (위로 향하는 삼각형)
+            # 위로 향하는 정삼각형
             draw.polygon([(mid_x, y1), (x2, y2), (x1, y2)], fill=fill,)
 
     for r in range(qr_object.modules_count):
