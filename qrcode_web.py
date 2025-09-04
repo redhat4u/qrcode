@@ -358,19 +358,19 @@ def set_language():
 
 # 선택된 언어 이름을 언어 코드로 변환
     lang_map = {
-        "한국어": "ko",
-        "English": "en",
-        "日本語": "ja",
-        "中文": "zh",
-        "Deutsch": "de",
-        "Français": "fr",
-        "Español": "es",
-        "Türkçe": "tr",
-        "Русский": "ru",
-        "Português": "pt",
-        "العربية": "ar",
-        "हिन्दी": "hi",
-        "বাংলা": "bn",
+        "한국어 (Korean)": "ko",
+        "English (US)": "en",
+        "日本語 (Japanese)": "ja",
+        "中文 (Chinese)": "zh",
+        "Deutsch (German)": "de",
+        "Français (French)": "fr",
+        "Español (Spanish)": "es",
+        "Türkçe (Turkish)": "tr",
+        "Русский (Russian)": "ru",
+        "Português (Portuguese)": "pt",
+        "العربية (Arabic)": "ar",
+        "हिन्दी (Hindi)": "hi",
+        "বাংলা (Bengali)": "bn",
     }
 
     new_lang = lang_map.get(st.session_state.lang_select, "ko",)
