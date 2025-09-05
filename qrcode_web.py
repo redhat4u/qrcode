@@ -530,8 +530,8 @@ def set_language():
             messages[old_lang]['pattern_shape_spade']: 'spade',
             messages[old_lang]['pattern_shape_club']: 'club',
             messages[old_lang]['pattern_shape_snowflake']: 'snowflake',
-            messages[old_lang]['pattern_shape_vertical_line']: 'vertical',
-            messages[old_lang]['pattern_shape_horizontal_line']: 'horizontal',
+#            messages[old_lang]['pattern_shape_vertical_line']: 'vertical',
+#            messages[old_lang]['pattern_shape_horizontal_line']: 'horizontal',
         }
         
         pattern_shape_map_new_lang = {
@@ -550,8 +550,8 @@ def set_language():
             'spade': messages[new_lang]['pattern_shape_spade'],
             'club': messages[new_lang]['pattern_shape_club'],
             'snowflake': messages[new_lang]['pattern_shape_snowflake'],
-            'vertical': messages[new_lang]['pattern_shape_vertical_line'],
-            'horizontal': messages[new_lang]['pattern_shape_horizontal_line'],
+#            'vertical': messages[new_lang]['pattern_shape_vertical_line'],
+#            'horizontal': messages[new_lang]['pattern_shape_horizontal_line'],
          }
 
         # 기존 선택된 값을 새 언어의 값으로 업데이트
